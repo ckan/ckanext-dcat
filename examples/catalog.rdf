@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF
+ xmlns:time="http://www.w3.org/2006/time#"
+ xmlns:dct="http://purl.org/dc/terms/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:dcat="http://www.w3.org/ns/dcat#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+ xmlns:tema="http://datos.gob.es/kos/sector-publico/sector/"
+ xmlns:auto="http://datos.gob.es/recurso/sector-publico/territorio/Autonomia/"
+ xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<dcat:Catalog rdf:about="https://data.some.org/catalog">
+  <dct:identifier>https://data.some.org/catalog</dct:identifier>
+  <dct:title>An example catalog</dct:title>
+  <dct:description>A longer description of what the catalog is, who maintains it, etc. Special characters should be properly handed (if the file is utf8 encoded), for instance for catalogs from Sant Adrià.</dct:description>
+  <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:issued>
+  <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-05-22T09:38:45Z</dct:modified>
+  <dc:language>en</dc:language>
+  <foaf:homepage rdf:resource="https://data.some.org/the/actual/catalog"/>
+  <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+  <dcat:dataset>
+    <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+      <dct:identifier>https://data.some.org/catalog/datasets/1</dct:identifier>
+      <dct:title>Example dataset 1</dct:title>
+      <dct:description>A longer description of dataset 1: includes three distributions, a CSV file, a PDF file and an API. Some special characters: Θεσσαλονίκη.</dct:description>
+      <dcat:keyword>stats</dcat:keyword>
+      <dcat:keyword>pollution</dcat:keyword>
+      <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:issued>
+      <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:modified>
+      <dc:language>en</dc:language>
+      <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+      <dcat:distribution>
+        <dcat:Distribution>
+          <dct:identifier>https://data.some.org/catalog/datasets/1/distribution/1</dct:identifier>
+          <dct:title>A distribution for this dataset in CSV format</dct:title>
+          <dct:description>A longer description for the distribution</dct:description>
+          <dcat:downloadURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://data.some.org/the/actual/catalog/datasets/1/resources/1.csv</dcat:downloadURL>
+          <dcat:mediaType>text/csv</dcat:mediaType>
+          <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+        </dcat:Distribution>
+      </dcat:distribution>
+      <dcat:distribution>
+        <dcat:Distribution>
+          <dct:identifier>https://data.some.org/catalog/datasets/1/distribution/2</dct:identifier>
+          <dct:title>A distribution for this dataset in PDF format</dct:title>
+          <dct:description>A longer description for the distribution</dct:description>
+          <dcat:downloadURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://data.some.org/the/actual/catalog/datasets/1/resources/2.pdf</dcat:downloadURL>
+          <dct:format>
+            <dct:IMT>
+              <rdf:value>application/pdf</rdf:value>
+            </dct:IMT>
+          </dct:format>
+          <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+        </dcat:Distribution>
+      </dcat:distribution>
+      <dcat:distribution>
+        <dcat:Distribution>
+          <dct:identifier>https://data.some.org/catalog/datasets/1/distribution/3</dct:identifier>
+          <dct:title>A distribution for this dataset as an API</dct:title>
+          <dct:description>A longer description for the distribution</dct:description>
+          <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://data.some.org/the/actual/catalog/link/to/an/api</dcat:accessURL>
+        </dcat:Distribution>
+      </dcat:distribution>
+    </dcat:Dataset>
+  </dcat:dataset>
+  <dcat:dataset>
+    <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/2">
+      <dct:identifier>https://data.some.org/catalog/datasets/2</dct:identifier>
+      <dct:title>Example dataset 2</dct:title>
+      <dct:description>A longer description of dataset 2: with two distributions, a website and a PDF file. Some special characters: Łódź</dct:description>
+      <dcat:keyword>stats</dcat:keyword>
+      <dcat:keyword>education</dcat:keyword>
+      <dcat:keyword>sloths</dcat:keyword>
+      <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-06-21</dct:issued>
+      <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-04-01</dct:modified>
+      <dc:language>en</dc:language>
+      <dcat:distribution>
+        <dcat:Distribution>
+          <dct:identifier>https://data.some.org/catalog/datasets/2/distribution/1</dct:identifier>
+          <dct:title>A distribution for this dataset as an external website</dct:title>
+          <dct:description>A longer description for the distribution</dct:description>
+          <dcat:downloadURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://external.site.org/</dcat:downloadURL>
+          <dct:format>html</dct:format>
+        </dcat:Distribution>
+      </dcat:distribution>
+      <dcat:distribution>
+        <dcat:Distribution>
+          <dct:identifier>https://data.some.org/catalog/datasets/2/distribution/2</dct:identifier>
+          <dct:title>A distribution for this dataset in PDF format</dct:title>
+          <dct:description>A longer description for the distribution</dct:description>
+          <dcat:downloadURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://data.some.org/the/actual/catalog/datasets/2/resources/2.pdf</dcat:downloadURL>
+          <dct:format>
+            <dct:IMT>
+              <rdf:value>application/pdf</rdf:value>
+            </dct:IMT>
+          </dct:format>
+        </dcat:Distribution>
+      </dcat:distribution>
+    </dcat:Dataset>
+  </dcat:dataset>
+</dcat:Catalog>
+</rdf:RDF>

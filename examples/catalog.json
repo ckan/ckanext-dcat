@@ -1,0 +1,102 @@
+{
+    "title": "An example catalog",
+    "description": "A longer description of what the catalog is, who maintains it, etc. Special characters should be properly handed (if the file is utf8 encoded), for instance for catalogs from Sant Adri\u00e0.", 
+    "homepage": "", 
+    "issued": "2013-04-26T00:00:00Z", 
+    "modified": "2013-05-22T09:38:45Z", 
+    "language": "en", 
+    "license": "https://data.some.org/link/to/license", 
+    "dataset": [
+        {
+            "title": "Example dataset 1",
+            "description": "A longer description of dataset 1: includes three distributions, a CSV file, a PDF file and an API. Some special characters: \u0398\u03b5\u03c3\u03c3\u03b1\u03bb\u03bf\u03bd\u03af\u03ba\u03b7.", 
+            "identifier": "https://data.some.org/catalog/datasets/1", 
+            "issued": "2013-04-26T00:00:00Z", 
+            "modified": "2013-04-26T00:00:00Z", 
+            "landingPage": "", 
+            "distribution": [
+                {
+                    "accessURL": "", 
+                    "byteSize": "", 
+                    "description": "A longer description for the distribution", 
+                    "downloadURL": "https://data.some.org/the/actual/catalog/datasets/1/resources/1.csv", 
+                    "format": "text/csv", 
+                    "issued": "", 
+                    "license": "https://data.some.org/link/to/license", 
+                    "modified": "", 
+                    "title": "A distribution for this dataset in CSV format"
+                }, 
+                {
+                    "accessURL": "", 
+                    "byteSize": "", 
+                    "description": "A longer description for the distribution", 
+                    "downloadURL": "https://data.some.org/the/actual/catalog/datasets/1/resources/2.pdf", 
+                    "format": "application/pdf", 
+                    "issued": "", 
+                    "license": "https://data.some.org/link/to/license", 
+                    "modified": "", 
+                    "title": "A distribution for this dataset in PDF format"
+                }, 
+                {
+                    "accessURL": "https://data.some.org/the/actual/catalog/link/to/an/api", 
+                    "byteSize": "", 
+                    "description": "A longer description for the distribution", 
+                    "downloadURL": "", 
+                    "format": "", 
+                    "issued": "", 
+                    "license": "", 
+                    "modified": "", 
+                    "title": "A distribution for this dataset as an API"
+                }
+            ], 
+            "keyword": [
+                "stats", 
+                "pollution"
+            ], 
+            "language": [
+                "en"
+            ]
+        }, 
+        {
+
+            "title": "Example dataset 2",
+            "description": "A longer description of dataset 2: with two distributions, a website and a PDF file. Some special characters: \u0141\u00f3d\u017a", 
+            "identifier": "https://data.some.org/catalog/datasets/2", 
+            "issued": "2012-06-21", 
+            "modified": "2013-04-01", 
+            "landingPage": "", 
+            "distribution": [
+                {
+                    "accessURL": "", 
+                    "byteSize": "", 
+                    "description": "A longer description for the distribution", 
+                    "downloadURL": "https://external.site.org/", 
+                    "format": "html", 
+                    "issued": "", 
+                    "license": "", 
+                    "modified": "", 
+                    "title": "A distribution for this dataset as an external website"
+                }, 
+                {
+                    "accessURL": "", 
+                    "byteSize": "", 
+                    "description": "A longer description for the distribution", 
+                    "downloadURL": "https://data.some.org/the/actual/catalog/datasets/2/resources/2.pdf", 
+                    "format": "application/pdf", 
+                    "issued": "", 
+                    "license": "", 
+                    "modified": "", 
+                    "title": "A distribution for this dataset in PDF format"
+                }
+            ], 
+            "keyword": [
+                "stats", 
+                "education", 
+                "sloths"
+            ], 
+            "language": [
+                "en"
+            ]
+        }
+    ] 
+}
