@@ -26,17 +26,17 @@ from ckanext.dcat import converters, formats
 log = logging.getLogger(__name__)
 
 class DCATHarvester(HarvesterBase):
-   
+
 
     MAX_FILE_SIZE = 1024 * 1024 * 50 # 50 Mb
     CHUNK_SIZE = 1024
 
 
     force_import = False
-    
+
     _user_name = None
 
-    def _get_content(self, url, harvest_job):
+    def _get_content(self, url, harvest_job, page=1):
         if not url.lower().startswith('http'):
             # Check local file
             if os.path.exists(url):
@@ -48,6 +48,13 @@ class DCATHarvester(HarvesterBase):
                 return None
 
         try:
+            if page > 1:
+                url = url + '&' if '?' in url else url + '?'
+                url = url + 'page={0}'.format(page)
+
+
+            log.debug('Getting file %s', url)
+
             # first we try a HEAD request which may not be supported
             did_get = False
             r = requests.head(url)
@@ -77,20 +84,24 @@ class DCATHarvester(HarvesterBase):
                     self._save_gather_error('Remote file is too big.', harvest_job)
                     return None
 
-            return content            
+            return content
 
         except requests.exceptions.HTTPError, error:
-            msg = 'Could not proxy resource. Server responded with %s %s' % (
+            if page > 1 and error.response.status_code == 404:
+                # We want to catch these ones later on
+                raise
+
+            msg = 'Could not get content. Server responded with %s %s' % (
                 error.response.status_code, error.response.reason)
             self._save_gather_error(msg, harvest_job)
             return None
         except requests.exceptions.ConnectionError, error:
-            msg = '''Could not proxy resource because a
+            msg = '''Could not get content because a
                                 connection error occurred. %s''' % error
             self._save_gather_error(msg, harvest_job)
             return None
         except requests.exceptions.Timeout, error:
-            msg = 'Could not proxy resource because the connection timed out.'
+            msg = 'Could not get content because the connection timed out.'
             self._save_gather_error(msg, harvest_job)
             return None
 
@@ -135,7 +146,7 @@ class DCATHarvester(HarvesterBase):
         return None
 
     def gather_stage(self,harvest_job):
-        log.debug('In DCATHarvester gahter_stage')
+        log.debug('In DCATHarvester gather_stage')
 
 
         ids = []
@@ -156,39 +167,74 @@ class DCATHarvester(HarvesterBase):
         # Get file contents
         url = harvest_job.source.url
 
-        log.debug('Getting file %s', url)
-        content = self._get_content(url, harvest_job)
+        previous_content = ''
+        page = 1
+        while True:
 
-        if not content:
-            return None
-
-        # TODO: Pagination
-
-        try:
-            for guid, as_string in self._get_guids_and_datasets(content):
-
-                # Save the dataset element on the harvest object
-                log.debug('Got identifier: {0}'.format(guid))
-                guids_in_source.append(guid)
-
-                if guid in guids_in_db:
-                    # Dataset needs to be udpated
-                    obj = HarvestObject(guid=guid, job=harvest_job,
-                                    package_id=guid_to_package_id[guid],
-                                    content=as_string,
-                                    extras=[HarvestObjectExtra(key='status', value='change')])
+            try:
+                content = self._get_content(url, harvest_job, page)
+            except requests.exceptions.HTTPError, error:
+                if error.response.status_code == 404:
+                    if page > 1:
+                        # Server returned a 404 after the first page, no more
+                        # records
+                        log.debug('404 after first page, no more pages')
+                        break
+                    else:
+                        # Proper 404
+                        msg = 'Could not get content. Server responded with 404 Not Found'
+                        self._save_gather_error(msg, harvest_job)
+                        return None
                 else:
-                    # Dataset needs to be created
-                    obj = HarvestObject(guid=guid, job=harvest_job,
-                                    content=as_string,
-                                    extras=[HarvestObjectExtra(key='status', value='new')])
+                    # This should never happen. Raising just in case.
+                    raise
 
-                obj.save()
-                ids.append(obj.id)
-        except ValueError, e:
-            msg = 'Error parsing file: {0}'.format(str(e))
-            self._save_gather_error(msg, harvest_job)
-            return None
+            if not content:
+                return None
+
+            if previous_content == content:
+                # Server does not support pagination or no more pages
+                log.debug('Same content, no more pages')
+                break
+
+            try:
+                batch_guids = []
+                for guid, as_string in self._get_guids_and_datasets(content):
+
+                    log.debug('Got identifier: {0}'.format(guid))
+                    batch_guids.append(guid)
+
+                    if guid in guids_in_db:
+                        # Dataset needs to be udpated
+                        obj = HarvestObject(guid=guid, job=harvest_job,
+                                        package_id=guid_to_package_id[guid],
+                                        content=as_string,
+                                        extras=[HarvestObjectExtra(key='status', value='change')])
+                    else:
+                        # Dataset needs to be created
+                        obj = HarvestObject(guid=guid, job=harvest_job,
+                                        content=as_string,
+                                        extras=[HarvestObjectExtra(key='status', value='new')])
+
+                    obj.save()
+                    ids.append(obj.id)
+
+                if len(batch_guids) > 0:
+                    guids_in_source.extend(batch_guids)
+                else:
+                    log.debug('Empty document, no more records')
+                    # Empty document, no more ids
+                    break
+
+            except ValueError, e:
+                msg = 'Error parsing file: {0}'.format(str(e))
+                self._save_gather_error(msg, harvest_job)
+                return None
+
+
+
+            page = page + 1
+            previous_content = content
 
         # Check datasets that need to be deleted
         guids_to_delete = set(guids_in_db) - set(guids_in_source)
