@@ -1,0 +1,15 @@
+{
+    "title": "Zimbabwe Regional Geochemical Survey.",
+    "description": "During the period 1982-86 a team of geologists from the British Geological Survey ...",
+    "identifier": "9df8df51-63db-37a8-e044-0003ba9b0d98",
+    "landingPage" : null,
+    "issued": "2012-05-10",
+    "modified": "2012-05-10T21:04",
+    "language": ["en", "es", "ca"],
+    "keyword" : ["exploration", "geochemical-exploration", "geochemical-maps", "geochemistry", "geology", "nercddc", "regional-geology"],
+    "distribution": [{"accessURL": "http://www.bgs.ac.uk/gbase/geochemcd/home.html",
+                       "byteSize": null,
+                       "description": "Resource locator",
+                       "format": "text/html",
+                       "title": ""}]
+}

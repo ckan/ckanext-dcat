@@ -1,0 +1,367 @@
+{
+    "author": null, 
+    "author_email": null, 
+    "extras": [
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "INSPIRE", 
+            "value": "True"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "access_constraints", 
+            "value": "[\"Subject to a licence fee. Subject to usual BGS terms and conditions.\"]"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "bbox-east-long", 
+            "value": "33.0000"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "bbox-north-lat", 
+            "value": "-15.0000"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "bbox-south-lat", 
+            "value": "-22.0000"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "bbox-west-long", 
+            "value": "25.0000"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "contact-email", 
+            "value": "enquiries@bgs.ac.uk"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "coupled-resource", 
+            "value": "[]"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "dataset-reference-date", 
+            "value": "[{\"type\": \"publication\", \"value\": \"1982\"}]"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "4ccba7d6-474b-43e5-b9f1-f94c178909da"
+            }, 
+            "key": "eu_country", 
+            "value": "UK"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "frequency-of-update", 
+            "value": "notPlanned"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "guid", 
+            "value": "9df8df51-63db-37a8-e044-0003ba9b0d98"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "4ccba7d6-474b-43e5-b9f1-f94c178909da"
+            }, 
+            "key": "harvest_catalogue_name", 
+            "value": "Data.gov.uk"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "4ccba7d6-474b-43e5-b9f1-f94c178909da"
+            }, 
+            "key": "harvest_catalogue_url", 
+            "value": "http://catalogue.data.gov.uk"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "4ccba7d6-474b-43e5-b9f1-f94c178909da"
+            }, 
+            "key": "harvest_dataset_url", 
+            "value": "http://catalogue.data.gov.uk/package/756d6426-d52d-492a-a263-599ad1caa123"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "harvest_object_id", 
+            "value": "20687c9f-1007-446e-aa14-9b88fd1d3a39"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "licence", 
+            "value": "[]"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "metadata-date", 
+            "value": "2011-12-16T17:19:00"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "metadata-language", 
+            "value": "eng"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "openness_score", 
+            "value": "0"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "openness_score_last_checked", 
+            "value": "2011-06-07T11:47:03.831218"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "published_by", 
+            "value": "15004"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "resource-type", 
+            "value": "dataset"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "responsible-party", 
+            "value": "British Geological Survey (distributor)"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "spatial", 
+            "value": "{\"type\":\"Polygon\",\"coordinates\":[[[33.0000, -22.0000],[33.0000, -15.0000], [25.0000, -15.0000], [25.0000, -22.0000], [33.0000, -22.0000]]]}"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "spatial-data-service-type", 
+            "value": ""
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730"
+            }, 
+            "key": "spatial-reference-system", 
+            "value": "urn:ogc:def:crs:EPSG::32636"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "temporal_coverage-from", 
+            "value": "[\"1982\"]"
+        }, 
+        {
+            "__extras": {
+                "package_id": "756d6426-d52d-492a-a263-599ad1caa123", 
+                "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41"
+            }, 
+            "key": "temporal_coverage-to", 
+            "value": "[\"1986\"]"
+        },
+        {
+            "key": "dcat_issued", 
+            "value": "2012-05-10"
+        },
+        {
+            "key": "dcat_modified", 
+            "value": "2012-05-10T21:04"
+        },
+        {
+            "key": "language", 
+            "value": "en,es,ca"
+        }
+    ], 
+    "groups": [], 
+    "id": "756d6426-d52d-492a-a263-599ad1caa123", 
+    "isopen": false, 
+    "license_id": null, 
+    "license_title": null, 
+    "maintainer": null, 
+    "maintainer_email": null, 
+    "metadata_created": "2011-06-13T21:30:17.624899", 
+    "metadata_modified": "2012-03-15T18:16:21.035169", 
+    "name": "zimbabwe-regional-geochemical-survey", 
+    "notes": "During the period 1982-86 a team of geologists from the British Geological Survey ...", 
+    "num_resources": 1, 
+    "num_tags": 7, 
+    "organization": null, 
+    "owner_org": null, 
+    "private": false, 
+    "relationships_as_object": [], 
+    "relationships_as_subject": [], 
+    "resources": [
+        {
+            "cache_last_updated": null, 
+            "cache_url": null, 
+            "description": "Resource locator", 
+            "format": "text/html", 
+            "hash": "", 
+            "id": "95b07708-afde-4d24-a35c-1da8ddfd7d42", 
+            "last_modified": null, 
+            "mimetype": null, 
+            "mimetype_inner": null, 
+            "name": "", 
+            "position": 0, 
+            "resource_group_id": "3c33aa4c-b551-4ed9-9c8d-a1f261d61b27", 
+            "resource_locator_function": "information", 
+            "resource_locator_protocol": "", 
+            "resource_type": null, 
+            "revision_id": "defc71fc-2ac4-4d65-aa8a-f8b082172f41", 
+            "revision_timestamp": "2012-03-15T18:16:21.035169", 
+            "size": null, 
+            "state": "active", 
+            "tracking_summary": {
+                "recent": 0, 
+                "total": 0
+            }, 
+            "url": "http://www.bgs.ac.uk/gbase/geochemcd/home.html", 
+            "webstore_last_updated": null, 
+            "webstore_url": null
+        }
+    ], 
+    "revision_id": "1816777b-f93c-4eb2-8100-7b1a65004730", 
+    "revision_timestamp": "2011-06-13T21:30:17.624899", 
+    "state": "active", 
+    "tags": [
+        {
+            "display_name": "exploration", 
+            "id": "a5be0486-83c2-4304-b281-7c3fa9707bca", 
+            "name": "exploration", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }, 
+        {
+            "display_name": "geochemical-exploration", 
+            "id": "c7997021-240f-4a52-abb1-42256aedcc61", 
+            "name": "geochemical-exploration", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }, 
+        {
+            "display_name": "geochemical-maps", 
+            "id": "d11e89b5-756f-48cb-b75f-62c871224ebb", 
+            "name": "geochemical-maps", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }, 
+        {
+            "display_name": "geochemistry", 
+            "id": "7f7ac9ab-67ac-4db3-a092-cd783194104a", 
+            "name": "geochemistry", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }, 
+        {
+            "display_name": "geology", 
+            "id": "c09f039c-24d0-4077-a765-5e3fe086739d", 
+            "name": "geology", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }, 
+        {
+            "display_name": "nercddc", 
+            "id": "6d84e7ec-53e3-4b6a-bd42-021cdeb9bb66", 
+            "name": "nercddc", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }, 
+        {
+            "display_name": "regional-geology", 
+            "id": "43b2fa99-716c-4cff-8fb1-374db8b8347e", 
+            "name": "regional-geology", 
+            "revision_timestamp": "2011-06-13T21:30:17.624899", 
+            "state": "active", 
+            "vocabulary_id": null
+        }
+    ], 
+    "title": "Zimbabwe Regional Geochemical Survey.", 
+    "tracking_summary": {
+        "recent": 0, 
+        "total": 0
+    }, 
+    "type": "dataset", 
+    "url": null, 
+    "version": null
+} 
