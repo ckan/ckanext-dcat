@@ -25,15 +25,16 @@ def dcat_to_ckan(dcat_dict):
         'key': 'language',
         'value': ','.join(dcat_dict.get('language', []))
     })
-    
+
     package_dict['resources'] = []
-    for distribution in dcat_dict['distribution']:
+    for distribution in dcat_dict.get('distribution', []):
         resource = {
             'name': distribution.get('title'),
             'description': distribution.get('description'),
             'url': distribution.get('downloadURL') or distribution.get('accessURL'),
             'format': distribution.get('format'),
         }
+
         if distribution.get('byteSize'):
             try:
                 resource['size'] = int(distribution.get('byteSize'))
@@ -42,3 +43,40 @@ def dcat_to_ckan(dcat_dict):
         package_dict['resources'].append(resource)
 
     return package_dict
+
+
+def ckan_to_dcat(package_dict):
+
+    dcat_dict = {}
+
+    dcat_dict['title'] = package_dict.get('title')
+    dcat_dict['description'] = package_dict.get('notes')
+    dcat_dict['landingPage'] = package_dict.get('url')
+
+    dcat_dict['keyword'] = []
+    for tag in package_dict.get('tags', []):
+        dcat_dict['keyword'].append(tag['name'])
+
+    for extra in package_dict.get('extras', []):
+        if extra['key'] in ['dcat_issued', 'dcat_modified']:
+            dcat_dict[extra['key'].replace('dcat_', '')] = extra['value']
+
+        elif extra['key'] == 'language':
+            dcat_dict['language'] = extra['value'].split(',')
+
+        elif extra['key'] == 'guid':
+            dcat_dict['identifier'] = extra['value']
+
+    dcat_dict['distribution'] = []
+    for resource in package_dict.get('resources', []):
+        distribution = {
+            'title': resource.get('name'),
+            'description': resource.get('description'),
+            'format': resource.get('format'),
+            'byteSize': resource.get('size'),
+            # TODO: downloadURL or accessURL depending on resource type?
+            'accessURL': resource.get('url'),
+        }
+        dcat_dict['distribution'].append(distribution)
+
+    return dcat_dict
