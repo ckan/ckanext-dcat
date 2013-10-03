@@ -302,6 +302,7 @@ class DCATHarvester(HarvesterBase):
         context = {
             'user': self._get_user_name(),
             'return_id_only': True,
+            'ignore_auth': True,
         }
 
         if status == 'new':
