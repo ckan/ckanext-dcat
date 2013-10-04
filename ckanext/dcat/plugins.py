@@ -84,6 +84,7 @@ def _search_ckan_datasets(context, data_dict):
 
     search_data_dict = {
         'q': '*:*',
+        'fq': 'dataset_type:dataset',
         'rows': n,
         'start': n * (page - 1),
     }
