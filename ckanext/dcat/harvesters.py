@@ -145,6 +145,17 @@ class DCATHarvester(HarvesterBase):
             return obj.source.url
         return None
 
+    ## Start hooks
+
+    def modify_package_dict(self, package_dict, dcat_dict, harvest_object):
+        '''
+            Allows custom harvesters to modify the package dict before
+            creating or updating the actual package.
+        '''
+        return package_dict
+
+    ## End hooks
+
     def gather_stage(self,harvest_job):
         log.debug('In DCATHarvester gather_stage')
 
@@ -291,9 +302,15 @@ class DCATHarvester(HarvesterBase):
             previous_object.add()
 
 
-        package_dict = self._get_package_dict(harvest_object)
+        package_dict, dcat_dict = self._get_package_dict(harvest_object)
         if not package_dict.get('name'):
             package_dict['name'] = self._get_package_name(harvest_object, package_dict['title'])
+
+        # Allow custom harvesters to modify the package dict before creating
+        # or updating the package
+        package_dict = self.modify_package_dict(package_dict,
+                                                dcat_dict,
+                                                harvest_object)
 
         # Flag this object as the current one
         harvest_object.current = True
@@ -382,7 +399,7 @@ class DCATXMLHarvester(DCATHarvester):
 
         package_dict = converters.dcat_to_ckan(dcat_dict)
 
-        return package_dict
+        return package_dict, dcat_dict
 
 
 
@@ -427,4 +444,4 @@ class DCATJSONHarvester(DCATHarvester):
 
         package_dict = converters.dcat_to_ckan(dcat_dict)
 
-        return package_dict
+        return package_dict, dcat_dict
