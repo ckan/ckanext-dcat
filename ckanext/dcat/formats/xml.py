@@ -10,6 +10,9 @@ class MappedXmlObject(object):
 
 
 class MappedXmlDocument(MappedXmlObject):
+
+    base_class = None
+
     def __init__(self, xml_str=None, xml_tree=None, lang='en'):
         assert (xml_str or xml_tree is not None), 'Must provide some XML in one format or another'
         self.xml_str = xml_str
@@ -44,6 +47,16 @@ class MappedXmlDocument(MappedXmlObject):
             else:
                 xml_str = self.xml_str
             self.xml_tree = etree.fromstring(xml_str, parser=parser)
+
+            if self.base_class and ':' in self.base_class:
+                ns = self.base_class.split(':')[0]
+                if self.base_class.replace(ns, self.xml_tree.nsmap[ns]) != self.xml_tree.tag:
+                    elements = self.xml_tree.xpath(self.base_class, namespaces=self.xml_tree.nsmap)
+                    if len(elements):
+                        self.xml_tree = elements[0]
+                    else:
+                        raise ValueError('The provided document does not seem to contain a {0} element'.format(self.base_class))
+
         return self.xml_tree
 
     def infer_values(self, values):
@@ -324,12 +337,14 @@ _dcat_dataset_elements = [
 
 class _DCATDataset(DCATElement):
 
-    elements = _dcat_dataset_elements 
+    elements = _dcat_dataset_elements
 
 
 class DCATDataset(MappedXmlDocument):
-    
-    elements = _dcat_dataset_elements 
+
+    base_class = 'dcat:Dataset'
+
+    elements = _dcat_dataset_elements
 
 
 class DCATCatalog(MappedXmlDocument):
@@ -341,6 +356,8 @@ class DCATCatalog(MappedXmlDocument):
             * dct:temporal
             * dcat:theme
     '''
+
+    base_class = 'dcat:Catalog'
 
     elements = [
         DCATElement(
