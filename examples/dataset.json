@@ -7,6 +7,10 @@
     "modified": "2012-05-10T21:04",
     "language": ["en", "es", "ca"],
     "keyword" : ["exploration", "geochemical-exploration", "geochemical-maps", "geochemistry", "geology", "nercddc", "regional-geology"],
+    "publisher": {
+        "name": "Geological Society",
+        "mbox": "info@gs.org"
+    },
     "distribution": [{"accessURL": "http://www.bgs.ac.uk/gbase/geochemcd/home.html",
                        "byteSize": null,
                        "description": "Resource locator",

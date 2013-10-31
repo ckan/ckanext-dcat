@@ -254,10 +254,22 @@ class DCATDistribution(DCATElement):
     ]
 
 
+_dcat_publisher = DCATElement(
+    name='publisher',
+    search_paths=[
+        'dct:publisher/foaf:Organization/foaf:name/text()',
+        'dct:publisher/foaf:Person/foaf:name/text()',
+        'dct:publisher/text()',
+        'dct:publisher/@rdf:about',
+    ],
+    multiplicity='0..1'
+)
+
+
+
 '''
     TODO:
         * dct:accrualPeriodicity (dct:Frequency, how do you encode those?)
-        * dct:publisher
         * dct:spatial
         * dct:temporal
         * dcat:theme
@@ -323,7 +335,7 @@ _dcat_dataset_elements = [
         ],
         multiplicity='0..1',
     ),
-
+    _dcat_publisher,
     DCATDistribution(
         name="distribution",
         search_paths=[
@@ -351,9 +363,7 @@ class DCATCatalog(MappedXmlDocument):
     '''
         TODO:
             * dct:accrualPeriodicity (dct:Frequency, how do you encode those?)
-            * dct:publisher
             * dct:spatial
-            * dct:temporal
             * dcat:theme
     '''
 
@@ -412,7 +422,7 @@ class DCATCatalog(MappedXmlDocument):
             ],
             multiplicity='0..1',
         ),
-
+        _dcat_publisher,
         _DCATDataset(
             name="dataset",
             search_paths=[
