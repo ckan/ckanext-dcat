@@ -254,16 +254,27 @@ class DCATDistribution(DCATElement):
     ]
 
 
-_dcat_publisher = DCATElement(
-    name='publisher',
-    search_paths=[
-        'dct:publisher/foaf:Organization/foaf:name/text()',
-        'dct:publisher/foaf:Person/foaf:name/text()',
-        'dct:publisher/text()',
-        'dct:publisher/@rdf:about',
-    ],
-    multiplicity='0..1'
-)
+class DCATPublisher(DCATElement):
+    name = 'publisher'
+
+    elements = [
+        DCATElement(
+            name='name',
+            search_paths=[
+                'foaf:name/text()',
+                'text()',
+                '@rdf:about',
+            ],
+            multiplicity='0..1'
+        ),
+        DCATElement(
+            name='email',
+            search_paths=[
+                'foaf:mbox/text()',
+            ],
+            multiplicity='0..1'
+        ),
+    ]
 
 
 
@@ -335,7 +346,16 @@ _dcat_dataset_elements = [
         ],
         multiplicity='0..1',
     ),
-    _dcat_publisher,
+    DCATPublisher(
+        name='publisher',
+        search_paths=[
+            'dct:publisher/foaf:Agent',
+            'dct:publisher/foaf:Organization',
+            'dct:publisher/foaf:Person',
+            'dct:publisher',
+        ],
+        multiplicity='0..1'
+    ),
     DCATDistribution(
         name="distribution",
         search_paths=[
@@ -422,7 +442,16 @@ class DCATCatalog(MappedXmlDocument):
             ],
             multiplicity='0..1',
         ),
-        _dcat_publisher,
+        DCATPublisher(
+            name='publisher',
+            search_paths=[
+                'dct:publisher/foaf:Agent',
+                'dct:publisher/foaf:Organization',
+                'dct:publisher/foaf:Person',
+                'dct:publisher',
+            ],
+            multiplicity='0..1'
+        ),
         _DCATDataset(
             name="dataset",
             search_paths=[

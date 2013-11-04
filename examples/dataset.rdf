@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:time="http://www.w3.org/2006/time#"
+	xmlns:dct="http://purl.org/dc/terms/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:dcat="http://www.w3.org/ns/dcat#"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:tema="http://datos.gob.es/kos/sector-publico/sector/"
+	xmlns:auto="http://datos.gob.es/recurso/sector-publico/territorio/Autonomia/"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98">
+    <dct:identifier>9df8df51-63db-37a8-e044-0003ba9b0d98</dct:identifier>
+    <dct:title>Zimbabwe Regional Geochemical Survey.</dct:title>
+    <dct:description>During the period 1982-86 a team of geologists from the British Geological Survey ...</dct:description>
+    <dcat:keyword>exploration</dcat:keyword>
+    <dcat:keyword>geochemical-exploration</dcat:keyword>
+    <dcat:keyword>geochemical-maps</dcat:keyword>
+    <dcat:keyword>geochemistry</dcat:keyword>
+    <dcat:keyword>geology</dcat:keyword>
+    <dcat:keyword>nercddc</dcat:keyword>
+    <dcat:keyword>regional-geology</dcat:keyword>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10T21:04</dct:modified>
+    <dc:language>en</dc:language>
+    <dc:language>es</dc:language>
+    <dc:language>ca</dc:language>
+    <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+    <dct:publisher>
+        <foaf:Organization>
+            <foaf:name>Publishing Organization for dataset 1</foaf:name>
+            <foaf:mbox>contact@some.org</foaf:mbox>
+        </foaf:Organization>
+    </dct:publisher>
+    <dcat:distribution>
+        <dcat:Distribution>
+            <dct:title/>
+            <dct:description>Resource locator</dct:description>
+            <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>
+            <dcat:mediaType>text/html</dcat:mediaType>
+        </dcat:Distribution>
+    </dcat:distribution>
+</dcat:Dataset>
+</rdf:RDF>

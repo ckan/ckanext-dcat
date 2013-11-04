@@ -33,6 +33,7 @@
       <dct:publisher>
         <foaf:Organization>
             <foaf:name>Publishing Organization for dataset 1</foaf:name>
+            <foaf:mbox>contact@some.org</foaf:mbox>
         </foaf:Organization>
       </dct:publisher>
       <dcat:distribution>
@@ -83,6 +84,7 @@
       <dct:publisher>
         <foaf:Organization>
             <foaf:name>Publishing Organization for dataset 2</foaf:name>
+            <foaf:mbox>contact@another.org</foaf:mbox>
         </foaf:Organization>
       </dct:publisher>
       <dcat:distribution>

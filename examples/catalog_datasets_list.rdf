@@ -20,6 +20,12 @@
       <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:modified>
       <dc:language>en</dc:language>
       <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+      <dct:publisher>
+        <foaf:Organization>
+            <foaf:name>Publishing Organization for dataset 1</foaf:name>
+            <foaf:mbox>contact@some.org</foaf:mbox>
+        </foaf:Organization>
+      </dct:publisher>
       <dcat:distribution>
         <dcat:Distribution>
           <dct:identifier>https://data.some.org/catalog/datasets/1/distribution/1</dct:identifier>
@@ -64,6 +70,12 @@
       <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-06-21</dct:issued>
       <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-04-01</dct:modified>
       <dc:language>en</dc:language>
+      <dct:publisher>
+        <foaf:Organization>
+            <foaf:name>Publishing Organization for dataset 2</foaf:name>
+            <foaf:mbox>contact@another.org</foaf:mbox>
+        </foaf:Organization>
+      </dct:publisher>
       <dcat:distribution>
         <dcat:Distribution>
           <dct:identifier>https://data.some.org/catalog/datasets/2/distribution/1</dct:identifier>
