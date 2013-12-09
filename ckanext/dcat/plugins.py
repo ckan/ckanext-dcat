@@ -5,6 +5,11 @@ from dateutil.parser import parse as dateutil_parse
 
 from ckan import plugins as p
 
+if p.toolkit.check_ckan_version(min_version='2.1'):
+    BaseController = p.toolkit.BaseController
+else:
+    from ckan.lib.base import BaseController
+
 import ckanext.dcat.converters as converters
 
 
@@ -29,7 +34,7 @@ class DCATJSONInterface(p.SingletonPlugin):
         }
 
 
-class DCATController(p.toolkit.BaseController):
+class DCATController(BaseController):
 
     def dcat_json(self):
 
