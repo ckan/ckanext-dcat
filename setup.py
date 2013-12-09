@@ -28,5 +28,9 @@ setup(
     dcat_xml_harvester=ckanext.dcat.harvesters:DCATXMLHarvester
     dcat_json_harvester=ckanext.dcat.harvesters:DCATJSONHarvester
     dcat_json_interface=ckanext.dcat.plugins:DCATJSONInterface
+
+    [paste.paster_command]
+    generate_static = ckanext.dcat.commands:GenerateStaticDCATCommand
+
 	""",
 )
