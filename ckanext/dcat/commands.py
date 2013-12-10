@@ -45,11 +45,22 @@ class GenerateStaticDCATCommand(p.toolkit.CkanCommand):
         data_dict = {'page': 0}
 
         with open(output, 'w') as f:
-            f.write(u"[")
+            f.write(u'{')
+            try:
+                # Generate the dcat:catalog elements for the result.
+                catalog = p.toolkit.get_action('dcat_catalog_info')({},
+                                                                data_dict)
+            except p.toolkit.ValidationError, e:
+                p.toolkit.abort(409, str(e))
+
+            header = json.dumps(catalog)[1:-1]
+            f.write(header)
+            f.write(u',"dataset": [')
 
             while True:
+                data_dict['page'] = data_dict['page'] + 1
+
                 try:
-                    data_dict['page'] = data_dict['page'] + 1
                     datasets = \
                         p.toolkit.get_action('dcat_datasets_list')({},
                                                                    data_dict)
@@ -61,6 +72,6 @@ class GenerateStaticDCATCommand(p.toolkit.CkanCommand):
                     break
 
                 for dataset in datasets:
-                    f.write(json.dumps(dataset))
+                    json.dump(dataset, f)
 
-            f.write(u"]")
+            f.write(u"]}")
