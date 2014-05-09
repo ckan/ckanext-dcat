@@ -44,32 +44,28 @@ This extension offers the following Implementation Guidelines:
 In terms of CKAN, this extension offers:
 
 * TODO: Endpoints for (paginated) dumps of all the catalog's datasets metadata
-  in RDF/XML and JSON format.
+  in RDF/XML and JSON format. (``dcat_json_interface`` plugin)
 
 * TODO: Individual endpoints for describing a dataset metadata in RDF/XML and
   JSON format. (Note: CKAN core already offers a RDF/XML representation, need
   to decide hwo they fit together).
 
 * Harvesters that allow importing similar dumps in RDF/XML or JSON from other
-  catalogs to create CKAN datasets.
-
-
-
-Datasets Serializations
-=======================
-
-
-Simple Request Specification
-============================
-
-
-Harvesters
-==========
+  catalogs to create CKAN datasets (``dcat_json_harvester`` and ``dcat_xml_harvester`` plugins).
 
 
 Install
 =======
 
+1. Install ckanext-harvest (https://github.com/ckan/ckanext-harvest#installation)
+
+2. Install the extension on your virtualenv::
+
+    (pyenv) $ pip install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat
+
+3. Enable the required plugins in your ini file::
+
+    ckan.plugins = dcat_xml_harvester dcat_json_harvester dcat_json_interface
 
 
 
