@@ -47,10 +47,11 @@ class MappedXmlDocument(MappedXmlObject):
             else:
                 xml_str = self.xml_str
             self.xml_tree = etree.fromstring(xml_str, parser=parser)
-
             if self.base_class and ':' in self.base_class:
-                ns = self.base_class.split(':')[0]
-                if self.base_class.replace(ns, self.xml_tree.nsmap[ns]) != self.xml_tree.tag:
+                parts = self.base_class.split(':')
+                ns = parts[0]
+                name = parts[1]
+                if '{{{ns}}}{name}'.format(ns=self.xml_tree.nsmap[ns], name=name) != self.xml_tree.tag:
                     elements = self.xml_tree.xpath(self.base_class, namespaces=self.xml_tree.nsmap)
                     if len(elements):
                         self.xml_tree = elements[0]

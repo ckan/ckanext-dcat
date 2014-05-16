@@ -58,7 +58,7 @@ class DCATHarvester(HarvesterBase):
             # first we try a HEAD request which may not be supported
             did_get = False
             r = requests.head(url)
-            if r.status_code == 405:
+            if r.status_code == 405 or r.status_code == 400:
                 r = requests.get(url, stream=True)
                 did_get = True
             r.raise_for_status()
@@ -303,6 +303,9 @@ class DCATHarvester(HarvesterBase):
 
 
         package_dict, dcat_dict = self._get_package_dict(harvest_object)
+        if not package_dict:
+            return False
+
         if not package_dict.get('name'):
             package_dict['name'] = self._get_package_name(harvest_object, package_dict['title'])
 
@@ -394,7 +397,11 @@ class DCATXMLHarvester(DCATHarvester):
 
         content = harvest_object.content
 
-        dataset = formats.xml.DCATDataset(content)
+        try:
+            dataset = formats.xml.DCATDataset(content)
+        except ValueError, e:
+            self._save_object_error('Content does not look like dcat:Dataset for harvest object {0}'.format(harvest_object.id), harvest_object, 'Import')
+            return None, None
         dcat_dict = dataset.read_values()
 
         package_dict = converters.dcat_to_ckan(dcat_dict)
