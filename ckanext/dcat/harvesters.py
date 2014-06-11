@@ -178,7 +178,7 @@ class DCATHarvester(HarvesterBase):
         # Get file contents
         url = harvest_job.source.url
 
-        previous_content = ''
+        previous_guids = []
         page = 1
         while True:
 
@@ -203,35 +203,33 @@ class DCATHarvester(HarvesterBase):
             if not content:
                 return None
 
-            if previous_content == content:
-                # Server does not support pagination or no more pages
-                log.debug('Same content, no more pages')
-                break
 
             try:
+
                 batch_guids = []
                 for guid, as_string in self._get_guids_and_datasets(content):
 
                     log.debug('Got identifier: {0}'.format(guid))
                     batch_guids.append(guid)
 
-                    if guid in guids_in_db:
-                        # Dataset needs to be udpated
-                        obj = HarvestObject(guid=guid, job=harvest_job,
-                                        package_id=guid_to_package_id[guid],
-                                        content=as_string,
-                                        extras=[HarvestObjectExtra(key='status', value='change')])
-                    else:
-                        # Dataset needs to be created
-                        obj = HarvestObject(guid=guid, job=harvest_job,
-                                        content=as_string,
-                                        extras=[HarvestObjectExtra(key='status', value='new')])
+                    if guid not in previous_guids:
 
-                    obj.save()
-                    ids.append(obj.id)
+                        if guid in guids_in_db:
+                            # Dataset needs to be udpated
+                            obj = HarvestObject(guid=guid, job=harvest_job,
+                                            package_id=guid_to_package_id[guid],
+                                            content=as_string,
+                                            extras=[HarvestObjectExtra(key='status', value='change')])
+                        else:
+                            # Dataset needs to be created
+                            obj = HarvestObject(guid=guid, job=harvest_job,
+                                            content=as_string,
+                                            extras=[HarvestObjectExtra(key='status', value='new')])
+                        obj.save()
+                        ids.append(obj.id)
 
                 if len(batch_guids) > 0:
-                    guids_in_source.extend(batch_guids)
+                    guids_in_source.extend(set(batch_guids) - set(previous_guids))
                 else:
                     log.debug('Empty document, no more records')
                     # Empty document, no more ids
@@ -242,10 +240,15 @@ class DCATHarvester(HarvesterBase):
                 self._save_gather_error(msg, harvest_job)
                 return None
 
+            if sorted(previous_guids) == sorted(batch_guids):
+                # Server does not support pagination or no more pages
+                log.debug('Same content, no more pages')
+                break
 
 
             page = page + 1
-            previous_content = content
+
+            previous_guids = batch_guids
 
         # Check datasets that need to be deleted
         guids_to_delete = set(guids_in_db) - set(guids_in_source)
