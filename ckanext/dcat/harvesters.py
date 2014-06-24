@@ -209,7 +209,7 @@ class DCATHarvester(HarvesterBase):
                 batch_guids = []
                 for guid, as_string in self._get_guids_and_datasets(content):
 
-                    log.debug('Got identifier: {0}'.format(guid))
+                    log.debug('Got identifier: {0}'.format(guid.encode('utf8')))
                     batch_guids.append(guid)
 
                     if guid not in previous_guids:
