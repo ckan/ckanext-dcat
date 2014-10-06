@@ -63,7 +63,7 @@ class DCATHarvester(HarvesterBase):
                 did_get = True
             r.raise_for_status()
 
-            cl = r.headers['content-length']
+            cl = r.headers.get('content-length')
             if cl and int(cl) > self.MAX_FILE_SIZE:
                 msg = '''Remote file is too big. Allowed
                     file size: {allowed}, Content-Length: {actual}.'''.format(
