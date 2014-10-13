@@ -105,12 +105,13 @@ class DCATHarvester(HarvesterBase):
             self._save_gather_error(msg, harvest_job)
             return None
 
-
     def _get_user_name(self):
         if self._user_name:
             return self._user_name
 
-        user = p.toolkit.get_action('get_site_user')({'ignore_auth': True}, {})
+        user = p.toolkit.get_action('get_site_user')(
+            {'ignore_auth': True, 'defer_commit': True},
+            {})
         self._user_name = user['name']
 
         return self._user_name
