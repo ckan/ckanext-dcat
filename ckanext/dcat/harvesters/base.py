@@ -1,36 +1,25 @@
-#coding: utf-8
-
 import os
 import uuid
-import json
 import logging
-from hashlib import sha1
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
-from lxml import etree
 import requests
 
 from ckan import plugins as p
 from ckan import logic
 from ckan import model
 
+
 from ckanext.harvest.harvesters import HarvesterBase
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
-from ckanext.dcat import converters, formats
 
 log = logging.getLogger(__name__)
 
+
 class DCATHarvester(HarvesterBase):
 
-
-    MAX_FILE_SIZE = 1024 * 1024 * 50 # 50 Mb
+    MAX_FILE_SIZE = 1024 * 1024 * 50  # 50 Mb
     CHUNK_SIZE = 1024
-
 
     force_import = False
 
@@ -360,99 +349,3 @@ class DCATHarvester(HarvesterBase):
         model.Session.commit()
 
         return True
-
-
-class DCATXMLHarvester(DCATHarvester):
-
-    DCAT_NS = 'http://www.w3.org/ns/dcat#'
-    DCT_NS = 'http://purl.org/dc/terms/'
-    RDF_NS = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
-
-    def info(self):
-        return {
-            'name': 'dcat_xml',
-            'title': 'DCAT XML-RDF Harvester',
-            'description': 'Harvester for DCAT dataset descriptions serialized as XML-RDF'
-        }
-
-
-    def _get_guids_and_datasets(self, content):
-
-        doc = etree.fromstring(content)
-
-        for dataset_element in doc.xpath('//dcat:Dataset',namespaces={'dcat': self.DCAT_NS}) :
-
-            as_string = etree.tostring(dataset_element)
-
-            # Get identifier
-            guid = dataset_element.get('{{{ns}}}about'.format(ns=self.RDF_NS))
-            if not guid:
-                id_element = dataset_element.find('{{{ns}}}identifier'.format(ns=self.DCT_NS))
-                if id_element:
-                    guid = id_element.strip()
-                else:
-                    # This is bad, any ideas welcomed
-                    guid = sha1(as_string).hexdigest()
-
-            yield guid, as_string
-
-
-    def _get_package_dict(self, harvest_object):
-
-        content = harvest_object.content
-
-        try:
-            dataset = formats.xml.DCATDataset(content)
-        except ValueError, e:
-            self._save_object_error('Content does not look like dcat:Dataset for harvest object {0}'.format(harvest_object.id), harvest_object, 'Import')
-            return None, None
-        dcat_dict = dataset.read_values()
-
-        package_dict = converters.dcat_to_ckan(dcat_dict)
-
-        return package_dict, dcat_dict
-
-
-
-class DCATJSONHarvester(DCATHarvester):
-
-    def info(self):
-        return {
-            'name': 'dcat_json',
-            'title': 'DCAT JSON Harvester',
-            'description': 'Harvester for DCAT dataset descriptions serialized as JSON'
-        }
-
-    def _get_guids_and_datasets(self, content):
-
-        doc = json.loads(content)
-
-        if isinstance(doc, list):
-            # Assume a list of datasets
-            datasets = doc
-        elif isinstance(doc, dict):
-            datasets = doc.get('dataset', [])
-        else:
-            raise ValueError('Wrong JSON object')
-
-        for dataset in datasets:
-
-            as_string = json.dumps(dataset)
-
-            # Get identifier
-            guid = dataset.get('identifier')
-            if not guid:
-                # This is bad, any ideas welcomed
-                guid = sha1(as_string).hexdigest()
-
-            yield guid, as_string
-
-    def _get_package_dict(self, harvest_object):
-
-        content = harvest_object.content
-
-        dcat_dict = json.loads(content)
-
-        package_dict = converters.dcat_to_ckan(dcat_dict)
-
-        return package_dict, dcat_dict

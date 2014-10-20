@@ -7,18 +7,18 @@ import ckan.model as model
 import ckan.logic as logic
 
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
-# TODO: refactor caknext-dcat so lxml is not needed
-from ckanext.dcat.harvesters import DCATHarvester
+
+from ckanext.dcat.harvesters.base import DCATHarvester
 
 from ckanext.dcat.parsers import RDFParserException, RDFParser
 
-from ckanext.dcat.interfaces import IRDFDCATHarvester
+from ckanext.dcat.interfaces import IDCATRDFHarvester
 
 
 log = logging.getLogger(__name__)
 
 
-class RDFDCATHarvester(DCATHarvester):
+class DCATRDFHarvester(DCATHarvester):
 
     def info(self):
         return {
@@ -129,12 +129,12 @@ class RDFDCATHarvester(DCATHarvester):
 
     def gather_stage(self, harvest_job):
 
-        log.debug('In RDFDCATHarvester gather_stage')
+        log.debug('In DCATRDFHarvester gather_stage')
 
         # Get file contents
         url = harvest_job.source.url
 
-        for harvester in p.PluginImplementations(IRDFDCATHarvester):
+        for harvester in p.PluginImplementations(IDCATRDFHarvester):
             url, before_download_errors = harvester.before_download(url, harvest_job)
 
             for error_msg in before_download_errors:
@@ -149,7 +149,7 @@ class RDFDCATHarvester(DCATHarvester):
             return False
 
         # TODO: store content?
-        for harvester in p.PluginImplementations(IRDFDCATHarvester):
+        for harvester in p.PluginImplementations(IDCATRDFHarvester):
             content, after_download_errors = harvester.after_download(content, harvest_job)
 
             for error_msg in after_download_errors:
@@ -201,7 +201,7 @@ class RDFDCATHarvester(DCATHarvester):
 
     def import_stage(self, harvest_object):
 
-        log.debug('In RDFDCATHarvester import_stage')
+        log.debug('In DCATRDFHarvester import_stage')
 
         status = self._get_object_extra(harvest_object, 'status')
         if status == 'delete':
@@ -293,7 +293,6 @@ class RDFDCATHarvester(DCATHarvester):
                 return False
 
             log.info('Created dataset %s', dataset['name'])
-
 
         model.Session.commit()
 
