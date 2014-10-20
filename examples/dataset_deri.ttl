@@ -1,0 +1,32 @@
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+
+<http://data.london.gov.uk/dataset/Abandoned_Vehicles>
+      a       dcat:Dataset ;
+      rdfs:label "Abandoned Vehicles" ;
+      dct:accrualPeriodicity
+              "Annual" ;
+      dct:description "Number of abandoned vehicles.To estimate missing data, the supplied data for 2007/08 has been used if at least three quarterly periods have been supplied for 2007/08.Â  If fewer than three quarterly periods have been supplied for 2007/08 then data from 2006/07 has been used and the average percentage increase/decrease for that region has been applied to the 2006/07 data to estimate the 2007/08 figure. This is the estimation method used for previous years' data. Ealing's 2007/08 figure is the number of abandoned vehicles of which the authority has disposed.Â  Previous figures for Ealing are the number of abandoned vehicles reported to the authority." ;
+      dct:issued "06/05/2009" ;
+      dct:references <http://www.defra.gov.uk/evidence/statistics/environment/waste/wrabanvehicles.htm> ;
+      dct:spatial "Greater London" ;
+      dct:title "Abandoned Vehicles" ;
+      dcat:granularity "Local Authority" ;
+      dcat:distribution
+              <http://data.london.gov.uk/dataset/Abandoned_Vehicles/csv> ;
+      skos:prefLabel "Abandoned Vehicles" ;
+      foaf:homepage <http://data.london.gov.uk/datastore/package/abandoned-vehicles> .
+
+
+<http://data.london.gov.uk/dataset/Abandoned_Vehicles/csv>
+      a       dcat:Download ;
+      rdfs:label "CSV distribution of: Abandoned Vehicles" ;
+      dct:format "text/plain" ;
+      dct:title "CSV distribution of: Abandoned Vehicles" ;
+      dcat:accessURL <http://data.london.gov.uk/datafiles/environment/abandoned-vehicles-borough.csv> .

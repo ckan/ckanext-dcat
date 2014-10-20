@@ -32,7 +32,7 @@ setup(
     dcat_json_interface=ckanext.dcat.plugins:DCATJSONInterface
 
     # Test plugins
-    #test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
+    test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile

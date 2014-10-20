@@ -2,43 +2,70 @@
 <rdf:RDF
     xmlns:time="http://www.w3.org/2006/time#"
 	xmlns:dct="http://purl.org/dc/terms/"
-	xmlns:dc="http://purl.org/dc/elements/1.1/"
 	xmlns:dcat="http://www.w3.org/ns/dcat#"
 	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:adms="http://www.w3.org/ns/adms#"
+    xmlns:schema="http://schema.org/"
+	xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-	xmlns:tema="http://datos.gob.es/kos/sector-publico/sector/"
-	xmlns:auto="http://datos.gob.es/recurso/sector-publico/territorio/Autonomia/"
 	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98">
-    <dct:identifier>9df8df51-63db-37a8-e044-0003ba9b0d98</dct:identifier>
     <dct:title>Zimbabwe Regional Geochemical Survey.</dct:title>
     <dct:description>During the period 1982-86 a team of geologists from the British Geological Survey ...</dct:description>
+    <dcat:landingUrl>http://dataset.info.org</dcat:landingUrl>
     <dcat:keyword>exploration</dcat:keyword>
-    <dcat:keyword>geochemical-exploration</dcat:keyword>
-    <dcat:keyword>geochemical-maps</dcat:keyword>
     <dcat:keyword>geochemistry</dcat:keyword>
     <dcat:keyword>geology</dcat:keyword>
-    <dcat:keyword>nercddc</dcat:keyword>
-    <dcat:keyword>regional-geology</dcat:keyword>
-    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10</dct:issued>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-10</dct:issued>
     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10T21:04</dct:modified>
-    <dc:language>en</dc:language>
-    <dc:language>es</dc:language>
-    <dc:language>ca</dc:language>
+    <dct:identifier>9df8df51-63db-37a8-e044-0003ba9b0d98</dct:identifier>
+    <adms:identifier>alternate-identifier-x343</adms:identifier>
+    <adms:version>2.3</adms:version>
+    <adms:versionNotes>New schema added</adms:versionNotes>
+    <dct:language>en</dct:language>
+    <dct:language>es</dct:language>
+    <dct:language>ca</dct:language>
+    <dcat:theme rdf:resource="http://eurovoc.europa.eu/100142"/>
+    <dcat:theme rdf:resource="http://eurovoc.europa.eu/209065"/>
+    <dcat:theme>Earth Sciences</dcat:theme>
+    <dcat:conformsTo>Standard 1</dcat:conformsTo>
+    <dcat:conformsTo>Standard 2</dcat:conformsTo>
     <dct:license rdf:resource="https://data.some.org/link/to/license"/>
+    <dct:spatial rdf:resource="http://publications.europa.eu/mdr/authority/country/ZWE"/>
+    <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
+    <dct:temporal>
+        <dct:PeriodOfTime>
+            <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1905-03-01</schema:startDate>
+            <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-01-05</schema:endDate>
+        </dct:PeriodOfTime>
+    </dct:temporal>
+    <adms:contactPoint>
+      <vcard:Organization>
+        <vcard:fn>Point of Contact</vcard:fn>
+        <vcard:hasEmail rdf:resource="mailto:contact@some.org"/>
+      </vcard:Organization>
+    </adms:contactPoint>
     <dct:publisher>
-        <foaf:Organization>
+        <foaf:Organization rdf:about="http://orgs.vocab.org/some-org">
             <foaf:name>Publishing Organization for dataset 1</foaf:name>
             <foaf:mbox>contact@some.org</foaf:mbox>
+            <foaf:homepage>http://some.org</foaf:homepage>
+            <dct:type rdf:resource="http://purl.org/adms/publishertype/NonProfitOrganisation"/>
         </foaf:Organization>
     </dct:publisher>
     <dcat:distribution>
-        <dcat:Distribution>
-            <dct:title/>
-            <dct:description>Resource locator</dct:description>
+        <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
+            <dct:title>Some website</dct:title>
+            <dct:description>A longer description</dct:description>
+            <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-11</dct:issued>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-01T00:04:06</dct:modified>
+            <dct:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
+            <dct:rights>Some statement about rights</dct:rights>
+            <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
             <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>
             <dcat:mediaType>text/html</dcat:mediaType>
+            <dcat:byteSize>12323</dcat:byteSize>
         </dcat:Distribution>
     </dcat:distribution>
 </dcat:Dataset>

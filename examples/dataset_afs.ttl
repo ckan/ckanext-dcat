@@ -1,0 +1,36 @@
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+@prefix dcat:  <http://www.w3.org/ns/dcat#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://example.com/data/test-dataset-1>
+    a                  dcat:Dataset ;
+    dc:language        "ca" , "en" , "es" ;
+    dct:description    "A longer description of the dataset" ;
+    dct:identifier     "http://example.com/data/test-dataset-1" ;
+    dct:issued         "2012-05-10" ;
+    dct:modified       "2012-05-10T21:04" ;
+    dct:publisher      [ a          foaf:Organization ;
+                         foaf:mbox  "contact@some.org" ;
+                         foaf:name  "Name of the Publishing Organization"
+                       ] ;
+    dct:title          "A test dataset on your catalogue" ;
+    dcat:distribution  [ a                 dcat:Distribution ;
+                         dct:format        [ a          dct:IMT ;
+                                             rdf:value  "text/csv"
+                                           ] ;
+                         dct:license       "https://url.to.license" ;
+                         dct:title         "Test resource CSV file" ;
+                         dcat:downloadURL  "http://url.to.csv.file"
+                       ] ;
+    dcat:distribution  [ a               dcat:Distribution ;
+                         dct:format      [ a          dct:IMT ;
+                                           rdf:value  "text/html"
+                                         ] ;
+                         dct:license     "https://url.to.license" ;
+                         dct:title       "Test resource HTML file" ;
+                         dcat:accessURL  "http://url.to.html.page"
+                       ] ;
+    dcat:keyword       "pollution" , "stats" ;
+    dcat:landingPage   "http://url.to.dataset.home" .
