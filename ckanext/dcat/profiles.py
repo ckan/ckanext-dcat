@@ -322,7 +322,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             for key, predicate in (
                     ('name', DCT.title),
                     ('description', DCT.description),
-                    ('format', DCT.format),
+                    ('format', DCT['format']),
                     ('mimetype', DCAT.mediaType),
                     ('download_url', DCAT.downloadURL),
                     ('issued', DCT.issued),

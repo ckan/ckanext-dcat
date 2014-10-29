@@ -94,9 +94,8 @@ class TestEuroDCATAPProfile(object):
         #  Simple values
         eq_(resource['name'], u'Some website')
         eq_(resource['description'], u'A longer description')
-
-        # eq_(resource['format'], u'')
-        # eq_(resource['mimetype'], u'')
+        eq_(resource['format'], u'HTML')
+        eq_(resource['mimetype'], u'text/html')
         eq_(resource['issued'], u'2012-05-11')
         eq_(resource['modified'], u'2012-05-01T00:04:06')
         eq_(resource['status'], u'http://purl.org/adms/status/Completed')

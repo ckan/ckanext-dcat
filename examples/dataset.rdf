@@ -64,6 +64,7 @@
             <dct:rights>Some statement about rights</dct:rights>
             <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
             <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>
+            <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
             <dcat:byteSize>12323</dcat:byteSize>
         </dcat:Distribution>
