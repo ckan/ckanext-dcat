@@ -243,7 +243,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         for key, predicate in (
                 ('title', DCT.title),
                 ('notes', DCT.description),
-                ('url', DCAT.landingUrl),
+                ('url', DCAT.landingPage),
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:

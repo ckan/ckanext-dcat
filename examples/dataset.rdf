@@ -13,7 +13,7 @@
 <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98">
     <dct:title>Zimbabwe Regional Geochemical Survey.</dct:title>
     <dct:description>During the period 1982-86 a team of geologists from the British Geological Survey ...</dct:description>
-    <dcat:landingUrl>http://dataset.info.org</dcat:landingUrl>
+    <dcat:landingPage>http://dataset.info.org</dcat:landingPage>
     <dcat:keyword>exploration</dcat:keyword>
     <dcat:keyword>geochemistry</dcat:keyword>
     <dcat:keyword>geology</dcat:keyword>
