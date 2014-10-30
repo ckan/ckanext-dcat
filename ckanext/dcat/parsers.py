@@ -39,6 +39,14 @@ class RDFParser(object):
 
     def __init__(self, profiles=None, compatibility_mode=False):
         '''
+        Creates a parser instance
+
+        You can optionally pass a list of profiles to be used.
+
+        In compatibility mode, some fields are modified to maintain
+        compatibility with previous versions of the ckanext-dcat parsers
+        (eg adding the `dcat_` prefix or storing comma separated lists instead
+        of JSON dumps).
 
         '''
         if not profiles:
@@ -146,7 +154,7 @@ if __name__ == '__main__':
                         default=sys.stdin)
     parser.add_argument('-f', '--format',
                         help='''Serialization format (as understood by rdflib)
-                                eg: xml, n3 ...'). Defaults to \'xml\'.''')
+                                eg: xml, n3 ... Defaults to \'xml\'.''')
     parser.add_argument('-P', '--pretty',
                         action='store_true',
                         help='Make the output more human readable')

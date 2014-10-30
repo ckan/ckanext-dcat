@@ -25,10 +25,10 @@ class RDFProfile(object):
 
         Graph is an rdflib.Graph instance.
 
-        On compatibility mode, some fields are modified to maintain
+        In compatibility mode, some fields are modified to maintain
         compatibility with previous versions of the ckanext-dcat parsers
         (eg adding the `dcat_` prefix or storing comma separated lists instead
-        of JSON dumps.
+        of JSON dumps).
         '''
 
         self.g = graph
