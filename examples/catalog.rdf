@@ -2,7 +2,6 @@
 <rdf:RDF
  xmlns:time="http://www.w3.org/2006/time#"
  xmlns:dct="http://purl.org/dc/terms/"
- xmlns:dc="http://purl.org/dc/elements/1.1/"
  xmlns:dcat="http://www.w3.org/ns/dcat#"
  xmlns:foaf="http://xmlns.com/foaf/0.1/"
  xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
@@ -16,7 +15,7 @@
   <dct:description>A longer description of what the catalog is, who maintains it, etc. Special characters should be properly handed (if the file is utf8 encoded), for instance for catalogs from Sant Adrià.</dct:description>
   <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:issued>
   <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-05-22T09:38:45Z</dct:modified>
-  <dc:language>en</dc:language>
+  <dct:language>en</dct:language>
   <foaf:homepage rdf:resource="https://data.some.org/the/actual/catalog"/>
   <dct:license rdf:resource="https://data.some.org/link/to/license"/>
   <dcat:dataset>
@@ -28,7 +27,7 @@
       <dcat:keyword>pollution</dcat:keyword>
       <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:issued>
       <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-26T00:00:00Z</dct:modified>
-      <dc:language>en</dc:language>
+      <dct:language>en</dct:language>
       <dct:license rdf:resource="https://data.some.org/link/to/license"/>
       <dct:publisher>
         <foaf:Organization>
@@ -80,7 +79,7 @@
       <dcat:keyword>sloths</dcat:keyword>
       <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-06-21</dct:issued>
       <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-04-01</dct:modified>
-      <dc:language>en</dc:language>
+      <dct:language>en</dct:language>
       <dct:publisher>
         <foaf:Organization>
             <foaf:name>Publishing Organization for dataset 2</foaf:name>

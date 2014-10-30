@@ -1,0 +1,204 @@
+{
+    "@context": {
+        "Catalog": "http://www.w3.org/ns/dcat#Catalog",
+        "conformsTo": {
+            "@id": "http://purl.org/dc/terms/#conformsTo",
+            "@type": "@id"
+        },
+        "dataset": "http://www.w3.org/ns/dcat#dataset",
+        "describedBy": {
+            "@id": "http://www.w3.org/2007/05/powder-s#describedby",
+            "@type": "@id"
+        },
+        "description": "http://purl.org/dc/terms/description",
+        "title": "http://purl.org/dc/terms/title"
+    },
+    "@id": "http://www.agency.gov/data.json",
+    "@type": "Catalog",
+    "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+    "dataset": [
+        {
+            "@context": {
+                "Dataset": "http://www.w3.org/ns/dcat#Dataset",
+                "Distribution": "http://www.w3.org/ns/dcat#Distribution",
+                "accrualPeriodicity": "http://purl.org/dc/terms/accrualPeriodicity",
+                "conformsTo": {
+                    "@id": "http://purl.org/dc/terms/#conformsTo",
+                    "@type": "@id"
+                },
+                "contactPoint": "http://www.w3.org/ns/adms#contactPoint",
+                "describedBy": {
+                    "@id": "http://www.w3.org/2007/05/powder-s#describedby",
+                    "@type": "@id"
+                },
+                "description": "http://purl.org/dc/terms/description",
+                "distribution": "http://www.w3.org/ns/dcat#distribution",
+                "identifier": "http://www.w3.org/ns/dcat#identifier",
+                "issued": {
+                    "@id": "http://purl.org/dc/terms/issued",
+                    "@type": "xsd:dateTime"
+                },
+                "keyword": "http://www.w3.org/ns/dcat#keyword",
+                "landingPage": "http://www.w3.org/ns/dcat#landingPage",
+                "language": "http://purl.org/dc/terms/language",
+                "license": {
+                    "@id": "http://purl.org/dc/terms/#license",
+                    "@type": "@id"
+                },
+                "modified": {
+                    "@id": "http://purl.org/dc/terms/modified",
+                    "@type": "xsd:dateTime"
+                },
+                "publisher": "http://purl.org/dc/terms/publisher",
+                "spatial": "http://purl.org/dc/terms/spatial",
+                "temporal": "http://purl.org/dc/terms/temporal",
+                "theme": "http://www.w3.org/ns/dcat#theme",
+                "title": "http://purl.org/dc/terms/title"
+            },
+            "@id": "http://www.agency.gov/datasets/widgets-data",
+            "@type": "Dataset",
+            "accessLevel": "public",
+            "accrualPeriodicity": "R/P1Y",
+            "conformsTo": "http://www.agency.gov/widget-taxonomy/",
+            "contactPoint": {
+                "@context": {
+                    "Contact": "http://www.w3.org/ns/adms#Contact",
+                    "fn": "http://www.w3.org/2006/vcard/ns#fn",
+                    "hasEmail": "http://www.w3.org/2006/vcard/ns#hasEmail"
+                },
+                "@type": "Contact",
+                "fn": "Jane Doe",
+                "hasEmail": "mailto:jane.doe@agency.gov"
+            },
+            "describedBy": "http://www.agency.gov/datasets/widgets-dictionary.html",
+            "description": "This dataset provides national statistics on the production of widgets",
+            "distribution": [
+                {
+                    "@context": {
+                        "Distribution": "http://www.w3.org/ns/dcat#Distribution",
+                        "accessURL": "http://www.w3.org/ns/dcat#accessURL",
+                        "description": "http://purl.org/dc/terms/description",
+                        "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
+                        "format": "http://purl.org/dc/terms/format",
+                        "mediaType": "http://www.w3.org/ns/dcat#mediaType",
+                        "title": "http://purl.org/dc/terms/title"
+                    },
+                    "@type": "Distribution",
+                    "description": "Widgets data as a CSV file",
+                    "downloadURL": "https://data.agency.gov/datasets/widgets-statistics/widgets.csv",
+                    "format": "CSV",
+                    "mediaType": "text/csv",
+                    "title": "widgets.csv"
+                },
+                {
+                    "@context": {
+                        "Distribution": "http://www.w3.org/ns/dcat#Distribution",
+                        "accessURL": "http://www.w3.org/ns/dcat#accessURL",
+                        "description": "http://purl.org/dc/terms/description",
+                        "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
+                        "format": "http://purl.org/dc/terms/format",
+                        "mediaType": "http://www.w3.org/ns/dcat#mediaType",
+                        "title": "http://purl.org/dc/terms/title"
+                    },
+                    "@type": "Distribution",
+                    "description": "Widgets data as a zipped CSV file with attached data dictionary",
+                    "downloadURL": "https://data.agency.gov/datasets/widgets-statistics/widgets-all.zip",
+                    "format": "Zipped CSV",
+                    "mediaType": "application/zip",
+                    "title": "widgets-all.zip"
+                },
+                {
+                    "@context": {
+                        "Distribution": "http://www.w3.org/ns/dcat#Distribution",
+                        "accessURL": "http://www.w3.org/ns/dcat#accessURL",
+                        "description": "http://purl.org/dc/terms/description",
+                        "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
+                        "format": "http://purl.org/dc/terms/format",
+                        "mediaType": "http://www.w3.org/ns/dcat#mediaType",
+                        "title": "http://purl.org/dc/terms/title"
+                    },
+                    "@type": "Distribution",
+                    "conformsTo": "http://www.agency.gov/widget-data-standard/",
+                    "describedBy": "http://www.agency.gov/widgets/schema.json",
+                    "describedByType": "application/schema+json",
+                    "description": "Widget data as a JSON feed",
+                    "downloadURL": "http://www.agency.gov/feeds/widgets-all.json",
+                    "format": "JSON",
+                    "mediaType": "application/json",
+                    "title": "widgets-all.json"
+                },
+                {
+                    "@context": {
+                        "Distribution": "http://www.w3.org/ns/dcat#Distribution",
+                        "accessURL": "http://www.w3.org/ns/dcat#accessURL",
+                        "description": "http://purl.org/dc/terms/description",
+                        "downloadURL": "http://www.w3.org/ns/dcat#downloadURL",
+                        "format": "http://purl.org/dc/terms/format",
+                        "mediaType": "http://www.w3.org/ns/dcat#mediaType",
+                        "title": "http://purl.org/dc/terms/title"
+                    },
+                    "@type": "Distribution",
+                    "accessURL": "https://data.agency.gov/api/widgets-statistics/",
+                    "description": "A fully queryable REST API with JSON and XML output",
+                    "format": "API",
+                    "title": "Widgets REST API"
+                }
+            ],
+            "identifier": "widgets-0001",
+            "issued": "2011-11-22",
+            "keyword": [
+                "widget",
+                "manufacturing",
+                "factory"
+            ],
+            "landingPage": "http://agency.gov/widgets/data",
+            "language": [
+                "en-US"
+            ],
+            "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+            "modified": "2011-11-19T12:00:00Z",
+            "primaryITInvestmentUII": "021-006227212",
+            "programCode": [
+                "018:001"
+            ],
+            "publisher": {
+                "@context": {
+                    "Organization": "http://xmlns.com/foaf/0.1/Organization",
+                    "homepage": "http://xmlns.com/foaf/0.1/homepage",
+                    "mbox": "http://xmlns.com/foaf/0.1/mbox",
+                    "name": "http://xmlns.com/foaf/0.1/name"
+                },
+                "@type": "Organization",
+                "mbox": "widget.services@agency.gov",
+                "name": "Widget Services",
+                "subOrganizationOf": {
+                    "@type": "Organization",
+                    "name": "Office of Citizen Services and Innovative Technologies",
+                    "subOrganizationOf": {
+                        "@type": "Organization",
+                        "name": "General Services Administration",
+                        "subOrganizationOf": {
+                            "@type": "Organization",
+                            "name": "U.S. Government"
+                        }
+                    }
+                }
+            },
+            "references": [
+                "http://agency.gov/docs/widgets-1.html",
+                "http://agency.gov/docs/widgets-2.html"
+            ],
+            "rights": "This dataset has been given an international public domain dedication for worldwide reuse",
+            "spatial": "United States",
+            "systemOfRecords": "http://www.agency.gov/widgets/sorn/",
+            "temporal": "2009-09-01T12:00:00Z/2010-05-31T12:00:00Z",
+            "theme": [
+                "manufacturing"
+            ],
+            "title": "U.S. Widget Manufacturing Statistics"
+        }
+    ],
+    "describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+    "description": "A longer description for Test Catalog",
+    "title": "Test Catalog"
+}
