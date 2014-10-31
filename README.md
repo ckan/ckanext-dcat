@@ -12,7 +12,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
 
 With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [http://publicdata.eu](http://publicdata.eu) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
 
-There is growing consensus around [DCAT](http://www.w3.org/TR/vocab-dcat) being the right way forward, but an actual implementations are needed. This extension aims to provide tools and guidance to allow publishers to publish and share DCAT based metadata easily. 
+There is growing consensus around [DCAT](http://www.w3.org/TR/vocab-dcat) being the right way forward, but actual implementations are needed. This extension aims to provide tools and guidance to allow publishers to publish and share DCAT based metadata easily. 
 
 In terms of CKAN, this extension offers:
 
@@ -285,7 +285,7 @@ Profiles can extend other profiles to avoid repeating rules, or can be completel
 
 The following example shows a complete example of a profile built on top of the default one (`euro_dcat_ap`):
 
-    ```python
+```python
 
     from rdflib.namespace import Namespace
     from ckanext.dcat.profiles import RDFProfile
@@ -311,7 +311,7 @@ The following example shows a complete example of a profile built on top of the 
                                                    'value': str(spatial_label)})
 
             return dataset_dict
-    ```
+```
 
 Note how the dataset dict is passed between profiles so it can be further tweaked.
 
