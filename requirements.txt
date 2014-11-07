@@ -1,2 +1,4 @@
 rdflib==4.1.2
 rdflib-jsonld==0.2
+# TODO: remove when legacy xml harvester is finally removed
+lxml>=2.3
