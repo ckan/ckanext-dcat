@@ -307,6 +307,12 @@ class DCATHarvester(HarvesterBase):
         package_dict = self.modify_package_dict(package_dict,
                                                 dcat_dict,
                                                 harvest_object)
+        # Unless already set by an extension, get the owner organization (if any)
+        # from the harvest source dataset
+        if not package_dict.get('owner_org'):
+            source_dataset = model.Package.get(harvest_object.source.id)
+            if source_dataset.owner_org:
+                package_dict['owner_org'] = source_dataset.owner_org
 
         # Flag this object as the current one
         harvest_object.current = True
