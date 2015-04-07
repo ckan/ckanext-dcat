@@ -404,6 +404,12 @@ To enable the JSON harvester, add the `dcat_json_harvester` plugin to your CKAN 
 The DCAT XML harvester (`dcat_xml_harvester`) is now deprecated, in favour of the [RDF harvester](#rdf-dcat-harvester). The XML serialization described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site is a valid RDF/XML one, so changing the harvester should have no effect. There might be slight differences in the way CKAN fields are created though, check [Compatibility mode](#compatibility-mode) for more details.
 
 
+## Running the Tests
+
+To run the tests, do:
+
+    nosetests --nologcapture --ckan --with-pylons=test.ini ckanext
+
 ## Acknowledgements
 
 The work on the RDF parser and harvester has been made possible by the Government of Sweden and Vinnova, as part of work on the upcoming version of [Öppnadata.se](http://oppnadata.se), the Swedish Open Data Portal.
