@@ -1,0 +1,15 @@
+language: python
+python:
+    - "2.7"
+env:
+    - CKANVERSION=master
+    - CKANVERSION=2.2
+    - CKANVERSION=2.3
+install:
+    - bash bin/travis-build.bash
+    - pip install coveralls
+services:
+    - redis-server
+script: sh bin/travis-run.sh
+after_success:
+    - coveralls

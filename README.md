@@ -1,5 +1,10 @@
 # ckanext-dcat
 
+[![Build Status](https://travis-ci.org/ckan/ckanext-dcat.png)](https://travis-ci.org/ckan/ckanext-dcat)
+
+[![Coverage Status](https://img.shields.io/coveralls/ckan/ckanext-dcat.svg)](https://coveralls.io/r/ckan/ckanext-dcat?branch=master)
+
+
 This extension provides plugins that allow CKAN to expose and consume metadata from other catalogs using RDF documents serialized using DCAT. The Data Catalog Vocabulary (DCAT) is "an RDF vocabulary designed to facilitate interoperability between data catalogs published on the Web". More information can be found on the following W3C page:
 
 [http://www.w3.org/TR/vocab-dcat](http://www.w3.org/TR/vocab-dcat)
@@ -403,6 +408,12 @@ To enable the JSON harvester, add the `dcat_json_harvester` plugin to your CKAN 
 
 The DCAT XML harvester (`dcat_xml_harvester`) is now deprecated, in favour of the [RDF harvester](#rdf-dcat-harvester). The XML serialization described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site is a valid RDF/XML one, so changing the harvester should have no effect. There might be slight differences in the way CKAN fields are created though, check [Compatibility mode](#compatibility-mode) for more details.
 
+
+## Running the Tests
+
+To run the tests, do:
+
+    nosetests --nologcapture --ckan --with-pylons=test.ini ckanext
 
 ## Acknowledgements
 
