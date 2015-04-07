@@ -173,6 +173,13 @@ class DCATRDFHarvester(DCATHarvester):
             if not dataset.get('name'):
                 dataset['name'] = self._gen_new_name(dataset['title'])
 
+            # Unless already set by the parser, get the owner organization (if any)
+            # from the harvest source dataset
+            if not dataset.get('owner_org'):
+                source_dataset = model.Package.get(harvest_job.source.id)
+                if source_dataset.owner_org:
+                    dataset['owner_org'] = source_dataset.owner_org
+
             # Try to get a unique identifier for the harvested dataset
             guid = self._get_guid(dataset)
             if not guid:
