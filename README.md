@@ -1,5 +1,10 @@
 # ckanext-dcat
 
+[![Build Status](https://travis-ci.org/ckan/ckanext-dcat.png)](https://travis-ci.org/ckan/ckanext-dcat)
+
+[![Coverage Status](https://img.shields.io/coveralls/ckan/ckanext-dcat.svg)](https://coveralls.io/r/ckan/ckanext-dcat?branch=master)
+
+
 This extension provides plugins that allow CKAN to expose and consume metadata from other catalogs using RDF documents serialized using DCAT. The Data Catalog Vocabulary (DCAT) is "an RDF vocabulary designed to facilitate interoperability between data catalogs published on the Web". More information can be found on the following W3C page:
 
 [http://www.w3.org/TR/vocab-dcat](http://www.w3.org/TR/vocab-dcat)
