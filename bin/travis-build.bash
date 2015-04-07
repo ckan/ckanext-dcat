@@ -37,7 +37,6 @@ paster db init -c test-core.ini
 cd -
 
 echo "Installing ckanext-harvest and its requirements..."
-sudo apt-get install redis-server
 git clone https://github.com/ckan/ckanext-harvest
 cd ckanext-harvest
 python setup.py develop
