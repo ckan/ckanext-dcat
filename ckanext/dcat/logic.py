@@ -5,6 +5,21 @@ from ckan.plugins import toolkit
 
 import ckanext.dcat.converters as converters
 
+from ckanext.dcat.parsers import RDFParser
+
+
+@toolkit.side_effect_free
+def package_show_dcat(context, data_dict):
+
+    dataset_dict = toolkit.get_action('package_show')(context, data_dict)
+
+    parser = RDFParser()
+
+    output = parser.serialize_dataset(dataset_dict,
+                                      _format=data_dict.get('format'))
+
+    return output
+
 
 @toolkit.side_effect_free
 def dcat_datasets_list(context, data_dict):
