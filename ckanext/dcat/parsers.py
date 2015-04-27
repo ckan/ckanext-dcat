@@ -7,6 +7,7 @@ from pkg_resources import iter_entry_points
 from pylons import config
 
 import rdflib
+from rdflib import URIRef, BNode
 from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
@@ -145,14 +146,66 @@ class RDFParser(object):
 
             yield dataset_dict
 
+    def graph_from_dataset(self, dataset_dict):
+        '''
+        Given a CKAN dataset dict, creates a graph using the loaded profiles
+
+        The class RDFLib graph (accessible via `parser.g`) will be updated by
+        the loaded profiles.
+
+        Returns the reference to the dataset, which will be an rdflib URIRef
+        or BNode object.
+        '''
+
+        uri_value = dataset_dict.get('uri')
+        if not uri_value:
+            for extra in dataset_dict.get('extras', []):
+                if extra['key'] == 'uri':
+                    uri_value = extra['value']
+                    break
+
+        # TODO: create a CKAN URI if not present
+        dataset_ref = URIRef(uri_value) if uri_value else BNode()
+
+        for profile_class in self._profiles:
+            profile = profile_class(self.g, self.compatibility_mode)
+            profile.graph_from_dataset(dataset_dict, dataset_ref)
+
+        return dataset_ref
+
+    def serialize_dataset(self, dataset_dict, _format='xml'):
+        '''
+        Given a CKAN dataset dict, returns an RDF serialization
+
+        The serialization format can be defined using the `_format` parameter.
+        It must be one of the ones supported by RDFLib, defaults to `xml`.
+
+        Returns a string with the serialized dataset
+        '''
+
+        self.graph_from_dataset(dataset_dict)
+
+        output = self.g.serialize(format=_format)
+
+        return output
+
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-        description='Parse DCAT RDF graphs to CKAN dataset JSON objects')
+        description='DCAT RDF - CKAN operations')
+    parser.add_argument('mode',
+                        default='consume',
+                        help='''
+Operation mode.
+`consume` parses DCAT RDF graphs to CKAN dataset JSON objects.
+`produce` serializes CKAN dataset JSON objects into DCAT RDF.
+                        ''')
     parser.add_argument('file', nargs='?', type=argparse.FileType('r'),
-                        default=sys.stdin)
+                        default=sys.stdin,
+                        help='Input file. If omitted will read from stdin')
     parser.add_argument('-f', '--format',
+                        default='xml',
                         help='''Serialization format (as understood by rdflib)
                                 eg: xml, n3 ... Defaults to \'xml\'.''')
     parser.add_argument('-P', '--pretty',
@@ -171,9 +224,14 @@ if __name__ == '__main__':
 
     parser = RDFParser(profiles=args.profile,
                        compatibility_mode=args.compat_mode)
-    parser.parse(contents, _format=args.format)
+    if args.mode == 'produce':
+        dataset = json.loads(contents)
+        out = parser.serialize_dataset(dataset, _format=args.format)
+        print out
+    else:
+        parser.parse(contents, _format=args.format)
 
-    ckan_datasets = [d for d in parser.datasets()]
+        ckan_datasets = [d for d in parser.datasets()]
 
-    indent = 4 if args.pretty else None
-    print json.dumps(ckan_datasets, indent=indent)
+        indent = 4 if args.pretty else None
+        print json.dumps(ckan_datasets, indent=indent)

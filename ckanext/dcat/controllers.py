@@ -10,6 +10,22 @@ else:
 
 class DCATController(BaseController):
 
+    def read(self, _id, _format='rdf'):
+
+        if _format == 'ttl':
+            _format = 'turtle'
+        if _format == 'rdf':
+            _format = 'xml'
+
+        content_types = {
+            'xml': 'application/rdf+xml',
+            'n3': 'text/n3',
+            'turtle': 'text/turtle',
+        }
+
+        toolkit.response.headers.update({'Content-type': content_types[_format]})
+        return toolkit.get_action('dcat_dataset_show')({}, {'id': _id, 'format': _format})
+
     def dcat_json(self):
 
         data_dict = {

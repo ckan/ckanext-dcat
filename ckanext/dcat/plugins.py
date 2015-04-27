@@ -2,7 +2,29 @@ from pylons import config
 
 from ckan import plugins as p
 
-from ckanext.dcat.logic import dcat_datasets_list
+from ckanext.dcat.logic import dcat_dataset_show, dcat_datasets_list
+
+
+class DCATPlugin(p.SingletonPlugin):
+
+    p.implements(p.IRoutes, inherit=True)
+    p.implements(p.IActions)
+
+    # IRoutes
+    def before_map(self, _map):
+
+        controller = 'ckanext.dcat.controllers:DCATController'
+
+        _map.connect('/dataset/{_id}.{_format}',
+                     controller=controller, action='read',
+                     requirements={'format': 'rdf|n3|ttl'})
+        return _map
+
+    # IActions
+    def get_actions(self):
+        return {
+            'dcat_dataset_show': dcat_dataset_show,
+        }
 
 
 class DCATJSONInterface(p.SingletonPlugin):
