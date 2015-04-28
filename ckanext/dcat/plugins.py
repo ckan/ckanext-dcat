@@ -10,8 +10,13 @@ from ckanext.dcat.logic import (dcat_dataset_show,
 
 class DCATPlugin(p.SingletonPlugin):
 
+    p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IActions)
+
+    # IConfigurer
+    def update_config(self, config):
+        p.toolkit.add_template_directory(config, 'templates')
 
     # IRoutes
     def before_map(self, _map):
