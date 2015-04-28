@@ -200,7 +200,7 @@ and may depend on a particular instance needs.
 
 ## RDF DCAT Parser
 
-The `ckanext.dcat.parsers.RDFParser` class allows to read RDF serializations in different
+The `ckanext.dcat.processors.RDFParser` class allows to read RDF serializations in different
 formats and extract CKAN dataset dicts. It will look for DCAT datasets and distributions
 and create CKAN datasets and resources, as dictionaries that can be passed to [`package_create`](http://docs.ckan.org/en/latest/api/index.html#ckan.logic.action.create.package_create) or [`package_update`](http://docs.ckan.org/en/latest/api/index.html#ckan.logic.action.update.package_update).
 
@@ -208,7 +208,7 @@ Here is a quick overview of how it works:
 
 ```python
 
-    from ckanext.dcat.parsers import RDFParser, RDFParserException
+    from ckanext.dcat.processors import RDFParser, RDFParserException
 
     parser = RDFParser()
 

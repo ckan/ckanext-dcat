@@ -6,7 +6,7 @@ import nose
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace, RDF
 
-from ckanext.dcat.parsers import RDFParser
+from ckanext.dcat.processors import RDFParser
 
 eq_ = nose.tools.eq_
 

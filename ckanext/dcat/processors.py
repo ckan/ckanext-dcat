@@ -30,17 +30,11 @@ class RDFProfileException(Exception):
     pass
 
 
-class RDFParser(object):
-    '''
-    An RDF to CKAN parser based on rdflib
-
-    Supports different profiles which are the ones that will generate
-    CKAN dicts from the RDF graph.
-    '''
+class RDFProcessor(object):
 
     def __init__(self, profiles=None, compatibility_mode=False):
         '''
-        Creates a parser instance
+        Creates a parser or serializer instance
 
         You can optionally pass a list of profiles to be used.
 
@@ -94,6 +88,15 @@ class RDFParser(object):
 
         return profiles
 
+
+class RDFParser(RDFProcessor):
+    '''
+    An RDF to CKAN parser based on rdflib
+
+    Supports different profiles which are the ones that will generate
+    CKAN dicts from the RDF graph.
+    '''
+
     def _datasets(self):
         '''
         Generator that returns all DCAT datasets on the graph
@@ -145,6 +148,15 @@ class RDFParser(object):
                 profile.parse_dataset(dataset_dict, dataset_ref)
 
             yield dataset_dict
+
+
+class RDFSerializer(RDFProcessor):
+    '''
+    A CKAN to RDF serializer based on rdflib
+
+    Supports different profiles which are the ones that will generate
+    the RDF graph.
+    '''
 
     def graph_from_dataset(self, dataset_dict):
         '''

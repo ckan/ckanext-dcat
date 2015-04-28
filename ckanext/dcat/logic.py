@@ -5,17 +5,17 @@ from ckan.plugins import toolkit
 
 import ckanext.dcat.converters as converters
 
-from ckanext.dcat.parsers import RDFParser
+from ckanext.dcat.processors import RDFSerializer
 
 
 def dcat_dataset_show(context, data_dict):
 
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
 
-    parser = RDFParser()
+    serializer = RDFSerializer()
 
-    output = parser.serialize_dataset(dataset_dict,
-                                      _format=data_dict.get('format'))
+    output = serializer.serialize_dataset(dataset_dict,
+                                          _format=data_dict.get('format'))
 
     return output
 
@@ -25,10 +25,10 @@ def dcat_catalog_show(context, data_dict):
 
     dataset_dicts = _search_ckan_datasets(context, data_dict)
 
-    parser = RDFParser()
+    serializer = RDFSerializer()
 
-    output = parser.serialize_catalog({}, dataset_dicts,
-                                      _format=data_dict.get('format'))
+    output = serializer.serialize_catalog({}, dataset_dicts,
+                                          _format=data_dict.get('format'))
 
     return output
 
