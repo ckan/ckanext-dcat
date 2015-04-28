@@ -8,7 +8,9 @@ else:
     from ckan.lib.base import BaseController
 
 CONTENT_TYPES = {
+    'rdf': 'application/rdf+xml',
     'xml': 'application/rdf+xml',
+    'pretty-xml': 'application/rdf+xml',
     'n3': 'text/n3',
     'turtle': 'text/turtle',
 }
@@ -63,6 +65,6 @@ class DCATController(BaseController):
 def _normalize_format(_format):
     if _format == 'ttl':
         _format = 'turtle'
-    elif _format == 'rdf':
-        _format = 'xml'
+    elif _format in ('rdf', 'xml'):
+        _format = 'pretty-xml'
     return _format
