@@ -8,7 +8,6 @@ import ckanext.dcat.converters as converters
 from ckanext.dcat.parsers import RDFParser
 
 
-@toolkit.side_effect_free
 def dcat_dataset_show(context, data_dict):
 
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
