@@ -2,7 +2,10 @@ from pylons import config
 
 from ckan import plugins as p
 
-from ckanext.dcat.logic import dcat_dataset_show, dcat_datasets_list
+from ckanext.dcat.logic import (dcat_dataset_show,
+                                dcat_catalog_show,
+                                dcat_datasets_list,
+                                )
 
 
 class DCATPlugin(p.SingletonPlugin):
@@ -15,15 +18,20 @@ class DCATPlugin(p.SingletonPlugin):
 
         controller = 'ckanext.dcat.controllers:DCATController'
 
-        _map.connect('/dataset/{_id}.{_format}',
-                     controller=controller, action='read',
-                     requirements={'format': 'rdf|n3|ttl'})
+        _map.connect('dcat_catalog', '/catalog.{_format}',
+                     controller=controller, action='read_catalog',
+                     requirements={'_format': 'xml|rdf|n3|ttl'})
+
+        _map.connect('dcat_dataset', '/dataset/{_id}.{_format}',
+                     controller=controller, action='read_dataset',
+                     requirements={'_format': 'xml|rdf|n3|ttl'})
         return _map
 
     # IActions
     def get_actions(self):
         return {
             'dcat_dataset_show': dcat_dataset_show,
+            'dcat_catalog_show': dcat_catalog_show,
         }
 
 

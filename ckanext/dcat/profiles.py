@@ -3,9 +3,13 @@ import json
 
 from dateutil.parser import parse as parse_date
 
+from pylons import config
+
 import rdflib
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDF, XSD
+
+from ckan.plugins import toolkit
 
 
 DCT = Namespace("http://purl.org/dc/terms/")
@@ -370,6 +374,25 @@ class RDFProfile(object):
         except ValueError:
             self.g.add((subject, predicate, Literal(value)))
 
+    def _last_catalog_modification(self):
+        '''
+        Returns the date and time the catalog was last modified
+
+        To be more precise, the most recent value for `metadata_modified` on a
+        dataset.
+
+        Returns a dateTime string in ISO format, or None if it could not be
+        found.
+        '''
+
+        result = toolkit.get_action('package_search')({}, {
+            'sort': 'metadata_modified desc',
+            'rows': 1,
+        })
+        if result and result.get('results'):
+            return result['results'][0]['metadata_modified']
+        return None
+
 
 class EuropeanDCATAPProfile(RDFProfile):
     '''
@@ -685,3 +708,30 @@ class EuropeanDCATAPProfile(RDFProfile):
                 except TypeError:
                     g.add((distribution, DCAT.byteSize,
                            Literal(resource_dict['size'])))
+
+    def graph_from_catalog(self, catalog_dict, catalog_ref):
+
+        g = self.g
+
+        for prefix, namespace in namespaces.iteritems():
+            g.bind(prefix, namespace)
+
+        g.add((catalog_ref, RDF.type, DCAT.Catalog))
+
+        # Basic fields
+        items = [
+            ('title', DCT.title, config.get('ckan.site_title')),
+            ('description', DCT.description, config.get('ckan.site_description')),
+            ('homepage', FOAF.homepage, config.get('ckan.site_url')),
+            ('language', DCT.language, config.get('ckan.locale_default', 'en')),
+        ]
+        for item in items:
+            key, predicate, fallback = item
+            value = catalog_dict.get(key, fallback)
+            if value:
+                g.add((catalog_ref, predicate, Literal(value)))
+
+        # Dates
+        modified = self._last_catalog_modification()
+        if modified:
+            self._add_date_triple(catalog_ref, DCT.modified, modified)

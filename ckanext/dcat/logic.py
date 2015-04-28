@@ -22,6 +22,19 @@ def dcat_dataset_show(context, data_dict):
 
 
 @toolkit.side_effect_free
+def dcat_catalog_show(context, data_dict):
+
+    dataset_dicts = _search_ckan_datasets(context, data_dict)
+
+    parser = RDFParser()
+
+    output = parser.serialize_catalog({}, dataset_dicts,
+                                      _format=data_dict.get('format'))
+
+    return output
+
+
+@toolkit.side_effect_free
 def dcat_datasets_list(context, data_dict):
 
     ckan_datasets = _search_ckan_datasets(context, data_dict)

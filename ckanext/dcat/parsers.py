@@ -173,6 +173,26 @@ class RDFParser(object):
 
         return dataset_ref
 
+    def graph_from_catalog(self, catalog_dict):
+        '''
+        Creates a graph for the catalog (CKAN site) using the loaded profiles
+
+        The class RDFLib graph (accessible via `parser.g`) will be updated by
+        the loaded profiles.
+
+        Returns the reference to the catalog, which will be an rdflib URIRef
+        or BNode object.
+        '''
+
+        # TODO: create a CKAN URI if not present
+        catalog_ref = URIRef('http://my-catalog')
+
+        for profile_class in self._profiles:
+            profile = profile_class(self.g, self.compatibility_mode)
+            profile.graph_from_catalog(catalog_dict, catalog_ref)
+
+        return catalog_ref
+
     def serialize_dataset(self, dataset_dict, _format='xml'):
         '''
         Given a CKAN dataset dict, returns an RDF serialization
@@ -184,6 +204,37 @@ class RDFParser(object):
         '''
 
         self.graph_from_dataset(dataset_dict)
+
+        output = self.g.serialize(format=_format)
+
+        return output
+
+    def serialize_catalog(self, catalog_dict, dataset_dicts=[],
+                          _format='xml'):
+        '''
+        Returns an RDF serialization of the whole catalog
+
+        `catalog_dict` can contain literal values for the dcat:Catalog class
+        like `title`, `homepage`, etc. If not provided these would get default
+        values from the CKAN config (eg from `ckan.site_title`).
+
+        If passed a list of CKAN dataset dicts, these will be also serializsed
+        as part of the catalog.
+        **Note:** There is no hard limit on the number of datasets at this
+        level, this should be handled upstream.
+
+        The serialization format can be defined using the `_format` parameter.
+        It must be one of the ones supported by RDFLib, defaults to `xml`.
+
+        Returns a string with the serialized catalog
+        '''
+
+        catalog_ref = self.graph_from_catalog(catalog_dict)
+        if dataset_dicts:
+            for dataset_dict in dataset_dicts:
+                dataset_ref = self.graph_from_dataset(dataset_dict)
+
+                self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
 
         output = self.g.serialize(format=_format)
 
