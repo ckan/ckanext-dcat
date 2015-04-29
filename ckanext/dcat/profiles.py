@@ -11,6 +11,7 @@ from rdflib.namespace import Namespace, RDF, XSD
 
 from ckan.plugins import toolkit
 
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -618,11 +619,11 @@ class EuropeanDCATAPProfile(RDFProfile):
             dataset_dict.get('organization'),
         ]):
 
-            publisher_uri = self._get_dataset_value(dataset_dict, 'publisher_uri')
+            publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
             if publisher_uri:
                 publisher_details = URIRef(publisher_uri)
             else:
-                # TODO: create a CKAN one
+                # No organization nor publisher_uri
                 publisher_details = BNode()
 
             g.add((publisher_details, RDF.type, FOAF.Organization))
@@ -633,7 +634,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                 publisher_name = dataset_dict['organization']['title']
 
             g.add((publisher_details, FOAF.name, Literal(publisher_name)))
-
+            # TODO: It would make sense to fallback these to organization
+            # fields but they are not in the default schema and the
+            # `organization` object in the dataset_dict does not include
+            # custom fields
             items = [
                 ('publisher_email', FOAF.mbox, None),
                 ('publisher_url', FOAF.homepage, None),
@@ -658,12 +662,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
 
-            distribution_uri = self._get_resource_value(resource_dict, 'uri')
-            if distribution_uri:
-                distribution = URIRef(distribution_uri)
-            else:
-                # TODO: create a CKAN one
-                distribution = BNode()
+            distribution = URIRef(resource_uri(resource_dict))
 
             g.add((dataset_ref, DCAT.distribution, distribution))
 

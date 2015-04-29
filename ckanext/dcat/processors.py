@@ -7,13 +7,15 @@ from pkg_resources import iter_entry_points
 from pylons import config
 
 import rdflib
-from rdflib import URIRef, BNode
+from rdflib import URIRef
 from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
 
-DCAT = Namespace("http://www.w3.org/ns/dcat#")
+from ckanext.dcat.utils import catalog_uri, dataset_uri
 
+
+DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
 RDF_PROFILES_ENTRY_POINT_GROUP = 'ckan.rdf.profiles'
 RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
@@ -176,8 +178,7 @@ class RDFSerializer(RDFProcessor):
                     uri_value = extra['value']
                     break
 
-        # TODO: create a CKAN URI if not present
-        dataset_ref = URIRef(uri_value) if uri_value else BNode()
+        dataset_ref = URIRef(dataset_uri(dataset_dict))
 
         for profile_class in self._profiles:
             profile = profile_class(self.g, self.compatibility_mode)
@@ -196,8 +197,7 @@ class RDFSerializer(RDFProcessor):
         or BNode object.
         '''
 
-        # TODO: create a CKAN URI if not present
-        catalog_ref = URIRef('http://my-catalog')
+        catalog_ref = URIRef(catalog_uri())
 
         for profile_class in self._profiles:
             profile = profile_class(self.g, self.compatibility_mode)

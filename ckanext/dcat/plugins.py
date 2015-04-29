@@ -6,6 +6,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_catalog_show,
                                 dcat_datasets_list,
                                 )
+from ckanext.dcat.utils import catalog_uri
 
 
 class DCATPlugin(p.SingletonPlugin):
@@ -17,6 +18,9 @@ class DCATPlugin(p.SingletonPlugin):
     # IConfigurer
     def update_config(self, config):
         p.toolkit.add_template_directory(config, 'templates')
+
+        # Check catalog URI on startup to emit a warning if necessary
+        catalog_uri()
 
     # IRoutes
     def before_map(self, _map):
