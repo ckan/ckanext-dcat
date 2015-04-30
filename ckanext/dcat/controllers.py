@@ -27,7 +27,10 @@ class DCATController(BaseController):
 
         toolkit.response.headers.update(
             {'Content-type': CONTENT_TYPES[_format]})
-        return toolkit.get_action('dcat_catalog_show')({}, data_dict)
+        try:
+            return toolkit.get_action('dcat_catalog_show')({}, data_dict)
+        except toolkit.ValidationError, e:
+            toolkit.abort(409, str(e))
 
     def read_dataset(self, _id, _format='rdf'):
 

@@ -7,7 +7,7 @@ from pkg_resources import iter_entry_points
 from pylons import config
 
 import rdflib
-from rdflib import URIRef
+from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
@@ -15,7 +15,7 @@ import ckan.plugins as p
 from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format
 
 
-
+HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
 RDF_PROFILES_ENTRY_POINT_GROUP = 'ckan.rdf.profiles'
@@ -163,6 +163,44 @@ class RDFSerializer(RDFProcessor):
     Supports different profiles which are the ones that will generate
     the RDF graph.
     '''
+    def _add_pagination_triples(self, paging_info):
+        '''
+        Adds pagination triples to the graph using the paging info provided
+
+        The pagination info dict can have the following keys:
+        `count`, `items_per_page`, `current`, `first`, `last`, `next` or
+        `previous`.
+
+        It uses members from the hydra:PagedCollection class
+
+        http://www.hydra-cg.com/spec/latest/core/
+
+        Returns the reference to the pagination info, which will be an rdflib
+        URIRef or BNode object.
+        '''
+        self.g.bind('hydra', HYDRA)
+
+        if paging_info.get('current'):
+            pagination_ref = URIRef(paging_info['current'])
+        else:
+            pagination_ref = BNode()
+        self.g.add((pagination_ref, RDF.type, HYDRA.PagedCollection))
+
+        items = [
+            ('next', HYDRA.nextPage),
+            ('previous', HYDRA.previousPage),
+            ('first', HYDRA.firstPage),
+            ('last', HYDRA.lastPage),
+            ('count', HYDRA.totalItems),
+            ('items_per_page', HYDRA.itemsPerPage),
+        ]
+        for item in items:
+            key, predicate = item
+            if paging_info.get(key):
+                self.g.add((pagination_ref, predicate,
+                            Literal(paging_info[key])))
+
+        return pagination_ref
 
     def graph_from_dataset(self, dataset_dict):
         '''
@@ -227,7 +265,7 @@ class RDFSerializer(RDFProcessor):
         return output
 
     def serialize_catalog(self, catalog_dict, dataset_dicts=None,
-                          _format='xml'):
+                          _format='xml', pagination_info=None):
         '''
         Returns an RDF serialization of the whole catalog
 
@@ -243,6 +281,9 @@ class RDFSerializer(RDFProcessor):
         The serialization format can be defined using the `_format` parameter.
         It must be one of the ones supported by RDFLib, defaults to `xml`.
 
+        `pagination_info` may be a dict containing keys describing the results
+        pagination. See the `_add_pagination_triples()` method for details.
+
         Returns a string with the serialized catalog
         '''
 
@@ -252,6 +293,9 @@ class RDFSerializer(RDFProcessor):
                 dataset_ref = self.graph_from_dataset(dataset_dict)
 
                 self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
+
+        if pagination_info:
+            self._add_pagination_triples(pagination_info)
 
         _format = url_to_rdflib_format(_format)
         output = self.g.serialize(format=_format)
