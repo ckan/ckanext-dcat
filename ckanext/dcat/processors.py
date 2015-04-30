@@ -12,7 +12,8 @@ from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
 
-from ckanext.dcat.utils import catalog_uri, dataset_uri
+from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format
+
 
 
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -124,6 +125,9 @@ class RDFParser(RDFProcessor):
 
         Returns nothing.
         '''
+
+        _format = url_to_rdflib_format(_format)
+
         try:
             self.g.parse(data=data, format=_format)
         # Apparently there is no single way of catching exceptions from all
@@ -217,11 +221,12 @@ class RDFSerializer(RDFProcessor):
 
         self.graph_from_dataset(dataset_dict)
 
+        _format = url_to_rdflib_format(_format)
         output = self.g.serialize(format=_format)
 
         return output
 
-    def serialize_catalog(self, catalog_dict, dataset_dicts=[],
+    def serialize_catalog(self, catalog_dict, dataset_dicts=None,
                           _format='xml'):
         '''
         Returns an RDF serialization of the whole catalog
@@ -248,6 +253,7 @@ class RDFSerializer(RDFProcessor):
 
                 self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
 
+        _format = url_to_rdflib_format(_format)
         output = self.g.serialize(format=_format)
 
         return output

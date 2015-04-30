@@ -131,7 +131,6 @@ def publisher_uri_from_dataset_dict(dataset_dict):
     return uri
 
 
-
 def dataset_id_from_resource(resource_dict):
     '''
     Finds the id for a dataset if not present on the resource dict
@@ -144,3 +143,25 @@ def dataset_id_from_resource(resource_dict):
     resource = model.Resource.get(resource_dict['id'])
     if resource:
         return resource.get_package_id()
+
+
+def url_to_rdflib_format(_format):
+    '''
+    Translates the RDF formats used on the endpoints to rdflib ones
+    '''
+    if _format == 'ttl':
+        _format = 'turtle'
+    elif _format in ('rdf', 'xml'):
+        _format = 'pretty-xml'
+    return _format
+
+
+def rdflib_to_url_format(_format):
+    '''
+    Translates RDF formats used by rdflib to the ones used on the endpoints
+    '''
+    if _format == 'turtle':
+        _format = 'ttl'
+    elif _format == 'pretty-xml':
+        _format = 'xml'
+    return _format

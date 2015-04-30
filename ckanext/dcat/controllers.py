@@ -10,17 +10,14 @@ else:
 CONTENT_TYPES = {
     'rdf': 'application/rdf+xml',
     'xml': 'application/rdf+xml',
-    'pretty-xml': 'application/rdf+xml',
     'n3': 'text/n3',
-    'turtle': 'text/turtle',
+    'ttl': 'text/turtle',
 }
 
 
 class DCATController(BaseController):
 
     def read_catalog(self, _format='rdf'):
-
-        _format = _normalize_format(_format)
 
         data_dict = {
             'page': toolkit.request.params.get('page'),
@@ -33,8 +30,6 @@ class DCATController(BaseController):
         return toolkit.get_action('dcat_catalog_show')({}, data_dict)
 
     def read_dataset(self, _id, _format='rdf'):
-
-        _format = _normalize_format(_format)
 
         toolkit.response.headers.update(
             {'Content-type': CONTENT_TYPES[_format]})
@@ -62,9 +57,4 @@ class DCATController(BaseController):
         return content
 
 
-def _normalize_format(_format):
-    if _format == 'ttl':
-        _format = 'turtle'
-    elif _format in ('rdf', 'xml'):
-        _format = 'pretty-xml'
-    return _format
+
