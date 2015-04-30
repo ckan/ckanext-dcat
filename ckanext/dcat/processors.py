@@ -206,11 +206,10 @@ class RDFSerializer(RDFProcessor):
         '''
         Given a CKAN dataset dict, creates a graph using the loaded profiles
 
-        The class RDFLib graph (accessible via `parser.g`) will be updated by
-        the loaded profiles.
+        The class RDFLib graph (accessible via `serializer.g`) will be updated
+        by the loaded profiles.
 
-        Returns the reference to the dataset, which will be an rdflib URIRef
-        or BNode object.
+        Returns the reference to the dataset, which will be an rdflib URIRef.
         '''
 
         uri_value = dataset_dict.get('uri')
@@ -232,11 +231,10 @@ class RDFSerializer(RDFProcessor):
         '''
         Creates a graph for the catalog (CKAN site) using the loaded profiles
 
-        The class RDFLib graph (accessible via `parser.g`) will be updated by
-        the loaded profiles.
+        The class RDFLib graph (accessible via `serializer.g`) will be updated
+        by the loaded profiles.
 
-        Returns the reference to the catalog, which will be an rdflib URIRef
-        or BNode object.
+        Returns the reference to the catalog, which will be an rdflib URIRef.
         '''
 
         catalog_ref = URIRef(catalog_uri())
