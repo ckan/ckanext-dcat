@@ -18,6 +18,8 @@ wrong_page_exception = toolkit.ValidationError(
 
 def dcat_dataset_show(context, data_dict):
 
+    toolkit.check_access('dcat_dataset_show', context, data_dict)
+
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
 
     serializer = RDFSerializer()
@@ -30,6 +32,8 @@ def dcat_dataset_show(context, data_dict):
 
 @toolkit.side_effect_free
 def dcat_catalog_show(context, data_dict):
+
+    toolkit.check_access('dcat_catalog_show', context, data_dict)
 
     query = _search_ckan_datasets(context, data_dict)
     dataset_dicts = query['results']
@@ -47,6 +51,8 @@ def dcat_catalog_show(context, data_dict):
 @toolkit.side_effect_free
 def dcat_catalog_search(context, data_dict):
 
+    toolkit.check_access('dcat_catalog_search', context, data_dict)
+
     query = _search_ckan_datasets(context, data_dict)
 
     dataset_dicts = query['results']
@@ -63,6 +69,8 @@ def dcat_catalog_search(context, data_dict):
 
 @toolkit.side_effect_free
 def dcat_datasets_list(context, data_dict):
+
+    toolkit.check_access('dcat_datasets_list', context, data_dict)
 
     ckan_datasets = _search_ckan_datasets(context, data_dict)['results']
 
@@ -182,3 +190,11 @@ def _pagination_info(query, data_dict):
         pagination_info['next'] = _page_url(page + 1)
 
     return pagination_info
+
+
+@toolkit.auth_allow_anonymous_access
+def dcat_auth(context, data_dict):
+    '''
+    All users can access DCAT endpoints by default
+    '''
+    return {'success': True}
