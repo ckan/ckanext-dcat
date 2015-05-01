@@ -1,7 +1,6 @@
 from __future__ import division
 
 from pylons import config
-from routes import url_for
 from dateutil.parser import parse as dateutil_parse
 
 from ckan.plugins import toolkit
@@ -12,6 +11,9 @@ from ckanext.dcat.processors import RDFSerializer
 
 
 DATASETS_PER_PAGE = 100
+
+wrong_page_exception = toolkit.ValidationError(
+    'Page param must be a positive integer starting in 1')
 
 
 def dcat_dataset_show(context, data_dict):
@@ -56,8 +58,6 @@ def _search_ckan_datasets(context, data_dict):
     n = int(config.get('ckanext.dcat.datasets_per_page', DATASETS_PER_PAGE))
     page = data_dict.get('page', 1) or 1
 
-    wrong_page_exception = toolkit.ValidationError(
-        'Page param must be a positive integer starting in 1')
     try:
         page = int(page)
         if page < 1:
@@ -96,7 +96,7 @@ def _pagination_info(query, data_dict):
     Creates a pagination_info dict to be passed to the serializers
 
     `query` is the output of `package_search` and `data_dict`
-    contains the request params
+    contains the request params.
 
     The keys for the dictionary are:
 
@@ -111,16 +111,29 @@ def _pagination_info(query, data_dict):
     Returns a dict
     '''
 
-    def _page_url(route, page):
-        return url_for(route,
-                       _format=data_dict.get('format', 'xml'),
-                       page=page,
-                       qualified=True)
+    def _page_url(page):
+
+        params = [p for p in toolkit.request.params.iteritems()
+                  if p[0] != 'page']
+        if params:
+            qs = '&'.join(['{0}={1}'.format(p[0], p[1]) for p in params])
+            return '{0}?{1}&page={2}'.format(
+                toolkit.request.path_url,
+                qs,
+                page
+            )
+        else:
+            return '{0}?page={1}'.format(
+                toolkit.request.path_url,
+                page
+            )
 
     try:
         page = int(data_dict.get('page', 1) or 1)
+        if page < 1:
+            raise wrong_page_exception
     except ValueError:
-        raise toolkit.ValidationError('Page must be an integer')
+        raise wrong_page_exception
 
     items_per_page = int(config.get('ckanext.dcat.datasets_per_page',
                                     DATASETS_PER_PAGE))
@@ -129,11 +142,11 @@ def _pagination_info(query, data_dict):
         'items_per_page': items_per_page,
     }
 
-    pagination_info['current'] = _page_url('dcat_catalog', page)
-    pagination_info['first'] = _page_url('dcat_catalog', 1)
+    pagination_info['current'] = _page_url(page)
+    pagination_info['first'] = _page_url(1)
 
-    last_page = int(round(query['count'] / items_per_page))
-    pagination_info['last'] = _page_url('dcat_catalog', last_page)
+    last_page = int(round(query['count'] / items_per_page)) or 1
+    pagination_info['last'] = _page_url(last_page)
 
     if page > 1:
         if ((page - 1) * items_per_page
@@ -142,9 +155,9 @@ def _pagination_info(query, data_dict):
         else:
             previous_page = last_page
 
-        pagination_info['previous'] = _page_url('dcat_catalog', previous_page)
+        pagination_info['previous'] = _page_url(previous_page)
 
     if page * items_per_page < query['count']:
-        pagination_info['next'] = _page_url('dcat_catalog', page + 1)
+        pagination_info['next'] = _page_url(page + 1)
 
     return pagination_info
