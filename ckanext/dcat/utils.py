@@ -7,6 +7,14 @@ from ckan import model
 log = logging.getLogger(__name__)
 
 
+CONTENT_TYPES = {
+    'rdf': 'application/rdf+xml',
+    'xml': 'application/rdf+xml',
+    'n3': 'text/n3',
+    'ttl': 'text/turtle',
+}
+
+
 def catalog_uri():
     '''
     Returns an URI for the whole catalog

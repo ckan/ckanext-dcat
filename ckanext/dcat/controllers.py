@@ -7,12 +7,7 @@ if toolkit.check_ckan_version(min_version='2.1'):
 else:
     from ckan.lib.base import BaseController
 
-CONTENT_TYPES = {
-    'rdf': 'application/rdf+xml',
-    'xml': 'application/rdf+xml',
-    'n3': 'text/n3',
-    'ttl': 'text/turtle',
-}
+from ckanext.dcat.utils import CONTENT_TYPES
 
 
 class DCATController(BaseController):
