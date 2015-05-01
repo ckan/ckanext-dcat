@@ -394,6 +394,49 @@ class RDFProfile(object):
             return result['results'][0]['metadata_modified']
         return None
 
+    # Public methods for profiles to implement
+
+    def parse_dataset(self, dataset_dict, dataset_ref):
+        '''
+        Creates a CKAN dataset dict from the RDF graph
+
+        The `dataset_dict` is passed to all the loaded profiles before being
+        yielded, so it can be further modified by each one of them.
+        `dataset_ref` is an rdflib URIRef object
+        that can be used to reference the dataset when querying the graph.
+
+        Returns a dataset dict that can be passed to eg `package_create`
+        or `package_update`
+        '''
+        return dataset_dict
+
+    def graph_from_catalog(self, catalog_dict, catalog_ref):
+        '''
+        Creates an RDF graph for the whole catalog (site)
+
+        The class RDFLib graph (accessible via `self.g`) should be updated on
+        this method
+
+        `catalog_dict` is a dict that can contain literal values for the
+        dcat:Catalog class like `title`, `homepage`, etc. `catalog_ref` is an
+        rdflib URIRef object that must be used to reference the catalog when
+        working with the graph.
+        '''
+        pass
+
+    def graph_from_dataset(self, dataset_dict, dataset_ref):
+        '''
+        Given a CKAN dataset dict, creates an RDF graph
+
+        The class RDFLib graph (accessible via `self.g`) should be updated on
+        this method
+
+        `dataset_dict` is a dict with the dataset metadata like the one
+        returned by `package_show`. `dataset_ref` is an rdflib URIRef object
+        that must be used to reference the dataset when working with the graph.
+        '''
+        pass
+
 
 class EuropeanDCATAPProfile(RDFProfile):
     '''
