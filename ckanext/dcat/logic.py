@@ -164,6 +164,9 @@ def _pagination_info(query, data_dict):
     except ValueError:
         raise wrong_page_exception
 
+    if query['count'] == 0:
+        return {}
+
     items_per_page = int(config.get('ckanext.dcat.datasets_per_page',
                                     DATASETS_PER_PAGE))
     pagination_info = {
