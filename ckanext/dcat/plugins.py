@@ -4,6 +4,7 @@ from ckan import plugins as p
 
 from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_catalog_show,
+                                dcat_catalog_search,
                                 dcat_datasets_list,
                                 )
 from ckanext.dcat.utils import catalog_uri
@@ -41,6 +42,7 @@ class DCATPlugin(p.SingletonPlugin):
         return {
             'dcat_dataset_show': dcat_dataset_show,
             'dcat_catalog_show': dcat_catalog_show,
+            'dcat_catalog_search': dcat_catalog_search,
         }
 
 

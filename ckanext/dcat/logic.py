@@ -45,6 +45,23 @@ def dcat_catalog_show(context, data_dict):
 
 
 @toolkit.side_effect_free
+def dcat_catalog_search(context, data_dict):
+
+    query = _search_ckan_datasets(context, data_dict)
+
+    dataset_dicts = query['results']
+    pagination_info = _pagination_info(query, data_dict)
+
+    serializer = RDFSerializer()
+
+    output = serializer.serialize_catalog({}, dataset_dicts,
+                                          _format=data_dict.get('format'),
+                                          pagination_info=pagination_info)
+
+    return output
+
+
+@toolkit.side_effect_free
 def dcat_datasets_list(context, data_dict):
 
     ckan_datasets = _search_ckan_datasets(context, data_dict)['results']
@@ -74,17 +91,21 @@ def _search_ckan_datasets(context, data_dict):
                 'Wrong modified date format. Use ISO-8601 format')
 
     search_data_dict = {
-        'q': '*:*',
-        'fq': 'dataset_type:dataset',
         'rows': n,
         'start': n * (page - 1),
+        'sort': 'metadata_modified desc',
     }
 
+    search_data_dict['q'] = data_dict.get('q', '*:*')
+    search_data_dict['fq'] = data_dict.get('fq')
+    search_data_dict['fq_list'] = []
+
+    # Force datasets
+    search_data_dict['fq_list'].append('dataset_type:dataset')
+
     if modified_since:
-        search_data_dict.update({
-            'fq': 'metadata_modified:[{0} TO NOW]'.format(modified_since),
-            'sort': 'metadata_modified desc',
-        })
+        search_data_dict['fq_list'].append(
+            'metadata_modified:[{0} TO NOW]'.format(modified_since))
 
     query = toolkit.get_action('package_search')(context, search_data_dict)
 
