@@ -790,15 +790,25 @@ class EuropeanDCATAPProfile(RDFProfile):
             items = [
                 ('name', DCT.title, None),
                 ('description', DCT.description, None),
-                # TODO: check
-                ('format', DCT['format'], None),
-                ('mimetype', DCAT.mediaType, None),
                 ('status', ADMS.status, None),
                 ('rights', DCT.rights, None),
                 ('license', DCT.license, None),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
+
+            # Format
+            if '/' in resource_dict.get('format', ''):
+                g.add((distribution, DCAT.mediaType,
+                       Literal(resource_dict['format'])))
+            else:
+                if resource_dict.get('format'):
+                    g.add((distribution, DCT['format'],
+                           Literal(resource_dict['format'])))
+
+                if resource_dict.get('mimetype'):
+                    g.add((distribution, DCAT.mediaType,
+                           Literal(resource_dict['mimetype'])))
 
             # URL
             url = resource_dict.get('url')
