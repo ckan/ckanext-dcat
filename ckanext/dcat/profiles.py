@@ -241,6 +241,69 @@ class RDFProfile(object):
 
         return contact
 
+    def _distribution_format(self, distribution, normalize_ckan_format=True):
+        '''
+        Returns the Internet Media Type and format label for a distribution
+
+        Given a reference (URIRef or BNode) to a dcat:Distribution, it will
+        try to extract the media type (previously knowm as MIME type), eg
+        `text/csv`, and the format label, eg `CSV`
+
+        Values for the media type will be checked in the following order:
+
+        1. literal value of dcat:mediaType
+        2. literal value of dct:format if it contains a '/' character
+        3. value of dct:format if it is an instance of dct:IMT, eg:
+
+            <dct:format>
+                <dct:IMT rdf:value="text/html" rdfs:label="HTML"/>
+            </dct:format>
+
+        Values for the label will be checked in the following order:
+
+        1. literal value of dct:format if it not contains a '/' character
+        2. label of dct:format if it is an instance of dct:IMT (see above)
+
+        If `normalize_ckan_format` is True, the label will be tried to match
+        against the standard list of formats that is included with CKAN core
+        (https://github.com/ckan/ckan/blob/master/ckan/config/resource_formats.json)
+        This allows for instance to populate the CKAN resource format field
+        with a format that view plugins, etc will understand (`csv`, `xml`,
+        etc.)
+
+        Return a tuple with the media type and the label, both set to None if
+        they couldn't be found.
+        '''
+
+        imt = None
+        label = None
+
+        _format = self._object(distribution, DCT['format'])
+        if isinstance(_format, Literal):
+            if '/' in _format:
+                imt = unicode(_format)
+            else:
+                label = unicode(_format)
+        elif isinstance(_format, (BNode, URIRef)):
+            if self._object(_format, RDF.type) == DCT.IMT:
+                imt = self.g.value(_format, default=None)
+                label = self.g.label(_format, default=None)
+
+        imt = self._object_value(distribution, DCAT.mediaType)
+
+        if normalize_ckan_format:
+            import ckan.config
+            from ckan.lib import helpers
+
+            format_registry = helpers.resource_formats()
+
+            if imt in format_registry:
+                label = format_registry[imt][1]
+            elif label in format_registry:
+                label = format_registry[label][1]
+
+        return imt, label
+
     def _get_dict_value(self, _dict, key, default=None):
         '''
         Returns the value for the given key on a CKAN dict
@@ -537,8 +600,6 @@ class EuropeanDCATAPProfile(RDFProfile):
             for key, predicate in (
                     ('name', DCT.title),
                     ('description', DCT.description),
-                    ('format', DCT['format']),
-                    ('mimetype', DCAT.mediaType),
                     ('download_url', DCAT.downloadURL),
                     ('issued', DCT.issued),
                     ('modified', DCT.modified),
@@ -554,6 +615,20 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                        DCAT.accessURL) or
                                     self._object_value(distribution,
                                                        DCAT.downloadURL))
+
+            # Format and media type
+            normalize_ckan_format = config.get(
+                'ckanext.dcat.normalize_ckan_format', True)
+            imt, label = self._distribution_format(distribution,
+                                                   normalize_ckan_format)
+
+            if imt:
+                resource_dict['mimetype'] = imt
+
+            if label:
+                resource_dict['format'] = label
+            elif imt:
+                resource_dict['format'] = imt
 
             size = self._object_value_int(distribution, DCAT.byteSize)
             if size is not None:
