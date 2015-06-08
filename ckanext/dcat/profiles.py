@@ -205,7 +205,7 @@ class RDFProfile(object):
 
         for agent in self.g.objects(subject, predicate):
 
-            publisher['uri'] = (str(agent) if isinstance(agent,
+            publisher['uri'] = (unicode(agent) if isinstance(agent,
                                 rdflib.term.URIRef) else None)
 
             publisher['name'] = self._object_value(agent, FOAF.name)
@@ -232,7 +232,7 @@ class RDFProfile(object):
 
         for agent in self.g.objects(subject, predicate):
 
-            contact['uri'] = (str(agent) if isinstance(agent,
+            contact['uri'] = (unicode(agent) if isinstance(agent,
                               rdflib.term.URIRef) else None)
 
             contact['name'] = self._object_value(agent, VCARD.fn)
