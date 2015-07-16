@@ -145,9 +145,6 @@ class DCATRDFHarvester(DCATHarvester):
 
         content = self._get_content(url, harvest_job, 1)
 
-        if not content:
-            return False
-
         # TODO: store content?
         for harvester in p.PluginImplementations(IDCATRDFHarvester):
             content, after_download_errors = harvester.after_download(content, harvest_job)
@@ -155,8 +152,8 @@ class DCATRDFHarvester(DCATHarvester):
             for error_msg in after_download_errors:
                 self._save_gather_error(error_msg, harvest_job)
 
-            if not content:
-                return False
+        if not content:
+            return False
 
         # TODO: profiles conf
         parser = RDFParser()
