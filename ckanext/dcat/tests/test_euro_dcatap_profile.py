@@ -6,6 +6,8 @@ import nose
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace, RDF
 
+from ckan.plugins import toolkit
+
 try:
     from ckan.tests import helpers
 except ImportError:
@@ -248,9 +250,11 @@ class TestEuroDCATAPProfile(object):
         datasets = [d for d in p.datasets()]
 
         resource = datasets[0]['resources'][0]
-
-        eq_(resource['format'], u'CSV')
-        eq_(resource['mimetype'], u'text/csv')
+        if toolkit.check_ckan_version(min_version='2.3'):
+            eq_(resource['format'], u'CSV')
+            eq_(resource['mimetype'], u'text/csv')
+        else:
+            eq_(resource['format'], u'text/csv')
 
     @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
     def test_distribution_format_imt_only_normalize_false(self):
@@ -362,8 +366,11 @@ class TestEuroDCATAPProfile(object):
 
         resource = datasets[0]['resources'][0]
 
-        eq_(resource['format'], u'CSV')
-        eq_(resource['mimetype'], u'text/csv')
+        if toolkit.check_ckan_version(min_version='2.3'):
+            eq_(resource['format'], u'CSV')
+            eq_(resource['mimetype'], u'text/csv')
+        else:
+            eq_(resource['format'], u'Comma Separated Values')
 
     def test_catalog_xml_rdf(self):
 
