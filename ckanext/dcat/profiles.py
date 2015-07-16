@@ -264,8 +264,9 @@ class RDFProfile(object):
         1. literal value of dct:format if it not contains a '/' character
         2. label of dct:format if it is an instance of dct:IMT (see above)
 
-        If `normalize_ckan_format` is True, the label will be tried to match
-        against the standard list of formats that is included with CKAN core
+        If `normalize_ckan_format` is True and using CKAN>=2.3, the label will
+        be tried to match against the standard list of formats that is included
+        with CKAN core
         (https://github.com/ckan/ckan/blob/master/ckan/config/resource_formats.json)
         This allows for instance to populate the CKAN resource format field
         with a format that view plugins, etc will understand (`csv`, `xml`,
@@ -291,7 +292,8 @@ class RDFProfile(object):
 
         imt = self._object_value(distribution, DCAT.mediaType)
 
-        if normalize_ckan_format:
+        if (normalize_ckan_format and
+                toolkit.check_ckan_version(min_version='2.3')):
             import ckan.config
             from ckan.lib import helpers
 
