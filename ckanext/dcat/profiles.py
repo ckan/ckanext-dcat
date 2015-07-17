@@ -7,7 +7,9 @@ from pylons import config
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD
+from rdflib.namespace import Namespace, RDF, XSD, SKOS
+
+from geomet import wkt
 
 from ckan.plugins import toolkit
 
@@ -20,6 +22,10 @@ VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 SCHEMA = Namespace('http://schema.org/')
 TIME = Namespace('http://www.w3.org/2006/time')
+LOCN = Namespace('http://www.w3.org/ns/locn#')
+GSP = Namespace('http://www.opengis.net/ont/geosparql#')
+
+GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
 namespaces = {
     'dct': DCT,
@@ -29,6 +35,9 @@ namespaces = {
     'foaf': FOAF,
     'schema': SCHEMA,
     'time': TIME,
+    'skos': SKOS,
+    'locn': LOCN,
+    'gsp': GSP,
 }
 
 
@@ -778,6 +787,38 @@ class EuropeanDCATAPProfile(RDFProfile):
             if end:
                 self._add_date_triple(temporal_extent, SCHEMA.endDate, end)
             g.add((dataset_ref, DCT.temporal, temporal_extent))
+
+        # Spatial
+        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
+        spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
+        spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
+
+        if spatial_uri or spatial_text or spatial_geom:
+            if spatial_uri:
+                spatial_ref = URIRef(spatial_uri)
+            else:
+                spatial_ref = BNode()
+
+            g.add((spatial_ref, RDF.type, DCT.Location))
+            g.add((dataset_ref, DCT.spatial, spatial_ref))
+
+            if spatial_text:
+                g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
+
+            if spatial_geom:
+                # GeoJSON
+                g.add((spatial_ref,
+                       LOCN.geometry,
+                       Literal(spatial_geom, datatype=GEOJSON_IMT)))
+                # WKT, because GeoDCAT-AP says so
+                try:
+                    g.add((spatial_ref,
+                           LOCN.geometry,
+                           Literal(wkt.dumps(json.loads(spatial_geom),
+                                             decimals=4),
+                                   datatype=GSP.wktLiteral)))
+                except (TypeError, ValueError):
+                    pass
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
