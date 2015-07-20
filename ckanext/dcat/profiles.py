@@ -868,13 +868,13 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             self._add_date_triples_from_dict(resource_dict, distribution, items)
 
-            # Int
+            # Numbers
             if resource_dict.get('size'):
                 try:
                     g.add((distribution, DCAT.byteSize,
                            Literal(float(resource_dict['size']),
                                    datatype=XSD.decimal)))
-                except TypeError:
+                except (ValueError, TypeError):
                     g.add((distribution, DCAT.byteSize,
                            Literal(resource_dict['size'])))
 
