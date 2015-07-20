@@ -458,8 +458,11 @@ class RDFProfile(object):
         Returns a dateTime string in ISO format, or None if it could not be
         found.
         '''
-
-        result = toolkit.get_action('package_search')({}, {
+        context = {
+            'user': toolkit.get_action('get_site_user')(
+                {'ignore_auth': True})['name']
+        }
+        result = toolkit.get_action('package_search')(context, {
             'sort': 'metadata_modified desc',
             'rows': 1,
         })
