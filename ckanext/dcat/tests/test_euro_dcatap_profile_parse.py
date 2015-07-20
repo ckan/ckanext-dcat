@@ -4,7 +4,7 @@ import json
 import nose
 
 from rdflib import Graph, URIRef, Literal
-from rdflib.namespace import Namespace, RDF
+from rdflib.namespace import RDF
 
 from ckan.plugins import toolkit
 
@@ -13,16 +13,14 @@ try:
 except ImportError:
     from ckan.new_tests import helpers
 
-
 from ckanext.dcat.processors import RDFParser
+from ckanext.dcat.profiles import DCAT, DCT
 
 eq_ = nose.tools.eq_
-
-DCAT = Namespace("http://www.w3.org/ns/dcat#")
-DCT = Namespace("http://purl.org/dc/terms/")
+assert_true = nose.tools.assert_true
 
 
-class TestEuroDCATAPProfile(object):
+class TestEuroDCATAPProfileParsing(object):
 
     def _get_file_contents(self, file_name):
         path = os.path.join(os.path.dirname(__file__),
@@ -86,7 +84,7 @@ class TestEuroDCATAPProfile(object):
         eq_(_get_extra_value('contact_email'), 'mailto:contact@some.org')
 
         #  Lists
-        eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en' , u'es'])
+        eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en', u'es'])
         eq_(sorted(_get_extra_value_as_list('theme')), [u'Earth Sciences',
                                                         u'http://eurovoc.europa.eu/100142',
                                                         u'http://eurovoc.europa.eu/209065'])

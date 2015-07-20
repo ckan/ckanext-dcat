@@ -677,9 +677,6 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g.add((dataset_ref, RDF.type, DCAT.Dataset))
 
-        # rec.add((uri, DC.identifier, Literal(data["name"])))
-        # ('spatial_uri', DCT.spatial),
-
         # Basic fields
         items = [
             ('title', DCT.title, None),
