@@ -9,7 +9,7 @@ import rdflib
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDF, XSD, SKOS
 
-from geomet import wkt
+from geomet import wkt, InvalidGeoJSONException
 
 from ckan.plugins import toolkit
 
@@ -814,7 +814,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                            Literal(wkt.dumps(json.loads(spatial_geom),
                                              decimals=4),
                                    datatype=GSP.wktLiteral)))
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, InvalidGeoJSONException):
                     pass
 
         # Resources
