@@ -411,13 +411,12 @@ class RDFProfile(object):
         '''
         items = []
         # List of values
-
         if isinstance(value, list):
             items = value
         elif isinstance(value, basestring):
             try:
                 # JSON list
-                value = json.loads(value)
+                items = json.loads(value)
             except ValueError:
                 if ',' in value:
                     # Comma-separated list
