@@ -894,7 +894,10 @@ class EuropeanDCATAPProfile(RDFProfile):
         ]
         for item in items:
             key, predicate, fallback = item
-            value = catalog_dict.get(key, fallback)
+            if catalog_dict:
+                value = catalog_dict.get(key, fallback)
+            else:
+                value = fallback
             if value:
                 g.add((catalog_ref, predicate, Literal(value)))
 

@@ -224,7 +224,7 @@ class RDFSerializer(RDFProcessor):
 
         return dataset_ref
 
-    def graph_from_catalog(self, catalog_dict):
+    def graph_from_catalog(self, catalog_dict=None):
         '''
         Creates a graph for the catalog (CKAN site) using the loaded profiles
 
