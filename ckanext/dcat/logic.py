@@ -1,4 +1,5 @@
 from __future__ import division
+import math
 
 from pylons import config
 from dateutil.parser import parse as dateutil_parse
@@ -177,7 +178,7 @@ def _pagination_info(query, data_dict):
     pagination_info['current'] = _page_url(page)
     pagination_info['first'] = _page_url(1)
 
-    last_page = int(round(query['count'] / items_per_page)) or 1
+    last_page = int(math.ceil(query['count'] / items_per_page)) or 1
     pagination_info['last'] = _page_url(last_page)
 
     if page > 1:

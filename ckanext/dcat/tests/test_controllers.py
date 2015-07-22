@@ -1,6 +1,8 @@
 import nose
 
-from routes import url_for
+from ckan.lib.helpers import url_for
+
+from rdflib import Graph
 
 try:
     from ckan.tests import helpers, factories
@@ -8,6 +10,8 @@ except ImportError:
     from ckan.new_tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser
+from ckanext.dcat.profiles import RDF, DCAT
+from ckanext.dcat.processors import HYDRA
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -186,3 +190,42 @@ class TestEndpoints(helpers.FunctionalTestBase):
         dcat_datasets = [d for d in p.datasets()]
 
         eq_(len(dcat_datasets), 4)
+
+    def _object_value(self, graph, subject, predicate):
+
+        objects = [o for o in graph.objects(subject, predicate)]
+        return unicode(objects[0]) if objects else None
+
+    @helpers.change_config('ckanext.dcat.datasets_per_page', 10)
+    def test_catalog_pagination(self):
+
+        for i in xrange(12):
+            factories.Dataset()
+
+        app = self._get_test_app()
+
+        url = url_for('dcat_catalog', _format='rdf')
+
+        response = app.get(url)
+
+        content = response.body
+
+        g = Graph()
+        g.parse(data=content, format='xml')
+
+        eq_(len([d for d in g.subjects(RDF.type, DCAT.Dataset)]), 10)
+
+        pagination = [o for o in g.subjects(RDF.type, HYDRA.PagedCollection)][0]
+
+        eq_(self._object_value(g, pagination, HYDRA.totalItems), '12')
+
+        eq_(self._object_value(g, pagination, HYDRA.itemsPerPage), '10')
+
+        eq_(self._object_value(g, pagination, HYDRA.firstPage),
+            url_for('dcat_catalog', _format='rdf', page=1, host='localhost'))
+
+        eq_(self._object_value(g, pagination, HYDRA.nextPage),
+            url_for('dcat_catalog', _format='rdf', page=2, host='localhost'))
+
+        eq_(self._object_value(g, pagination, HYDRA.lastPage),
+            url_for('dcat_catalog', _format='rdf', page=2, host='localhost'))
