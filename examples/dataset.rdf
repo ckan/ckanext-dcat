@@ -41,12 +41,12 @@
             <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-01-05</schema:endDate>
         </dct:PeriodOfTime>
     </dct:temporal>
-    <adms:contactPoint>
+    <dcat:contactPoint>
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>
         <vcard:hasEmail rdf:resource="mailto:contact@some.org"/>
       </vcard:Organization>
-    </adms:contactPoint>
+    </dcat:contactPoint>
     <dct:publisher>
         <foaf:Organization rdf:about="http://orgs.vocab.org/some-org">
             <foaf:name>Publishing Organization for dataset 1</foaf:name>

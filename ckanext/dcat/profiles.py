@@ -582,12 +582,17 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                'value': json.dumps(values)})
 
         # Contact details
-        contact = self._contact_details(dataset_ref, ADMS.contactPoint)
-        for key in ('uri', 'name', 'email'):
-            if contact.get(key):
-                dataset_dict['extras'].append(
-                    {'key': 'contact_{0}'.format(key),
-                     'value': contact.get(key)})
+        contact = self._contact_details(dataset_ref, DCAT.contactPoint)
+        if not contact:
+            # adms:contactPoint was supported on the first version of DCAT-AP
+            contact = self._contact_details(dataset_ref, ADMS.contactPoint)
+
+        if contact:
+            for key in ('uri', 'name', 'email'):
+                if contact.get(key):
+                    dataset_dict['extras'].append(
+                        {'key': 'contact_{0}'.format(key),
+                         'value': contact.get(key)})
 
         # Publisher
         publisher = self._publisher(dataset_ref, DCT.publisher)
@@ -738,7 +743,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 contact_details = BNode()
 
             g.add((contact_details, RDF.type, VCARD.Organization))
-            g.add((dataset_ref, ADMS.contactPoint, contact_details))
+            g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
             items = [
                 ('contact_name', VCARD.fn, ['maintainer', 'author']),

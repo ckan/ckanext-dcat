@@ -184,7 +184,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         # Contact details
 
-        contact_details = self._triple(g, dataset_ref, ADMS.contactPoint, None)[2]
+        contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
         eq_(unicode(contact_details), extras['contact_uri'])
         assert self._triple(g, contact_details, VCARD.fn, extras['contact_name'])
@@ -205,7 +205,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        contact_details = self._triple(g, dataset_ref, ADMS.contactPoint, None)[2]
+        contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
         assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['maintainer'])
@@ -224,7 +224,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        contact_details = self._triple(g, dataset_ref, ADMS.contactPoint, None)[2]
+        contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
         assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
