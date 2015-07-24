@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from pylons import config
 
@@ -38,10 +39,17 @@ def catalog_uri():
     if not uri:
         uri = config.get('ckan.site_url')
     if not uri:
-        uri = 'http://' + config.get('app_instance_uuid').replace('{', '') \
-                                                         .replace('}', '')
-        log.critical('Using app id as catalog URI, you should set the ' +
-                     '`ckanext.dcat.base_uri` or `ckan.site_url` option')
+        app_uuid = config.get('app_instance_uuid')
+        if app_uuid:
+            uri = 'http://' + app_uuid.replace('{', '').replace('}', '')
+            log.critical('Using app id as catalog URI, you should set the ' +
+                         '`ckanext.dcat.base_uri` or `ckan.site_url` option')
+        else:
+            uri = 'http://' + str(uuid.uuid4())
+            log.critical('Using a random id as catalog URI, you should set ' +
+                         'the `ckanext.dcat.base_uri` or `ckan.site_url` ' +
+                         'option')
+
     return uri
 
 
