@@ -1,3 +1,4 @@
+import time
 import nose
 
 from ckan.lib.helpers import url_for
@@ -22,6 +23,11 @@ class TestEndpoints(helpers.FunctionalTestBase):
     @classmethod
     def teardown_class(cls):
         helpers.reset_db()
+
+    def _object_value(self, graph, subject, predicate):
+
+        objects = [o for o in graph.objects(subject, predicate)]
+        return unicode(objects[0]) if objects else None
 
     def test_dataset_default(self):
 
@@ -191,10 +197,41 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
         eq_(len(dcat_datasets), 4)
 
-    def _object_value(self, graph, subject, predicate):
+    def test_catalog_modified_date(self):
 
-        objects = [o for o in graph.objects(subject, predicate)]
-        return unicode(objects[0]) if objects else None
+        dataset1 = factories.Dataset(title='First dataset')
+        time.sleep(1)
+        dataset2 = factories.Dataset(title='Second dataset')
+
+        url = url_for('dcat_catalog',
+                      _format='ttl',
+                      modified_since=dataset2['metadata_modified'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        content = response.body
+
+        p = RDFParser()
+
+        p.parse(content, _format='turtle')
+
+        dcat_datasets = [d for d in p.datasets()]
+
+        eq_(len(dcat_datasets), 1)
+
+        eq_(dcat_datasets[0]['title'], dataset2['title'])
+
+    def test_catalog_modified_date_wrong_date(self):
+
+        url = url_for('dcat_catalog',
+                      _format='ttl',
+                      modified_since='wrong_date')
+
+        app = self._get_test_app()
+
+        app.get(url, status=409)
 
     @helpers.change_config('ckanext.dcat.datasets_per_page', 10)
     def test_catalog_pagination(self):
