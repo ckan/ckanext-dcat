@@ -24,6 +24,7 @@ SCHEMA = Namespace('http://schema.org/')
 TIME = Namespace('http://www.w3.org/2006/time')
 LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
+OWL = Namespace('http://www.w3.org/2002/07/owl#')
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -38,6 +39,7 @@ namespaces = {
     'skos': SKOS,
     'locn': LOCN,
     'gsp': GSP,
+    'owl': OWL,
 }
 
 
@@ -535,10 +537,17 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('title', DCT.title),
                 ('notes', DCT.description),
                 ('url', DCAT.landingPage),
+                ('version', OWL.versionInfo),
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = value
+
+        if not dataset_dict.get('version'):
+            # adms:version was supported on the first version of the DCAT-AP
+            value = self._object_value(dataset_ref, ADMS.version)
+            if value:
+                dataset_dict['version'] = value
 
         # Tags
         keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
@@ -553,7 +562,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('modified', DCT.modified),
                 ('identifier', DCT.identifier),
                 ('alternate_identifier', ADMS.identifier),
-                ('dcat_version', ADMS.version),
                 ('version_notes', ADMS.versionNotes),
                 ('frequency', DCT.accrualPeriodicity),
                 ('spatial_uri', DCT.spatial),
@@ -685,7 +693,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('notes', DCT.description, None),
             ('url', DCAT.landingPage, None),
             ('identifier', DCT.identifier, ['guid', 'id']),
-            ('dcat_version', ADMS.version, ['version']),
+            ('version', OWL.versionInfo, ['dcat_version']),
             ('alternate_identifier', ADMS.identifier, None),
             ('version_notes', ADMS.versionNotes, None),
             ('frequency', DCT.accrualPeriodicity, None),

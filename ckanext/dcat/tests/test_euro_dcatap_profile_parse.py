@@ -14,7 +14,7 @@ except ImportError:
     from ckan.new_tests import helpers
 
 from ckanext.dcat.processors import RDFParser
-from ckanext.dcat.profiles import DCAT, DCT
+from ckanext.dcat.profiles import DCAT, DCT, ADMS
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -48,6 +48,7 @@ class TestEuroDCATAPProfileParsing(object):
         eq_(dataset['title'], u'Zimbabwe Regional Geochemical Survey.')
         eq_(dataset['notes'], u'During the period 1982-86 a team of geologists from the British Geological Survey ...')
         eq_(dataset['url'], 'http://dataset.info.org')
+        eq_(dataset['version'], '2.3')
 
         # Tags
 
@@ -69,7 +70,6 @@ class TestEuroDCATAPProfileParsing(object):
         eq_(_get_extra_value('modified'), u'2012-05-10T21:04:00')
         eq_(_get_extra_value('identifier'), u'9df8df51-63db-37a8-e044-0003ba9b0d98')
         eq_(_get_extra_value('alternate_identifier'), u'alternate-identifier-x343')
-        eq_(_get_extra_value('dcat_version'), u'2.3')
         eq_(_get_extra_value('version_notes'), u'New schema added')
         eq_(_get_extra_value('temporal_start'), '1905-03-01')
         eq_(_get_extra_value('temporal_end'), '2013-01-05')
@@ -118,6 +118,23 @@ class TestEuroDCATAPProfileParsing(object):
 
         # Distribution URI
         eq_(resource['uri'], u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1')
+
+    # owl:versionInfo is tested on the test above
+    def test_dataset_version_adms(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        g.add((dataset1, ADMS.version, Literal('2.3a')))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+
+        eq_(dataset['version'], u'2.3a')
 
     def test_distribution_access_url(self):
         g = Graph()

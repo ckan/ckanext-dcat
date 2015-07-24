@@ -18,7 +18,7 @@ except ImportError:
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
-                                   SKOS, LOCN, GSP, GEOJSON_IMT)
+                                   SKOS, LOCN, GSP, OWL, GEOJSON_IMT)
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -85,7 +85,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, DCT.title, dataset['title'])
         assert self._triple(g, dataset_ref, DCT.description, dataset['notes'])
 
-        assert self._triple(g, dataset_ref, ADMS.version, dataset['version'])
+        assert self._triple(g, dataset_ref, OWL.versionInfo, dataset['version'])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, extras['version_notes'])
         assert self._triple(g, dataset_ref, ADMS.identifier, extras['alternate_identifier'])
         assert self._triple(g, dataset_ref, DCT.accrualPeriodicity, extras['frequency'])

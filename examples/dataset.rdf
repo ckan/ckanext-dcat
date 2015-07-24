@@ -7,6 +7,7 @@
     xmlns:adms="http://www.w3.org/ns/adms#"
     xmlns:schema="http://schema.org/"
 	xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
 	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -21,7 +22,7 @@
     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10T21:04</dct:modified>
     <dct:identifier>9df8df51-63db-37a8-e044-0003ba9b0d98</dct:identifier>
     <adms:identifier>alternate-identifier-x343</adms:identifier>
-    <adms:version>2.3</adms:version>
+    <owl:versionInfo>2.3</owl:versionInfo>
     <adms:versionNotes>New schema added</adms:versionNotes>
     <dct:language>en</dct:language>
     <dct:language>es</dct:language>
