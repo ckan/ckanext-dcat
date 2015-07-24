@@ -78,9 +78,13 @@ def dataset_uri(dataset_dict):
             if extra['key'] == 'uri':
                 uri = extra['value']
                 break
-    if not uri:
+    if not uri and dataset_dict.get('id'):
         uri = '{0}/dataset/{1}'.format(catalog_uri().rstrip('/'),
                                        dataset_dict['id'])
+    if not uri:
+        uri = '{0}/dataset/{1}'.format(catalog_uri().rstrip('/'),
+                                       str(uuid.uuid4()))
+        log.warning('Using a random id for dataset URI')
 
     return uri
 
