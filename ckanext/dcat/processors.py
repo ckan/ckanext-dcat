@@ -259,7 +259,7 @@ class RDFSerializer(RDFProcessor):
 
         return output
 
-    def serialize_catalog(self, catalog_dict, dataset_dicts=None,
+    def serialize_catalog(self, catalog_dict=None, dataset_dicts=None,
                           _format='xml', pagination_info=None):
         '''
         Returns an RDF serialization of the whole catalog
