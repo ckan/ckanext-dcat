@@ -13,6 +13,7 @@ CONTENT_TYPES = {
     'xml': 'application/rdf+xml',
     'n3': 'text/n3',
     'ttl': 'text/turtle',
+    'jsonld': 'application/ld+json',
 }
 
 
@@ -173,6 +174,9 @@ def url_to_rdflib_format(_format):
         _format = 'turtle'
     elif _format in ('rdf', 'xml'):
         _format = 'pretty-xml'
+    elif _format == 'jsonld':
+        _format = 'json-ld'
+
     return _format
 
 
@@ -184,4 +188,7 @@ def rdflib_to_url_format(_format):
         _format = 'ttl'
     elif _format == 'pretty-xml':
         _format = 'xml'
+    elif _format == 'json-ld':
+        _format = 'jsonld'
+
     return _format

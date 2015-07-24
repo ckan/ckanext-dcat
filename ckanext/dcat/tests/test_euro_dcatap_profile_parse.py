@@ -411,6 +411,35 @@ class TestEuroDCATAPProfileParsing(object):
         eq_(resource['url'], u'http://data.london.gov.uk/datafiles/environment/abandoned-vehicles-borough.csv')
         eq_(resource['uri'], u'http://data.london.gov.uk/dataset/Abandoned_Vehicles/csv')
 
+    def test_dataset_json_ld_1(self):
+
+        contents = self._get_file_contents('catalog_pod.jsonld')
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.parse(contents, _format='json-ld')
+
+        datasets = [d for d in p.datasets()]
+
+        eq_(len(datasets), 1)
+
+        dataset = datasets[0]
+        extras = dict((e['key'], e['value']) for e in dataset['extras'])
+
+        eq_(dataset['title'], 'U.S. Widget Manufacturing Statistics')
+
+        eq_(extras['contact_name'], 'Jane Doe')
+        eq_(extras['contact_email'], 'mailto:jane.doe@agency.gov')
+        eq_(extras['publisher_name'], 'Widget Services')
+        eq_(extras['publisher_email'], 'widget.services@agency.gov')
+
+        eq_(len(dataset['resources']), 4)
+
+        resource = [r for r in dataset['resources'] if r['name'] == 'widgets.csv'][0]
+        eq_(resource['name'], u'widgets.csv')
+        eq_(resource['url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
+        eq_(resource['download_url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
+
     def test_dataset_compatibility_mode(self):
 
         contents = self._get_file_contents('dataset.rdf')

@@ -149,6 +149,36 @@ class TestEndpoints(helpers.FunctionalTestBase):
         eq_(dcat_dataset['title'], dataset['title'])
         eq_(dcat_dataset['notes'], dataset['notes'])
 
+    def test_dataset_jsonld(self):
+
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        url = url_for('dcat_dataset', _id=dataset['id'], _format='jsonld')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        eq_(response.headers['Content-Type'], 'application/ld+json')
+
+        content = response.body
+
+        # Parse the contents to check it's an actual serialization
+        p = RDFParser()
+
+        p.parse(content, _format='json-ld')
+
+        dcat_datasets = [d for d in p.datasets()]
+
+        eq_(len(dcat_datasets), 1)
+
+        dcat_dataset = dcat_datasets[0]
+
+        eq_(dcat_dataset['title'], dataset['title'])
+        eq_(dcat_dataset['notes'], dataset['notes'])
+
     def test_catalog_default(self):
 
         for i in xrange(4):

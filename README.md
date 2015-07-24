@@ -83,8 +83,16 @@ RDF representations of a particular dataset can accessed using the following end
 
     https://{ckan-instance-host}/datasets/{dataset-id}.{format}
 
-The extension will determine the RDF serialization format returned. Currently supported values
-are `xml` for [RDF/XML](https://en.wikipedia.org/wiki/RDF/XML), `ttl` for [Turtle](https://en.wikipedia.org/wiki/Turtle_%28syntax%29) and `n3` for [Notation3](https://en.wikipedia.org/wiki/Notation3). The fallback `rdf` format defaults to RDF/XML.
+The extension will determine the RDF serialization format returned. The currently supported values are:
+
+| Extension | Format                                                      | Media Type          |
+|-----------|-------------------------------------------------------------|---------------------|
+| `xml`     | [RDF/XML](https://en.wikipedia.org/wiki/RDF/XML)            | application/rdf+xml |
+| `ttl`     | [Turtle](https://en.wikipedia.org/wiki/Turtle_%28syntax%29) | text/turtle         |
+| `n3`      | [Notation3](https://en.wikipedia.org/wiki/Notation3)        | text/n3             |
+| `jsonld`  | [JSON-LD](http://json-ld.org/)                              | application/ld+json |
+
+The fallback `rdf` format defaults to RDF/XML.
 
 Here's an example of the different formats available (links might not be live as they link to a demo site):
 
