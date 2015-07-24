@@ -109,8 +109,9 @@ def _search_ckan_datasets(context, data_dict):
     search_data_dict['fq'] = data_dict.get('fq')
     search_data_dict['fq_list'] = []
 
-    # Force datasets
-    search_data_dict['fq_list'].append('dataset_type:dataset')
+    # Exclude certain dataset types
+    search_data_dict['fq_list'].append('-dataset_type:harvest')
+    search_data_dict['fq_list'].append('-dataset_type:showcase')
 
     if modified_since:
         search_data_dict['fq_list'].append(
