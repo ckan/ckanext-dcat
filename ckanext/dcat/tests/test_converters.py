@@ -39,6 +39,11 @@ class TestConverters(object):
         dcat_dict = self._get_file_as_dict('dataset.json')
         expected_ckan_dict = self._get_file_as_dict('ckan_dataset.json')
 
+        # Pop CKAN specific fields
+        expected_ckan_dict.pop('id', None)
+        expected_ckan_dict['resources'][0].pop('id', None)
+        expected_ckan_dict['resources'][0].pop('package_id', None)
+
         ckan_dict = converters.dcat_to_ckan(dcat_dict)
 
         assert ckan_dict == expected_ckan_dict, self._poor_mans_dict_diff(

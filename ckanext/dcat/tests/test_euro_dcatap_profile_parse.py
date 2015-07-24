@@ -4,16 +4,23 @@ import json
 import nose
 
 from rdflib import Graph, URIRef, Literal
-from rdflib.namespace import Namespace, RDF
+from rdflib.namespace import RDF
 
-from ckanext.dcat.parsers import RDFParser
+from ckan.plugins import toolkit
+
+try:
+    from ckan.tests import helpers
+except ImportError:
+    from ckan.new_tests import helpers
+
+from ckanext.dcat.processors import RDFParser
+from ckanext.dcat.profiles import DCAT, DCT
 
 eq_ = nose.tools.eq_
+assert_true = nose.tools.assert_true
 
-DCAT = Namespace("http://www.w3.org/ns/dcat#")
 
-
-class TestEuroDCATAPProfile(object):
+class TestEuroDCATAPProfileParsing(object):
 
     def _get_file_contents(self, file_name):
         path = os.path.join(os.path.dirname(__file__),
@@ -77,7 +84,7 @@ class TestEuroDCATAPProfile(object):
         eq_(_get_extra_value('contact_email'), 'mailto:contact@some.org')
 
         #  Lists
-        eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en' , u'es'])
+        eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en', u'es'])
         eq_(sorted(_get_extra_value_as_list('theme')), [u'Earth Sciences',
                                                         u'http://eurovoc.europa.eu/100142',
                                                         u'http://eurovoc.europa.eu/209065'])
@@ -179,6 +186,190 @@ class TestEuroDCATAPProfile(object):
         eq_(resource['url'], u'http://access.url.org')
         eq_(resource['download_url'], u'http://download.url.org')
 
+    def test_distribution_format_imt_and_format(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCAT.mediaType, Literal('text/csv')))
+        g.add((distribution1_1, DCT['format'], Literal('CSV')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'CSV')
+        eq_(resource['mimetype'], u'text/csv')
+
+    def test_distribution_format_format_only(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCT['format'], Literal('CSV')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'CSV')
+
+    def test_distribution_format_imt_only(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCAT.mediaType, Literal('text/csv')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+        if toolkit.check_ckan_version(min_version='2.3'):
+            eq_(resource['format'], u'CSV')
+            eq_(resource['mimetype'], u'text/csv')
+        else:
+            eq_(resource['format'], u'text/csv')
+
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
+    def test_distribution_format_imt_only_normalize_false(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCAT.mediaType, Literal('text/csv')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'text/csv')
+        eq_(resource['mimetype'], u'text/csv')
+
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
+    def test_distribution_format_format_only_normalize_false(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCT['format'], Literal('CSV')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'CSV')
+        assert 'mimetype' not in resource
+
+    def test_distribution_format_unknown_imt(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCAT.mediaType, Literal('text/unknown-imt')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'text/unknown-imt')
+        eq_(resource['mimetype'], u'text/unknown-imt')
+
+    def test_distribution_format_imt_normalized(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCAT.mediaType, Literal('text/unknown-imt')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'text/unknown-imt')
+        eq_(resource['mimetype'], u'text/unknown-imt')
+
+    def test_distribution_format_format_normalized(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCAT.mediaType, Literal('text/csv')))
+        g.add((distribution1_1, DCT['format'], Literal('Comma Separated Values')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        if toolkit.check_ckan_version(min_version='2.3'):
+            eq_(resource['format'], u'CSV')
+            eq_(resource['mimetype'], u'text/csv')
+        else:
+            eq_(resource['format'], u'Comma Separated Values')
+
     def test_catalog_xml_rdf(self):
 
         contents = self._get_file_contents('catalog.rdf')
@@ -219,6 +410,35 @@ class TestEuroDCATAPProfile(object):
         eq_(resource['name'], u'CSV distribution of: Abandoned Vehicles')
         eq_(resource['url'], u'http://data.london.gov.uk/datafiles/environment/abandoned-vehicles-borough.csv')
         eq_(resource['uri'], u'http://data.london.gov.uk/dataset/Abandoned_Vehicles/csv')
+
+    def test_dataset_json_ld_1(self):
+
+        contents = self._get_file_contents('catalog_pod.jsonld')
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.parse(contents, _format='json-ld')
+
+        datasets = [d for d in p.datasets()]
+
+        eq_(len(datasets), 1)
+
+        dataset = datasets[0]
+        extras = dict((e['key'], e['value']) for e in dataset['extras'])
+
+        eq_(dataset['title'], 'U.S. Widget Manufacturing Statistics')
+
+        eq_(extras['contact_name'], 'Jane Doe')
+        eq_(extras['contact_email'], 'mailto:jane.doe@agency.gov')
+        eq_(extras['publisher_name'], 'Widget Services')
+        eq_(extras['publisher_email'], 'widget.services@agency.gov')
+
+        eq_(len(dataset['resources']), 4)
+
+        resource = [r for r in dataset['resources'] if r['name'] == 'widgets.csv'][0]
+        eq_(resource['name'], u'widgets.csv')
+        eq_(resource['url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
+        eq_(resource['download_url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
 
     def test_dataset_compatibility_mode(self):
 

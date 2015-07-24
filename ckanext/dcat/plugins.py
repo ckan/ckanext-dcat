@@ -1,105 +1,84 @@
-import json
-
 from pylons import config
-from dateutil.parser import parse as dateutil_parse
 
 from ckan import plugins as p
 
-if p.toolkit.check_ckan_version(min_version='2.1'):
-    BaseController = p.toolkit.BaseController
-else:
-    from ckan.lib.base import BaseController
+from ckanext.dcat.logic import (dcat_dataset_show,
+                                dcat_catalog_show,
+                                dcat_catalog_search,
+                                dcat_datasets_list,
+                                dcat_auth,
+                                )
+from ckanext.dcat.utils import catalog_uri
 
-import ckanext.dcat.converters as converters
+
+class DCATPlugin(p.SingletonPlugin):
+
+    p.implements(p.IConfigurer, inherit=True)
+    p.implements(p.IRoutes, inherit=True)
+    p.implements(p.IActions, inherit=True)
+    p.implements(p.IAuthFunctions, inherit=True)
+
+    # IConfigurer
+    def update_config(self, config):
+        p.toolkit.add_template_directory(config, 'templates')
+
+        # Check catalog URI on startup to emit a warning if necessary
+        catalog_uri()
+
+    # IRoutes
+    def before_map(self, _map):
+
+        controller = 'ckanext.dcat.controllers:DCATController'
+
+        _map.connect('dcat_catalog', '/catalog.{_format}',
+                     controller=controller, action='read_catalog',
+                     requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+
+        _map.connect('dcat_dataset', '/dataset/{_id}.{_format}',
+                     controller=controller, action='read_dataset',
+                     requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+        return _map
+
+    # IActions
+    def get_actions(self):
+        return {
+            'dcat_dataset_show': dcat_dataset_show,
+            'dcat_catalog_show': dcat_catalog_show,
+            'dcat_catalog_search': dcat_catalog_search,
+        }
+
+    # IAuthFunctions
+    def get_auth_functions(self):
+        return {
+            'dcat_dataset_show': dcat_auth,
+            'dcat_catalog_show': dcat_auth,
+            'dcat_catalog_search': dcat_auth,
+        }
 
 
 class DCATJSONInterface(p.SingletonPlugin):
 
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IActions)
+    p.implements(p.IAuthFunctions, inherit=True)
 
-    ## IRoutes
+    # IRoutes
     def after_map(self, map):
 
-        controller = 'ckanext.dcat.plugins:DCATController'
+        controller = 'ckanext.dcat.controllers:DCATController'
         route = config.get('ckanext.dcat.json_endpoint', '/dcat.json')
         map.connect(route, controller=controller, action='dcat_json')
 
         return map
 
-    ## IActions
+    # IActions
     def get_actions(self):
         return {
             'dcat_datasets_list': dcat_datasets_list,
         }
 
-
-class DCATController(BaseController):
-
-    def dcat_json(self):
-
-        data_dict = {
-            'page': p.toolkit.request.params.get('page'),
-            'modified_since': p.toolkit.request.params.get('modified_since'),
+    # IAuthFunctions
+    def get_auth_functions(self):
+        return {
+            'dcat_datasets_list': dcat_auth,
         }
-
-        try:
-            datasets = p.toolkit.get_action('dcat_datasets_list')({},
-                                                                  data_dict)
-        except p.toolkit.ValidationError, e:
-            p.toolkit.abort(409, str(e))
-
-        content = json.dumps(datasets)
-
-        p.toolkit.response.headers['Content-Type'] = 'application/json'
-        p.toolkit.response.headers['Content-Length'] = len(content)
-
-        return content
-
-
-def dcat_datasets_list(context, data_dict):
-
-    ckan_datasets = _search_ckan_datasets(context, data_dict)
-
-    return [converters.ckan_to_dcat(ckan_dataset)
-            for ckan_dataset in ckan_datasets]
-
-
-def _search_ckan_datasets(context, data_dict):
-
-    n = int(config.get('ckanext.dcat.datasets_per_page', 100))
-    page = data_dict.get('page', 1) or 1
-
-    wrong_page_exception = p.toolkit.ValidationError(
-        'Page param must be a positive integer starting in 1')
-    try:
-        page = int(page)
-        if page < 1:
-            raise wrong_page_exception
-    except ValueError:
-        raise wrong_page_exception
-
-    modified_since = data_dict.get('modified_since')
-    if modified_since:
-        try:
-            modified_since = dateutil_parse(modified_since).isoformat() + 'Z'
-        except (ValueError, AttributeError):
-            raise p.toolkit.ValidationError(
-                'Wrong modified date format. Use ISO-8601 format')
-
-    search_data_dict = {
-        'q': '*:*',
-        'fq': 'dataset_type:dataset',
-        'rows': n,
-        'start': n * (page - 1),
-    }
-
-    if modified_since:
-        search_data_dict.update({
-            'fq': 'metadata_modified:[{0} TO NOW]'.format(modified_since),
-            'sort': 'metadata_modified desc',
-        })
-
-    query = p.toolkit.get_action('package_search')(context, search_data_dict)
-
-    return query['results']

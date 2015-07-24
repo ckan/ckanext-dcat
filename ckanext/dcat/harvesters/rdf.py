@@ -10,7 +10,7 @@ from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
 from ckanext.dcat.harvesters.base import DCATHarvester
 
-from ckanext.dcat.parsers import RDFParserException, RDFParser
+from ckanext.dcat.processors import RDFParserException, RDFParser
 
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 

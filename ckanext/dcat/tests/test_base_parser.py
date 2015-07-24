@@ -5,7 +5,7 @@ from pylons import config
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace, RDF
 
-from ckanext.dcat.parsers import (
+from ckanext.dcat.processors import (
     RDFParser,
     RDFParserException,
     RDFProfileException,
