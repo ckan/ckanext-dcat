@@ -1,5 +1,3 @@
 rdflib==4.1.2
 rdflib-jsonld==0.2
 git+git://github.com/geomet/geomet.git
-# TODO: remove when legacy xml harvester is finally removed
-lxml>=2.3
