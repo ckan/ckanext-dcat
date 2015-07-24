@@ -330,13 +330,17 @@ Operation mode.
 
     contents = args.file.read()
 
-    parser = RDFParser(profiles=args.profile,
-                       compatibility_mode=args.compat_mode)
     if args.mode == 'produce':
+        serializer = RDFSerializer(profiles=args.profile,
+                                   compatibility_mode=args.compat_mode)
+
         dataset = json.loads(contents)
-        out = parser.serialize_dataset(dataset, _format=args.format)
+        out = serializer.serialize_dataset(dataset, _format=args.format)
         print out
     else:
+        parser = RDFParser(profiles=args.profile,
+                           compatibility_mode=args.compat_mode)
+
         parser.parse(contents, _format=args.format)
 
         ckan_datasets = [d for d in parser.datasets()]
