@@ -5,11 +5,14 @@ env:
     - CKANVERSION=master
     - CKANVERSION=2.2
     - CKANVERSION=2.3
+    - CKANVERSION=2.4.0
 install:
     - bash bin/travis-build.bash
     - pip install coveralls
 services:
     - redis-server
 script: sh bin/travis-run.sh
+before_install:
+    - pip install codecov
 after_success:
-    - coveralls
+    - codecov
