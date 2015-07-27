@@ -656,7 +656,12 @@ To run the tests, do:
 
 ## Acknowledgements
 
-The work on the RDF parser and harvester has been made possible by the Government of Sweden and Vinnova, as part of work on the upcoming version of [Öppnadata.se](http://oppnadata.se), the Swedish Open Data Portal.
+Work on ckanext-dcat has been made possible by:
+
+* the Government of Sweden and Vinnova, as part of work on [Öppnadata.se](http://oppnadata.se), the Swedish Open Data Portal.
+* [FIWARE](https://www.fiware.org), a project funded by the European Commission to integrate different technologies to offer connected cloud services from a single platform.
+
+If you can fund new developments or contribute please get in touch.
 
 
 ## Copying and License
