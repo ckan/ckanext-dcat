@@ -3,12 +3,11 @@ python:
     - "2.7"
 env:
     - CKANVERSION=master
-    - CKANVERSION=2.2
-    - CKANVERSION=2.3
-    - CKANVERSION=2.4.0
+    - CKANVERSION=release-v2.2-latest
+    - CKANVERSION=release-v2.3-latest
+    - CKANVERSION=release-v2.4-latest
 install:
     - bash bin/travis-build.bash
-    - pip install coveralls
 services:
     - redis-server
 script: sh bin/travis-run.sh
