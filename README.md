@@ -359,6 +359,57 @@ that are used if the default field is not present (see [RDF Serializer](#rdf-dca
     }
     ```
 
+* The following formats for `dct:spatial` are supported by the default [parser](#rdf-dcat-parser). Note that the default [serializer](#rdf-dcat-serializer) will return the single `dct:spatial` instance form by default.
+
+    - One `dct:spatial` instance, URI only
+
+        ```xml
+        <dct:spatial rdf:resource="http://geonames/Newark"/>
+        ```
+
+    - One `dct:spatial` instance with text (this should not be used anyway)
+
+        ```xml
+        <dct:spatial>Newark</dct:spatial>
+        ```
+
+    - One `dct:spatial` instance with label and/or geometry
+
+        ```xml
+        <dct:spatial rdf:resource="http://geonames/Newark">
+            <dct:Location>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json">
+                    {"type": "Polygon", "coordinates": [[[175.0, 17.5], [-65.5, 17.5], [-65.5, 72.0], [175.0, 72.0], [175.0, 17.5]]]}
+                </locn:geometry>
+                <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">
+                    POLYGON ((175.0000 17.5000, -65.5000 17.5000, -65.5000 72.0000, 175.0000 72.0000, 175.0000 17.5000))
+                </locn:geometry>
+                <skos:prefLabel>Newark</skos:prefLabel>
+            </dct:Location>
+        </dct:spatial>
+        ```
+
+    - Multiple `dct:spatial` instances (as in GeoDCAT-AP)
+
+        ```xml
+        <dct:spatial rdf:resource="http://geonames/Newark"/>
+        <dct:spatial>
+            <dct:Location>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json">
+                    {"type": "Polygon", "coordinates": [[[175.0, 17.5], [-65.5, 17.5], [-65.5, 72.0], [175.0, 72.0], [175.0, 17.5]]]}
+                </locn:geometry>
+                <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">
+                    POLYGON ((175.0000 17.5000, -65.5000 17.5000, -65.5000 72.0000, 175.0000 72.0000, 175.0000 17.5000))
+                </locn:geometry>
+            </dct:Location>
+        </dct:spatial>
+        <dct:spatial>
+            <dct:Location rdf:nodeID="N8c2a57d92e2d48fca3883053f992f0cf">
+                <skos:prefLabel>Newark</skos:prefLabel>
+            </dct:Location>
+        </dct:spatial>
+        ```
+
 
 ## RDF DCAT Parser
 

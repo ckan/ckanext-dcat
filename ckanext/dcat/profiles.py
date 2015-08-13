@@ -7,7 +7,7 @@ from pylons import config
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD, SKOS
+from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 
 from geomet import wkt, InvalidGeoJSONException
 
@@ -251,6 +251,60 @@ class RDFProfile(object):
             contact['email'] = self._object_value(agent, VCARD.hasEmail)
 
         return contact
+
+    def _spatial(self, subject, predicate):
+        '''
+        Returns a dict with details about the spatial location
+
+        Both subject and predicate must be rdflib URIRef or BNode objects
+
+        Returns keys for uri, text or geom with the values set to
+        None if they could not be found.
+
+        Geometries are always returned in GeoJSON. If only WKT is provided,
+        it will be transformed to GeoJSON.
+
+        Check the notes on the README for the supported formats:
+
+        https://github.com/ckan/ckanext-dcat/#rdf-dcat-to-ckan-dataset-mapping
+        '''
+
+        uri = None
+        text = None
+        geom = None
+
+        for spatial in self.g.objects(subject, predicate):
+
+            if isinstance(spatial, URIRef):
+                uri = unicode(spatial)
+
+            if isinstance(spatial, Literal):
+                text = unicode(spatial)
+
+            if (spatial, RDF.type, DCT.Location) in self.g:
+                for geometry in self.g.objects(spatial, LOCN.geometry):
+                    if (geometry.datatype == URIRef(GEOJSON_IMT) or
+                            not geometry.datatype):
+                        try:
+                            json.loads(unicode(geometry))
+                            geom = unicode(geometry)
+                        except (ValueError, TypeError):
+                            pass
+                    if not geom and geometry.datatype == GSP.wktLiteral:
+                        try:
+                            geom = json.dumps(wkt.loads(unicode(geometry)))
+                        except (ValueError, TypeError):
+                            pass
+                for label in self.g.objects(spatial, SKOS.prefLabel):
+                    text = unicode(label)
+                for label in self.g.objects(spatial, RDFS.label):
+                    text = unicode(label)
+
+        return {
+            'uri': uri,
+            'text': text,
+            'geom': geom,
+        }
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
@@ -564,7 +618,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('alternate_identifier', ADMS.identifier),
                 ('version_notes', ADMS.versionNotes),
                 ('frequency', DCT.accrualPeriodicity),
-                ('spatial_uri', DCT.spatial),
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -610,6 +663,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         if end:
             dataset_dict['extras'].append(
                 {'key': 'temporal_end', 'value': end})
+
+        # Spatial
+        spatial = self._spatial(dataset_ref, DCT.spatial)
+        for key in ('uri', 'text', 'geom'):
+            if spatial.get(key):
+                dataset_dict['extras'].append(
+                    {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
+                     'value': spatial.get(key)})
 
         # Dataset URI (explicitly show the missing ones)
         dataset_uri = (unicode(dataset_ref)

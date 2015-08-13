@@ -3,7 +3,7 @@ import json
 
 import nose
 
-from rdflib import Graph, URIRef, Literal
+from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF
 
 from ckan.plugins import toolkit
@@ -14,13 +14,20 @@ except ImportError:
     from ckan.new_tests import helpers
 
 from ckanext.dcat.processors import RDFParser
-from ckanext.dcat.profiles import DCAT, DCT, ADMS
+from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
+                                   GEOJSON_IMT)
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
 
 
-class TestEuroDCATAPProfileParsing(object):
+class BaseParseTest(object):
+
+    def _extras(self, dataset):
+        extras = {}
+        for extra in dataset.get('extras'):
+            extras[extra['key']] = extra['value']
+        return extras
 
     def _get_file_contents(self, file_name):
         path = os.path.join(os.path.dirname(__file__),
@@ -28,6 +35,9 @@ class TestEuroDCATAPProfileParsing(object):
                             file_name)
         with open(path, 'r') as f:
             return f.read()
+
+
+class TestEuroDCATAPProfileParsing(BaseParseTest):
 
     def test_dataset_all_fields(self):
 
@@ -387,6 +397,8 @@ class TestEuroDCATAPProfileParsing(object):
         else:
             eq_(resource['format'], u'Comma Separated Values')
 
+
+
     def test_catalog_xml_rdf(self):
 
         contents = self._get_file_contents('catalog.rdf')
@@ -480,3 +492,234 @@ class TestEuroDCATAPProfileParsing(object):
         eq_(_get_extra_value('dcat_publisher_name'), 'Publishing Organization for dataset 1')
         eq_(_get_extra_value('dcat_publisher_email'), 'contact@some.org')
         eq_(_get_extra_value('language'), 'ca,en,es')
+
+
+class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
+
+    def test_spatial_multiple_dct_spatial_instances(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+
+        location_ref = BNode()
+        g.add((location_ref, RDF.type, DCT.Location))
+        g.add((dataset, DCT.spatial, location_ref))
+        g.add((location_ref,
+               LOCN.geometry,
+               Literal('{"type": "Point", "coordinates": [23, 45]}', datatype=GEOJSON_IMT)))
+
+        location_ref = BNode()
+        g.add((location_ref, RDF.type, DCT.Location))
+        g.add((dataset, DCT.spatial, location_ref))
+        g.add((location_ref, SKOS.prefLabel, Literal('Newark')))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        eq_(extras['spatial_uri'], 'http://geonames/Newark')
+        eq_(extras['spatial_text'], 'Newark')
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
+
+    def test_spatial_one_dct_spatial_instance(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+
+        g.add((spatial_uri, RDF.type, DCT.Location))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('{"type": "Point", "coordinates": [23, 45]}', datatype=GEOJSON_IMT)))
+        g.add((spatial_uri, SKOS.prefLabel, Literal('Newark')))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        eq_(extras['spatial_uri'], 'http://geonames/Newark')
+        eq_(extras['spatial_text'], 'Newark')
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
+
+    def test_spatial_one_dct_spatial_instance_no_uri(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        location_ref = BNode()
+        g.add((dataset, DCT.spatial, location_ref))
+
+        g.add((location_ref, RDF.type, DCT.Location))
+        g.add((location_ref,
+               LOCN.geometry,
+               Literal('{"type": "Point", "coordinates": [23, 45]}', datatype=GEOJSON_IMT)))
+        g.add((location_ref, SKOS.prefLabel, Literal('Newark')))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        assert_true('spatial_uri' not in extras)
+        eq_(extras['spatial_text'], 'Newark')
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
+
+
+    def test_spatial_rdfs_label(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+
+        g.add((spatial_uri, RDF.type, DCT.Location))
+        g.add((spatial_uri, RDFS.label, Literal('Newark')))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        eq_(extras['spatial_text'], 'Newark')
+
+    def test_spatial_both_geojson_and_wkt(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+
+        g.add((spatial_uri, RDF.type, DCT.Location))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('{"type": "Point", "coordinates": [23, 45]}', datatype=GEOJSON_IMT)))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('POINT (67 89)', datatype=GSP.wktLiteral)))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
+
+    def test_spatial_wkt_only(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+
+        g.add((spatial_uri, RDF.type, DCT.Location))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('POINT (67 89)', datatype=GSP.wktLiteral)))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+        # NOTE: geomet returns floats for coordinates on WKT -> GeoJSON
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [67.0, 89.0]}')
+
+    def test_spatial_wrong_geometries(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+
+        g.add((spatial_uri, RDF.type, DCT.Location))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('Not GeoJSON', datatype=GEOJSON_IMT)))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('Not WKT', datatype=GSP.wktLiteral)))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        assert_true('spatial' not in extras)
+
+    def test_spatial_literal_only(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        g.add((dataset, DCT.spatial, Literal('Newark')))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        eq_(extras['spatial_text'], 'Newark')
+        assert_true('spatial_uri' not in extras)
+        assert_true('spatial' not in extras)
+
+    def test_spatial_uri_only(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_uri = URIRef('http://geonames/Newark')
+        g.add((dataset, DCT.spatial, spatial_uri))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        eq_(extras['spatial_uri'], 'http://geonames/Newark')
+        assert_true('spatial_text' not in extras)
+        assert_true('spatial' not in extras)
