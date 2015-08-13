@@ -11,6 +11,10 @@ from ckanext.dcat.logic import (dcat_dataset_show,
 from ckanext.dcat.utils import catalog_uri
 
 
+DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
+CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
+
+
 class DCATPlugin(p.SingletonPlugin):
 
     p.implements(p.IConfigurer, inherit=True)
@@ -25,12 +29,26 @@ class DCATPlugin(p.SingletonPlugin):
         # Check catalog URI on startup to emit a warning if necessary
         catalog_uri()
 
+        # Check custom catalog endpoint
+        custom_endpoint = config.get(CUSTOM_ENDPOINT_CONFIG)
+        if custom_endpoint:
+            if not custom_endpoint[:1] == '/':
+                raise Exception(
+                    '"{0}" should start with a backslash (/)'.format(
+                        CUSTOM_ENDPOINT_CONFIG))
+            if '{_format}' not in custom_endpoint:
+                raise Exception(
+                    '"{0}" should contain {{_format}}'.format(
+                        CUSTOM_ENDPOINT_CONFIG))
+
     # IRoutes
     def before_map(self, _map):
 
         controller = 'ckanext.dcat.controllers:DCATController'
 
-        _map.connect('dcat_catalog', '/catalog.{_format}',
+        _map.connect('dcat_catalog',
+                     config.get('ckanext.dcat.catalog_endpoint',
+                                DEFAULT_CATALOG_ENDPOINT),
                      controller=controller, action='read_catalog',
                      requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
 

@@ -123,6 +123,12 @@ Additionally to the individual dataset representations, the extension also offer
 
     https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_date={date}]
 
+This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
+
+    ckanext.dcat.catalog_endpoint = /dcat/catalog/{_format}
+
+The custom endpoint **must** start with a backslash (`/`) and contain the `{_format}` placeholder.
+
 As described previously, the extension will determine the RDF serialization format returned.
 
 * http://demo.ckan.org/catalog.rdf
@@ -159,6 +165,8 @@ The default number of datasets returned (100) can be modified by CKAN site maint
 The catalog endpoint also supports a `modified_date` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
 
 http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
+
+
 
 ### URIs
 
