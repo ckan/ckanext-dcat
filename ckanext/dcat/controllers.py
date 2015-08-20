@@ -6,13 +6,31 @@ if toolkit.check_ckan_version(min_version='2.1'):
     BaseController = toolkit.BaseController
 else:
     from ckan.lib.base import BaseController
+from ckan.controllers.package import PackageController
+from ckan.controllers.home import HomeController
 
-from ckanext.dcat.utils import CONTENT_TYPES
+from ckanext.dcat.utils import CONTENT_TYPES, parse_accept_header
+
+
+def check_access_header():
+    _format = None
+
+    # Check Accept headers
+    accept_header = toolkit.request.headers.get('Accept', '')
+    if accept_header:
+        _format = parse_accept_header(accept_header)
+    return _format
 
 
 class DCATController(BaseController):
 
-    def read_catalog(self, _format='rdf'):
+    def read_catalog(self, _format=None):
+
+        if not _format:
+            _format = check_access_header()
+
+        if not _format:
+            return HomeController().index()
 
         data_dict = {
             'page': toolkit.request.params.get('page'),
@@ -27,7 +45,13 @@ class DCATController(BaseController):
         except toolkit.ValidationError, e:
             toolkit.abort(409, str(e))
 
-    def read_dataset(self, _id, _format='rdf'):
+    def read_dataset(self, _id, _format=None):
+
+        if not _format:
+            _format = check_access_header()
+
+        if not _format:
+            return PackageController().read(_id)
 
         toolkit.response.headers.update(
             {'Content-type': CONTENT_TYPES[_format]})

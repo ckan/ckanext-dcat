@@ -22,6 +22,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
     @classmethod
     def teardown_class(cls):
+        super(TestEndpoints, cls).teardown_class()
         helpers.reset_db()
 
     def _object_value(self, graph, subject, predicate):
@@ -296,3 +297,114 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
         eq_(self._object_value(g, pagination, HYDRA.lastPage),
             url_for('dcat_catalog', _format='rdf', page=2, host='localhost'))
+
+
+class TestAcceptHeader(helpers.FunctionalTestBase):
+    '''
+    ckanext.dcat.enable_content_negotiation is enabled on test.ini
+    '''
+
+    @classmethod
+    def teardown_class(cls):
+        super(TestAcceptHeader, cls).teardown_class()
+        helpers.reset_db()
+
+    def test_dataset_basic(self):
+
+        dataset = factories.Dataset()
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        headers = {'Accept': 'application/ld+json'}
+
+        app = self._get_test_app()
+
+        response = app.get(url, headers=headers)
+
+        eq_(response.headers['Content-Type'], 'application/ld+json')
+
+    def test_dataset_multiple(self):
+
+        dataset = factories.Dataset()
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        headers = {'Accept': 'text/csv; q=1.0, text/turtle; q=0.6, application/ld+json; q=0.3'}
+
+        app = self._get_test_app()
+
+        response = app.get(url, headers=headers)
+
+        eq_(response.headers['Content-Type'], 'text/turtle')
+
+    def test_dataset_not_supported_returns_html(self):
+
+        dataset = factories.Dataset()
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        headers = {'Accept': 'image/gif'}
+
+        app = self._get_test_app()
+
+        response = app.get(url, headers=headers)
+
+        eq_(response.headers['Content-Type'], 'text/html; charset=utf-8')
+
+    def test_dataset_no_header_returns_html(self):
+
+        dataset = factories.Dataset()
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        eq_(response.headers['Content-Type'], 'text/html; charset=utf-8')
+
+    def test_catalog_basic(self):
+
+        url = url_for('home')
+
+        headers = {'Accept': 'application/ld+json'}
+
+        app = self._get_test_app()
+
+        response = app.get(url, headers=headers)
+
+        eq_(response.headers['Content-Type'], 'application/ld+json')
+
+    def test_catalog_multiple(self):
+
+        url = url_for('home')
+
+        headers = {'Accept': 'text/csv; q=1.0, text/turtle; q=0.6, application/ld+json; q=0.3'}
+
+        app = self._get_test_app()
+
+        response = app.get(url, headers=headers)
+
+        eq_(response.headers['Content-Type'], 'text/turtle')
+
+    def test_catalog_not_supported_returns_html(self):
+
+        url = url_for('home')
+
+        headers = {'Accept': 'image/gif'}
+
+        app = self._get_test_app()
+
+        response = app.get(url, headers=headers)
+
+        eq_(response.headers['Content-Type'], 'text/html; charset=utf-8')
+
+    def test_catalog_no_header_returns_html(self):
+
+        url = url_for('home')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        eq_(response.headers['Content-Type'], 'text/html; charset=utf-8')

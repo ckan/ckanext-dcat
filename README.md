@@ -189,6 +189,27 @@ Whenever possible, URIs are generated for the relevant entities. To try to gener
 Note that if you are using the [RDF DCAT harvester](#rdf-dcat-harvester) to import datasets from other catalogs and these define a proper URI for each dataset or resource, these will be stored as `uri` fields in your instance, and thus used when generating serializations for them.
 
 
+### Content negotiation
+
+The extension supports returning different representations of the datasets based on the value of the `Accept` header ([Content negotiation](https://en.wikipedia.org/wiki/Content_negotiation)).
+
+When enabled, client applications can request a particular format via the `Accept` header on requests to the main dataset page, eg:
+
+    curl https://{ckan-instance-host}/dataset/{dataset-id} -H Accept:text/turtle
+
+    curl https://{ckan-instance-host}/dataset/{dataset-id} -H Accept:"application/rdf+xml; q=1.0, application/ld+json; q=0.6"
+
+This is also supported on the [catalog endpoint](#catalog-endpoint), in this case when making a request to the CKAN root URL (home page). This won't support the pagination and filter parameters:
+
+    curl https://{ckan-instance-host} -H Accept:text/turtle
+
+Note that this feature overrides the CKAN core home page and dataset page controllers, so you probably don't want to enable it if your own extension is also doing it.
+
+To enable content negotiation, set the following configuration option on your ini file:
+
+    ckanext.dcat.enable_content_negotiation = True
+
+
 ## RDF DCAT harvester
 
 The RDF parser described in the previous section has been integrated into a harvester,

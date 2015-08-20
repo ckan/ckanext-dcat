@@ -192,3 +192,57 @@ def rdflib_to_url_format(_format):
         _format = 'jsonld'
 
     return _format
+
+import re
+import operator
+# For parsing {name};q=x and {name} style fields from the accept header
+accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
+
+def parse_accept_header(accept_header=''):
+    '''
+    Parses the supplied accept header and tries to determine
+    which content types we can provide in the response.
+
+    We will always provide html as the default if we can't see anything else
+    but we will also need to take into account the q score.
+
+    Returns the format string if there is a suitable RDF format to return, None
+    otherwise.
+    '''
+    if accept_header is None:
+        accept_header = ''
+
+    accepted_media_types = dict((value, key)
+                                for key, value
+                                in CONTENT_TYPES.iteritems())
+
+    accepted_media_types_wildcard = {}
+    for media_type, _format in accepted_media_types.iteritems():
+        _type = media_type.split('/')[0]
+        if _type not in accepted_media_types_wildcard:
+            accepted_media_types_wildcard[_type] = _format
+
+    acceptable = {}
+    for typ in accept_header.split(','):
+        m = accept_re.match(typ)
+        if m:
+            key = m.groups(0)[0].strip()
+            qscore = m.groups(0)[2] or 1.0
+            acceptable[key] = float(qscore)
+
+    for media_type in sorted(acceptable.iteritems(),
+                             key=operator.itemgetter(1),
+                             reverse=True):
+
+        if media_type[0] == 'text/html':
+            return None
+
+        if media_type[0] in accepted_media_types:
+            return accepted_media_types[media_type[0]]
+
+        if '/' in media_type[0] and media_type[0].split('/')[1] == '*':
+            _type = media_type[0].split('/')[0]
+            if _type in accepted_media_types_wildcard:
+                return accepted_media_types_wildcard[_type]
+
+    return None

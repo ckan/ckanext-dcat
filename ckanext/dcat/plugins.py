@@ -13,6 +13,7 @@ from ckanext.dcat.utils import catalog_uri
 
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
+ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
 
 
 class DCATPlugin(p.SingletonPlugin):
@@ -55,6 +56,16 @@ class DCATPlugin(p.SingletonPlugin):
         _map.connect('dcat_dataset', '/dataset/{_id}.{_format}',
                      controller=controller, action='read_dataset',
                      requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+
+        if p.toolkit.asbool(config.get(ENABLE_CONTENT_NEGOTIATION_CONFIG)):
+
+            _map.connect('home', '/', controller=controller,
+                         action='read_catalog')
+
+            _map.connect('dataset_read', '/dataset/{_id}',
+                         controller=controller, action='read_dataset',
+                         ckan_icon='sitemap')
+
         return _map
 
     # IActions
