@@ -130,7 +130,7 @@ class RDFParser(RDFProcessor):
         # Apparently there is no single way of catching exceptions from all
         # rdflib parsers at once, so if you use a new one and the parsing
         # exceptions are not cached, add them here.
-        except (SyntaxError, xml.sax.SAXParseException), e:
+        except (SyntaxError, xml.sax.SAXParseException, rdflib.plugin.PluginException), e:
 
             raise RDFParserException(e)
 

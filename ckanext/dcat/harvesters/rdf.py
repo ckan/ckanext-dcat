@@ -143,7 +143,7 @@ class DCATRDFHarvester(DCATHarvester):
             if not url:
                 return False
 
-        content = self._get_content(url, harvest_job, 1)
+        content, content_format = self._get_content(url, harvest_job, 1)
 
         # TODO: store content?
         for harvester in p.PluginImplementations(IDCATRDFHarvester):
@@ -157,9 +157,9 @@ class DCATRDFHarvester(DCATHarvester):
 
         # TODO: profiles conf
         parser = RDFParser()
-        # TODO: format conf
+
         try:
-            parser.parse(content)
+            parser.parse(content, _format=content_format)
         except RDFParserException, e:
             self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
             return False

@@ -221,7 +221,11 @@ to allow automatic import of datasets from remote sources. To enable the RDF har
 The harvester will download the remote file, extract all datasets using the parser and create or update actual CKAN datasets based on that.
 It will also handle deletions, ie if a dataset is not present any more in the DCAT dump anymore it will get deleted from CKAN.
 
-*TODO*: configure formats and profiles.
+The harvester will look at the `content-type` HTTP header field to determine the used RDF format. Any format understood by the [RDFLib](https://rdflib.readthedocs.org/en/stable/plugin_parsers.html) library can be parsed. It is possible to override this functionality and provide a specific format using the harvester configuration. This is useful when the server does not return the correct `content-type` or when harvesting a file on the local file system without a proper extension. The harvester configuration is a JSON object that you fill into the harvester configuration form field.
+
+    {"rdf_format":"text/turtle"}
+
+*TODO*: configure profiles.
 
 ### Extending the RDF harvester
 
