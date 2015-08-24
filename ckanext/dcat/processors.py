@@ -127,6 +127,8 @@ class RDFParser(RDFProcessor):
         '''
 
         _format = url_to_rdflib_format(_format)
+        if _format == 'pretty-xml':
+            _format = 'xml'
 
         try:
             self.g.parse(data=data, format=_format)
