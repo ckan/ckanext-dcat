@@ -125,6 +125,9 @@ class RDFParser(RDFProcessor):
 
         Returns nothing.
         '''
+
+        _format = url_to_rdflib_format(_format)
+
         try:
             self.g.parse(data=data, format=_format)
         # Apparently there is no single way of catching exceptions from all
