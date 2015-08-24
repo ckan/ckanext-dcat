@@ -344,20 +344,21 @@ class RDFProfile(object):
         imt = None
         label = None
 
+        imt = self._object_value(distribution, DCAT.mediaType)
+
         _format = self._object(distribution, DCT['format'])
         if isinstance(_format, Literal):
-            if '/' in _format:
+            if not imt and '/' in _format:
                 imt = unicode(_format)
             else:
                 label = unicode(_format)
         elif isinstance(_format, (BNode, URIRef)):
             if self._object(_format, RDF.type) == DCT.IMT:
-                imt = self.g.value(_format, default=None)
-                label = self.g.label(_format, default=None)
+                if not imt:
+                    imt = unicode(self.g.value(_format, default=None))
+                label = unicode(self.g.label(_format, default=None))
 
-        imt = self._object_value(distribution, DCAT.mediaType)
-
-        if (normalize_ckan_format and
+        if ((imt or label) and normalize_ckan_format and
                 toolkit.check_ckan_version(min_version='2.3')):
             import ckan.config
             from ckan.lib import helpers

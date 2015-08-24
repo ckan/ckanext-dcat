@@ -397,7 +397,34 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         else:
             eq_(resource['format'], u'Comma Separated Values')
 
+    def test_distribution_format_IMT_field(self):
+        g = Graph()
 
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+
+        imt = BNode()
+
+        g.add((imt, RDF.type, DCT.IMT))
+        g.add((imt, RDF.value, Literal('text/turtle')))
+        g.add((imt, RDFS.label, Literal('Turtle')))
+
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCT['format'], imt))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'Turtle')
+        eq_(resource['mimetype'], u'text/turtle')
 
     def test_catalog_xml_rdf(self):
 
