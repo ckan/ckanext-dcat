@@ -80,7 +80,9 @@ class DCATHarvester(HarvesterBase):
                     self._save_gather_error('Remote file is too big.', harvest_job)
                     return None, None
 
-            _content_format = _content_format or r.headers.get('content-type').split(";", 1)[0]
+            if _content_format is None and r.headers.get('content-type'):
+                _content_format = r.headers.get('content-type').split(";", 1)[0]
+
             return content, _content_format
 
         except requests.exceptions.HTTPError, error:
