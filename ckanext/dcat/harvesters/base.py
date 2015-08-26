@@ -13,6 +13,7 @@ from ckan import model
 
 from ckanext.harvest.harvesters import HarvesterBase
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
+from ckanext.dcat.processors import RDFParserException, RDFParser
 
 
 log = logging.getLogger(__name__)
@@ -26,6 +27,21 @@ class DCATHarvester(HarvesterBase):
     force_import = False
 
     _user_name = None
+
+    def validate_config(self, source_config):
+        if not source_config:
+            return source_config
+
+        source_config_obj = json.loads(source_config)
+        if 'rdf_format' in source_config_obj:
+            rdf_format = source_config_obj['rdf_format']
+            if not isinstance(rdf_format, basestring):
+                raise ValueError('rdf_format must be a string')
+            supported_formats = RDFParser().supported_formats()
+            if rdf_format not in supported_formats:
+                raise ValueError('rdf_format should be one of: ' + ", ".join(supported_formats))
+
+        return source_config
 
     def _get_content(self, url, harvest_job, page=1):
         _content_format = None
