@@ -1,7 +1,6 @@
 import os
 import uuid
 import logging
-import json
 
 import requests
 import rdflib
@@ -13,7 +12,6 @@ from ckan import model
 
 from ckanext.harvest.harvesters import HarvesterBase
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
-from ckanext.dcat.processors import RDFParserException, RDFParser
 
 
 log = logging.getLogger(__name__)
@@ -28,33 +26,25 @@ class DCATHarvester(HarvesterBase):
 
     _user_name = None
 
-    def validate_config(self, source_config):
-        if not source_config:
-            return source_config
 
-        source_config_obj = json.loads(source_config)
-        if 'rdf_format' in source_config_obj:
-            rdf_format = source_config_obj['rdf_format']
-            if not isinstance(rdf_format, basestring):
-                raise ValueError('rdf_format must be a string')
-            supported_formats = RDFParser().supported_formats()
-            if rdf_format not in supported_formats:
-                raise ValueError('rdf_format should be one of: ' + ", ".join(supported_formats))
+    def _get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+        '''
+        Gets the content and type of the given url.
 
-        return source_config
-
-    def _get_content(self, url, harvest_job, page=1):
-        _content_format = None
-        if harvest_job.source.config:
-            _content_format = json.loads(harvest_job.source.config).get("rdf_format")
+        :param url: a web url (starting with http) or a local path
+        :param harvest_job: the job, used for error reporting
+        :param page: adds paging to the url
+        :param content_type: will be returned as type
+        :return: a tuple containing the content and content-type
+        '''
 
         if not url.lower().startswith('http'):
             # Check local file
             if os.path.exists(url):
                 with open(url, 'r') as f:
                     content = f.read()
-                _content_format = _content_format or rdflib.util.guess_format(url)
-                return content, _content_format
+                content_type = content_type or rdflib.util.guess_format(url)
+                return content, content_type
             else:
                 self._save_gather_error('Could not get content for this url', harvest_job)
                 return None, None
@@ -96,10 +86,10 @@ class DCATHarvester(HarvesterBase):
                     self._save_gather_error('Remote file is too big.', harvest_job)
                     return None, None
 
-            if _content_format is None and r.headers.get('content-type'):
-                _content_format = r.headers.get('content-type').split(";", 1)[0]
+            if content_type is None and r.headers.get('content-type'):
+                content_type = r.headers.get('content-type').split(";", 1)[0]
 
-            return content, _content_format
+            return content, content_type
 
         except requests.exceptions.HTTPError, error:
             if page > 1 and error.response.status_code == 404:
@@ -199,7 +189,7 @@ class DCATHarvester(HarvesterBase):
         while True:
 
             try:
-                content = self._get_content(url, harvest_job, page)
+                content, content_type = self._get_content_and_type(url, harvest_job, page)
             except requests.exceptions.HTTPError, error:
                 if error.response.status_code == 404:
                     if page > 1:
