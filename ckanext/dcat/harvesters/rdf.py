@@ -127,6 +127,21 @@ class DCATRDFHarvester(DCATHarvester):
 
         return object_ids
 
+    def validate_config(self, source_config):
+        if not source_config:
+            return source_config
+
+        source_config_obj = json.loads(source_config)
+        if 'rdf_format' in source_config_obj:
+            rdf_format = source_config_obj['rdf_format']
+            if not isinstance(rdf_format, basestring):
+                raise ValueError('rdf_format must be a string')
+            supported_formats = RDFParser().supported_formats()
+            if rdf_format not in supported_formats:
+                raise ValueError('rdf_format should be one of: ' + ", ".join(supported_formats))
+
+        return source_config
+
     def gather_stage(self, harvest_job):
 
         log.debug('In DCATRDFHarvester gather_stage')
@@ -143,7 +158,10 @@ class DCATRDFHarvester(DCATHarvester):
             if not url:
                 return False
 
-        content = self._get_content(url, harvest_job, 1)
+        rdf_format = None
+        if harvest_job.source.config:
+            rdf_format = json.loads(harvest_job.source.config).get("rdf_format")
+        content, rdf_format = self._get_content_and_type(url, harvest_job, 1, content_type=rdf_format)
 
         # TODO: store content?
         for harvester in p.PluginImplementations(IDCATRDFHarvester):
@@ -157,9 +175,9 @@ class DCATRDFHarvester(DCATHarvester):
 
         # TODO: profiles conf
         parser = RDFParser()
-        # TODO: format conf
+
         try:
-            parser.parse(content)
+            parser.parse(content, _format=rdf_format)
         except RDFParserException, e:
             self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
             return False

@@ -7,6 +7,7 @@ from pkg_resources import iter_entry_points
 from pylons import config
 
 import rdflib
+import rdflib.parser
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDF
 
@@ -135,9 +136,19 @@ class RDFParser(RDFProcessor):
         # Apparently there is no single way of catching exceptions from all
         # rdflib parsers at once, so if you use a new one and the parsing
         # exceptions are not cached, add them here.
-        except (SyntaxError, xml.sax.SAXParseException), e:
+        # PluginException indicates that an unknown format was passed.
+        except (SyntaxError, xml.sax.SAXParseException,
+                rdflib.plugin.PluginException), e:
 
             raise RDFParserException(e)
+
+    def supported_formats(self):
+        '''
+        Returns a list of all formats supported by this processor.
+        '''
+        return sorted([plugin.name
+                       for plugin
+                       in rdflib.plugin.plugins(kind=rdflib.parser.Parser)])
 
     def datasets(self):
         '''

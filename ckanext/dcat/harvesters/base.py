@@ -3,6 +3,7 @@ import uuid
 import logging
 
 import requests
+import rdflib
 
 from ckan import plugins as p
 from ckan import logic
@@ -25,16 +26,28 @@ class DCATHarvester(HarvesterBase):
 
     _user_name = None
 
-    def _get_content(self, url, harvest_job, page=1):
+
+    def _get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+        '''
+        Gets the content and type of the given url.
+
+        :param url: a web url (starting with http) or a local path
+        :param harvest_job: the job, used for error reporting
+        :param page: adds paging to the url
+        :param content_type: will be returned as type
+        :return: a tuple containing the content and content-type
+        '''
+
         if not url.lower().startswith('http'):
             # Check local file
             if os.path.exists(url):
                 with open(url, 'r') as f:
                     content = f.read()
-                return content
+                content_type = content_type or rdflib.util.guess_format(url)
+                return content, content_type
             else:
                 self._save_gather_error('Could not get content for this url', harvest_job)
-                return None
+                return None, None
 
         try:
             if page > 1:
@@ -58,7 +71,7 @@ class DCATHarvester(HarvesterBase):
                     file size: {allowed}, Content-Length: {actual}.'''.format(
                     allowed=self.MAX_FILE_SIZE, actual=cl)
                 self._save_gather_error(msg, harvest_job)
-                return None
+                return None, None
 
             if not did_get:
                 r = requests.get(url, stream=True)
@@ -71,9 +84,12 @@ class DCATHarvester(HarvesterBase):
 
                 if length >= self.MAX_FILE_SIZE:
                     self._save_gather_error('Remote file is too big.', harvest_job)
-                    return None
+                    return None, None
 
-            return content
+            if content_type is None and r.headers.get('content-type'):
+                content_type = r.headers.get('content-type').split(";", 1)[0]
+
+            return content, content_type
 
         except requests.exceptions.HTTPError, error:
             if page > 1 and error.response.status_code == 404:
@@ -83,16 +99,16 @@ class DCATHarvester(HarvesterBase):
             msg = 'Could not get content. Server responded with %s %s' % (
                 error.response.status_code, error.response.reason)
             self._save_gather_error(msg, harvest_job)
-            return None
+            return None, None
         except requests.exceptions.ConnectionError, error:
             msg = '''Could not get content because a
                                 connection error occurred. %s''' % error
             self._save_gather_error(msg, harvest_job)
-            return None
+            return None, None
         except requests.exceptions.Timeout, error:
             msg = 'Could not get content because the connection timed out.'
             self._save_gather_error(msg, harvest_job)
-            return None
+            return None, None
 
     def _get_user_name(self):
         if self._user_name:
@@ -173,7 +189,7 @@ class DCATHarvester(HarvesterBase):
         while True:
 
             try:
-                content = self._get_content(url, harvest_job, page)
+                content, content_type = self._get_content_and_type(url, harvest_job, page)
             except requests.exceptions.HTTPError, error:
                 if error.response.status_code == 404:
                     if page > 1:

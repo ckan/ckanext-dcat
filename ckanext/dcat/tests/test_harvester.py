@@ -22,20 +22,20 @@ eq_ = nose.tools.eq_
 
 # Start monkey-patch
 
-original_get_content = DCATRDFHarvester._get_content
+original_get_content_and_type = DCATRDFHarvester._get_content_and_type
 
 
-def _patched_get_content(self, url, harvest_job, page=1):
+def _patched_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
 
     httpretty.enable()
 
-    value = original_get_content(self, url, harvest_job, page)
+    value1, value2 = original_get_content_and_type(self, url, harvest_job, page, content_type)
 
     httpretty.disable()
 
-    return value
+    return value1, value2
 
-DCATRDFHarvester._get_content = _patched_get_content
+DCATRDFHarvester._get_content_and_type = _patched_get_content_and_type
 
 # End monkey-patch
 
@@ -148,10 +148,10 @@ class FunctionalHarvestTest(object):
         cls.fetch_consumer = queue.get_consumer('ckan.harvest.fetch.test',
                                                 'harvest_object_id')
 
-        cls.mock_url = 'http://some.dcat.file.rdf'
-
         # Minimal remote RDF file
-        cls.remote_file = '''<?xml version="1.0" encoding="utf-8" ?>
+        cls.rdf_mock_url = 'http://some.dcat.file.rdf'
+        cls.rdf_content_type = 'application/rdf+xml'
+        cls.rdf_content = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
          xmlns:dcat="http://www.w3.org/ns/dcat#"
@@ -171,6 +171,62 @@ class FunctionalHarvestTest(object):
         </dcat:Catalog>
         </rdf:RDF>
         '''
+        cls.rdf_remote_file_small = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset 1</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        </rdf:RDF>
+        '''
+        cls.rdf_remote_file_invalid = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog
+        </rdf:RDF>
+        '''
+
+        #Minimal remote turtle file
+        cls.ttl_mock_url = 'http://some.dcat.file.ttl'
+        cls.ttl_content_type = 'text/turtle'
+        cls.ttl_content = '''@prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dc: <http://purl.org/dc/terms/> .
+        <https://data.some.org/catalog>
+          a dcat:Catalog ;
+          dcat:dataset <https://data.some.org/catalog/datasets/1>, <https://data.some.org/catalog/datasets/2> .
+        <https://data.some.org/catalog/datasets/1>
+          a dcat:Dataset ;
+          dc:title "Example dataset 1" .
+        <https://data.some.org/catalog/datasets/2>
+          a dcat:Dataset ;
+          dc:title "Example dataset 2" .
+          '''
+        cls.ttl_remote_file_small = '''@prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dc: <http://purl.org/dc/terms/> .
+        <https://data.some.org/catalog>
+          a dcat:Catalog ;
+          dcat:dataset <https://data.some.org/catalog/datasets/1>, <https://data.some.org/catalog/datasets/2> .
+        <https://data.some.org/catalog/datasets/1>
+          a dcat:Dataset ;
+          dc:title "Example dataset 1" .
+          '''
+        cls.ttl_remote_file_invalid =  '''@prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dc: <http://purl.org/dc/terms/> .
+        <https://data.some.org/catalog>
+          a dcat:Catalog ;
+        <https://data.some.org/catalog/datasets/1>
+          a dcat:Dataset ;
+          dc:title "Example dataset 1" .
+          '''
+
 
     def setup(self):
 
@@ -182,12 +238,12 @@ class FunctionalHarvestTest(object):
     def teardown(cls):
         h.reset_db()
 
-    def _create_harvest_source(self, **kwargs):
+    def _create_harvest_source(self, mock_url, **kwargs):
 
         source_dict = {
             'title': 'Test RDF DCAT Source',
             'name': 'test-rdf-dcat-source',
-            'url': self.mock_url,
+            'url': mock_url,
             'source_type': 'dcat_rdf',
         }
 
@@ -261,18 +317,37 @@ class FunctionalHarvestTest(object):
 
 class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
-    def test_harvest_create(self):
+    def test_harvest_create_rdf(self):
+
+        self._test_harvest_create(self.rdf_mock_url,
+                                  self.rdf_content,
+                                  self.rdf_content_type)
+
+    def test_harvest_create_ttl(self):
+
+        self._test_harvest_create(self.ttl_mock_url,
+                                  self.ttl_content,
+                                  self.ttl_content_type)
+
+    def test_harvest_create_with_config_content_Type(self):
+
+        self._test_harvest_create(self.ttl_mock_url,
+                                  self.ttl_content,
+                                  'text/plain',
+                                  config='{"rdf_format":"text/turtle"}')
+
+    def _test_harvest_create(self, url, content, content_type, **kwargs):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.mock_url,
-                               body=self.remote_file)
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.mock_url,
-                               status=405)
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
 
-        harvest_source = self._create_harvest_source()
+        harvest_source = self._create_harvest_source(url, **kwargs)
 
         self._run_full_job(harvest_source['id'], num_objects=2)
 
@@ -286,18 +361,29 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
             assert result['title'] in ('Example dataset 1',
                                        'Example dataset 2')
 
-    def test_harvest_update(self):
+    def test_harvest_update_rdf(self):
 
+        self._test_harvest_update(self.rdf_mock_url,
+                                  self.rdf_content,
+                                  self.rdf_content_type)
+
+    def test_harvest_update_ttl(self):
+
+        self._test_harvest_update(self.ttl_mock_url,
+                                  self.ttl_content,
+                                  self.ttl_content_type)
+
+    def _test_harvest_update(self, url, content, content_type):
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.mock_url,
-                               body=self.remote_file)
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.mock_url,
-                               status=405)
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
 
-        harvest_source = self._create_harvest_source()
+        harvest_source = self._create_harvest_source(url)
 
         # First run, will create two datasets as previously tested
         self._run_full_job(harvest_source['id'], num_objects=2)
@@ -306,10 +392,10 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         self._run_jobs()
 
         # Mock an update in the remote file
-        new_file = self.remote_file.replace('Example dataset 1',
-                                            'Example dataset 1 (updated)')
-        httpretty.register_uri(httpretty.GET, self.mock_url,
-                               body=new_file)
+        new_file = content.replace('Example dataset 1',
+                                   'Example dataset 1 (updated)')
+        httpretty.register_uri(httpretty.GET, url,
+                               body=new_file, content_type=content_type)
 
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
@@ -325,18 +411,32 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
             assert result['title'] in ('Example dataset 1 (updated)',
                                        'Example dataset 2')
 
-    def test_harvest_delete(self):
+    def test_harvest_delete_rdf(self):
+
+        self._test_harvest_delete(self.rdf_mock_url,
+                                  self.rdf_content,
+                                  self.rdf_remote_file_small,
+                                  self.rdf_content_type)
+
+    def test_harvest_delete_ttl(self):
+
+        self._test_harvest_delete(self.ttl_mock_url,
+                                  self.ttl_content,
+                                  self.ttl_remote_file_small,
+                                  self.ttl_content_type)
+
+    def _test_harvest_delete(self, url, content, content_small, content_type):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.mock_url,
-                               body=self.remote_file)
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.mock_url,
-                               status=405)
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
 
-        harvest_source = self._create_harvest_source()
+        harvest_source = self._create_harvest_source(url)
 
         # First run, will create two datasets as previously tested
         self._run_full_job(harvest_source['id'], num_objects=2)
@@ -345,23 +445,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         self._run_jobs()
 
         # Mock a deletion in the remote file
-        new_file = '''<?xml version="1.0" encoding="utf-8" ?>
-        <rdf:RDF
-         xmlns:dct="http://purl.org/dc/terms/"
-         xmlns:dcat="http://www.w3.org/ns/dcat#"
-         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <dcat:Catalog rdf:about="https://data.some.org/catalog">
-          <dcat:dataset>
-            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
-              <dct:title>Example dataset 1</dct:title>
-            </dcat:Dataset>
-          </dcat:dataset>
-        </dcat:Catalog>
-        </rdf:RDF>
-        '''
-        httpretty.register_uri(httpretty.GET, self.mock_url,
-                               body=new_file)
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content_small, content_type=content_type)
 
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
@@ -374,26 +459,30 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         eq_(results['results'][0]['title'], 'Example dataset 1')
 
-    def test_harvest_bad_format(self):
+    def test_harvest_bad_format_rdf(self):
 
-        bad_format_file = '''<?xml version="1.0" encoding="utf-8" ?>
-        <rdf:RDF
-         xmlns:dcat="http://www.w3.org/ns/dcat#"
-         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <dcat:Catalog
-        </rdf:RDF>
-        '''
+        self._test_harvest_bad_format(self.rdf_mock_url,
+                                      self.rdf_remote_file_invalid,
+                                      self.rdf_content_type)
+
+    def test_harvest_bad_format_ttl(self):
+
+        self._test_harvest_bad_format(self.ttl_mock_url,
+                                      self.ttl_remote_file_invalid,
+                                      self.ttl_content_type)
+
+    def _test_harvest_bad_format(self, url, bad_content, content_type):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.mock_url,
-                               body=bad_format_file)
+        httpretty.register_uri(httpretty.GET, url,
+                               body=bad_content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.mock_url,
-                               status=405)
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
 
-        harvest_source = self._create_harvest_source()
+        harvest_source = self._create_harvest_source(url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -444,7 +533,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         plugin = p.get_plugin('test_rdf_harvester')
 
-        harvest_source = self._create_harvest_source()
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -459,14 +548,16 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Mock the GET request to get the file
         httpretty.register_uri(httpretty.GET, source_url,
-                               body=self.remote_file)
+                               body=self.rdf_content,
+                               content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         httpretty.register_uri(httpretty.HEAD, source_url,
-                               status=405)
+                               status=405,
+                               content_type=self.rdf_content_type)
 
-        harvest_source = self._create_harvest_source(url=source_url)
+        harvest_source = self._create_harvest_source(source_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -500,14 +591,16 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Mock the GET request to get the file
         httpretty.register_uri(httpretty.GET, source_url,
-                               body=self.remote_file)
+                               body=self.rdf_content,
+                               content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         httpretty.register_uri(httpretty.HEAD, source_url,
-                               status=405)
+                               status=405,
+                               content_type=self.rdf_content_type)
 
-        harvest_source = self._create_harvest_source(url=source_url)
+        harvest_source = self._create_harvest_source(source_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -534,14 +627,14 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         plugin = p.get_plugin('test_rdf_harvester')
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.mock_url)
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.mock_url,
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url,
                                status=405)
 
-        harvest_source = self._create_harvest_source()
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -556,14 +649,16 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Mock the GET request to get the file
         httpretty.register_uri(httpretty.GET, source_url,
-                               body='return.empty.content')
+                               body='return.empty.content',
+                               content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         httpretty.register_uri(httpretty.HEAD, source_url,
-                               status=405)
+                               status=405,
+                               content_type=self.rdf_content_type)
 
-        harvest_source = self._create_harvest_source(url=source_url)
+        harvest_source = self._create_harvest_source(source_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -598,14 +693,16 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Mock the GET request to get the file
         httpretty.register_uri(httpretty.GET, source_url,
-                               body='return.errors')
+                               body='return.errors',
+                               content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         httpretty.register_uri(httpretty.HEAD, source_url,
-                               status=405)
+                               status=405,
+                               content_type=self.rdf_content_type)
 
-        harvest_source = self._create_harvest_source(url=source_url)
+        harvest_source = self._create_harvest_source(source_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
@@ -627,6 +724,25 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         eq_('Error 1', last_job_status['gather_error_summary'][0][0])
         eq_('Error 2', last_job_status['gather_error_summary'][1][0])
+
+
+class TestDCATRDFHarvester(object):
+
+    def test_validates_correct_config(self):
+        harvester = DCATRDFHarvester()
+
+        for config in ['{}', '{"rdf_format":"text/turtle"}']:
+            eq_(config, harvester.validate_config(config))
+
+    def test_does_not_validate_incorrect_config(self):
+        harvester = DCATRDFHarvester()
+
+        for config in ['invalid', '{invalid}', '{rdf_format:invalid}']:
+            try:
+                harvester.validate_config(config)
+                assert False
+            except ValueError:
+                assert True
 
 
 class TestIDCATRDFHarvester(object):
