@@ -132,7 +132,8 @@ class RDFParser(RDFProcessor):
         # rdflib parsers at once, so if you use a new one and the parsing
         # exceptions are not cached, add them here.
         # PluginException indicates that an unknown format was passed.
-        except (SyntaxError, xml.sax.SAXParseException, rdflib.plugin.PluginException), e:
+        except (SyntaxError, xml.sax.SAXParseException,
+                rdflib.plugin.PluginException), e:
 
             raise RDFParserException(e)
 
@@ -140,7 +141,9 @@ class RDFParser(RDFProcessor):
         '''
         Returns a list of all formats supported by this processor.
         '''
-        return sorted([plugin.name for plugin in rdflib.plugin.plugins(kind=rdflib.parser.Parser)])
+        return sorted([plugin.name
+                       for plugin
+                       in rdflib.plugin.plugins(kind=rdflib.parser.Parser)])
 
     def datasets(self):
         '''
