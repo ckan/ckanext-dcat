@@ -22,20 +22,20 @@ eq_ = nose.tools.eq_
 
 # Start monkey-patch
 
-original_get_content = DCATRDFHarvester._get_content
+original_get_content_and_type = DCATRDFHarvester._get_content_and_type
 
 
-def _patched_get_content(self, url, harvest_job, page=1):
+def _patched_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
 
     httpretty.enable()
 
-    value1, value2 = original_get_content(self, url, harvest_job, page)
+    value1, value2 = original_get_content_and_type(self, url, harvest_job, page, content_type)
 
     httpretty.disable()
 
     return value1, value2
 
-DCATRDFHarvester._get_content = _patched_get_content
+DCATRDFHarvester._get_content_and_type = _patched_get_content_and_type
 
 # End monkey-patch
 
@@ -724,6 +724,25 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         eq_('Error 1', last_job_status['gather_error_summary'][0][0])
         eq_('Error 2', last_job_status['gather_error_summary'][1][0])
+
+
+class TestDCATRDFHarvester(object):
+
+    def test_validates_correct_config(self):
+        harvester = DCATRDFHarvester()
+
+        for config in ['{}', '{"rdf_format":"text/turtle"}']:
+            eq_(config, harvester.validate_config(config))
+
+    def test_does_not_validate_incorrect_config(self):
+        harvester = DCATRDFHarvester()
+
+        for config in ['invalid', '{invalid}', '{rdf_format:invalid}']:
+            try:
+                harvester.validate_config(config)
+                assert False
+            except ValueError:
+                assert True
 
 
 class TestIDCATRDFHarvester(object):

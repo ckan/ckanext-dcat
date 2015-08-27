@@ -1,7 +1,6 @@
 import os
 import uuid
 import logging
-import json
 
 import requests
 import rdflib
@@ -27,18 +26,25 @@ class DCATHarvester(HarvesterBase):
 
     _user_name = None
 
-    def _get_content(self, url, harvest_job, page=1):
-        _content_format = None
-        if harvest_job.source.config:
-            _content_format = json.loads(harvest_job.source.config).get("rdf_format")
+
+    def _get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+        '''
+        Gets the content and type of the given url.
+
+        :param url: a web url (starting with http) or a local path
+        :param harvest_job: the job, used for error reporting
+        :param page: adds paging to the url
+        :param content_type: will be returned as type
+        :return: a tuple containing the content and content-type
+        '''
 
         if not url.lower().startswith('http'):
             # Check local file
             if os.path.exists(url):
                 with open(url, 'r') as f:
                     content = f.read()
-                _content_format = _content_format or rdflib.util.guess_format(url)
-                return content, _content_format
+                content_type = content_type or rdflib.util.guess_format(url)
+                return content, content_type
             else:
                 self._save_gather_error('Could not get content for this url', harvest_job)
                 return None, None
@@ -80,8 +86,10 @@ class DCATHarvester(HarvesterBase):
                     self._save_gather_error('Remote file is too big.', harvest_job)
                     return None, None
 
-            _content_format = _content_format or r.headers.get('content-type').split(";", 1)[0]
-            return content, _content_format
+            if content_type is None and r.headers.get('content-type'):
+                content_type = r.headers.get('content-type').split(";", 1)[0]
+
+            return content, content_type
 
         except requests.exceptions.HTTPError, error:
             if page > 1 and error.response.status_code == 404:
@@ -181,7 +189,7 @@ class DCATHarvester(HarvesterBase):
         while True:
 
             try:
-                content = self._get_content(url, harvest_job, page)
+                content, content_type = self._get_content_and_type(url, harvest_job, page)
             except requests.exceptions.HTTPError, error:
                 if error.response.status_code == 404:
                     if page > 1:
