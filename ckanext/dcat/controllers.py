@@ -55,8 +55,14 @@ class DCATController(BaseController):
 
         toolkit.response.headers.update(
             {'Content-type': CONTENT_TYPES[_format]})
-        return toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
-                                                            'format': _format})
+
+        try:
+            result = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
+                'format': _format})
+        except toolkit.ObjectNotFound:
+            toolkit.abort(404)
+
+        return result
 
     def dcat_json(self):
 

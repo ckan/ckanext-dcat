@@ -180,6 +180,13 @@ class TestEndpoints(helpers.FunctionalTestBase):
         eq_(dcat_dataset['title'], dataset['title'])
         eq_(dcat_dataset['notes'], dataset['notes'])
 
+    def test_dataset_not_found(self):
+        import uuid
+
+        url = url_for('dcat_dataset', _id=str(uuid.uuid4()), _format='n3')
+        app = self._get_test_app()
+        app.get(url, status=404)
+
     def test_catalog_default(self):
 
         for i in xrange(4):
