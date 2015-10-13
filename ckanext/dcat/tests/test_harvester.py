@@ -98,6 +98,33 @@ class TestDCATHarvestUnit(object):
 
         eq_(guid, 'dataset_dcat_id')
 
+    def test_get_guid_uri_none(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'uri', 'value': None},
+                {'key': 'dcat_identifier', 'value': 'dataset_dcat_id'},
+            ]
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'dataset_dcat_id')
+
+    def test_get_guid_dcat_identifier_none(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'dcat_identifier', 'value': None},
+            ]
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'test-dataset')
+
     def test_get_guid_source_url_name(self):
 
         dataset = {

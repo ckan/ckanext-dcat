@@ -42,15 +42,13 @@ class DCATRDFHarvester(DCATHarvester):
 
          Returns None if no guid could be decided.
         '''
-
         guid = None
-
         for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'uri':
+            if extra['key'] == 'uri' and extra['value']:
                 return extra['value']
 
         for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'dcat_identifier':
+            if extra['key'] == 'dcat_identifier' and extra['value']:
                 return extra['value']
 
         if dataset_dict.get('name'):
@@ -197,6 +195,7 @@ class DCATRDFHarvester(DCATHarvester):
 
             # Try to get a unique identifier for the harvested dataset
             guid = self._get_guid(dataset)
+
             if not guid:
                 log.error('Could not get a unique identifier for dataset: {0}'.format(dataset))
                 continue
