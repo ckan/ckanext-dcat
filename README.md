@@ -81,7 +81,7 @@ When the `dcat` plugin is enabled, the following RDF endpoints are available on 
 
 RDF representations of a particular dataset can accessed using the following endpoint:
 
-    https://{ckan-instance-host}/datasets/{dataset-id}.{format}
+    https://{ckan-instance-host}/dataset/{dataset-id}.{format}
 
 The extension will determine the RDF serialization format returned. The currently supported values are:
 
