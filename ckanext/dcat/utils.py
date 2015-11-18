@@ -76,7 +76,7 @@ def dataset_uri(dataset_dict):
     uri = dataset_dict.get('uri')
     if not uri:
         for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'uri':
+            if extra['key'] == 'uri' and extra['value'] != 'None':
                 uri = extra['value']
                 break
     if not uri and dataset_dict.get('id'):
@@ -109,7 +109,7 @@ def resource_uri(resource_dict):
     '''
 
     uri = resource_dict.get('uri')
-    if not uri:
+    if not uri or uri == 'None':
         dataset_id = dataset_id_from_resource(resource_dict)
 
         uri = '{0}/dataset/{1}/resource/{2}'.format(catalog_uri().rstrip('/'),
