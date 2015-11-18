@@ -85,6 +85,19 @@ class TestDCATHarvestUnit(object):
 
         eq_(guid, 'http://dataset/uri')
 
+    def test_get_guid_identifier(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'identifier', 'value': 'dataset_dcat_id'},
+            ]
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'dataset_dcat_id')
+
     def test_get_guid_dcat_identifier(self):
 
         dataset = {

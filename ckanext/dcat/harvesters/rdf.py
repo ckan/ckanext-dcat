@@ -48,6 +48,10 @@ class DCATRDFHarvester(DCATHarvester):
                 return extra['value']
 
         for extra in dataset_dict.get('extras', []):
+            if extra['key'] == 'identifier' and extra['value']:
+                return extra['value']
+
+        for extra in dataset_dict.get('extras', []):
             if extra['key'] == 'dcat_identifier' and extra['value']:
                 return extra['value']
 
