@@ -119,8 +119,6 @@ def _search_ckan_datasets(context, data_dict):
     }
 
     search_data_dict['q'] = data_dict.get('q', '*:*')
-    #if('organization' in data_dict):
-    #    search_data_dict['organization'] = data_dict.get('organization')
     search_data_dict['fq'] = data_dict.get('fq')
     search_data_dict['fq_list'] = []
 
