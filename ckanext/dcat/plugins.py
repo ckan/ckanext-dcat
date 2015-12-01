@@ -5,6 +5,7 @@ from ckan import plugins as p
 from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_catalog_show,
                                 dcat_catalog_search,
+                                dcat_organization_show,
                                 dcat_datasets_list,
                                 dcat_auth,
                                 )
@@ -53,6 +54,10 @@ class DCATPlugin(p.SingletonPlugin):
                      controller=controller, action='read_catalog',
                      requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
 
+        _map.connect('dcat_organization', '/organization/{_id}.{_format}',
+                     controller=controller, action='read_organization',
+                     requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+
         _map.connect('dcat_dataset', '/dataset/{_id}.{_format}',
                      controller=controller, action='read_dataset',
                      requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
@@ -72,6 +77,7 @@ class DCATPlugin(p.SingletonPlugin):
     def get_actions(self):
         return {
             'dcat_dataset_show': dcat_dataset_show,
+            'dcat_organization_show': dcat_organization_show,
             'dcat_catalog_show': dcat_catalog_show,
             'dcat_catalog_search': dcat_catalog_search,
         }
@@ -80,6 +86,7 @@ class DCATPlugin(p.SingletonPlugin):
     def get_auth_functions(self):
         return {
             'dcat_dataset_show': dcat_auth,
+            'dcat_organization_show': dcat_auth,
             'dcat_catalog_show': dcat_auth,
             'dcat_catalog_search': dcat_auth,
         }

@@ -8,6 +8,7 @@ else:
     from ckan.lib.base import BaseController
 from ckan.controllers.package import PackageController
 from ckan.controllers.home import HomeController
+from ckan.controllers.organization import OrganizationController
 
 from ckanext.dcat.utils import CONTENT_TYPES, parse_accept_header
 
@@ -44,6 +45,26 @@ class DCATController(BaseController):
             return toolkit.get_action('dcat_catalog_show')({}, data_dict)
         except toolkit.ValidationError, e:
             toolkit.abort(409, str(e))
+
+    def read_organization(self, _id, _format=None):
+
+        if not _format:
+            _format = check_access_header()
+
+        if not _format:
+            return OrganizationController().read(_id)
+
+        toolkit.response.headers.update(
+            {'Content-type': CONTENT_TYPES[_format]})
+
+        try:
+            fq = ' organization:"'+_id+'"'
+            result = toolkit.get_action('dcat_organization_show')({}, {'fq':fq,
+                'format': _format})
+        except toolkit.ObjectNotFound:
+            toolkit.abort(404)
+
+        return result
 
     def read_dataset(self, _id, _format=None):
 
