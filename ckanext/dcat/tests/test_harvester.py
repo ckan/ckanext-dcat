@@ -183,10 +183,8 @@ class FunctionalHarvestTest(object):
     @classmethod
     def setup_class(cls):
 
-        cls.gather_consumer = queue.get_consumer('ckan.harvest.gather.test',
-                                                 'harvest_job_id')
-        cls.fetch_consumer = queue.get_consumer('ckan.harvest.fetch.test',
-                                                'harvest_object_id')
+        cls.gather_consumer = queue.get_gather_consumer()
+        cls.fetch_consumer = queue.get_fetch_consumer()
 
         # Minimal remote RDF file
         cls.rdf_mock_url = 'http://some.dcat.file.rdf'
@@ -267,13 +265,11 @@ class FunctionalHarvestTest(object):
           dc:title "Example dataset 1" .
           '''
 
-
     def setup(self):
 
         harvest_model.setup()
 
-        self.gather_consumer.queue_purge(queue='ckan.harvest.gather.test')
-        self.fetch_consumer.queue_purge(queue='ckan.harvest.fetch.test')
+        queue.purge_queues()
 
     def teardown(cls):
         h.reset_db()
@@ -618,10 +614,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         eq_(last_job_status['status'], 'Finished')
 
-        # We would expect two datasets created, so if no stats we assume the
-        # gather stage was stopped
-
-        eq_(last_job_status['stats'], {})
+        eq_(last_job_status['stats']['added'], 0)
 
     def test_harvest_before_download_errors_get_stored(self):
 
@@ -720,10 +713,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         eq_(last_job_status['status'], 'Finished')
 
-        # We would expect two datasets created, so if no stats we assume the
-        # gather stage was stopped
-
-        eq_(last_job_status['stats'], {})
+        eq_(last_job_status['stats']['added'], 0)
 
     def test_harvest_after_download_errors_get_stored(self):
 
