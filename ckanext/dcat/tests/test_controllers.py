@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import nose
 
@@ -415,3 +416,42 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
         response = app.get(url)
 
         eq_(response.headers['Content-Type'], 'text/html; charset=utf-8')
+
+
+class TestTranslations(helpers.FunctionalTestBase):
+    '''
+    ckanext.dcat.enable_content_negotiation is enabled on test.ini
+    '''
+
+    @classmethod
+    def teardown_class(cls):
+        super(TestTranslations, cls).teardown_class()
+        helpers.reset_db()
+
+    def test_labels_default(self):
+
+        dataset = factories.Dataset(extras=[
+            {'key': 'version_notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert 'Version notes' in response.body
+
+    def test_labels_translated(self):
+
+        dataset = factories.Dataset(extras=[
+            {'key': 'version_notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert 'Notes de la versió' in response.body

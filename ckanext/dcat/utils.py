@@ -4,6 +4,9 @@ import uuid
 from pylons import config
 
 from ckan import model
+import ckan.plugins.toolkit as toolkit
+
+_ = toolkit._
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +18,43 @@ CONTENT_TYPES = {
     'ttl': 'text/turtle',
     'jsonld': 'application/ld+json',
 }
+
+
+def field_labels():
+    '''
+    Returns a dict with the user friendly translatable field labels that
+    can be used in the frontend.
+    '''
+
+    return {
+        'uri': _('URI'),
+        'guid': _('GUID'),
+        'theme': _('Theme'),
+        'identifier': _('Identifier'),
+        'alternate_identifier': _('Alternate identifier'),
+        'issued': _('Issued'),
+        'modified': _('Modified'),
+        'version_notes': _('Version notes'),
+        'language': _('Language'),
+        'frequency': _('Frequency'),
+        'conforms_to': _('Conforms to'),
+        'spatial_uri': _('Spatial URI'),
+        'temporal_start': _('Start of temporal extent'),
+        'temporal_end': _('End of temporal extent'),
+        'publisher_uri': _('Publisher URI'),
+        'publisher_name': _('Publisher name'),
+        'publisher_email': _('Publisher email'),
+        'publisher_url': _('Publisher URL'),
+        'publisher_type': _('Publisher type'),
+        'contact_name': _('Contact name'),
+        'contact_email': _('Contact email'),
+        'contact_uri': _('Contact URI'),
+        'download_url': _('Download URL'),
+        'mimetype': _('Media type'),
+        'size': _('Size'),
+        'rights': _('Rights'),
+        'created': _('Created'),
+    }
 
 
 def catalog_uri():
@@ -100,7 +140,8 @@ def resource_uri(resource_dict):
     The value will be the first found of:
 
         1. The value of the `uri` field
-        2. `catalog_uri()` + '/dataset/' + `package_id` + '/resource/' + `id` field
+        2. `catalog_uri()` + '/dataset/' + `package_id` + '/resource/'
+            + `id` field
 
     Check the documentation for `catalog_uri()` for the recommended ways of
     setting it.
@@ -197,6 +238,7 @@ import re
 import operator
 # For parsing {name};q=x and {name} style fields from the accept header
 accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
+
 
 def parse_accept_header(accept_header=''):
     '''

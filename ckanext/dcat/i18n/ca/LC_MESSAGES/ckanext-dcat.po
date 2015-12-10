@@ -1,0 +1,128 @@
+# Catalan translations for ckanext-dcat.
+# Copyright (C) 2015 Open Knowledge
+# This file is distributed under the same license as the ckanext-dcat
+# project.
+# Adrià Mercader <amercadero@gmail.com>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ckanext-dcat 0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-12-10 12:03+0000\n"
+"PO-Revision-Date: 2015-12-10 11:25+0000\n"
+"Last-Translator: Adrià Mercader <amercadero@gmail.com>\n"
+"Language-Team: ca <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: ckanext/dcat/utils.py:30
+msgid "URI"
+msgstr "URI"
+
+#: ckanext/dcat/utils.py:31
+msgid "GUID"
+msgstr "GUID"
+
+#: ckanext/dcat/utils.py:32
+msgid "Theme"
+msgstr "Tema"
+
+#: ckanext/dcat/utils.py:33
+msgid "Identifier"
+msgstr "Identificador"
+
+#: ckanext/dcat/utils.py:34
+msgid "Alternate identifier"
+msgstr "Identificador alternatiu"
+
+#: ckanext/dcat/utils.py:35
+msgid "Issued"
+msgstr "Publicat"
+
+#: ckanext/dcat/utils.py:36
+msgid "Modified"
+msgstr "Modificat"
+
+#: ckanext/dcat/utils.py:37
+msgid "Version notes"
+msgstr "Notes de la versió"
+
+#: ckanext/dcat/utils.py:38
+msgid "Language"
+msgstr "Idioma"
+
+#: ckanext/dcat/utils.py:39
+msgid "Frequency"
+msgstr "Freqüència"
+
+#: ckanext/dcat/utils.py:40
+msgid "Conforms to"
+msgstr "Conforme a"
+
+#: ckanext/dcat/utils.py:41
+msgid "Spatial URI"
+msgstr "URI espacial"
+
+#: ckanext/dcat/utils.py:42
+msgid "Start of temporal extent"
+msgstr "Inici del període temporal"
+
+#: ckanext/dcat/utils.py:43
+msgid "End of temporal extent"
+msgstr "Final del període temporal"
+
+#: ckanext/dcat/utils.py:44
+msgid "Publisher URI"
+msgstr "URI del publicador"
+
+#: ckanext/dcat/utils.py:45
+msgid "Publisher name"
+msgstr "Nom del publicador"
+
+#: ckanext/dcat/utils.py:46
+msgid "Publisher email"
+msgstr "Email del publicador"
+
+#: ckanext/dcat/utils.py:47
+msgid "Publisher URL"
+msgstr "URL del publicador"
+
+#: ckanext/dcat/utils.py:48
+msgid "Publisher type"
+msgstr "Tipus del publicador"
+
+#: ckanext/dcat/utils.py:49
+msgid "Contact name"
+msgstr "Nom del contacte"
+
+#: ckanext/dcat/utils.py:50
+msgid "Contact email"
+msgstr "Email de contacte"
+
+#: ckanext/dcat/utils.py:51
+msgid "Contact URI"
+msgstr "URI del contacte"
+
+#: ckanext/dcat/utils.py:52
+msgid "Download URL"
+msgstr "URL de descàrrega"
+
+#: ckanext/dcat/utils.py:53
+msgid "Media type"
+msgstr "Tipus de medi"
+
+#: ckanext/dcat/utils.py:54
+msgid "Size"
+msgstr "Mida"
+
+#: ckanext/dcat/utils.py:55
+msgid "Rights"
+msgstr "Drets"
+
+#: ckanext/dcat/utils.py:56
+msgid "Created"
+msgstr "Creat"
+

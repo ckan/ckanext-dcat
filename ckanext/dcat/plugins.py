@@ -1,6 +1,12 @@
 from pylons import config
 
 from ckan import plugins as p
+try:
+    from ckan.lib.plugins import DefaultTranslation
+except ImportError:
+    class DefaultTranslation():
+        pass
+
 
 from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_catalog_show,
@@ -8,27 +14,29 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_datasets_list,
                                 dcat_auth,
                                 )
-from ckanext.dcat.utils import catalog_uri
-
+from ckanext.dcat import utils
 
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
 
 
-class DCATPlugin(p.SingletonPlugin):
+class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
+    p.implements(p.IPackageController, inherit=True)
+    if p.toolkit.check_ckan_version(min_version='2.5.0'):
+        p.implements(p.ITranslation, inherit=True)
 
     # IConfigurer
     def update_config(self, config):
         p.toolkit.add_template_directory(config, 'templates')
 
         # Check catalog URI on startup to emit a warning if necessary
-        catalog_uri()
+        utils.catalog_uri()
 
         # Check custom catalog endpoint
         custom_endpoint = config.get(CUSTOM_ENDPOINT_CONFIG)
@@ -83,6 +91,27 @@ class DCATPlugin(p.SingletonPlugin):
             'dcat_catalog_show': dcat_auth,
             'dcat_catalog_search': dcat_auth,
         }
+
+    # IPackageController
+    def after_show(self, context, data_dict):
+
+        if context.get('for_view'):
+            field_labels = utils.field_labels()
+
+            def set_titles(object_dict):
+                for key, value in object_dict.iteritems():
+                    if key in field_labels:
+                        object_dict[field_labels[key]] = object_dict[key]
+                        del object_dict[key]
+
+            for resource in data_dict.get('resources', []):
+                set_titles(resource)
+
+            for extra in data_dict.get('extras', []):
+                if extra['key'] in field_labels:
+                    extra['key'] = field_labels[extra['key']]
+
+        return data_dict
 
 
 class DCATJSONInterface(p.SingletonPlugin):
