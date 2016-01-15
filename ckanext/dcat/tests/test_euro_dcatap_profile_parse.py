@@ -125,6 +125,14 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(resource['modified'], u'2012-05-01T00:04:06')
         eq_(resource['status'], u'http://purl.org/adms/status/Completed')
 
+        # Lists
+        for item in [
+            ('documentation', [u'http://dataset.info.org/distribution1/doc1', u'http://dataset.info.org/distribution1/doc2']),
+            ('language', [u'ca', u'en', u'es']),
+            ('conforms_to', [u'Standard 1', u'Standard 2']),
+        ]:
+            eq_(sorted(json.loads(resource[item[0]])), item[1])
+
         # These two are likely to need clarification
         eq_(resource['license'], u'http://creativecommons.org/licenses/by/3.0/')
         eq_(resource['rights'], u'Some statement about rights')

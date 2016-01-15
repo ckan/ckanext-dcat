@@ -708,6 +708,15 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                        DCAT.accessURL) or
                                     self._object_value(distribution,
                                                        DCAT.downloadURL))
+            #  Lists
+            for key, predicate in (
+                    ('language', DCT.language),
+                    ('documentation', FOAF.page),
+                    ('conforms_to', DCT.conformsTo),
+                    ):
+                values = self._object_value_list(distribution, predicate)
+                if values:
+                    resource_dict[key] = json.dumps(values)
 
             # Format and media type
             normalize_ckan_format = config.get(
@@ -920,6 +929,14 @@ class EuropeanDCATAPProfile(RDFProfile):
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
+
+            #  Lists
+            items = [
+                ('documentation', FOAF.page, None),
+                ('language', DCT.language, None),
+                ('conforms_to', DCT.conformsTo, None),
+            ]
+            self._add_list_triples_from_dict(resource_dict, distribution, items)
 
             # Format
             if '/' in resource_dict.get('format', ''):

@@ -75,6 +75,13 @@
             <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
             <dcat:byteSize>12323</dcat:byteSize>
+            <foaf:page rdf:resource="http://dataset.info.org/distribution1/doc1"/>
+            <foaf:page rdf:resource="http://dataset.info.org/distribution1/doc2"/>
+            <dct:language>en</dct:language>
+            <dct:language>es</dct:language>
+            <dct:language>ca</dct:language>
+            <dct:conformsTo>Standard 1</dct:conformsTo>
+            <dct:conformsTo>Standard 2</dct:conformsTo>
         </dcat:Distribution>
     </dcat:distribution>
 </dcat:Dataset>

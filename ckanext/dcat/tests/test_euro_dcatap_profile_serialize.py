@@ -479,6 +479,9 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'issued': '2015-06-26T15:21:09.034694',
             'modified': '2015-06-26T15:21:09.075774',
             'size': 1234,
+            'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
+            'language': '[\"en\", \"es\", \"ca\"]',
+            'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
         }
 
         dataset = {
@@ -508,6 +511,17 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.rights, resource['rights'])
         assert self._triple(g, distribution, DCT.license, resource['license'])
         assert self._triple(g, distribution, ADMS.status, resource['status'])
+
+        # List
+        for item in [
+            ('documentation', FOAF.page),
+            ('language', DCT.language),
+            ('conforms_to', DCT.conformsTo),
+        ]:
+            values = json.loads(resource[item[0]])
+            eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
+            for value in values:
+                assert self._triple(g, distribution, item[1], value)
 
         # Dates
         assert self._triple(g, distribution, DCT.issued, resource['issued'], XSD.dateTime)

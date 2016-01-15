@@ -300,7 +300,10 @@ that are used if the default field is not present (see [RDF Serializer](#rdf-dca
 | dcat:Distribution | dct:issued             | resource:issued                           |                                | text      |                                                                                                                                                               |
 | dcat:Distribution | dct:modified           | resource:modified                         |                                | text      |                                                                                                                                                               |
 | dcat:Distribution | dct:rights             | resource:rights                           |                                | text      |                                                                                                                                                               |
+| dcat:Distribution | foaf:page              | resource:documentation                    |                                | list      | See note about lists                                                                                                                                          |
 
+| dcat:Distribution | dct:language           | resource:language                         |                                | list      | See note about lists                                                                                                                                          |
+| dcat:Distribution | dct:conformsTo         | resource:conforms_to                      |                                | list      | See note about lists                                                                                                                                          |
 
 *Notes*
 
