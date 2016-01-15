@@ -631,7 +631,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         for key, predicate in (
                 ('language', DCT.language),
                 ('theme', DCAT.theme),
-                ('conforms_to', DCAT.conformsTo),
+                ('conforms_to', DCT.conformsTo),
                 ('documentation', FOAF.page),
                 ('related_resource', DCT.relation),
                 ):
@@ -788,7 +788,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         items = [
             ('language', DCT.language, None),
             ('theme', DCAT.theme, None),
-            ('conforms_to', DCAT.conformsTo, None),
+            ('conforms_to', DCT.conformsTo, None),
             ('documentation', FOAF.page, None),
             ('related_resource', DCT.relation, None),
         ]

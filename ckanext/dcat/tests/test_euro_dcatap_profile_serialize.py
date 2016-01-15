@@ -109,7 +109,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         for item in [
             ('language', DCT.language),
             ('theme', DCAT.theme),
-            ('conforms_to', DCAT.conformsTo),
+            ('conforms_to', DCT.conformsTo),
             ('documentation', FOAF.page),
             ('related_resource', DCT.relation),
         ]:

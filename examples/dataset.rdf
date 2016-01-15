@@ -30,8 +30,8 @@
     <dcat:theme rdf:resource="http://eurovoc.europa.eu/100142"/>
     <dcat:theme rdf:resource="http://eurovoc.europa.eu/209065"/>
     <dcat:theme>Earth Sciences</dcat:theme>
-    <dcat:conformsTo>Standard 1</dcat:conformsTo>
-    <dcat:conformsTo>Standard 2</dcat:conformsTo>
+    <dct:conformsTo>Standard 1</dct:conformsTo>
+    <dct:conformsTo>Standard 2</dct:conformsTo>
     <dct:license rdf:resource="https://data.some.org/link/to/license"/>
     <dct:spatial rdf:resource="http://publications.europa.eu/mdr/authority/country/ZWE"/>
     <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
