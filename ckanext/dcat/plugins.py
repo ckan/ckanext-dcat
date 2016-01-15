@@ -70,6 +70,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             _map.connect('home', '/', controller=controller,
                          action='read_catalog')
 
+            _map.connect('add dataset', '/dataset/new', controller='package', action='new')
             _map.connect('dataset_read', '/dataset/{_id}',
                          controller=controller, action='read_dataset',
                          ckan_icon='sitemap')

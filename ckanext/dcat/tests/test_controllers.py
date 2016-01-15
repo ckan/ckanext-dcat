@@ -188,6 +188,18 @@ class TestEndpoints(helpers.FunctionalTestBase):
         app = self._get_test_app()
         app.get(url, status=404)
 
+    def test_dataset_form_is_rendered(self):
+
+        url = url_for('dataset')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        content = response.body
+
+        assert '<form id="dataset-edit"' in content
+
     def test_catalog_default(self):
 
         for i in xrange(4):
