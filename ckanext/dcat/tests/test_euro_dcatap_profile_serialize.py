@@ -68,6 +68,11 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'language', 'value': '[\"en\"]'},
                 {'key': 'theme', 'value': '[\"http://eurovoc.europa.eu/100142\", \"http://eurovoc.europa.eu/100152\"]'},
                 {'key': 'conforms_to', 'value': '[\"Standard 1\", \"Standard 2\"]'},
+                {'key': 'access_rights', 'value': 'public'},
+                {'key': 'documentation', 'value': '[\"http://dataset.info.org/doc1\", \"http://dataset.info.org/doc2\"]'},
+                {'key': 'provenance', 'value': 'Some statement about provenance'},
+                {'key': 'dcat_type', 'value': 'test-type'},
+                {'key': 'related_resource', 'value': '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
 
             ]
         }
@@ -89,6 +94,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, ADMS.versionNotes, extras['version_notes'])
         assert self._triple(g, dataset_ref, ADMS.identifier, extras['alternate_identifier'])
         assert self._triple(g, dataset_ref, DCT.accrualPeriodicity, extras['frequency'])
+        assert self._triple(g, dataset_ref, DCT.accessRights, extras['access_rights'])
 
         # Tags
         eq_(len([t for t in g.triples((dataset_ref, DCAT.keyword, None))]), 2)
@@ -104,6 +110,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('language', DCT.language),
             ('theme', DCAT.theme),
             ('conforms_to', DCAT.conformsTo),
+            ('documentation', FOAF.page),
+            ('related_resource', DCT.relation),
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))

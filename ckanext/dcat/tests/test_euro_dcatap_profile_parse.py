@@ -92,6 +92,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('publisher_type'), 'http://purl.org/adms/publishertype/NonProfitOrganisation')
         eq_(_get_extra_value('contact_name'), 'Point of Contact')
         eq_(_get_extra_value('contact_email'), 'mailto:contact@some.org')
+        eq_(_get_extra_value('access_rights'), 'public')
+        eq_(_get_extra_value('provenance'), 'Some statement about provenance')
+        eq_(_get_extra_value('dcat_type'), 'test-type')
 
         #  Lists
         eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en', u'es'])
@@ -99,6 +102,11 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                                                         u'http://eurovoc.europa.eu/100142',
                                                         u'http://eurovoc.europa.eu/209065'])
         eq_(sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1', u'Standard 2'])
+        eq_(sorted(_get_extra_value_as_list('documentation')), [u'http://dataset.info.org/doc1',
+                                                                u'http://dataset.info.org/doc2'])
+        eq_(sorted(_get_extra_value_as_list('related_resource')), [u'http://dataset.info.org/related1',
+                                                                   u'http://dataset.info.org/related2'])
+
 
         # Dataset URI
         eq_(_get_extra_value('uri'), u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98')

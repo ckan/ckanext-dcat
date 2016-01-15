@@ -619,6 +619,9 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('alternate_identifier', ADMS.identifier),
                 ('version_notes', ADMS.versionNotes),
                 ('frequency', DCT.accrualPeriodicity),
+                ('access_rights', DCT.accessRights),
+                ('provenance', DCT.provenance),
+                ('dcat_type', DCT.type),
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -629,6 +632,8 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('language', DCT.language),
                 ('theme', DCAT.theme),
                 ('conforms_to', DCAT.conformsTo),
+                ('documentation', FOAF.page),
+                ('related_resource', DCT.relation),
                 ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -764,7 +769,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('alternate_identifier', ADMS.identifier, None),
             ('version_notes', ADMS.versionNotes, None),
             ('frequency', DCT.accrualPeriodicity, None),
-
+            ('access_rights', DCT.accessRights, None),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -784,6 +789,8 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('language', DCT.language, None),
             ('theme', DCAT.theme, None),
             ('conforms_to', DCAT.conformsTo, None),
+            ('documentation', FOAF.page, None),
+            ('related_resource', DCT.relation, None),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
