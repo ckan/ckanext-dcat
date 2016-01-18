@@ -190,7 +190,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
     def test_dataset_form_is_rendered(self):
 
-        url = url_for('dataset')
+        url = url_for('add dataset')
 
         app = self._get_test_app()
 
