@@ -22,7 +22,8 @@
     <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-10</dct:issued>
     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10T21:04</dct:modified>
     <dct:identifier>9df8df51-63db-37a8-e044-0003ba9b0d98</dct:identifier>
-    <adms:identifier>alternate-identifier-x343</adms:identifier>
+    <adms:identifier>alternate-identifier-1</adms:identifier>
+    <adms:identifier>alternate-identifier-2</adms:identifier>
     <owl:versionInfo>2.3</owl:versionInfo>
     <adms:versionNotes>New schema added</adms:versionNotes>
     <dct:language>en</dct:language>

@@ -62,7 +62,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'metadata_modified': '2015-06-26T15:21:09.075774',
             'tags': [{'name': 'Tag 1'}, {'name': 'Tag 2'}],
             'extras': [
-                {'key': 'alternate_identifier', 'value': 'xyz'},
+                {'key': 'alternate_identifier', 'value': '[\"xyz\", \"abc\"]'},
                 {'key': 'version_notes', 'value': 'This is a beta version'},
                 {'key': 'frequency', 'value': 'monthly'},
                 {'key': 'language', 'value': '[\"en\"]'},
@@ -95,7 +95,6 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, dataset_ref, OWL.versionInfo, dataset['version'])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, extras['version_notes'])
-        assert self._triple(g, dataset_ref, ADMS.identifier, extras['alternate_identifier'])
         assert self._triple(g, dataset_ref, DCT.accrualPeriodicity, extras['frequency'])
         assert self._triple(g, dataset_ref, DCT.accessRights, extras['access_rights'])
 
@@ -113,6 +112,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('language', DCT.language),
             ('theme', DCAT.theme),
             ('conforms_to', DCT.conformsTo),
+            ('alternate_identifier', ADMS.identifier),
             ('documentation', FOAF.page),
             ('related_resource', DCT.relation),
             ('has_version', DCT.hasVersion),

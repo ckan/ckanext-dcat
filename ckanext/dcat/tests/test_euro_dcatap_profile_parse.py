@@ -79,7 +79,6 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('issued'), u'2012-05-10')
         eq_(_get_extra_value('modified'), u'2012-05-10T21:04:00')
         eq_(_get_extra_value('identifier'), u'9df8df51-63db-37a8-e044-0003ba9b0d98')
-        eq_(_get_extra_value('alternate_identifier'), u'alternate-identifier-x343')
         eq_(_get_extra_value('version_notes'), u'New schema added')
         eq_(_get_extra_value('temporal_start'), '1905-03-01')
         eq_(_get_extra_value('temporal_end'), '2013-01-05')
@@ -102,6 +101,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                                                         u'http://eurovoc.europa.eu/100142',
                                                         u'http://eurovoc.europa.eu/209065'])
         eq_(sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1', u'Standard 2'])
+
+        eq_(sorted(_get_extra_value_as_list('alternate_identifier')), [u'alternate-identifier-1', u'alternate-identifier-2'])
         eq_(sorted(_get_extra_value_as_list('documentation')), [u'http://dataset.info.org/doc1',
                                                                 u'http://dataset.info.org/doc2'])
         eq_(sorted(_get_extra_value_as_list('related_resource')), [u'http://dataset.info.org/related1',
