@@ -634,6 +634,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('conforms_to', DCT.conformsTo),
                 ('documentation', FOAF.page),
                 ('related_resource', DCT.relation),
+                ('has_version', DCT.hasVersion),
+                ('is_version_of', DCT.isVersionOf),
+                ('source', DCT.source),
+                ('sample', ADMS.sample),
                 ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -800,6 +804,10 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('conforms_to', DCT.conformsTo, None),
             ('documentation', FOAF.page, None),
             ('related_resource', DCT.relation, None),
+            ('has_version', DCT.hasVersion, None),
+            ('is_version_of', DCT.isVersionOf, None),
+            ('source', DCT.source, None),
+            ('sample', ADMS.sample, None),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 

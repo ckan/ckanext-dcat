@@ -73,7 +73,10 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'provenance', 'value': 'Some statement about provenance'},
                 {'key': 'dcat_type', 'value': 'test-type'},
                 {'key': 'related_resource', 'value': '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
-
+                {'key': 'has_version', 'value': '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", \"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
+                {'key': 'is_version_of', 'value': '[\"https://data.some.org/catalog/datasets/original-dataset\"]'},
+                {'key': 'source', 'value': '[\"https://data.some.org/catalog/datasets/source-dataset-1\", \"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
+                {'key': 'sample', 'value': '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
             ]
         }
         extras = self._extras(dataset)
@@ -112,6 +115,10 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('conforms_to', DCT.conformsTo),
             ('documentation', FOAF.page),
             ('related_resource', DCT.relation),
+            ('has_version', DCT.hasVersion),
+            ('is_version_of', DCT.isVersionOf),
+            ('source', DCT.source),
+            ('sample', ADMS.sample),
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))

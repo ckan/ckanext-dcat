@@ -106,7 +106,12 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                                                                 u'http://dataset.info.org/doc2'])
         eq_(sorted(_get_extra_value_as_list('related_resource')), [u'http://dataset.info.org/related1',
                                                                    u'http://dataset.info.org/related2'])
-
+        eq_(sorted(_get_extra_value_as_list('has_version')), [u'https://data.some.org/catalog/datasets/derived-dataset-1',
+                                                              u'https://data.some.org/catalog/datasets/derived-dataset-2'])
+        eq_(sorted(_get_extra_value_as_list('is_version_of')), [u'https://data.some.org/catalog/datasets/original-dataset'])
+        eq_(sorted(_get_extra_value_as_list('source')), [u'https://data.some.org/catalog/datasets/source-dataset-1',
+                                                         u'https://data.some.org/catalog/datasets/source-dataset-2'])
+        eq_(sorted(_get_extra_value_as_list('sample')), [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
 
         # Dataset URI
         eq_(_get_extra_value('uri'), u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98')

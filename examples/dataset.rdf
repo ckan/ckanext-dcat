@@ -42,6 +42,12 @@
     <dct:type>test-type</dct:type>
     <dct:relation rdf:resource="http://dataset.info.org/related1"/>
     <dct:relation rdf:resource="http://dataset.info.org/related2"/>
+    <dct:hasVersion rdf:resource="https://data.some.org/catalog/datasets/derived-dataset-1"/>
+    <dct:hasVersion rdf:resource="https://data.some.org/catalog/datasets/derived-dataset-2"/>
+    <dct:isVersionOf rdf:resource="https://data.some.org/catalog/datasets/original-dataset"/>
+    <dct:source rdf:resource="https://data.some.org/catalog/datasets/source-dataset-1"/>
+    <dct:source rdf:resource="https://data.some.org/catalog/datasets/source-dataset-2"/>
+    <adms:sample rdf:resource="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample"/>
     <dct:temporal>
         <dct:PeriodOfTime>
             <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1905-03-01</schema:startDate>
