@@ -25,6 +25,7 @@ TIME = Namespace('http://www.w3.org/2006/time')
 LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
 OWL = Namespace('http://www.w3.org/2002/07/owl#')
+SPDX = Namespace('http://spdx.org/rdf/terms#')
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -736,9 +737,19 @@ class EuropeanDCATAPProfile(RDFProfile):
             elif imt:
                 resource_dict['format'] = imt
 
+            # Size
             size = self._object_value_int(distribution, DCAT.byteSize)
             if size is not None:
                 resource_dict['size'] = size
+
+            # Checksum
+            for checksum in self.g.objects(distribution, SPDX.checksum):
+                algorithm = self._object_value(checksum, SPDX.algorithm)
+                checksum_value = self._object_value(checksum, SPDX.checksumValue)
+                if algorithm:
+                    resource_dict['hash_algorithm'] = algorithm
+                if checksum_value:
+                    resource_dict['hash'] = checksum_value
 
             # Distribution URI (explicitly show the missing ones)
             resource_dict['uri'] = (unicode(distribution)
@@ -984,6 +995,21 @@ class EuropeanDCATAPProfile(RDFProfile):
                 except (ValueError, TypeError):
                     g.add((distribution, DCAT.byteSize,
                            Literal(resource_dict['size'])))
+            # Checksum
+            if resource_dict.get('hash'):
+                checksum = BNode()
+                g.add((checksum, SPDX.checksumValue,
+                       Literal(resource_dict['hash'],
+                               datatype=XSD.hexBinary)))
+
+                if resource_dict.get('hash_algorithm'):
+                    if resource_dict['hash_algorithm'].startswith('http'):
+                        g.add((checksum, SPDX.algorithm,
+                               URIRef(resource_dict['hash_algorithm'])))
+                    else:
+                        g.add((checksum, SPDX.algorithm,
+                               Literal(resource_dict['hash_algorithm'])))
+                g.add((distribution, SPDX.checksum, checksum))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 

@@ -308,6 +308,8 @@ that are used if the default field is not present (see [RDF Serializer](#rdf-dca
 
 | dcat:Distribution | dct:language           | resource:language                         |                                | list      | See note about lists                                                                                                                                          |
 | dcat:Distribution | dct:conformsTo         | resource:conforms_to                      |                                | list      | See note about lists                                                                                                                                          |
+| spdx:Checksum     | spdx:checksumValue     | resource:hash                             |                                | text      |                                                                                                                                                               |
+| spdx:Checksum     | spdx:algorithm         | resource:hash_algorithm                   |                                | text      |                                                                                                                                                               |
 
 *Notes*
 

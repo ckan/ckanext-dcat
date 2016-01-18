@@ -130,6 +130,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(resource['modified'], u'2012-05-01T00:04:06')
         eq_(resource['status'], u'http://purl.org/adms/status/Completed')
 
+        eq_(resource['hash'], u'4304cf2e751e6053c90b1804c89c0ebb758f395a')
+        eq_(resource['hash_algorithm'], u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1')
+
         # Lists
         for item in [
             ('documentation', [u'http://dataset.info.org/distribution1/doc1', u'http://dataset.info.org/distribution1/doc2']),

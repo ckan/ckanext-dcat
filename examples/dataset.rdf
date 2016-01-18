@@ -8,13 +8,14 @@
     xmlns:schema="http://schema.org/"
 	xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
 	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:spdx="http://spdx.org/rdf/terms#"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
 	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98">
     <dct:title>Zimbabwe Regional Geochemical Survey.</dct:title>
     <dct:description>During the period 1982-86 a team of geologists from the British Geological Survey ...</dct:description>
-    <dcat:landingPage>http://dataset.info.org</dcat:landingPage>
+    <dcat:landingPage rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://dataset.info.org</dcat:landingPage>
     <dcat:keyword>exploration</dcat:keyword>
     <dcat:keyword>geochemistry</dcat:keyword>
     <dcat:keyword>geology</dcat:keyword>
@@ -88,6 +89,12 @@
             <dct:language>ca</dct:language>
             <dct:conformsTo>Standard 1</dct:conformsTo>
             <dct:conformsTo>Standard 2</dct:conformsTo>
+            <spdx:checksum>
+                <spdx:Checksum>
+                    <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">4304cf2e751e6053c90b1804c89c0ebb758f395a</spdx:checksumValue>
+                    <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+                </spdx:Checksum>
+            </spdx:checksum>
         </dcat:Distribution>
     </dcat:distribution>
 </dcat:Dataset>

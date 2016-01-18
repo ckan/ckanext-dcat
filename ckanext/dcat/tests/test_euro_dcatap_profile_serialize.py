@@ -18,7 +18,7 @@ except ImportError:
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
-                                   SKOS, LOCN, GSP, OWL, GEOJSON_IMT)
+                                   SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT)
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -489,6 +489,9 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
             'language': '[\"en\", \"es\", \"ca\"]',
             'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
+            'hash': '4304cf2e751e6053c90b1804c89c0ebb758f395a',
+            'hash_algorithm': 'http://spdx.org/rdf/terms#checksumAlgorithm_sha1',
+
         }
 
         dataset = {
@@ -536,6 +539,12 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         # Numbers
         assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
+
+        # Checksum
+        checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
+        assert checksum
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
 
     def test_distribution_size_not_number(self):
 
@@ -735,6 +744,37 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
         assert self._triple(g, distribution, DCAT.mediaType, resource['format'])
+
+    def test_hash_algorithm_not_uri(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'hash': 'aaaa',
+            'hash_algorithm': 'sha1',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
+        assert checksum
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
 
 class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
