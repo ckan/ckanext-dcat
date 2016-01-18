@@ -49,7 +49,7 @@ In terms of CKAN features, this extension offers:
 
 These are implemented internally using:
 
-* A base [mapping](#rdf-dcat-to-ckan-dataset-mapping) between DCAT and CKAN datasets and viceversa.
+* A base [mapping](#rdf-dcat-to-ckan-dataset-mapping) between DCAT and CKAN datasets and viceversa (compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11)).
 
 * An [RDF Parser](#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](#profiles).
 
@@ -253,6 +253,8 @@ their equivalents on the CKAN model. In most cases this mapping is deliberately 
 the DCAT publisher property with a CKAN dataset author, maintainer or organization, as the link between them is not straight-forward
 and may depend on a particular instance needs. When mapping from CKAN metadata to DCAT though, there are in some cases fallback fields
 that are used if the default field is not present (see [RDF Serializer](#rdf-dcat-serializer) for more details on this.
+
+This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11).
 
 
 | DCAT class        | DCAT property          | CKAN dataset field                        | CKAN fallback fields           | Stored as |                                                                                                                                                               |
@@ -592,8 +594,7 @@ In most cases the default profile will provide a good mapping that will cover mo
 need custom logic, you can write a custom to profile that extends or replaces the default one.
 
 The default profile is mostly based in the
-[DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description),
-but as mentioned before it should be generic enough for most DCAT based representations.
+[DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). It is actually fully-compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11). As mentioned before though, it should be generic enough for most DCAT based representations.
 
 
 To define which profiles to use you can:
