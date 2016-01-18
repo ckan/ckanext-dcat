@@ -6,6 +6,7 @@ env:
     - CKANVERSION=release-v2.2-latest
     - CKANVERSION=release-v2.3-latest
     - CKANVERSION=release-v2.4-latest
+    - CKANVERSION=release-v2.5-latest
 install:
     - bash bin/travis-build.bash
 services:
