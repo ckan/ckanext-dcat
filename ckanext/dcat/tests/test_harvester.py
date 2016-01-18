@@ -4,7 +4,10 @@ import nose
 import httpretty
 
 import ckan.plugins as p
-import ckan.new_tests.helpers as h
+try:
+    import ckan.new_tests.helpers as h
+except ImportError:
+    import ckan.tests.helpers as h
 
 import ckanext.harvest.model as harvest_model
 from ckanext.harvest import queue
