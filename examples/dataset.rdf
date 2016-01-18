@@ -8,20 +8,22 @@
     xmlns:schema="http://schema.org/"
 	xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
 	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:spdx="http://spdx.org/rdf/terms#"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
 	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98">
     <dct:title>Zimbabwe Regional Geochemical Survey.</dct:title>
     <dct:description>During the period 1982-86 a team of geologists from the British Geological Survey ...</dct:description>
-    <dcat:landingPage>http://dataset.info.org</dcat:landingPage>
+    <dcat:landingPage rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://dataset.info.org</dcat:landingPage>
     <dcat:keyword>exploration</dcat:keyword>
     <dcat:keyword>geochemistry</dcat:keyword>
     <dcat:keyword>geology</dcat:keyword>
     <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-10</dct:issued>
     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-10T21:04</dct:modified>
     <dct:identifier>9df8df51-63db-37a8-e044-0003ba9b0d98</dct:identifier>
-    <adms:identifier>alternate-identifier-x343</adms:identifier>
+    <adms:identifier>alternate-identifier-1</adms:identifier>
+    <adms:identifier>alternate-identifier-2</adms:identifier>
     <owl:versionInfo>2.3</owl:versionInfo>
     <adms:versionNotes>New schema added</adms:versionNotes>
     <dct:language>en</dct:language>
@@ -30,11 +32,24 @@
     <dcat:theme rdf:resource="http://eurovoc.europa.eu/100142"/>
     <dcat:theme rdf:resource="http://eurovoc.europa.eu/209065"/>
     <dcat:theme>Earth Sciences</dcat:theme>
-    <dcat:conformsTo>Standard 1</dcat:conformsTo>
-    <dcat:conformsTo>Standard 2</dcat:conformsTo>
+    <dct:conformsTo>Standard 1</dct:conformsTo>
+    <dct:conformsTo>Standard 2</dct:conformsTo>
     <dct:license rdf:resource="https://data.some.org/link/to/license"/>
     <dct:spatial rdf:resource="http://publications.europa.eu/mdr/authority/country/ZWE"/>
     <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
+    <dct:accessRights>public</dct:accessRights>
+    <foaf:page rdf:resource="http://dataset.info.org/doc1"/>
+    <foaf:page rdf:resource="http://dataset.info.org/doc2"/>
+    <dct:provenance>Some statement about provenance</dct:provenance>
+    <dct:type>test-type</dct:type>
+    <dct:relation rdf:resource="http://dataset.info.org/related1"/>
+    <dct:relation rdf:resource="http://dataset.info.org/related2"/>
+    <dct:hasVersion rdf:resource="https://data.some.org/catalog/datasets/derived-dataset-1"/>
+    <dct:hasVersion rdf:resource="https://data.some.org/catalog/datasets/derived-dataset-2"/>
+    <dct:isVersionOf rdf:resource="https://data.some.org/catalog/datasets/original-dataset"/>
+    <dct:source rdf:resource="https://data.some.org/catalog/datasets/source-dataset-1"/>
+    <dct:source rdf:resource="https://data.some.org/catalog/datasets/source-dataset-2"/>
+    <adms:sample rdf:resource="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample"/>
     <dct:temporal>
         <dct:PeriodOfTime>
             <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1905-03-01</schema:startDate>
@@ -68,6 +83,19 @@
             <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
             <dcat:byteSize>12323</dcat:byteSize>
+            <foaf:page rdf:resource="http://dataset.info.org/distribution1/doc1"/>
+            <foaf:page rdf:resource="http://dataset.info.org/distribution1/doc2"/>
+            <dct:language>en</dct:language>
+            <dct:language>es</dct:language>
+            <dct:language>ca</dct:language>
+            <dct:conformsTo>Standard 1</dct:conformsTo>
+            <dct:conformsTo>Standard 2</dct:conformsTo>
+            <spdx:checksum>
+                <spdx:Checksum>
+                    <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">4304cf2e751e6053c90b1804c89c0ebb758f395a</spdx:checksumValue>
+                    <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+                </spdx:Checksum>
+            </spdx:checksum>
         </dcat:Distribution>
     </dcat:distribution>
 </dcat:Dataset>

@@ -18,7 +18,7 @@ except ImportError:
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
-                                   SKOS, LOCN, GSP, OWL, GEOJSON_IMT)
+                                   SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT)
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -62,13 +62,21 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'metadata_modified': '2015-06-26T15:21:09.075774',
             'tags': [{'name': 'Tag 1'}, {'name': 'Tag 2'}],
             'extras': [
-                {'key': 'alternate_identifier', 'value': 'xyz'},
+                {'key': 'alternate_identifier', 'value': '[\"xyz\", \"abc\"]'},
                 {'key': 'version_notes', 'value': 'This is a beta version'},
                 {'key': 'frequency', 'value': 'monthly'},
                 {'key': 'language', 'value': '[\"en\"]'},
                 {'key': 'theme', 'value': '[\"http://eurovoc.europa.eu/100142\", \"http://eurovoc.europa.eu/100152\"]'},
                 {'key': 'conforms_to', 'value': '[\"Standard 1\", \"Standard 2\"]'},
-
+                {'key': 'access_rights', 'value': 'public'},
+                {'key': 'documentation', 'value': '[\"http://dataset.info.org/doc1\", \"http://dataset.info.org/doc2\"]'},
+                {'key': 'provenance', 'value': 'Some statement about provenance'},
+                {'key': 'dcat_type', 'value': 'test-type'},
+                {'key': 'related_resource', 'value': '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
+                {'key': 'has_version', 'value': '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", \"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
+                {'key': 'is_version_of', 'value': '[\"https://data.some.org/catalog/datasets/original-dataset\"]'},
+                {'key': 'source', 'value': '[\"https://data.some.org/catalog/datasets/source-dataset-1\", \"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
+                {'key': 'sample', 'value': '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
             ]
         }
         extras = self._extras(dataset)
@@ -87,8 +95,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, dataset_ref, OWL.versionInfo, dataset['version'])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, extras['version_notes'])
-        assert self._triple(g, dataset_ref, ADMS.identifier, extras['alternate_identifier'])
         assert self._triple(g, dataset_ref, DCT.accrualPeriodicity, extras['frequency'])
+        assert self._triple(g, dataset_ref, DCT.accessRights, extras['access_rights'])
 
         # Tags
         eq_(len([t for t in g.triples((dataset_ref, DCAT.keyword, None))]), 2)
@@ -103,7 +111,14 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         for item in [
             ('language', DCT.language),
             ('theme', DCAT.theme),
-            ('conforms_to', DCAT.conformsTo),
+            ('conforms_to', DCT.conformsTo),
+            ('alternate_identifier', ADMS.identifier),
+            ('documentation', FOAF.page),
+            ('related_resource', DCT.relation),
+            ('has_version', DCT.hasVersion),
+            ('is_version_of', DCT.isVersionOf),
+            ('source', DCT.source),
+            ('sample', ADMS.sample),
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))
@@ -471,6 +486,12 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'issued': '2015-06-26T15:21:09.034694',
             'modified': '2015-06-26T15:21:09.075774',
             'size': 1234,
+            'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
+            'language': '[\"en\", \"es\", \"ca\"]',
+            'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
+            'hash': '4304cf2e751e6053c90b1804c89c0ebb758f395a',
+            'hash_algorithm': 'http://spdx.org/rdf/terms#checksumAlgorithm_sha1',
+
         }
 
         dataset = {
@@ -501,12 +522,29 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.license, resource['license'])
         assert self._triple(g, distribution, ADMS.status, resource['status'])
 
+        # List
+        for item in [
+            ('documentation', FOAF.page),
+            ('language', DCT.language),
+            ('conforms_to', DCT.conformsTo),
+        ]:
+            values = json.loads(resource[item[0]])
+            eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
+            for value in values:
+                assert self._triple(g, distribution, item[1], value)
+
         # Dates
         assert self._triple(g, distribution, DCT.issued, resource['issued'], XSD.dateTime)
         assert self._triple(g, distribution, DCT.modified, resource['modified'], XSD.dateTime)
 
         # Numbers
         assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
+
+        # Checksum
+        checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
+        assert checksum
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
 
     def test_distribution_size_not_number(self):
 
@@ -706,6 +744,37 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
         assert self._triple(g, distribution, DCAT.mediaType, resource['format'])
+
+    def test_hash_algorithm_not_uri(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'hash': 'aaaa',
+            'hash_algorithm': 'sha1',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
+        assert checksum
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
 
 class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):

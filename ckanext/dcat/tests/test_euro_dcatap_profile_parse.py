@@ -79,7 +79,6 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('issued'), u'2012-05-10')
         eq_(_get_extra_value('modified'), u'2012-05-10T21:04:00')
         eq_(_get_extra_value('identifier'), u'9df8df51-63db-37a8-e044-0003ba9b0d98')
-        eq_(_get_extra_value('alternate_identifier'), u'alternate-identifier-x343')
         eq_(_get_extra_value('version_notes'), u'New schema added')
         eq_(_get_extra_value('temporal_start'), '1905-03-01')
         eq_(_get_extra_value('temporal_end'), '2013-01-05')
@@ -92,6 +91,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('publisher_type'), 'http://purl.org/adms/publishertype/NonProfitOrganisation')
         eq_(_get_extra_value('contact_name'), 'Point of Contact')
         eq_(_get_extra_value('contact_email'), 'mailto:contact@some.org')
+        eq_(_get_extra_value('access_rights'), 'public')
+        eq_(_get_extra_value('provenance'), 'Some statement about provenance')
+        eq_(_get_extra_value('dcat_type'), 'test-type')
 
         #  Lists
         eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en', u'es'])
@@ -99,6 +101,18 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                                                         u'http://eurovoc.europa.eu/100142',
                                                         u'http://eurovoc.europa.eu/209065'])
         eq_(sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1', u'Standard 2'])
+
+        eq_(sorted(_get_extra_value_as_list('alternate_identifier')), [u'alternate-identifier-1', u'alternate-identifier-2'])
+        eq_(sorted(_get_extra_value_as_list('documentation')), [u'http://dataset.info.org/doc1',
+                                                                u'http://dataset.info.org/doc2'])
+        eq_(sorted(_get_extra_value_as_list('related_resource')), [u'http://dataset.info.org/related1',
+                                                                   u'http://dataset.info.org/related2'])
+        eq_(sorted(_get_extra_value_as_list('has_version')), [u'https://data.some.org/catalog/datasets/derived-dataset-1',
+                                                              u'https://data.some.org/catalog/datasets/derived-dataset-2'])
+        eq_(sorted(_get_extra_value_as_list('is_version_of')), [u'https://data.some.org/catalog/datasets/original-dataset'])
+        eq_(sorted(_get_extra_value_as_list('source')), [u'https://data.some.org/catalog/datasets/source-dataset-1',
+                                                         u'https://data.some.org/catalog/datasets/source-dataset-2'])
+        eq_(sorted(_get_extra_value_as_list('sample')), [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
 
         # Dataset URI
         eq_(_get_extra_value('uri'), u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98')
@@ -116,6 +130,17 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(resource['issued'], u'2012-05-11')
         eq_(resource['modified'], u'2012-05-01T00:04:06')
         eq_(resource['status'], u'http://purl.org/adms/status/Completed')
+
+        eq_(resource['hash'], u'4304cf2e751e6053c90b1804c89c0ebb758f395a')
+        eq_(resource['hash_algorithm'], u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1')
+
+        # Lists
+        for item in [
+            ('documentation', [u'http://dataset.info.org/distribution1/doc1', u'http://dataset.info.org/distribution1/doc2']),
+            ('language', [u'ca', u'en', u'es']),
+            ('conforms_to', [u'Standard 1', u'Standard 2']),
+        ]:
+            eq_(sorted(json.loads(resource[item[0]])), item[1])
 
         # These two are likely to need clarification
         eq_(resource['license'], u'http://creativecommons.org/licenses/by/3.0/')

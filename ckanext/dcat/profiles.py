@@ -25,6 +25,7 @@ TIME = Namespace('http://www.w3.org/2006/time')
 LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
 OWL = Namespace('http://www.w3.org/2002/07/owl#')
+SPDX = Namespace('http://spdx.org/rdf/terms#')
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -616,9 +617,11 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('issued', DCT.issued),
                 ('modified', DCT.modified),
                 ('identifier', DCT.identifier),
-                ('alternate_identifier', ADMS.identifier),
                 ('version_notes', ADMS.versionNotes),
                 ('frequency', DCT.accrualPeriodicity),
+                ('access_rights', DCT.accessRights),
+                ('provenance', DCT.provenance),
+                ('dcat_type', DCT.type),
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -628,7 +631,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         for key, predicate in (
                 ('language', DCT.language),
                 ('theme', DCAT.theme),
-                ('conforms_to', DCAT.conformsTo),
+                ('alternate_identifier', ADMS.identifier),
+                ('conforms_to', DCT.conformsTo),
+                ('documentation', FOAF.page),
+                ('related_resource', DCT.relation),
+                ('has_version', DCT.hasVersion),
+                ('is_version_of', DCT.isVersionOf),
+                ('source', DCT.source),
+                ('sample', ADMS.sample),
                 ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -703,6 +713,15 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                        DCAT.accessURL) or
                                     self._object_value(distribution,
                                                        DCAT.downloadURL))
+            #  Lists
+            for key, predicate in (
+                    ('language', DCT.language),
+                    ('documentation', FOAF.page),
+                    ('conforms_to', DCT.conformsTo),
+                    ):
+                values = self._object_value_list(distribution, predicate)
+                if values:
+                    resource_dict[key] = json.dumps(values)
 
             # Format and media type
             normalize_ckan_format = config.get(
@@ -718,9 +737,19 @@ class EuropeanDCATAPProfile(RDFProfile):
             elif imt:
                 resource_dict['format'] = imt
 
+            # Size
             size = self._object_value_int(distribution, DCAT.byteSize)
             if size is not None:
                 resource_dict['size'] = size
+
+            # Checksum
+            for checksum in self.g.objects(distribution, SPDX.checksum):
+                algorithm = self._object_value(checksum, SPDX.algorithm)
+                checksum_value = self._object_value(checksum, SPDX.checksumValue)
+                if algorithm:
+                    resource_dict['hash_algorithm'] = algorithm
+                if checksum_value:
+                    resource_dict['hash'] = checksum_value
 
             # Distribution URI (explicitly show the missing ones)
             resource_dict['uri'] = (unicode(distribution)
@@ -761,10 +790,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('url', DCAT.landingPage, None),
             ('identifier', DCT.identifier, ['guid', 'id']),
             ('version', OWL.versionInfo, ['dcat_version']),
-            ('alternate_identifier', ADMS.identifier, None),
             ('version_notes', ADMS.versionNotes, None),
             ('frequency', DCT.accrualPeriodicity, None),
-
+            ('access_rights', DCT.accessRights, None),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -783,7 +811,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         items = [
             ('language', DCT.language, None),
             ('theme', DCAT.theme, None),
-            ('conforms_to', DCAT.conformsTo, None),
+            ('conforms_to', DCT.conformsTo, None),
+            ('alternate_identifier', ADMS.identifier, None),
+            ('documentation', FOAF.page, None),
+            ('related_resource', DCT.relation, None),
+            ('has_version', DCT.hasVersion, None),
+            ('is_version_of', DCT.isVersionOf, None),
+            ('source', DCT.source, None),
+            ('sample', ADMS.sample, None),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -914,6 +949,14 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             self._add_triples_from_dict(resource_dict, distribution, items)
 
+            #  Lists
+            items = [
+                ('documentation', FOAF.page, None),
+                ('language', DCT.language, None),
+                ('conforms_to', DCT.conformsTo, None),
+            ]
+            self._add_list_triples_from_dict(resource_dict, distribution, items)
+
             # Format
             if '/' in resource_dict.get('format', ''):
                 g.add((distribution, DCAT.mediaType,
@@ -952,6 +995,21 @@ class EuropeanDCATAPProfile(RDFProfile):
                 except (ValueError, TypeError):
                     g.add((distribution, DCAT.byteSize,
                            Literal(resource_dict['size'])))
+            # Checksum
+            if resource_dict.get('hash'):
+                checksum = BNode()
+                g.add((checksum, SPDX.checksumValue,
+                       Literal(resource_dict['hash'],
+                               datatype=XSD.hexBinary)))
+
+                if resource_dict.get('hash_algorithm'):
+                    if resource_dict['hash_algorithm'].startswith('http'):
+                        g.add((checksum, SPDX.algorithm,
+                               URIRef(resource_dict['hash_algorithm'])))
+                    else:
+                        g.add((checksum, SPDX.algorithm,
+                               Literal(resource_dict['hash_algorithm'])))
+                g.add((distribution, SPDX.checksum, checksum))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
