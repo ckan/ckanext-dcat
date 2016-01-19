@@ -2,6 +2,8 @@
 import time
 import nose
 
+
+from ckan import plugins as p
 from ckan.lib.helpers import url_for
 
 from rdflib import Graph
@@ -431,9 +433,11 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
 
 
 class TestTranslations(helpers.FunctionalTestBase):
-    '''
-    ckanext.dcat.enable_content_negotiation is enabled on test.ini
-    '''
+
+    @classmethod
+    def setup_class(cls):
+        if p.toolkit.check_ckan_version(max_version='2.4.99'):
+            raise nose.SkipTest()
 
     @classmethod
     def teardown_class(cls):
