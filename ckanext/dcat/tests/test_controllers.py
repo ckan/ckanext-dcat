@@ -201,7 +201,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
         content = response.body
 
-        assert '<form id="dataset-edit"' in content
+        assert '<input id="field-title"' in content
 
     def test_catalog_default(self):
 
