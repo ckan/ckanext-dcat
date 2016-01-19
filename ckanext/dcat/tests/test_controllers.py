@@ -439,6 +439,8 @@ class TestTranslations(helpers.FunctionalTestBase):
         if p.toolkit.check_ckan_version(max_version='2.4.99'):
             raise nose.SkipTest()
 
+        super(TestTranslations, cls).setup_class()
+
     @classmethod
     def teardown_class(cls):
         super(TestTranslations, cls).teardown_class()
