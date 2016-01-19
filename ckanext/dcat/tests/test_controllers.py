@@ -191,12 +191,13 @@ class TestEndpoints(helpers.FunctionalTestBase):
         app.get(url, status=404)
 
     def test_dataset_form_is_rendered(self):
-
+        sysadmin = factories.Sysadmin()
+        env = {'REMOTE_USER': sysadmin['name'].encode('ascii')}
         url = url_for('add dataset')
 
         app = self._get_test_app()
 
-        response = app.get(url)
+        response = app.get(url, extra_environ=env)
 
         content = response.body
 
