@@ -3,10 +3,10 @@ python:
     - "2.7"
 env:
     - CKANVERSION=master
-    - CKANVERSION=release-v2.2-latest
-    - CKANVERSION=release-v2.3-latest
-    - CKANVERSION=release-v2.4-latest
-    - CKANVERSION=release-v2.5-latest
+    - CKANVERSION=2.2
+    - CKANVERSION=2.3
+    - CKANVERSION=2.4
+    - CKANVERSION=2.5
 install:
     - bash bin/travis-build.bash
 services:
