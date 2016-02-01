@@ -4,4 +4,5 @@
    <link rel="alternate" type="text/n3" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='n3', qualified=True) }}"/>
    <link rel="alternate" type="text/ttl" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='ttl', qualified=True) }}"/>
    <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='xml', qualified=True) }}"/>
+   <link rel="alternate" type="application/ld+json" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='jsonld', qualified=True) }}"/>
 {% endblock -%}
