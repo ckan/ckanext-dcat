@@ -775,3 +775,17 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         eq_(extras['spatial_uri'], 'http://geonames/Newark')
         assert_true('spatial_text' not in extras)
         assert_true('spatial' not in extras)
+
+    def test_tags_with_commas(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal('Tree, forest, shrub')))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        eq_(len(datasets[0]['tags']), 3)

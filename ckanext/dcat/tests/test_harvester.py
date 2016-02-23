@@ -275,6 +275,20 @@ class FunctionalHarvestTest(object):
           dc:title "Example dataset 2" ;
           dcat:keyword "San Sebastián", "Ελλάδα" .
           '''
+        cls.ttl_commas_in_keywords = u'''@prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dc: <http://purl.org/dc/terms/> .
+        <https://data.some.org/catalog>
+          a dcat:Catalog ;
+          dcat:dataset <https://data.some.org/catalog/datasets/1> .
+        <https://data.some.org/catalog/datasets/1>
+          a dcat:Dataset ;
+          dc:title "Example dataset 1" ;
+          dcat:keyword "Utbildning, kontaktuppgifter" .
+        <https://data.some.org/catalog/datasets/2>
+          a dcat:Dataset ;
+          dc:title "Example dataset 2" ;
+          dcat:keyword "Trees, forest, shrub" .
+          '''
         cls.ttl_remote_file_invalid = '''@prefix dcat: <http://www.w3.org/ns/dcat#> .
         @prefix dc: <http://purl.org/dc/terms/> .
         <https://data.some.org/catalog>
@@ -397,6 +411,12 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
                                   self.ttl_unicode_in_keywords,
                                   self.ttl_content_type)
 
+    def test_harvest_create_commas_keywords(self):
+
+        self._test_harvest_create(self.ttl_mock_url,
+                                  self.ttl_commas_in_keywords,
+                                  self.ttl_content_type)
+
     def _test_harvest_create(self, url, content, content_type, **kwargs):
 
         # Mock the GET request to get the file
@@ -437,6 +457,12 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         self._test_harvest_create(self.ttl_mock_url,
                                   self.ttl_unicode_in_keywords,
+                                  self.ttl_content_type)
+
+    def test_harvest_update_commas_keywords(self):
+
+        self._test_harvest_update(self.ttl_mock_url,
+                                  self.ttl_commas_in_keywords,
                                   self.ttl_content_type)
 
     def _test_harvest_update(self, url, content, content_type):

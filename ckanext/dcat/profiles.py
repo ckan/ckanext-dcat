@@ -607,6 +607,12 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Tags
         keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
+        # Split keywords with commas
+        keywords_with_commas = [k for k in keywords if ',' in k]
+        for keyword in keywords_with_commas:
+            keywords.remove(keyword)
+            keywords.extend([k.strip() for k in keyword.split(',')])
+
         for keyword in keywords:
             dataset_dict['tags'].append({'name': keyword})
 
