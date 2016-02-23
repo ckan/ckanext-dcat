@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from collections import defaultdict
 
 import nose
@@ -259,7 +261,21 @@ class FunctionalHarvestTest(object):
           a dcat:Dataset ;
           dc:title "Example dataset 1" .
           '''
-        cls.ttl_remote_file_invalid =  '''@prefix dcat: <http://www.w3.org/ns/dcat#> .
+        cls.ttl_unicode_in_keywords = u'''@prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dc: <http://purl.org/dc/terms/> .
+        <https://data.some.org/catalog>
+          a dcat:Catalog ;
+          dcat:dataset <https://data.some.org/catalog/datasets/1> .
+        <https://data.some.org/catalog/datasets/1>
+          a dcat:Dataset ;
+          dc:title "Example dataset 1" ;
+          dcat:keyword "förskola", "Garduña" .
+        <https://data.some.org/catalog/datasets/2>
+          a dcat:Dataset ;
+          dc:title "Example dataset 2" ;
+          dcat:keyword "San Sebastián", "Ελλάδα" .
+          '''
+        cls.ttl_remote_file_invalid = '''@prefix dcat: <http://www.w3.org/ns/dcat#> .
         @prefix dc: <http://purl.org/dc/terms/> .
         <https://data.some.org/catalog>
           a dcat:Catalog ;
@@ -375,6 +391,12 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
                                   'text/plain',
                                   config='{"rdf_format":"text/turtle"}')
 
+    def test_harvest_create_unicode_keywords(self):
+
+        self._test_harvest_create(self.ttl_mock_url,
+                                  self.ttl_unicode_in_keywords,
+                                  self.ttl_content_type)
+
     def _test_harvest_create(self, url, content, content_type, **kwargs):
 
         # Mock the GET request to get the file
@@ -395,7 +417,6 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         results = h.call_action('package_search', {}, fq=fq)
 
         eq_(results['count'], 2)
-
         for result in results['results']:
             assert result['title'] in ('Example dataset 1',
                                        'Example dataset 2')
@@ -410,6 +431,12 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         self._test_harvest_update(self.ttl_mock_url,
                                   self.ttl_content,
+                                  self.ttl_content_type)
+
+    def test_harvest_update_unicode_keywords(self):
+
+        self._test_harvest_create(self.ttl_mock_url,
+                                  self.ttl_unicode_in_keywords,
                                   self.ttl_content_type)
 
     def _test_harvest_update(self, url, content, content_type):
