@@ -1379,7 +1379,7 @@ class ItalianDCATAPProfile(RDFProfile):
             ('title', DCT.title, config.get('ckan.site_title')),
             ('description', DCT.description, config.get('ckan.site_description')),
             ('homepage', FOAF.homepage, config.get('ckan.site_url')),
-            ('language', DCT.language, config.get('ckan.locale_default', 'en')),
+            ('language', DCT.language, config.get('it_dcat_ap.language')),
         ]
         for item in items:
             key, predicate, fallback = item
