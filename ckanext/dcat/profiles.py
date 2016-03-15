@@ -32,6 +32,7 @@ GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+
 namespaces = {
     'dct': DCT,
     'dcat': DCAT,
+    'dcatapit': DCATAPIT,
     'adms': ADMS,
     'vcard': VCARD,
     'foaf': FOAF,
@@ -1207,7 +1208,8 @@ class ItalianDCATAPProfile(RDFProfile):
             # No publisher_uri
             publisher_details = BNode()
             rightsHolder_details = BNode()
-
+        
+        publisher_name = dataset_dict.get('organization').get('title')
         g.add((publisher_details, RDF.type, FOAF.Organization))
         g.add((publisher_details, FOAF.name, Literal(publisher_name)))
         g.add((dataset_ref, DCT.publisher, publisher_details))
