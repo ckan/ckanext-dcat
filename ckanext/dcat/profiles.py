@@ -1209,12 +1209,10 @@ class ItalianDCATAPProfile(RDFProfile):
             publisher_details = BNode()
             rightsHolder_details = BNode()
         
+        g.add((publisher_details, RDF.type, FOAF.Organization))
         publisher_name = dataset_dict.get('organization').get('title')
         if publisher_name:
-            print('PAOLO',publisher_name)
             g.add((publisher_details, FOAF.name, Literal(publisher_name)))
-        
-        g.add((publisher_details, RDF.type, FOAF.Organization))
         g.add((dataset_ref, DCT.publisher, publisher_details))
 
         # DCAT-AP_IT new properties
