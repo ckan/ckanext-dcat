@@ -73,6 +73,10 @@ These are implemented internally using:
 
         ckan.plugins = dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface
 
+5.  Restart the server, e.g. with
+
+        sudo service uwsgi restart
+
 ## RDF DCAT endpoints
 
 When the `dcat` plugin is enabled, the following RDF endpoints are available on your CKAN instance. The schema used on the serializations can be customized using [profiles](#profiles).
