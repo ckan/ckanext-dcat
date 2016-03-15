@@ -17,6 +17,7 @@ from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
+DCATAPIT = Namespace("http://dati.gov.it/onto/dcatapit#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -1168,17 +1169,22 @@ class ItalianDCATAPProfile(RDFProfile):
 
         # Basic fields
         items = [
+            ('identifier', DCT.identifier, ['guid', 'id']),
+            ('alternate_identifier', ADMS.identifier, None),
             ('title', DCT.title, None),
             ('notes', DCT.description, None),
             ('url', DCAT.landingPage, None),
-            ('identifier', DCT.identifier, ['guid', 'id']),
-            ('version', OWL.versionInfo, ['dcat_version']),
-            ('alternate_identifier', ADMS.identifier, None),
-            ('version_notes', ADMS.versionNotes, None),
-            ('frequency', DCT.accrualPeriodicity, None),
+            ('version', OWL.versionInfo, None),
+
+
+#            ('accrual-periodicity', DCT.accrualPeriodicity, None),
+#            ('temporal', DCT.temporal, None),
+#            ('language', DCT.language, None),
+#            ('dcat-category-id', DCAT.theme, None),
 
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
+
 
         # Tags
         for tag in dataset_dict.get('tags', []):
@@ -1191,13 +1197,34 @@ class ItalianDCATAPProfile(RDFProfile):
         ]
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        #  Lists
-        items = [
-            ('language', DCT.language, None),
-            ('theme', DCAT.theme, None),
-            ('conforms_to', DCAT.conformsTo, None),
-        ]
-        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        # Publisher
+        publisher_uri = self._get_dataset_value(dataset_dict, 'spc')
+        if publisher_uri:
+            publisher_details = URIRef(publisher_uri)
+            rightsHolder_details = URIRef(publisher_uri)
+        else:
+            # No publisher_uri
+            publisher_details = BNode()
+            rightsHolder_details = BNode()
+
+        g.add((publisher_details, RDF.type, FOAF.Organization))
+        g.add((publisher_details, FOAF.name, Literal(publisher_name)))
+        g.add((dataset_ref, DCT.publisher, publisher_details))
+
+        # DCAT-AP_IT new properties
+        
+        # subTheme
+        #g.add((dataset_ref, DCATAPIT.subTheme, ))
+        
+        # rightsHolder
+        g.add((rightsHolder_details, RDF.type, DCATAPIT.Agent))
+        g.add((rightsHolder_details, DCT.identifier, Literal(publisher_uri)))
+        g.add((rightsHolder_details, FOAF.name, Literal(publisher_name)))
+        g.add((dataset_ref, DCT.rightsHolder, rightsHolder_details))
+
+		# creator
+        g.add((dataset_ref, DCT.creator, ...))
 
         # Contact details
         if any([
@@ -1226,85 +1253,6 @@ class ItalianDCATAPProfile(RDFProfile):
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_details, items)
-
-        # Publisher
-        if any([
-            self._get_dataset_value(dataset_dict, 'publisher_uri'),
-            self._get_dataset_value(dataset_dict, 'publisher_name'),
-            dataset_dict.get('organization'),
-        ]):
-
-            publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
-            if publisher_uri:
-                publisher_details = URIRef(publisher_uri)
-            else:
-                # No organization nor publisher_uri
-                publisher_details = BNode()
-
-            g.add((publisher_details, RDF.type, FOAF.Organization))
-            g.add((dataset_ref, DCT.publisher, publisher_details))
-
-            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
-            if not publisher_name and dataset_dict.get('organization'):
-                publisher_name = dataset_dict['organization']['title']
-
-            g.add((publisher_details, FOAF.name, Literal(publisher_name)))
-            # TODO: It would make sense to fallback these to organization
-            # fields but they are not in the default schema and the
-            # `organization` object in the dataset_dict does not include
-            # custom fields
-            items = [
-                ('publisher_email', FOAF.mbox, None),
-                ('publisher_url', FOAF.homepage, None),
-                ('publisher_type', DCT.type, None),
-            ]
-
-            self._add_triples_from_dict(dataset_dict, publisher_details, items)
-
-        # Temporal
-        start = self._get_dataset_value(dataset_dict, 'temporal_start')
-        end = self._get_dataset_value(dataset_dict, 'temporal_end')
-        if start or end:
-            temporal_extent = BNode()
-
-            g.add((temporal_extent, RDF.type, DCT.PeriodOfTime))
-            if start:
-                self._add_date_triple(temporal_extent, SCHEMA.startDate, start)
-            if end:
-                self._add_date_triple(temporal_extent, SCHEMA.endDate, end)
-            g.add((dataset_ref, DCT.temporal, temporal_extent))
-
-        # Spatial
-        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
-        spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
-        spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
-
-        if spatial_uri or spatial_text or spatial_geom:
-            if spatial_uri:
-                spatial_ref = URIRef(spatial_uri)
-            else:
-                spatial_ref = BNode()
-
-            g.add((spatial_ref, RDF.type, DCT.Location))
-            g.add((dataset_ref, DCT.spatial, spatial_ref))
-
-            if spatial_text:
-                g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
-
-            if spatial_geom:
-                # GeoJSON
-                g.add((spatial_ref,
-                       LOCN.geometry,
-                       Literal(spatial_geom, datatype=GEOJSON_IMT)))
-                # WKT, because GeoDCAT-AP says so
-                try:
-                    g.add((spatial_ref,
-                           LOCN.geometry,
-                           Literal(wkt.dumps(json.loads(spatial_geom),
-                                             decimals=4),
-                                   datatype=GSP.wktLiteral)))
-                except (TypeError, ValueError, InvalidGeoJSONException):
-                    pass
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
@@ -1380,6 +1328,8 @@ class ItalianDCATAPProfile(RDFProfile):
             ('description', DCT.description, config.get('ckan.site_description')),
             ('homepage', FOAF.homepage, config.get('ckan.site_url')),
             ('language', DCT.language, config.get('it_dcat_ap.language')),
+            ('themeTaxonomy', DCAT.themeTaxonomy, config.get('it_dcat_ap.themeTaxonomy')),
+            ('publisher', DCT.publisher, config.get('it_dcat_ap.publisher'))
         ]
         for item in items:
             key, predicate, fallback = item
