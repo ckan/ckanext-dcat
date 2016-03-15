@@ -1209,6 +1209,8 @@ class ItalianDCATAPProfile(RDFProfile):
             publisher_details = BNode()
             rightsHolder_details = BNode()
         
+        print('PAOLO',dataset_dict.get('organization'))
+        print('PAOLO',dataset_dict.get('organization').get('title'))
         publisher_name = dataset_dict.get('organization').get('title')
         if publisher_name:
             g.add((publisher_details, FOAF.name, Literal(publisher_name)))
