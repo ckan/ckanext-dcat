@@ -11,6 +11,7 @@ from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 
 from geomet import wkt, InvalidGeoJSONException
 
+from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
@@ -609,6 +610,13 @@ class EuropeanDCATAPProfile(RDFProfile):
             if value:
                 dataset_dict['version'] = value
 
+        # Mappings for license retrieval (from distribution to dataset)
+        license_uri2id = {}
+        license_title2id = {}
+        for license_id, license in LicenseRegister().items():
+            license_uri2id[license.url] = license_id
+            license_title2id[license.title] = license_id
+
         # Tags
         keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
         # Split keywords with commas
@@ -768,6 +776,19 @@ class EuropeanDCATAPProfile(RDFProfile):
                                     else None)
 
             dataset_dict['resources'].append(resource_dict)
+
+            # License
+            if 'license_id' not in dataset_dict:
+                # If distribution has a license, attach it to the dataset
+                license = self._object(distribution, DCT.license)
+                if license:
+                    # Try to find a matching license comparing URIs, then titles
+                    license_id = license_uri2id.get(license.toPython())
+                    if license_id is None:
+                        license_id = license_title2id.get(
+                            self._object_value(license, DCT.title))
+                    if license_id is not None:
+                        dataset_dict['license_id'] = license_id
 
         if self.compatibility_mode:
             # Tweak the resulting dict to make it compatible with previous
