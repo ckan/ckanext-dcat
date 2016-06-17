@@ -1,6 +1,6 @@
 # ckanext-dcat
 
-[![Build Status](https://travis-ci.org/ckan/ckanext-dcat.png)](https://travis-ci.org/ckan/ckanext-dcat)
+[![Build Status](https://travis-ci.org/ckan/ckanext-dcat.svg?branch=master)](https://travis-ci.org/ckan/ckanext-dcat)
 [![Code Coverage](http://codecov.io/github/ckan/ckanext-dcat/coverage.svg?branch=master)](http://codecov.io/github/ckan/ckanext-dcat?branch=master)
 
 
