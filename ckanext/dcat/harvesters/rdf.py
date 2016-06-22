@@ -201,7 +201,8 @@ class DCATRDFHarvester(DCATHarvester):
             guid = self._get_guid(dataset)
 
             if not guid:
-                log.error('Could not get a unique identifier for dataset: {0}'.format(dataset))
+                self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
+                                        harvest_job)
                 continue
 
             dataset['extras'].append({'key': 'guid', 'value': guid})
