@@ -980,9 +980,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             url = resource_dict.get('url')
             download_url = resource_dict.get('download_url')
             if download_url:
-                g.add((distribution, DCAT.downloadURL, Literal(download_url)))
+                g.add((distribution, DCAT.downloadURL, URIRef(download_url)))
             if (url and not download_url) or (url and url != download_url):
-                g.add((distribution, DCAT.accessURL, Literal(url)))
+                g.add((distribution, DCAT.accessURL, URIRef(url)))
 
             # Dates
             items = [
