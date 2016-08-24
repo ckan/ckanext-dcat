@@ -579,7 +579,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'CSV file',
-            'url': 'http://example.com/data/file.csv',
+            'url': URIRef('http://example.com/data/file.csv'),
         }
 
         dataset = {
@@ -607,7 +607,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'CSV file',
-            'download_url': 'http://example.com/data/file.csv',
+            'download_url': URIRef('http://example.com/data/file.csv'),
         }
 
         dataset = {
@@ -635,8 +635,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'CSV file',
-            'url': 'http://example.com/data/file',
-            'download_url': 'http://example.com/data/file.csv',
+            'url': URIRef('http://example.com/data/file'),
+            'download_url': URIRef('http://example.com/data/file.csv'),
         }
 
         dataset = {
@@ -664,8 +664,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'CSV file',
-            'url': 'http://example.com/data/file.csv',
-            'download_url': 'http://example.com/data/file.csv',
+            'url': URIRef('http://example.com/data/file.csv'),
+            'download_url': URIRef('http://example.com/data/file.csv'),
         }
 
         dataset = {
