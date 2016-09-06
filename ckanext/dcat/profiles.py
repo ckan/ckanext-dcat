@@ -810,8 +810,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Dates
         items = [
-            ('issued', DCT.issued, ['metadata_created']),
-            ('modified', DCT.modified, ['metadata_modified']),
+            ('issued', DCT.issued, ['metadata_created'], Literal),
+            ('modified', DCT.modified, ['metadata_modified'], Literal),
         ]
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -851,9 +851,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
             items = [
-                ('contact_name', VCARD.fn, ['maintainer', 'author']),
+                ('contact_name', VCARD.fn, ['maintainer', 'author'], Literal),
                 ('contact_email', VCARD.hasEmail, ['maintainer_email',
-                                                   'author_email']),
+                                                   'author_email'], Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_details, items)
@@ -885,9 +885,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             # `organization` object in the dataset_dict does not include
             # custom fields
             items = [
-                ('publisher_email', FOAF.mbox, None), Literal,
-                ('publisher_url', FOAF.homepage, None), URIRef,
-                ('publisher_type', DCT.type, None), Literal,
+                ('publisher_email', FOAF.mbox, None, Literal),
+                ('publisher_url', FOAF.homepage, None, URIRef),
+                ('publisher_type', DCT.type, None, Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, publisher_details, items)
@@ -948,20 +948,20 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             #  Simple values
             items = [
-                ('name', DCT.title, None),
-                ('description', DCT.description, None),
-                ('status', ADMS.status, None),
-                ('rights', DCT.rights, None),
-                ('license', DCT.license, None),
+                ('name', DCT.title, None, Literal),
+                ('description', DCT.description, None, Literal),
+                ('status', ADMS.status, None, Literal),
+                ('rights', DCT.rights, None, Literal),
+                ('license', DCT.license, None, Literal),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
 
             #  Lists
             items = [
-                ('documentation', FOAF.page, None),
-                ('language', DCT.language, None),
-                ('conforms_to', DCT.conformsTo, None),
+                ('documentation', FOAF.page, None, Literal),
+                ('language', DCT.language, None, Literal),
+                ('conforms_to', DCT.conformsTo, None, Literal),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
@@ -988,8 +988,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             # Dates
             items = [
-                ('issued', DCT.issued, None),
-                ('modified', DCT.modified, None),
+                ('issued', DCT.issued, None, Literal),
+                ('modified', DCT.modified, None, Literal),
             ]
 
             self._add_date_triples_from_dict(resource_dict, distribution, items)

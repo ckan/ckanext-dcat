@@ -109,21 +109,21 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         # List
         for item in [
-            ('language', DCT.language),
-            ('theme', DCAT.theme),
-            ('conforms_to', DCT.conformsTo),
-            ('alternate_identifier', ADMS.identifier),
-            ('documentation', FOAF.page),
-            ('related_resource', DCT.relation),
-            ('has_version', DCT.hasVersion),
-            ('is_version_of', DCT.isVersionOf),
-            ('source', DCT.source),
-            ('sample', ADMS.sample),
+            ('language', DCT.language, Literal),
+            ('theme', DCAT.theme, URIRef),
+            ('conforms_to', DCT.conformsTo, Literal),
+            ('alternate_identifier', ADMS.identifier, Literal),
+            ('documentation', FOAF.page, Literal),
+            ('related_resource', DCT.relation, Literal),
+            ('has_version', DCT.hasVersion, Literal),
+            ('is_version_of', DCT.isVersionOf, Literal),
+            ('source', DCT.source, Literal),
+            ('sample', ADMS.sample, Literal),
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))
             for value in values:
-                assert self._triple(g, dataset_ref, item[1], value)
+                assert self._triple(g, dataset_ref, item[1], item[2](value))
 
     def test_identifier_extra(self):
         dataset = {
@@ -278,7 +278,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, RDF.type, FOAF.Organization)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
-        assert self._triple(g, publisher, FOAF.homepage, extras['publisher_url'])
+        assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
         assert self._triple(g, publisher, DCT.type, extras['publisher_type'])
 
     def test_publisher_org(self):
