@@ -795,7 +795,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         # Basic fields
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
         assert self._triple(g, catalog, DCT.title, config.get('ckan.site_title'))
-        assert self._triple(g, catalog, FOAF.homepage, config.get('ckan.site_url'))
+        assert self._triple(g, catalog, FOAF.homepage, URIRef(config.get('ckan.site_url')))
         assert self._triple(g, catalog, DCT.language, 'en')
 
     def test_graph_from_catalog_dict(self):
@@ -818,7 +818,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
         assert self._triple(g, catalog, DCT.title, catalog_dict['title'])
         assert self._triple(g, catalog, DCT.description, catalog_dict['description'])
-        assert self._triple(g, catalog, FOAF.homepage, catalog_dict['homepage'])
+        assert self._triple(g, catalog, FOAF.homepage, URIRef(catalog_dict['homepage']))
         assert self._triple(g, catalog, DCT.language, catalog_dict['language'])
 
     def test_graph_from_catalog_modified_date(self):
