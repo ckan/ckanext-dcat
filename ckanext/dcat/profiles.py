@@ -421,16 +421,18 @@ class RDFProfile(object):
                                list_value=False,
                                date_value=False):
         for item in items:
-            key, predicate, fallbacks = item
+            key, predicate, fallbacks, _type = item
             self._add_triple_from_dict(_dict, subject, predicate, key,
                                        fallbacks=fallbacks,
                                        list_value=list_value,
-                                       date_value=date_value)
+                                       date_value=date_value,
+                                       _type=_type)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
                               list_value=False,
-                              date_value=False):
+                              date_value=False,
+                              _type=Literal):
         '''
         Adds a new triple to the graph with the provided parameters
 
@@ -452,14 +454,14 @@ class RDFProfile(object):
                     break
 
         if value and list_value:
-            self._add_list_triple(subject, predicate, value)
+            self._add_list_triple(subject, predicate, value, _type)
         elif value and date_value:
-            self._add_date_triple(subject, predicate, value)
+            self._add_date_triple(subject, predicate, value, _type)
         elif value:
             # Normal text value
-            self.g.add((subject, predicate, Literal(value)))
+            self.g.add((subject, predicate, _type(value)))
 
-    def _add_list_triple(self, subject, predicate, value):
+    def _add_list_triple(self, subject, predicate, value, _type=Literal):
         '''
         Adds as many triples to the graph as values
 
@@ -484,9 +486,9 @@ class RDFProfile(object):
                     items = [value]
 
         for item in items:
-            self.g.add((subject, predicate, Literal(item)))
+            self.g.add((subject, predicate, _type(item)))
 
-    def _add_date_triple(self, subject, predicate, value):
+    def _add_date_triple(self, subject, predicate, value, _type=Literal):
         '''
         Adds a new triple with a date object
 
@@ -501,10 +503,10 @@ class RDFProfile(object):
             default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
             _date = parse_date(value, default=default_datetime)
 
-            self.g.add((subject, predicate, Literal(_date.isoformat(),
-                                                    datatype=XSD.dateTime)))
+            self.g.add((subject, predicate, _type(_date.isoformat(),
+                                                  datatype=XSD.dateTime)))
         except ValueError:
-            self.g.add((subject, predicate, Literal(value)))
+            self.g.add((subject, predicate, _type(value)))
 
     def _last_catalog_modification(self):
         '''
@@ -634,7 +636,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 dataset_dict['extras'].append({'key': key, 'value': value})
 
         #  Lists
-        for key, predicate in (
+        for key, predicate, in (
                 ('language', DCT.language),
                 ('theme', DCAT.theme),
                 ('alternate_identifier', ADMS.identifier),
@@ -791,14 +793,14 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         items = [
-            ('title', DCT.title, None),
-            ('notes', DCT.description, None),
-            ('url', DCAT.landingPage, None),
-            ('identifier', DCT.identifier, ['guid', 'id']),
-            ('version', OWL.versionInfo, ['dcat_version']),
-            ('version_notes', ADMS.versionNotes, None),
-            ('frequency', DCT.accrualPeriodicity, None),
-            ('access_rights', DCT.accessRights, None),
+            ('title', DCT.title, None, Literal),
+            ('notes', DCT.description, None, Literal),
+            ('url', DCAT.landingPage, None, URIRef),
+            ('identifier', DCT.identifier, ['guid', 'id'], Literal),
+            ('version', OWL.versionInfo, ['dcat_version'], Literal),
+            ('version_notes', ADMS.versionNotes, None, Literal),
+            ('frequency', DCT.accrualPeriodicity, None, Literal),
+            ('access_rights', DCT.accessRights, None, Literal),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -815,16 +817,16 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         #  Lists
         items = [
-            ('language', DCT.language, None),
-            ('theme', DCAT.theme, None),
-            ('conforms_to', DCT.conformsTo, None),
-            ('alternate_identifier', ADMS.identifier, None),
-            ('documentation', FOAF.page, None),
-            ('related_resource', DCT.relation, None),
-            ('has_version', DCT.hasVersion, None),
-            ('is_version_of', DCT.isVersionOf, None),
-            ('source', DCT.source, None),
-            ('sample', ADMS.sample, None),
+            ('language', DCT.language, None, Literal),
+            ('theme', DCAT.theme, None, URIRef),
+            ('conforms_to', DCT.conformsTo, None, Literal),
+            ('alternate_identifier', ADMS.identifier, None, Literal),
+            ('documentation', FOAF.page, None, Literal),
+            ('related_resource', DCT.relation, None, Literal),
+            ('has_version', DCT.hasVersion, None, Literal),
+            ('is_version_of', DCT.isVersionOf, None, Literal),
+            ('source', DCT.source, None, Literal),
+            ('sample', ADMS.sample, None, Literal),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -883,9 +885,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             # `organization` object in the dataset_dict does not include
             # custom fields
             items = [
-                ('publisher_email', FOAF.mbox, None),
-                ('publisher_url', FOAF.homepage, None),
-                ('publisher_type', DCT.type, None),
+                ('publisher_email', FOAF.mbox, None), Literal,
+                ('publisher_url', FOAF.homepage, None), URIRef,
+                ('publisher_type', DCT.type, None), Literal,
             ]
 
             self._add_triples_from_dict(dataset_dict, publisher_details, items)
@@ -1028,19 +1030,19 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         items = [
-            ('title', DCT.title, config.get('ckan.site_title')),
-            ('description', DCT.description, config.get('ckan.site_description')),
-            ('homepage', FOAF.homepage, config.get('ckan.site_url')),
-            ('language', DCT.language, config.get('ckan.locale_default', 'en')),
+            ('title', DCT.title, config.get('ckan.site_title'), Literal),
+            ('description', DCT.description, config.get('ckan.site_description'), Literal),
+            ('homepage', FOAF.homepage, config.get('ckan.site_url'), URIRef),
+            ('language', DCT.language, config.get('ckan.locale_default', 'en'), Literal),
         ]
         for item in items:
-            key, predicate, fallback = item
+            key, predicate, fallback, _type = item
             if catalog_dict:
                 value = catalog_dict.get(key, fallback)
             else:
                 value = fallback
             if value:
-                g.add((catalog_ref, predicate, Literal(value)))
+                g.add((catalog_ref, predicate, _type(value)))
 
         # Dates
         modified = self._last_catalog_modification()
