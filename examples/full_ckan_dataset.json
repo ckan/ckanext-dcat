@@ -362,6 +362,6 @@
         "total": 0
     },
     "type": "dataset",
-    "url": null,
+    "url": "http://some.source.url.com",
     "version": null
 }
