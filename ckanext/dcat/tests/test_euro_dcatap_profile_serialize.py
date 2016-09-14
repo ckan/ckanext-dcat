@@ -109,21 +109,21 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         # List
         for item in [
-            ('language', DCT.language),
-            ('theme', DCAT.theme),
-            ('conforms_to', DCT.conformsTo),
-            ('alternate_identifier', ADMS.identifier),
-            ('documentation', FOAF.page),
-            ('related_resource', DCT.relation),
-            ('has_version', DCT.hasVersion),
-            ('is_version_of', DCT.isVersionOf),
-            ('source', DCT.source),
-            ('sample', ADMS.sample),
+            ('language', DCT.language, Literal),
+            ('theme', DCAT.theme, URIRef),
+            ('conforms_to', DCT.conformsTo, Literal),
+            ('alternate_identifier', ADMS.identifier, Literal),
+            ('documentation', FOAF.page, Literal),
+            ('related_resource', DCT.relation, Literal),
+            ('has_version', DCT.hasVersion, Literal),
+            ('is_version_of', DCT.isVersionOf, Literal),
+            ('source', DCT.source, Literal),
+            ('sample', ADMS.sample, Literal),
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))
             for value in values:
-                assert self._triple(g, dataset_ref, item[1], value)
+                assert self._triple(g, dataset_ref, item[1], item[2](value))
 
     def test_identifier_extra(self):
         dataset = {
@@ -278,7 +278,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, RDF.type, FOAF.Organization)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
-        assert self._triple(g, publisher, FOAF.homepage, extras['publisher_url'])
+        assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
         assert self._triple(g, publisher, DCT.type, extras['publisher_type'])
 
     def test_publisher_org(self):
@@ -598,7 +598,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.accessURL, resource['url'])
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['url']))
         assert self._triple(g, distribution, DCAT.downloadURL, None) is None
 
     def test_distribution_download_url_only(self):
@@ -626,7 +626,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.downloadURL, resource['download_url'])
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
         assert self._triple(g, distribution, DCAT.accessURL, None) is None
 
     def test_distribution_both_urls_different(self):
@@ -655,8 +655,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.accessURL, resource['url'])
-        assert self._triple(g, distribution, DCAT.downloadURL, resource['download_url'])
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
 
     def test_distribution_both_urls_the_same(self):
 
@@ -684,7 +684,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.downloadURL, resource['url'])
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['url']))
         assert self._triple(g, distribution, DCAT.accessURL, None) is None
 
     def test_distribution_format(self):
@@ -795,7 +795,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         # Basic fields
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
         assert self._triple(g, catalog, DCT.title, config.get('ckan.site_title'))
-        assert self._triple(g, catalog, FOAF.homepage, config.get('ckan.site_url'))
+        assert self._triple(g, catalog, FOAF.homepage, URIRef(config.get('ckan.site_url')))
         assert self._triple(g, catalog, DCT.language, 'en')
 
     def test_graph_from_catalog_dict(self):
@@ -818,7 +818,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
         assert self._triple(g, catalog, DCT.title, catalog_dict['title'])
         assert self._triple(g, catalog, DCT.description, catalog_dict['description'])
-        assert self._triple(g, catalog, FOAF.homepage, catalog_dict['homepage'])
+        assert self._triple(g, catalog, FOAF.homepage, URIRef(catalog_dict['homepage']))
         assert self._triple(g, catalog, DCT.language, catalog_dict['language'])
 
     def test_graph_from_catalog_modified_date(self):
