@@ -2,7 +2,7 @@
     "id": "2988a6aa-2802-4f32-b846-d4520c79c4b7",
     "title": "Zimbabwe Regional Geochemical Survey.",
     "notes": "During the period 1982-86 a team of geologists from the British Geological Survey ...",
-    "url": null,
+    "url": "http://some.source.url.com",
     "extras": [{"key": "dcat_issued", "value": "2012-05-10"},
             {"key": "dcat_modified", "value": "2012-05-10T21:04"},
             {"key": "guid", "value": "9df8df51-63db-37a8-e044-0003ba9b0d98"},
