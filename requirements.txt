@@ -1,3 +1,5 @@
 rdflib==4.2.1
 rdflib-jsonld==0.4.0
 git+https://github.com/geomet/geomet.git
+# Pin this as newer versions installed by RDFLib give setuptools troubles
+html5lib==0.99999999
