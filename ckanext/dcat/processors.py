@@ -114,6 +114,16 @@ class RDFParser(RDFProcessor):
         for dataset in self.g.subjects(RDF.type, DCAT.Dataset):
             yield dataset
 
+    def next_page(self):
+        '''
+        Returns the URL of the next page or None if there is no next page
+        '''
+        for pagination_node in self.g.subjects(RDF.type, HYDRA.PagedCollection):
+            for o in self.g.objects(pagination_node, HYDRA.nextPage):
+                return unicode(o)
+        return None
+
+
     def parse(self, data, _format=None):
         '''
         Parses and RDF graph serialization and into the class graph
