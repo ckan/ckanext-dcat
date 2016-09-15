@@ -147,7 +147,7 @@ def _pagination_info(query, data_dict):
         base_url = config.get('ckan.site_url', '').strip('/')
         if not base_url:
             base_url = toolkit.request.host_url
-        base_url = '%s/%s%s' % (
+        base_url = '%s%s%s' % (
             base_url, toolkit.request.path_info, toolkit.request.script_name)
 
         params = [p for p in toolkit.request.params.iteritems()
