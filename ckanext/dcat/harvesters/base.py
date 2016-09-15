@@ -96,17 +96,17 @@ class DCATHarvester(HarvesterBase):
                 # We want to catch these ones later on
                 raise
 
-            msg = 'Could not get content. Server responded with %s %s' % (
-                error.response.status_code, error.response.reason)
+            msg = 'Could not get content from %s. Server responded with %s %s' % (
+                url, error.response.status_code, error.response.reason)
             self._save_gather_error(msg, harvest_job)
             return None, None
         except requests.exceptions.ConnectionError, error:
-            msg = '''Could not get content because a
-                                connection error occurred. %s''' % error
+            msg = '''Could not get content from %s because a
+                                connection error occurred. %s''' % (url, error)
             self._save_gather_error(msg, harvest_job)
             return None, None
         except requests.exceptions.Timeout, error:
-            msg = 'Could not get content because the connection timed out.'
+            msg = 'Could not get content from %s because the connection timed out.' % url
             self._save_gather_error(msg, harvest_job)
             return None, None
 
