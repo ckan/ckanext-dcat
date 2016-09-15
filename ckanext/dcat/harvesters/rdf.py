@@ -168,7 +168,7 @@ class DCATRDFHarvester(DCATHarvester):
                     self._save_gather_error(error_msg, harvest_job)
 
                 if not next_page_url:
-                    return False
+                    return []
 
             content, rdf_format = self._get_content_and_type(next_page_url, harvest_job, 1, content_type=rdf_format)
 
@@ -180,13 +180,13 @@ class DCATRDFHarvester(DCATHarvester):
                     self._save_gather_error(error_msg, harvest_job)
 
             if not content:
-                return False
+                return []
 
             try:
                 parser.parse(content, _format=rdf_format)
             except RDFParserException, e:
                 self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
-                return False
+                return []
 
             for dataset in parser.datasets():
                 if not dataset.get('name'):
