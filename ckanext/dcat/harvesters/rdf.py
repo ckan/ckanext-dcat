@@ -158,8 +158,6 @@ class DCATRDFHarvester(DCATHarvester):
         guids_in_source = []
         object_ids = []
 
-        # TODO: profiles conf
-        parser = RDFParser()
         while next_page_url:
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
                 next_page_url, before_download_errors = harvester.before_download(next_page_url, harvest_job)
@@ -181,6 +179,9 @@ class DCATRDFHarvester(DCATHarvester):
 
             if not content:
                 return []
+
+            # TODO: profiles conf
+            parser = RDFParser()
 
             try:
                 parser.parse(content, _format=rdf_format)
