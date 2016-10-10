@@ -139,6 +139,70 @@ class TestRDFParser(object):
 
         eq_(len(p.g), 2)
 
+    def test_parse_pagination_next_page(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:hydra="http://www.w3.org/ns/hydra/core#">
+         <hydra:PagedCollection rdf:about="http://example.com/catalog.xml?page=1">
+            <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">245</hydra:totalItems>
+            <hydra:lastPage>http://example.com/catalog.xml?page=3</hydra:lastPage>
+            <hydra:itemsPerPage rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">100</hydra:itemsPerPage>
+            <hydra:nextPage>http://example.com/catalog.xml?page=2</hydra:nextPage>
+            <hydra:firstPage>http://example.com/catalog.xml?page=1</hydra:firstPage>
+        </hydra:PagedCollection>
+        </rdf:RDF>
+        '''
+
+        p = RDFParser()
+
+        p.parse(data)
+
+        eq_(p.next_page(), 'http://example.com/catalog.xml?page=2')
+
+    def test_parse_without_pagination(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+            <rdfs:label>Some label</rdfs:label>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        p = RDFParser()
+
+        p.parse(data)
+
+        eq_(p.next_page(), None)
+
+    def test_parse_pagination_last_page(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:hydra="http://www.w3.org/ns/hydra/core#">
+         <hydra:PagedCollection rdf:about="http://example.com/catalog.xml?page=3">
+            <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">245</hydra:totalItems>
+            <hydra:lastPage>http://example.com/catalog.xml?page=3</hydra:lastPage>
+            <hydra:itemsPerPage rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">100</hydra:itemsPerPage>
+            <hydra:firstPage>http://example.com/catalog.xml?page=1</hydra:firstPage>
+            <hydra:previousPage>http://example.com/catalog.xml?page=2</hydra:previousPage>
+        </hydra:PagedCollection>
+        </rdf:RDF>
+        '''
+
+        p = RDFParser()
+
+        p.parse(data)
+
+        eq_(p.next_page(), None)
+
     def test_parse_data_different_format(self):
 
         data = '''

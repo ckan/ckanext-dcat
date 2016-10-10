@@ -1,6 +1,7 @@
 import json
 import uuid
 import logging
+import hashlib
 
 import ckan.plugins as p
 import ckan.model as model
@@ -148,71 +149,88 @@ class DCATRDFHarvester(DCATHarvester):
 
         log.debug('In DCATRDFHarvester gather_stage')
 
-        # Get file contents
-        url = harvest_job.source.url
-
-        for harvester in p.PluginImplementations(IDCATRDFHarvester):
-            url, before_download_errors = harvester.before_download(url, harvest_job)
-
-            for error_msg in before_download_errors:
-                self._save_gather_error(error_msg, harvest_job)
-
-            if not url:
-                return False
-
         rdf_format = None
         if harvest_job.source.config:
             rdf_format = json.loads(harvest_job.source.config).get("rdf_format")
-        content, rdf_format = self._get_content_and_type(url, harvest_job, 1, content_type=rdf_format)
 
-        # TODO: store content?
-        for harvester in p.PluginImplementations(IDCATRDFHarvester):
-            content, after_download_errors = harvester.after_download(content, harvest_job)
-
-            for error_msg in after_download_errors:
-                self._save_gather_error(error_msg, harvest_job)
-
-        if not content:
-            return False
-
-        # TODO: profiles conf
-        parser = RDFParser()
-
-        try:
-            parser.parse(content, _format=rdf_format)
-        except RDFParserException, e:
-            self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
-            return False
+        # Get file contents of first page
+        next_page_url = harvest_job.source.url
 
         guids_in_source = []
         object_ids = []
-        for dataset in parser.datasets():
-            if not dataset.get('name'):
-                dataset['name'] = self._gen_new_name(dataset['title'])
+        last_content_hash = None
 
-            # Unless already set by the parser, get the owner organization (if any)
-            # from the harvest source dataset
-            if not dataset.get('owner_org'):
-                source_dataset = model.Package.get(harvest_job.source.id)
-                if source_dataset.owner_org:
-                    dataset['owner_org'] = source_dataset.owner_org
+        while next_page_url:
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                next_page_url, before_download_errors = harvester.before_download(next_page_url, harvest_job)
 
-            # Try to get a unique identifier for the harvested dataset
-            guid = self._get_guid(dataset)
+                for error_msg in before_download_errors:
+                    self._save_gather_error(error_msg, harvest_job)
 
-            if not guid:
-                self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
-                                        harvest_job)
-                continue
+                if not next_page_url:
+                    return []
 
-            dataset['extras'].append({'key': 'guid', 'value': guid})
-            guids_in_source.append(guid)
+            content, rdf_format = self._get_content_and_type(next_page_url, harvest_job, 1, content_type=rdf_format)
 
-            obj = HarvestObject(guid=guid, job=harvest_job,
-                                content=json.dumps(dataset))
+            content_hash = hashlib.md5()
+            content_hash.update(content)
 
-            obj.save()
-            object_ids.append(obj.id)
+            if last_content_hash:
+                if content_hash.digest() == last_content_hash.digest():
+                    log.warning('Remote content was the same even when using a paginated URL, skipping')
+                    break
+            else:
+                last_content_hash = content_hash
+
+            # TODO: store content?
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                content, after_download_errors = harvester.after_download(content, harvest_job)
+
+                for error_msg in after_download_errors:
+                    self._save_gather_error(error_msg, harvest_job)
+
+            if not content:
+                return []
+
+            # TODO: profiles conf
+            parser = RDFParser()
+
+            try:
+                parser.parse(content, _format=rdf_format)
+            except RDFParserException, e:
+                self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
+                return []
+
+            for dataset in parser.datasets():
+                if not dataset.get('name'):
+                    dataset['name'] = self._gen_new_name(dataset['title'])
+
+                # Unless already set by the parser, get the owner organization (if any)
+                # from the harvest source dataset
+                if not dataset.get('owner_org'):
+                    source_dataset = model.Package.get(harvest_job.source.id)
+                    if source_dataset.owner_org:
+                        dataset['owner_org'] = source_dataset.owner_org
+
+                # Try to get a unique identifier for the harvested dataset
+                guid = self._get_guid(dataset)
+
+                if not guid:
+                    self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
+                                            harvest_job)
+                    continue
+
+                dataset['extras'].append({'key': 'guid', 'value': guid})
+                guids_in_source.append(guid)
+
+                obj = HarvestObject(guid=guid, job=harvest_job,
+                                    content=json.dumps(dataset))
+
+                obj.save()
+                object_ids.append(obj.id)
+
+            # get the next page
+            next_page_url = parser.next_page()
 
         # Check if some datasets need to be deleted
         object_ids_to_delete = self._mark_datasets_for_deletion(guids_in_source, harvest_job)

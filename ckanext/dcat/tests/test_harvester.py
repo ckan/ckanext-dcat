@@ -188,6 +188,8 @@ class FunctionalHarvestTest(object):
     @classmethod
     def setup_class(cls):
 
+        h.reset_db()
+
         cls.gather_consumer = queue.get_gather_consumer()
         cls.fetch_consumer = queue.get_fetch_consumer()
 
@@ -214,6 +216,95 @@ class FunctionalHarvestTest(object):
         </dcat:Catalog>
         </rdf:RDF>
         '''
+
+        # Minimal remote RDF file with pagination (1)
+        # Use slashes for paginated URLs because HTTPretty won't distinguish
+        # query strings
+        cls.rdf_mock_url_pagination_1 = 'http://some.dcat.file.pagination.rdf'
+        cls.rdf_content_pagination_1 = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:hydra="http://www.w3.org/ns/hydra/core#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset 1</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/2">
+              <dct:title>Example dataset 2</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        <hydra:PagedCollection rdf:about="http://some.dcat.file.pagination.rdf/page/1">
+            <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">4</hydra:totalItems>
+            <hydra:lastPage>http://some.dcat.file.pagination.rdf/page/2</hydra:lastPage>
+            <hydra:itemsPerPage rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</hydra:itemsPerPage>
+            <hydra:nextPage>http://some.dcat.file.pagination.rdf/page/2</hydra:nextPage>
+            <hydra:firstPage>http://some.dcat.file.pagination.rdf/page/1</hydra:firstPage>
+        </hydra:PagedCollection>
+        </rdf:RDF>
+        '''
+
+        # Minimal remote RDF file with pagination (2)
+        cls.rdf_mock_url_pagination_2 = 'http://some.dcat.file.pagination.rdf/page/2'
+        cls.rdf_content_pagination_2 = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:hydra="http://www.w3.org/ns/hydra/core#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/3">
+              <dct:title>Example dataset 3</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/4">
+              <dct:title>Example dataset 4</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        <hydra:PagedCollection rdf:about="http://some.dcat.file.pagination.rdf/page/1">
+            <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">4</hydra:totalItems>
+            <hydra:lastPage>http://some.dcat.file.pagination.rdf/page/2</hydra:lastPage>
+            <hydra:itemsPerPage rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</hydra:itemsPerPage>
+            <hydra:previousPage>http://some.dcat.file.pagination.rdf/page/1</hydra:previousPage>
+            <hydra:firstPage>http://some.dcat.file.pagination.rdf/page/1</hydra:firstPage>
+        </hydra:PagedCollection>
+        </rdf:RDF>
+        '''
+
+        # Minimal remote RDF file
+        cls.rdf_mock_url = 'http://some.dcat.file.rdf'
+        cls.rdf_content_type = 'application/rdf+xml'
+        cls.rdf_content = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset 1</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/2">
+              <dct:title>Example dataset 2</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        </rdf:RDF>
+        '''
+
         cls.rdf_remote_file_small = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
@@ -440,6 +531,76 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         for result in results['results']:
             assert result['title'] in ('Example dataset 1',
                                        'Example dataset 2')
+
+    def test_harvest_create_rdf_pagination(self):
+
+        # Mock the GET requests needed to get the file
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_1,
+                               body=self.rdf_content_pagination_1,
+                               content_type=self.rdf_content_type)
+
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_2,
+                               body=self.rdf_content_pagination_2,
+                               content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # them as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_1,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_2,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(
+            self.rdf_mock_url_pagination_1)
+
+        self._run_full_job(harvest_source['id'], num_objects=4)
+
+        # Check that four datasets were created
+        fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
+        results = h.call_action('package_search', {}, fq=fq)
+
+        eq_(results['count'], 4)
+        eq_(sorted([d['title'] for d in results['results']]),
+            ['Example dataset 1', 'Example dataset 2',
+             'Example dataset 3', 'Example dataset 4'])
+
+    def test_harvest_create_rdf_pagination_same_content(self):
+
+        # Mock the GET requests needed to get the file. Two different URLs but
+        # same content to mock a misconfigured server
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_1,
+                               body=self.rdf_content_pagination_1,
+                               content_type=self.rdf_content_type)
+
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_2,
+                               body=self.rdf_content_pagination_1,
+                               content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # them as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_1,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_2,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(
+            self.rdf_mock_url_pagination_1)
+
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Check that two datasets were created
+        fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
+        results = h.call_action('package_search', {}, fq=fq)
+
+        eq_(results['count'], 2)
+        eq_(sorted([d['title'] for d in results['results']]),
+            ['Example dataset 1', 'Example dataset 2'])
 
     def test_harvest_update_rdf(self):
 
