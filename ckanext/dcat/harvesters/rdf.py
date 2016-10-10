@@ -1,6 +1,7 @@
 import json
 import uuid
 import logging
+import hashlib
 
 import ckan.plugins as p
 import ckan.model as model
@@ -157,6 +158,7 @@ class DCATRDFHarvester(DCATHarvester):
 
         guids_in_source = []
         object_ids = []
+        last_content_hash = None
 
         while next_page_url:
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
@@ -169,6 +171,16 @@ class DCATRDFHarvester(DCATHarvester):
                     return []
 
             content, rdf_format = self._get_content_and_type(next_page_url, harvest_job, 1, content_type=rdf_format)
+
+            content_hash = hashlib.md5()
+            content_hash.update(content)
+
+            if last_content_hash:
+                if content_hash.digest() == last_content_hash.digest():
+                    log.warning('Remote content was the same even when using a paginated URL, skipping')
+                    break
+            else:
+                last_content_hash = content_hash
 
             # TODO: store content?
             for harvester in p.PluginImplementations(IDCATRDFHarvester):

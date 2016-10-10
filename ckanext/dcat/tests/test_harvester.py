@@ -558,7 +558,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         self._run_full_job(harvest_source['id'], num_objects=4)
 
-        # Check that two datasets were created
+        # Check that four datasets were created
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
         results = h.call_action('package_search', {}, fq=fq)
 
@@ -566,6 +566,41 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         eq_(sorted([d['title'] for d in results['results']]),
             ['Example dataset 1', 'Example dataset 2',
              'Example dataset 3', 'Example dataset 4'])
+
+    def test_harvest_create_rdf_pagination_same_content(self):
+
+        # Mock the GET requests needed to get the file. Two different URLs but
+        # same content to mock a misconfigured server
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_1,
+                               body=self.rdf_content_pagination_1,
+                               content_type=self.rdf_content_type)
+
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_2,
+                               body=self.rdf_content_pagination_1,
+                               content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # them as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_1,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_2,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(
+            self.rdf_mock_url_pagination_1)
+
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Check that two datasets were created
+        fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
+        results = h.call_action('package_search', {}, fq=fq)
+
+        eq_(results['count'], 2)
+        eq_(sorted([d['title'] for d in results['results']]),
+            ['Example dataset 1', 'Example dataset 2'])
 
     def test_harvest_update_rdf(self):
 
