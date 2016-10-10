@@ -97,6 +97,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, ADMS.versionNotes, extras['version_notes'])
         assert self._triple(g, dataset_ref, DCT.accrualPeriodicity, extras['frequency'])
         assert self._triple(g, dataset_ref, DCT.accessRights, extras['access_rights'])
+        assert self._triple(g, dataset_ref, DCT.provenance, extras['provenance'])
+        assert self._triple(g, dataset_ref, DCT.type, extras['dcat_type'])
 
         # Tags
         eq_(len([t for t in g.triples((dataset_ref, DCAT.keyword, None))]), 2)
