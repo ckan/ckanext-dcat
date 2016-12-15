@@ -59,3 +59,86 @@ class IDCATRDFHarvester(Interface):
         :rtype: tuple
         '''
         return content, []
+
+    def before_update(self, harvest_object, dataset_dict, temp_dict):
+        '''
+        Called just before the ``package_update`` action.
+        It may be used to preprocess the dataset dict.
+
+        Implementations may store some temp values in temp_dict, that will be
+        then passed back in the ``after_update`` call.
+
+        :param harvest_object: A ``HarvestObject`` domain object.
+        :type harvest_job: object
+        :param dataset_dict: The dataset dict already parsed by the RDF parser
+                             (and related plugins).
+        :type dataset_dict: dict
+        :param temp_dict: A dictionary, shared among all plugins, for storing
+                          temp data. Such dict will be passed back in the
+                          ``after_update`` call.
+        :type temp_dict: dict
+        '''
+        pass
+
+    def after_update(self, harvest_object, dataset_dict, temp_dict):
+        '''
+        Called just after a successful ``package_update`` action has been
+        performed.
+
+        :param harvest_object: A ``HarvestObject`` domain object.
+        :type harvest_job: object
+        :param dataset_dict: The dataset dict that has just been stored into
+                             the DB.
+        :type dataset_dict: dict
+        :param temp_dict: A dictionary, shared among all plugins, for storing
+                          temp data. 
+        :type temp_dict: dict
+
+        :returns: A string containing an error message, or None. If the error
+                  string is not None, it will be saved as an import error,
+                  and dataset importing will be rolled back,
+        :rtype: string
+        '''
+
+        return None
+
+    def before_create(self, harvest_object, dataset_dict, temp_dict):
+        '''
+        Called just before the ``package_create`` action.
+        It may be used to preprocess the dataset dict.
+
+        Implementations may store some temp values in temp_dict, that will be
+        then passed back in the ``after_create`` call.
+
+        :param harvest_object: A ``HarvestObject`` domain object.
+        :type harvest_job: object
+        :param dataset_dict: The dataset dict already parsed by the RDF parser
+                             (and related plugins).
+        :type dataset_dict: dict
+        :param temp_dict: A dictionary, shared among all plugins, for storing
+                          temp data. Such dict will be passed back in the
+                          ``after_create`` call.
+        :type temp_dict: dict
+        '''
+        pass
+
+    def after_create(self, harvest_object, dataset_dict, temp_dict):
+        '''
+        Called just after a successful ``package_create`` action has been
+        performed.
+
+        :param harvest_object: A ``HarvestObject`` domain object.
+        :type harvest_job: object
+        :param dataset_dict: The dataset dict that has just been stored into
+                             the DB.
+        :type dataset_dict: dict
+        :param temp_dict: A dictionary, shared among all plugins, for storing
+                          temp data.
+        :type temp_dict: dict
+
+        :returns: A string containing an error message, or None. If the error
+                  string is not None, it will be saved as an import error,
+                  and dataset importing will be rolled back,
+        :rtype: string
+        '''
+        return None

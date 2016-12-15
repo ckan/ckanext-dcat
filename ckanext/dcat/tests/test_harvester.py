@@ -73,6 +73,20 @@ class TestRDFHarvester(p.SingletonPlugin):
         else:
             return content, []
 
+    def before_update(self, harvest_object, dataset_dict, temp_dict):
+        self.calls['before_update'] += 1
+
+    def after_update(self, harvest_object, dataset_dict, temp_dict):
+        self.calls['after_update'] += 1
+        return None
+
+    def before_create(self, harvest_object, dataset_dict, temp_dict):
+        self.calls['before_create'] += 1
+
+    def after_create(self, harvest_object, dataset_dict, temp_dict):
+        self.calls['after_create'] += 1
+        return None
+
 
 class TestDCATHarvestUnit(object):
 
@@ -971,6 +985,56 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         eq_('Error 1', last_job_status['gather_error_summary'][0][0])
         eq_('Error 2', last_job_status['gather_error_summary'][1][0])
+
+    def test_harvest_import_extensions_point_gets_called(self):
+
+        plugin = p.get_plugin('test_rdf_harvester')
+
+        url = self.rdf_mock_url
+        content =  self.rdf_content
+        content_type = self.rdf_content_type
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
+
+        harvest_source = self._create_harvest_source(url)
+
+        # First run, will create two datasets as previously tested
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # Get the harvest source with the udpated status
+        harvest_source = h.call_action('harvest_source_show',
+                                       id=harvest_source['id'])
+        last_job_status = harvest_source['status']['last_job']
+        eq_(last_job_status['status'], 'Finished')
+
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 2)
+        eq_(plugin.calls['before_update'], 0)
+        eq_(plugin.calls['after_update'], 0)
+
+        # Mock an update in the remote file
+        new_file = content.replace('Example dataset 1',
+                                   'Example dataset 1 (updated)')
+        httpretty.register_uri(httpretty.GET, url,
+                               body=new_file, content_type=content_type)
+
+        # Run a second job
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 2)
+        eq_(plugin.calls['before_update'], 2)
+        eq_(plugin.calls['after_update'], 2)
 
 
 class TestDCATRDFHarvester(object):
