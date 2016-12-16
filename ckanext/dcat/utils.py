@@ -180,7 +180,7 @@ def publisher_uri_from_dataset_dict(dataset_dict):
     generated.
     '''
 
-    uri = dataset_dict.get('pubisher_uri')
+    uri = dataset_dict.get('publisher_uri')
     if not uri:
         for extra in dataset_dict.get('extras', []):
             if extra['key'] == 'publisher_uri':
