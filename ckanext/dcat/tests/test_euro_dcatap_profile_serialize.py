@@ -175,6 +175,22 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, dataset_ref, DCT.identifier, dataset['id'])
 
+    def test_alternate_identifier_numeric(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'alternate_identifier', 'value': '1.0'},
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert self._triple(g, dataset_ref, DCT.identifier, dataset['id'])
+
     def test_contact_details_extras(self):
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',

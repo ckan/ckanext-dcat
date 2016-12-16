@@ -477,6 +477,8 @@ class RDFProfile(object):
             try:
                 # JSON list
                 items = json.loads(value)
+                if isinstance(items, ((int, long, float, complex))):
+                    items = [items]
             except ValueError:
                 if ',' in value:
                     # Comma-separated list
