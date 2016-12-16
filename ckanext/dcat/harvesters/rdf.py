@@ -303,11 +303,23 @@ class DCATRDFHarvester(DCATHarvester):
             harvest_object.package_id = dataset['id']
             harvest_object.add()
 
+            harvester_tmp_dict = {}
+
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                harvester.before_update(harvest_object, dataset, harvester_tmp_dict)
+
             try:
                 p.toolkit.get_action('package_update')(context, dataset)
             except p.toolkit.ValidationError, e:
                 self._save_object_error('Update validation Error: %s' % str(e.error_summary), harvest_object, 'Import')
                 return False
+
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                err = harvester.after_update(harvest_object, dataset, harvester_tmp_dict)
+
+                if err:
+                    self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')
+                    return False
 
             log.info('Updated dataset %s', dataset['name'])
 
@@ -330,11 +342,23 @@ class DCATRDFHarvester(DCATHarvester):
             model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
             model.Session.flush()
 
+            harvester_tmp_dict = {}
+
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                harvester.before_create(harvest_object, dataset, harvester_tmp_dict)
+
             try:
                 p.toolkit.get_action('package_create')(context, dataset)
             except p.toolkit.ValidationError, e:
                 self._save_object_error('Create validation Error: %s' % str(e.error_summary), harvest_object, 'Import')
                 return False
+
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                err = harvester.after_create(harvest_object, dataset, harvester_tmp_dict)
+
+                if err:
+                    self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')
+                    return False
 
             log.info('Created dataset %s', dataset['name'])
 
