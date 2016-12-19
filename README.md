@@ -14,7 +14,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
 - [Installation](#installation)
 - [RDF DCAT endpoints](#rdf-dcat-endpoints)
     - [Dataset endpoints](#dataset-endpoints)
-    - [Catalog endpoints](#catalog-endpoints)
+    - [Catalog endpoint](#catalog-endpoint)
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
