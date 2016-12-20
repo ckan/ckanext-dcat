@@ -60,7 +60,7 @@ class IDCATRDFHarvester(Interface):
         '''
         return content, []
 
-    def before_update(self, harvest_object, dataset_dict, temp_dict):
+    def before_update(self, harvest_object, dataset_dict, temp_dict, context=None):
         '''
         Called just before the ``package_update`` action.
         It may be used to preprocess the dataset dict.
@@ -80,7 +80,7 @@ class IDCATRDFHarvester(Interface):
         '''
         pass
 
-    def after_update(self, harvest_object, dataset_dict, temp_dict):
+    def after_update(self, harvest_object, dataset_dict, temp_dict, context=None):
         '''
         Called just after a successful ``package_update`` action has been
         performed.
@@ -102,7 +102,7 @@ class IDCATRDFHarvester(Interface):
 
         return None
 
-    def before_create(self, harvest_object, dataset_dict, temp_dict):
+    def before_create(self, harvest_object, dataset_dict, temp_dict, context=None):
         '''
         Called just before the ``package_create`` action.
         It may be used to preprocess the dataset dict.
@@ -122,7 +122,7 @@ class IDCATRDFHarvester(Interface):
         '''
         pass
 
-    def after_create(self, harvest_object, dataset_dict, temp_dict):
+    def after_create(self, harvest_object, dataset_dict, temp_dict, context=None):
         '''
         Called just after a successful ``package_create`` action has been
         performed.
