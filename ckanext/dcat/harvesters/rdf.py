@@ -7,6 +7,8 @@ import ckan.plugins as p
 import ckan.model as model
 import ckan.logic as logic
 
+import ckan.lib.plugins as lib_plugins
+
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
 from ckanext.dcat.harvesters.base import DCATHarvester
@@ -324,8 +326,9 @@ class DCATRDFHarvester(DCATHarvester):
             log.info('Updated dataset %s', dataset['name'])
 
         else:
+            package_plugin = lib_plugins.lookup_package_plugin(dataset.get('type', None))
 
-            package_schema = logic.schema.default_create_package_schema()
+            package_schema = package_plugin.create_package_schema()
             context['schema'] = package_schema
 
             # We need to explicitly provide a package ID
