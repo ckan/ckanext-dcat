@@ -88,6 +88,16 @@ class TestRDFHarvester(p.SingletonPlugin):
         return None
 
 
+class TestRDFNullHarvester(TestRDFHarvester):
+    def before_update(self, harvest_object, dataset_dict, temp_dict):
+        super(TestRDFHarvesterNullHarvester, self).before_update(harvest_object, dataset_dict, temp_dict)
+        dataset_dict = None
+
+    def before_create(self, harvest_object, dataset_dict, temp_dict):
+        super(TestRDFHarvesterNullHarvester, self).before_create(harvest_object, dataset_dict, temp_dict)
+        dataset_dict = None
+
+
 class TestDCATHarvestUnit(object):
 
     def test_get_guid_uri(self):
@@ -1079,3 +1089,40 @@ class TestIDCATRDFHarvester(object):
 
         eq_(values[0], content)
         eq_(values[1], [])
+
+class TestIDCATRDFNullHarvester(FunctionalHarvestTest):
+
+    def test_harvest_with_before_create_null(self):
+        plugin = p.get_plugin('test_rdf_null_harvester')
+
+        url = self.rdf_mock_url
+        content =  self.rdf_content
+        content_type = self.rdf_content_type
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
+
+        harvest_source = self._create_harvest_source(url)
+
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # Get the harvest source with the updated status
+        harvest_source = h.call_action('harvest_source_show',
+                                       id=harvest_source['id'])
+        last_job_status = harvest_source['status']['last_job']
+        eq_(last_job_status['status'], 'Finished')
+        eq_(last_job_status['stats']['not modified'], 2)
+
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 0)
+        eq_(plugin.calls['before_update'], 0)
+        eq_(plugin.calls['after_update'], 0)
