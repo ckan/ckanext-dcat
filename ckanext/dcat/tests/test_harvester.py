@@ -89,12 +89,13 @@ class TestRDFHarvester(p.SingletonPlugin):
 
 
 class TestRDFNullHarvester(TestRDFHarvester):
+    p.implements(IDCATRDFHarvester)
     def before_update(self, harvest_object, dataset_dict, temp_dict):
-        super(TestRDFHarvesterNullHarvester, self).before_update(harvest_object, dataset_dict, temp_dict)
+        super(TestRDFNullHarvester, self).before_update(harvest_object, dataset_dict, temp_dict)
         dataset_dict = None
 
     def before_create(self, harvest_object, dataset_dict, temp_dict):
-        super(TestRDFHarvesterNullHarvester, self).before_create(harvest_object, dataset_dict, temp_dict)
+        super(TestRDFNullHarvester, self).before_create(harvest_object, dataset_dict, temp_dict)
         dataset_dict = None
 
 
@@ -1092,6 +1093,15 @@ class TestIDCATRDFHarvester(object):
 
 class TestIDCATRDFNullHarvester(FunctionalHarvestTest):
 
+    @classmethod
+    def setup_class(self):
+        super(TestIDCATRDFNullHarvester, self).setup_class()
+        p.load('test_rdf_null_harvester')
+
+    @classmethod
+    def teardown_class(self):
+        p.unload('test_rdf_null_harvester')
+
     def test_harvest_with_before_create_null(self):
         plugin = p.get_plugin('test_rdf_null_harvester')
 
@@ -1120,7 +1130,17 @@ class TestIDCATRDFNullHarvester(FunctionalHarvestTest):
                                        id=harvest_source['id'])
         last_job_status = harvest_source['status']['last_job']
         eq_(last_job_status['status'], 'Finished')
-        eq_(last_job_status['stats']['not modified'], 2)
+
+        nose.tools.assert_dict_equal(
+            last_job_status['stats'],
+            {
+                'deleted': 0,
+                'added': 0,
+                'updated': 0,
+                'not modified': 2,
+                'errored': 0
+            }
+        )
 
         eq_(plugin.calls['before_create'], 2)
         eq_(plugin.calls['after_create'], 0)
