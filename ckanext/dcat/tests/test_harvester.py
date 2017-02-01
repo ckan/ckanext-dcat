@@ -92,11 +92,11 @@ class TestRDFNullHarvester(TestRDFHarvester):
     p.implements(IDCATRDFHarvester)
     def before_update(self, harvest_object, dataset_dict, temp_dict):
         super(TestRDFNullHarvester, self).before_update(harvest_object, dataset_dict, temp_dict)
-        dataset_dict = None
+        dataset_dict.clear()
 
     def before_create(self, harvest_object, dataset_dict, temp_dict):
         super(TestRDFNullHarvester, self).before_create(harvest_object, dataset_dict, temp_dict)
-        dataset_dict = None
+        dataset_dict.clear()
 
 
 class TestDCATHarvestUnit(object):
