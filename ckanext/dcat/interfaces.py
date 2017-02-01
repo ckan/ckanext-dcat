@@ -65,6 +65,9 @@ class IDCATRDFHarvester(Interface):
         Called just before the ``package_update`` action.
         It may be used to preprocess the dataset dict.
 
+        If the content of the dataset dict is emptied (i.e. set to ``None``), 
+        the dataset will not be updated in CKAN, but simply ignored.
+
         Implementations may store some temp values in temp_dict, that will be
         then passed back in the ``after_update`` call.
 
@@ -106,6 +109,9 @@ class IDCATRDFHarvester(Interface):
         '''
         Called just before the ``package_create`` action.
         It may be used to preprocess the dataset dict.
+
+        If the content of the dataset dict is emptied (i.e. set to ``None``), 
+        the dataset will not be created in CKAN, but simply ignored.
 
         Implementations may store some temp values in temp_dict, that will be
         then passed back in the ``after_create`` call.
