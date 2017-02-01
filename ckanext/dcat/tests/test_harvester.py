@@ -1048,54 +1048,11 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         eq_(plugin.calls['after_update'], 2)
 
 
-class TestDCATRDFHarvester(object):
-
-    def test_validates_correct_config(self):
-        harvester = DCATRDFHarvester()
-
-        for config in ['{}', '{"rdf_format":"text/turtle"}']:
-            eq_(config, harvester.validate_config(config))
-
-    def test_does_not_validate_incorrect_config(self):
-        harvester = DCATRDFHarvester()
-
-        for config in ['invalid', '{invalid}', '{rdf_format:invalid}']:
-            try:
-                harvester.validate_config(config)
-                assert False
-            except ValueError:
-                assert True
-
-
-class TestIDCATRDFHarvester(object):
-
-    def test_before_download(self):
-
-        i = IDCATRDFHarvester()
-
-        url = 'http://some.url'
-
-        values = i.before_download(url, {})
-
-        eq_(values[0], url)
-        eq_(values[1], [])
-
-    def test_after_download(self):
-
-        i = IDCATRDFHarvester()
-
-        content = 'some.content'
-
-        values = i.after_download(content, {})
-
-        eq_(values[0], content)
-        eq_(values[1], [])
-
-class TestIDCATRDFNullHarvester(FunctionalHarvestTest):
+class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
 
     @classmethod
     def setup_class(self):
-        super(TestIDCATRDFNullHarvester, self).setup_class()
+        super(TestDCATHarvestFunctionalSetNull, self).setup_class()
         p.load('test_rdf_null_harvester')
 
     @classmethod
@@ -1146,3 +1103,47 @@ class TestIDCATRDFNullHarvester(FunctionalHarvestTest):
         eq_(plugin.calls['after_create'], 0)
         eq_(plugin.calls['before_update'], 0)
         eq_(plugin.calls['after_update'], 0)
+
+
+class TestDCATRDFHarvester(object):
+
+    def test_validates_correct_config(self):
+        harvester = DCATRDFHarvester()
+
+        for config in ['{}', '{"rdf_format":"text/turtle"}']:
+            eq_(config, harvester.validate_config(config))
+
+    def test_does_not_validate_incorrect_config(self):
+        harvester = DCATRDFHarvester()
+
+        for config in ['invalid', '{invalid}', '{rdf_format:invalid}']:
+            try:
+                harvester.validate_config(config)
+                assert False
+            except ValueError:
+                assert True
+
+
+class TestIDCATRDFHarvester(object):
+
+    def test_before_download(self):
+
+        i = IDCATRDFHarvester()
+
+        url = 'http://some.url'
+
+        values = i.before_download(url, {})
+
+        eq_(values[0], url)
+        eq_(values[1], [])
+
+    def test_after_download(self):
+
+        i = IDCATRDFHarvester()
+
+        content = 'some.content'
+
+        values = i.after_download(content, {})
+
+        eq_(values[0], content)
+        eq_(values[1], [])
