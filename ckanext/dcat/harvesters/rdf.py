@@ -299,10 +299,6 @@ class DCATRDFHarvester(DCATHarvester):
             dataset['name'] = existing_dataset['name']
             dataset['id'] = existing_dataset['id']
 
-            # Save reference to the package on the object
-            harvest_object.package_id = dataset['id']
-            harvest_object.add()
-
             harvester_tmp_dict = {}
 
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
@@ -310,6 +306,10 @@ class DCATRDFHarvester(DCATHarvester):
 
             try:
                 if dataset:
+                    # Save reference to the package on the object
+                    harvest_object.package_id = dataset['id']
+                    harvest_object.add()
+
                     p.toolkit.get_action('package_update')(context, dataset)
                 else:
                     log.info('Ignoring dataset %s' % existing_dataset['name'])
@@ -336,16 +336,6 @@ class DCATRDFHarvester(DCATHarvester):
             dataset['id'] = unicode(uuid.uuid4())
             package_schema['id'] = [unicode]
 
-            # Save reference to the package on the object
-            harvest_object.package_id = dataset['id']
-            harvest_object.add()
-
-            # Defer constraints and flush so the dataset can be indexed with
-            # the harvest object id (on the after_show hook from the harvester
-            # plugin)
-            model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
-            model.Session.flush()
-
             harvester_tmp_dict = {}
 
             name = dataset['name']
@@ -354,6 +344,16 @@ class DCATRDFHarvester(DCATHarvester):
 
             try:
                 if dataset:
+                    # Save reference to the package on the object
+                    harvest_object.package_id = dataset['id']
+                    harvest_object.add()
+
+                    # Defer constraints and flush so the dataset can be indexed with
+                    # the harvest object id (on the after_show hook from the harvester
+                    # plugin)
+                    model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
+                    model.Session.flush()
+
                     p.toolkit.get_action('package_create')(context, dataset)
                 else:
                     log.info('Ignoring dataset %s' % name)
