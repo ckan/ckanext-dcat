@@ -7,9 +7,9 @@ from dateutil.parser import parse as dateutil_parse
 from ckan.plugins import toolkit
 
 import ckanext.dcat.converters as converters
+import ckanext.dcat.utils as utils
 
 from ckanext.dcat.processors import RDFSerializer
-
 
 DATASETS_PER_PAGE = 100
 
@@ -143,19 +143,21 @@ def _pagination_info(query, data_dict):
     '''
 
     def _page_url(page):
-
         params = [p for p in toolkit.request.params.iteritems()
                   if p[0] != 'page']
         if params:
             qs = '&'.join(['{0}={1}'.format(p[0], p[1]) for p in params])
-            return '{0}?{1}&page={2}'.format(
-                toolkit.request.path_url,
+            return '{0}{1}?{2}&page={3}'.format(
+                utils.catalog_uri(),
+                toolkit.request.path,
                 qs,
                 page
             )
+
         else:
-            return '{0}?page={1}'.format(
-                toolkit.request.path_url,
+            return '{0}{1}?page={2}'.format(
+                utils.catalog_uri(),
+                toolkit.request.path,
                 page
             )
 

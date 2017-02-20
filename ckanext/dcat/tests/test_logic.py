@@ -23,7 +23,7 @@ class TestPagination(object):
     def test_pagination(self, mock_request):
 
         mock_request.params = {}
-        mock_request.path_url = 'http://example.com'
+        mock_request.path = '/catalog.rdf'
 
         # No page defined (defaults to 1)
         query = {
@@ -39,10 +39,10 @@ class TestPagination(object):
         eq_(pagination['count'], 12)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?page=1')
-        eq_(pagination['first'], 'http://example.com?page=1')
-        eq_(pagination['last'], 'http://example.com?page=2')
-        eq_(pagination['next'], 'http://example.com?page=2')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?page=2')
+        eq_(pagination['next'], 'http://test.ckan.net/catalog.rdf?page=2')
         assert 'previous' not in pagination
 
         # Page 1
@@ -59,10 +59,10 @@ class TestPagination(object):
         eq_(pagination['count'], 12)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?page=1')
-        eq_(pagination['first'], 'http://example.com?page=1')
-        eq_(pagination['last'], 'http://example.com?page=2')
-        eq_(pagination['next'], 'http://example.com?page=2')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?page=2')
+        eq_(pagination['next'], 'http://test.ckan.net/catalog.rdf?page=2')
         assert 'previous' not in pagination
 
         # Page 2
@@ -79,10 +79,10 @@ class TestPagination(object):
         eq_(pagination['count'], 12)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?page=2')
-        eq_(pagination['first'], 'http://example.com?page=1')
-        eq_(pagination['last'], 'http://example.com?page=2')
-        eq_(pagination['previous'], 'http://example.com?page=1')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?page=2')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?page=2')
+        eq_(pagination['previous'], 'http://test.ckan.net/catalog.rdf?page=1')
         assert 'next' not in pagination
 
         # Page 3
@@ -99,10 +99,10 @@ class TestPagination(object):
         eq_(pagination['count'], 12)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?page=3')
-        eq_(pagination['first'], 'http://example.com?page=1')
-        eq_(pagination['last'], 'http://example.com?page=2')
-        eq_(pagination['previous'], 'http://example.com?page=2')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?page=3')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?page=2')
+        eq_(pagination['previous'], 'http://test.ckan.net/catalog.rdf?page=2')
         assert 'next' not in pagination
 
     @helpers.change_config('ckanext.dcat.datasets_per_page', 100)
@@ -110,7 +110,7 @@ class TestPagination(object):
     def test_pagination_less_results_than_page_size(self, mock_request):
 
         mock_request.params = {}
-        mock_request.path_url = 'http://example.com'
+        mock_request.path = '/catalog.rdf'
 
         # No page defined (defaults to 1)
         query = {
@@ -126,9 +126,9 @@ class TestPagination(object):
         eq_(pagination['count'], 12)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?page=1')
-        eq_(pagination['first'], 'http://example.com?page=1')
-        eq_(pagination['last'], 'http://example.com?page=1')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?page=1')
         assert 'next' not in pagination
         assert 'previous' not in pagination
 
@@ -137,7 +137,7 @@ class TestPagination(object):
     def test_pagination_same_results_than_page_size(self, mock_request):
 
         mock_request.params = {}
-        mock_request.path_url = 'http://example.com'
+        mock_request.path = '/catalog.rdf'
 
         # No page defined (defaults to 1)
         query = {
@@ -153,9 +153,9 @@ class TestPagination(object):
         eq_(pagination['count'], 10)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?page=1')
-        eq_(pagination['first'], 'http://example.com?page=1')
-        eq_(pagination['last'], 'http://example.com?page=1')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?page=1')
         assert 'next' not in pagination
         assert 'previous' not in pagination
 
@@ -164,7 +164,7 @@ class TestPagination(object):
     def test_pagination_keeps_params(self, mock_request):
 
         mock_request.params = {'a': 1, 'b': 2}
-        mock_request.path_url = 'http://example.com'
+        mock_request.path = '/catalog.rdf'
 
         # No page defined (defaults to 1)
         query = {
@@ -180,10 +180,10 @@ class TestPagination(object):
         eq_(pagination['count'], 12)
         eq_(pagination['items_per_page'],
             config.get('ckanext.dcat.datasets_per_page'))
-        eq_(pagination['current'], 'http://example.com?a=1&b=2&page=1')
-        eq_(pagination['first'], 'http://example.com?a=1&b=2&page=1')
-        eq_(pagination['last'], 'http://example.com?a=1&b=2&page=2')
-        eq_(pagination['next'], 'http://example.com?a=1&b=2&page=2')
+        eq_(pagination['current'], 'http://test.ckan.net/catalog.rdf?a=1&b=2&page=1')
+        eq_(pagination['first'], 'http://test.ckan.net/catalog.rdf?a=1&b=2&page=1')
+        eq_(pagination['last'], 'http://test.ckan.net/catalog.rdf?a=1&b=2&page=2')
+        eq_(pagination['next'], 'http://test.ckan.net/catalog.rdf?a=1&b=2&page=2')
         assert 'previous' not in pagination
 
     def test_pagination_no_results_empty_dict(self):
