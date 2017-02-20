@@ -313,13 +313,13 @@ class TestEndpoints(helpers.FunctionalTestBase):
         eq_(self._object_value(g, pagination, HYDRA.itemsPerPage), '10')
 
         eq_(self._object_value(g, pagination, HYDRA.firstPage),
-            url_for('dcat_catalog', _format='rdf', page=1, host='localhost'))
+            url_for('dcat_catalog', _format='rdf', page=1, host='test.ckan.net'))
 
         eq_(self._object_value(g, pagination, HYDRA.nextPage),
-            url_for('dcat_catalog', _format='rdf', page=2, host='localhost'))
+            url_for('dcat_catalog', _format='rdf', page=2, host='test.ckan.net'))
 
         eq_(self._object_value(g, pagination, HYDRA.lastPage),
-            url_for('dcat_catalog', _format='rdf', page=2, host='localhost'))
+            url_for('dcat_catalog', _format='rdf', page=2, host='test.ckan.net'))
 
 
 class TestAcceptHeader(helpers.FunctionalTestBase):
