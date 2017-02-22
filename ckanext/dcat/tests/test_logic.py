@@ -25,8 +25,7 @@ class TestPagination(object):
 
         mock_request.params = {}
         mock_request.host_url = 'http://ckan.example.com'
-        mock_request.path_info = ''
-        mock_request.script_name = ''
+        mock_request.path = ''
 
         # No page defined (defaults to 1)
         query = {
@@ -115,8 +114,7 @@ class TestPagination(object):
 
         mock_request.params = {}
         mock_request.host_url = 'http://ckan.example.com'
-        mock_request.path_info = ''
-        mock_request.script_name = ''
+        mock_request.path = ''
 
         # No page defined (defaults to 1)
         query = {
@@ -145,8 +143,7 @@ class TestPagination(object):
 
         mock_request.params = {}
         mock_request.host_url = 'http://ckan.example.com'
-        mock_request.path_info = ''
-        mock_request.script_name = ''
+        mock_request.path = ''
 
         # No page defined (defaults to 1)
         query = {
@@ -175,8 +172,7 @@ class TestPagination(object):
 
         mock_request.params = {'a': 1, 'b': 2}
         mock_request.host_url = 'http://ckan.example.com'
-        mock_request.path_info = '/feed/'
-        mock_request.script_name = 'catalog.xml'
+        mock_request.path = '/feed/catalog.xml'
 
         # No page defined (defaults to 1)
         query = {
@@ -205,8 +201,7 @@ class TestPagination(object):
 
         mock_request.params = {}
         mock_request.host_url = 'http://ckan.example.com'
-        mock_request.path_info = '/feed/'
-        mock_request.script_name = 'catalog.xml'
+        mock_request.path = '/feed/catalog.xml'
 
         # No page defined (defaults to 1)
         query = {
