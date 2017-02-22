@@ -308,6 +308,35 @@ class RDFProfile(object):
             'geom': geom,
         }
 
+    def _license(self, dataset_ref):
+        '''
+        Returns a license identifier if one of the distributions license is
+        found in CKAN license registry. If no distribution's license matches,
+        None is returned.
+
+        The first distribution with a license found in the registry is used so
+        that if distributions have different licenses we'll only get the first
+        one.
+        '''
+        license_uri2id = {}
+        license_title2id = {}
+        for license_id, license in LicenseRegister().items():
+            license_uri2id[license.url] = license_id
+            license_title2id[license.title] = license_id
+
+        for distribution in self._distributions(dataset_ref):
+            # If distribution has a license, attach it to the dataset
+            license = self._object(distribution, DCT.license)
+            if license:
+                # Try to find a matching license comparing URIs, then titles
+                license_id = license_uri2id.get(license.toPython())
+                if license_id is None:
+                    license_id = license_title2id.get(
+                        self._object_value(license, DCT.title))
+                if license_id is not None:
+                    return license_id
+        return None
+
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
         Returns the Internet Media Type and format label for a distribution
@@ -610,13 +639,6 @@ class EuropeanDCATAPProfile(RDFProfile):
             if value:
                 dataset_dict['version'] = value
 
-        # Mappings for license retrieval (from distribution to dataset)
-        license_uri2id = {}
-        license_title2id = {}
-        for license_id, license in LicenseRegister().items():
-            license_uri2id[license.url] = license_id
-            license_title2id[license.title] = license_id
-
         # Tags
         keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
         # Split keywords with commas
@@ -707,6 +729,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                        else None)
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
 
+        # License
+        if 'license_id' not in dataset_dict:
+            dataset_dict['license_id'] = self._license(dataset_ref)
+
         # Resources
         for distribution in self._distributions(dataset_ref):
 
@@ -776,19 +802,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                                     else None)
 
             dataset_dict['resources'].append(resource_dict)
-
-            # License
-            if 'license_id' not in dataset_dict:
-                # If distribution has a license, attach it to the dataset
-                license = self._object(distribution, DCT.license)
-                if license:
-                    # Try to find a matching license comparing URIs, then titles
-                    license_id = license_uri2id.get(license.toPython())
-                    if license_id is None:
-                        license_id = license_title2id.get(
-                            self._object_value(license, DCT.title))
-                    if license_id is not None:
-                        dataset_dict['license_id'] = license_id
 
         if self.compatibility_mode:
             # Tweak the resulting dict to make it compatible with previous
