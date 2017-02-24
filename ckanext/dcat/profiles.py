@@ -67,6 +67,10 @@ class RDFProfile(object):
 
         self.compatibility_mode = compatibility_mode
 
+        # Cache for mappings of licenses URL/title to ID built when needed in
+        # _license().
+        self._licenceregister_cache = None
+
     def _datasets(self):
         '''
         Generator that returns all DCAT datasets on the graph
@@ -318,11 +322,15 @@ class RDFProfile(object):
         that if distributions have different licenses we'll only get the first
         one.
         '''
-        license_uri2id = {}
-        license_title2id = {}
-        for license_id, license in LicenseRegister().items():
-            license_uri2id[license.url] = license_id
-            license_title2id[license.title] = license_id
+        if self._licenceregister_cache is not None:
+            license_uri2id, license_title2id = self._licenceregister_cache
+        else:
+            license_uri2id = {}
+            license_title2id = {}
+            for license_id, license in LicenseRegister().items():
+                license_uri2id[license.url] = license_id
+                license_title2id[license.title] = license_id
+            self._licenceregister_cache = license_uri2id, license_title2id
 
         for distribution in self._distributions(dataset_ref):
             # If distribution has a license, attach it to the dataset
