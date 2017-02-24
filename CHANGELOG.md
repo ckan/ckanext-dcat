@@ -1,7 +1,7 @@
 # Changelog
 
 
-## v0.0.5
+## v0.0.6
 
 * Use Resources rather than Literals for dcat:landingPage, dcat:accessURL,
    dcat:downloadURL, foaf:homepage, dcat:theme (#66)
