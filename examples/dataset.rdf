@@ -76,7 +76,7 @@
             <dct:description>A longer description</dct:description>
             <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-11</dct:issued>
             <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-01T00:04:06</dct:modified>
-            <dct:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
+            <dct:license rdf:resource="http://creativecommons.org/licenses/by-nc/2.0/"/>
             <dct:rights>Some statement about rights</dct:rights>
             <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
             <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>

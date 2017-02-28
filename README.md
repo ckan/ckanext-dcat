@@ -300,7 +300,7 @@ This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/a
 | dcat:Distribution | dct:description        | resource:description                      |                                | text      |                                                                                                                                                               |
 | dcat:Distribution | dcat:mediaType         | resource:mimetype                         |                                | text      |                                                                                                                                                               |
 | dcat:Distribution | dct:format             | resource:format                           |                                | text      | This is likely to require extra logic to accommodate how CKAN deals with formats (eg ckan/ckanext-dcat#18)                                                    |
-| dcat:Distribution | dct:license            | resource:license                          |                                | text      | Note that on the CKAN model, license is at the dataset level                                                                                                  |
+| dcat:Distribution | dct:license            | resource:license                          |                                | text      | See note about dataset license                                                                                                                                |
 | dcat:Distribution | adms:status            | resource:status                           |                                | text      |                                                                                                                                                               |
 | dcat:Distribution | dcat:byteSize          | resource:size                             |                                | number    |                                                                                                                                                               |
 | dcat:Distribution | dct:issued             | resource:issued                           |                                | text      |                                                                                                                                                               |
@@ -457,6 +457,14 @@ This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/a
             </dct:Location>
         </dct:spatial>
         ```
+
+*  On the CKAN model, license is at the dataset level whereas in DCAT model it
+   is at distributions level. By default the RDF parser will try to find a
+   distribution with a license that matches one of those registered in CKAN
+   and attach this license to the dataset. The first matching distribution's
+   license is used, meaning that any discrepancy accross distributions license
+   will not be accounted for. This behavior can be customized by overridding the
+   `_license` method on a custom profile.
 
 
 ## RDF DCAT Parser

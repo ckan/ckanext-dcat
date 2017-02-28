@@ -59,6 +59,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(dataset['notes'], u'During the period 1982-86 a team of geologists from the British Geological Survey ...')
         eq_(dataset['url'], 'http://dataset.info.org')
         eq_(dataset['version'], '2.3')
+        eq_(dataset['license_id'], 'cc-nc')
 
         # Tags
 
@@ -143,7 +144,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             eq_(sorted(json.loads(resource[item[0]])), item[1])
 
         # These two are likely to need clarification
-        eq_(resource['license'], u'http://creativecommons.org/licenses/by/3.0/')
+        eq_(resource['license'], u'http://creativecommons.org/licenses/by-nc/2.0/')
         eq_(resource['rights'], u'Some statement about rights')
 
         eq_(resource['url'], u'http://www.bgs.ac.uk/gbase/geochemcd/home.html')
@@ -170,6 +171,47 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         dataset = [d for d in p.datasets()][0]
 
         eq_(dataset['version'], u'2.3a')
+
+    def test_dataset_license_from_distribution_by_uri(self):
+        # license_id retrieved from the URI of dcat:license object
+        g = Graph()
+
+        dataset = URIRef("http://example.org/datasets/1")
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        distribution = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((dataset, DCAT.distribution, distribution))
+        g.add((distribution, RDF.type, DCAT.Distribution))
+        g.add((distribution, DCT.license,
+               URIRef("http://www.opendefinition.org/licenses/cc-by")))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        eq_(dataset['license_id'], 'cc-by')
+
+    def test_dataset_license_from_distribution_by_title(self):
+        # license_id retrieved from dct:title of dcat:license object
+        g = Graph()
+
+        dataset = URIRef("http://example.org/datasets/1")
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        distribution = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution, RDF.type, DCAT.Distribution))
+        g.add((dataset, DCAT.distribution, distribution))
+        license = BNode()
+        g.add((distribution, DCT.license, license))
+        g.add((license, DCT.title, Literal("Creative Commons Attribution")))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        eq_(dataset['license_id'], 'cc-by')
 
     def test_distribution_access_url(self):
         g = Graph()

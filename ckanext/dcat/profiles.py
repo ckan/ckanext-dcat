@@ -11,6 +11,7 @@ from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 
 from geomet import wkt, InvalidGeoJSONException
 
+from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
@@ -65,6 +66,10 @@ class RDFProfile(object):
         self.g = graph
 
         self.compatibility_mode = compatibility_mode
+
+        # Cache for mappings of licenses URL/title to ID built when needed in
+        # _license().
+        self._licenceregister_cache = None
 
     def _datasets(self):
         '''
@@ -306,6 +311,39 @@ class RDFProfile(object):
             'text': text,
             'geom': geom,
         }
+
+    def _license(self, dataset_ref):
+        '''
+        Returns a license identifier if one of the distributions license is
+        found in CKAN license registry. If no distribution's license matches,
+        None is returned.
+
+        The first distribution with a license found in the registry is used so
+        that if distributions have different licenses we'll only get the first
+        one.
+        '''
+        if self._licenceregister_cache is not None:
+            license_uri2id, license_title2id = self._licenceregister_cache
+        else:
+            license_uri2id = {}
+            license_title2id = {}
+            for license_id, license in LicenseRegister().items():
+                license_uri2id[license.url] = license_id
+                license_title2id[license.title] = license_id
+            self._licenceregister_cache = license_uri2id, license_title2id
+
+        for distribution in self._distributions(dataset_ref):
+            # If distribution has a license, attach it to the dataset
+            license = self._object(distribution, DCT.license)
+            if license:
+                # Try to find a matching license comparing URIs, then titles
+                license_id = license_uri2id.get(license.toPython())
+                if license_id is None:
+                    license_id = license_title2id.get(
+                        self._object_value(license, DCT.title))
+                if license_id is not None:
+                    return license_id
+        return None
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
@@ -698,6 +736,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                        if isinstance(dataset_ref, rdflib.term.URIRef)
                        else None)
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
+
+        # License
+        if 'license_id' not in dataset_dict:
+            dataset_dict['license_id'] = self._license(dataset_ref)
 
         # Resources
         for distribution in self._distributions(dataset_ref):
