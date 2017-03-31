@@ -22,7 +22,6 @@ def dcat_dataset_show(context, data_dict):
     toolkit.check_access('dcat_dataset_show', context, data_dict)
 
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
-
     serializer = RDFSerializer()
 
     output = serializer.serialize_dataset(dataset_dict,
@@ -30,6 +29,21 @@ def dcat_dataset_show(context, data_dict):
 
     return output
 
+def dcat_organization_show(context, data_dict):
+
+    toolkit.check_access('dcat_organization_show', context, data_dict)
+
+    query = _search_ckan_datasets(context, data_dict)
+    dataset_dicts = query['results']
+    pagination_info = _pagination_info(query, data_dict)
+
+    serializer = RDFSerializer()
+
+    output = serializer.serialize_catalog({}, dataset_dicts,
+                                          _format=data_dict.get('format'),
+                                          pagination_info=pagination_info)
+
+    return output
 
 @toolkit.side_effect_free
 def dcat_catalog_show(context, data_dict):
@@ -55,7 +69,6 @@ def dcat_catalog_search(context, data_dict):
     toolkit.check_access('dcat_catalog_search', context, data_dict)
 
     query = _search_ckan_datasets(context, data_dict)
-
     dataset_dicts = query['results']
     pagination_info = _pagination_info(query, data_dict)
 

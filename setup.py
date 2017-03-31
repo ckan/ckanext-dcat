@@ -39,6 +39,7 @@ setup(
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
+    it_dcat_ap=ckanext.dcat.profiles:ItalianDCATAPProfile
 
     [paste.paster_command]
     generate_static = ckanext.dcat.commands:GenerateStaticDCATCommand

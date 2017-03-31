@@ -18,6 +18,7 @@ from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
+DCATAPIT = Namespace("http://dati.gov.it/onto/dcatapit#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -33,6 +34,7 @@ GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+
 namespaces = {
     'dct': DCT,
     'dcat': DCAT,
+    'dcatapit': DCATAPIT,
     'adms': ADMS,
     'vcard': VCARD,
     'foaf': FOAF,
@@ -1089,6 +1091,369 @@ class EuropeanDCATAPProfile(RDFProfile):
                 value = fallback
             if value:
                 g.add((catalog_ref, predicate, _type(value)))
+
+        # Dates
+        modified = self._last_catalog_modification()
+        if modified:
+            self._add_date_triple(catalog_ref, DCT.modified, modified)
+
+class ItalianDCATAPProfile(RDFProfile):
+    '''
+    An RDF profile based on the DCAT-AP for data portals in Italy
+
+    More information and specification:
+
+    http://www.dati.gov.it/consultazione/dcat-ap_it
+
+    '''
+
+    def parse_dataset(self, dataset_dict, dataset_ref):
+
+        dataset_dict['tags'] = []
+        dataset_dict['extras'] = []
+        dataset_dict['resources'] = []
+
+        # Basic fields
+        for key, predicate in (
+                ('title', DCT.title),
+                ('notes', DCT.description),
+                ('url', DCAT.landingPage),
+                ('version', OWL.versionInfo),
+                ):
+            value = self._object_value(dataset_ref, predicate)
+            if value:
+                dataset_dict[key] = value
+
+        if not dataset_dict.get('version'):
+            # adms:version was supported on the first version of the DCAT-AP
+            value = self._object_value(dataset_ref, ADMS.version)
+            if value:
+                dataset_dict['version'] = value
+
+        # Tags
+        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
+        for keyword in keywords:
+            dataset_dict['tags'].append({'name': keyword})
+
+        # Extras
+
+        #  Simple values
+        for key, predicate in (
+                ('issued', DCT.issued),
+                ('modified', DCT.modified),
+                ('identifier', DCT.identifier),
+                ('alternate_identifier', ADMS.identifier),
+                ('version_notes', ADMS.versionNotes),
+                ('frequency', DCT.accrualPeriodicity),
+                ):
+            value = self._object_value(dataset_ref, predicate)
+            if value:
+                dataset_dict['extras'].append({'key': key, 'value': value})
+
+        #  Lists
+        for key, predicate in (
+                ('language', DCT.language),
+                ('theme', DCAT.theme),
+                ('conforms_to', DCAT.conformsTo),
+                ):
+            values = self._object_value_list(dataset_ref, predicate)
+            if values:
+                dataset_dict['extras'].append({'key': key,
+                                               'value': json.dumps(values)})
+
+        # Contact details
+        contact = self._contact_details(dataset_ref, DCAT.contactPoint)
+        if not contact:
+            # adms:contactPoint was supported on the first version of DCAT-AP
+            contact = self._contact_details(dataset_ref, ADMS.contactPoint)
+
+        if contact:
+            for key in ('uri', 'name', 'email'):
+                if contact.get(key):
+                    dataset_dict['extras'].append(
+                        {'key': 'contact_{0}'.format(key),
+                         'value': contact.get(key)})
+
+        # Publisher
+        publisher = self._publisher(dataset_ref, DCT.publisher)
+        for key in ('uri', 'name', 'email', 'url', 'type'):
+            if publisher.get(key):
+                dataset_dict['extras'].append(
+                    {'key': 'publisher_{0}'.format(key),
+                     'value': publisher.get(key)})
+
+        # Temporal
+        start, end = self._time_interval(dataset_ref, DCT.temporal)
+        if start:
+            dataset_dict['extras'].append(
+                {'key': 'temporal_start', 'value': start})
+        if end:
+            dataset_dict['extras'].append(
+                {'key': 'temporal_end', 'value': end})
+
+        # Spatial
+        spatial = self._spatial(dataset_ref, DCT.spatial)
+        for key in ('uri', 'text', 'geom'):
+            if spatial.get(key):
+                dataset_dict['extras'].append(
+                    {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
+                     'value': spatial.get(key)})
+
+        # Dataset URI (explicitly show the missing ones)
+        dataset_uri = (unicode(dataset_ref)
+                       if isinstance(dataset_ref, rdflib.term.URIRef)
+                       else None)
+        dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
+
+        # Resources
+        for distribution in self._distributions(dataset_ref):
+
+            resource_dict = {}
+
+            #  Simple values
+            for key, predicate in (
+                    ('name', DCT.title),
+                    ('description', DCT.description),
+                    ('download_url', DCAT.downloadURL),
+                    ('issued', DCT.issued),
+                    ('modified', DCT.modified),
+                    ('status', ADMS.status),
+                    ('rights', DCT.rights),
+                    ('license', DCT.license),
+                    ):
+                value = self._object_value(distribution, predicate)
+                if value:
+                    resource_dict[key] = value
+
+            resource_dict['url'] = (self._object_value(distribution,
+                                                       DCAT.accessURL) or
+                                    self._object_value(distribution,
+                                                       DCAT.downloadURL))
+
+            # Format and media type
+            normalize_ckan_format = config.get(
+                'ckanext.dcat.normalize_ckan_format', True)
+            imt, label = self._distribution_format(distribution,
+                                                   normalize_ckan_format)
+
+            if imt:
+                resource_dict['mimetype'] = imt
+
+            if label:
+                resource_dict['format'] = label
+            elif imt:
+                resource_dict['format'] = imt
+
+            size = self._object_value_int(distribution, DCAT.byteSize)
+            if size is not None:
+                resource_dict['size'] = size
+
+            # Distribution URI (explicitly show the missing ones)
+            resource_dict['uri'] = (unicode(distribution)
+                                    if isinstance(distribution,
+                                                  rdflib.term.URIRef)
+                                    else None)
+
+            dataset_dict['resources'].append(resource_dict)
+
+        if self.compatibility_mode:
+            # Tweak the resulting dict to make it compatible with previous
+            # versions of the ckanext-dcat parsers
+            for extra in dataset_dict['extras']:
+                if extra['key'] in ('issued', 'modified', 'publisher_name',
+                                    'publisher_email',):
+
+                    extra['key'] = 'dcat_' + extra['key']
+
+                if extra['key'] == 'language':
+                    extra['value'] = ','.join(
+                        sorted(json.loads(extra['value'])))
+
+        return dataset_dict
+
+    def graph_from_dataset(self, dataset_dict, dataset_ref):
+
+        g = self.g
+
+        for prefix, namespace in namespaces.iteritems():
+            g.bind(prefix, namespace)
+
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        # Basic fields
+        items = [
+            ('identifier', DCT.identifier, ['guid', 'id']),
+            ('alternate_identifier', ADMS.identifier, None),
+            ('title', DCT.title, None),
+            ('notes', DCT.description, None),
+            ('url', DCAT.landingPage, None),
+            ('version', OWL.versionInfo, None),
+
+
+#            ('accrual-periodicity', DCT.accrualPeriodicity, None),
+#            ('temporal', DCT.temporal, None),
+#            ('language', DCT.language, None),
+#            ('dcat-category-id', DCAT.theme, None),
+
+        ]
+        self._add_triples_from_dict(dataset_dict, dataset_ref, items)
+
+
+        # Tags
+        for tag in dataset_dict.get('tags', []):
+            g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
+
+        # Dates
+        items = [
+            ('issued', DCT.issued, ['metadata_created']),
+            ('modified', DCT.modified, ['metadata_modified']),
+        ]
+        self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
+
+
+        # Publisher
+        publisher_uri = self._get_dataset_value(dataset_dict, 'spc')
+        if publisher_uri:
+            publisher_details = URIRef(publisher_uri)
+            rightsHolder_details = URIRef(publisher_uri)
+        else:
+            # No publisher_uri
+            publisher_details = BNode()
+            rightsHolder_details = BNode()
+        
+        g.add((publisher_details, RDF.type, FOAF.Organization))
+        publisher_name = dataset_dict.get('organization').get('title')
+        if publisher_name:
+            g.add((publisher_details, FOAF.name, Literal(publisher_name)))
+        g.add((dataset_ref, DCT.publisher, publisher_details))
+
+        # DCAT-AP_IT new properties
+        
+        # subTheme
+        #g.add((dataset_ref, DCATAPIT.subTheme, ))
+        
+        # rightsHolder
+        g.add((rightsHolder_details, RDF.type, DCATAPIT.Agent))
+        g.add((rightsHolder_details, DCT.identifier, Literal(publisher_uri)))
+        g.add((rightsHolder_details, FOAF.name, Literal(publisher_name)))
+        g.add((dataset_ref, DCT.rightsHolder, rightsHolder_details))
+
+		# creator
+        g.add((dataset_ref, DCT.creator, ...))
+
+        # Contact details
+        if any([
+            self._get_dataset_value(dataset_dict, 'contact_uri'),
+            self._get_dataset_value(dataset_dict, 'contact_name'),
+            self._get_dataset_value(dataset_dict, 'contact_email'),
+            self._get_dataset_value(dataset_dict, 'maintainer'),
+            self._get_dataset_value(dataset_dict, 'maintainer_email'),
+            self._get_dataset_value(dataset_dict, 'author'),
+            self._get_dataset_value(dataset_dict, 'author_email'),
+        ]):
+
+            contact_uri = self._get_dataset_value(dataset_dict, 'contact_uri')
+            if contact_uri:
+                contact_details = URIRef(contact_uri)
+            else:
+                contact_details = BNode()
+
+            g.add((contact_details, RDF.type, VCARD.Organization))
+            g.add((dataset_ref, DCAT.contactPoint, contact_details))
+
+            items = [
+                ('contact_name', VCARD.fn, ['maintainer', 'author']),
+                ('contact_email', VCARD.hasEmail, ['maintainer_email',
+                                                   'author_email']),
+            ]
+
+            self._add_triples_from_dict(dataset_dict, contact_details, items)
+
+        # Resources
+        for resource_dict in dataset_dict.get('resources', []):
+
+            distribution = URIRef(resource_uri(resource_dict))
+
+            g.add((dataset_ref, DCAT.distribution, distribution))
+
+            g.add((distribution, RDF.type, DCAT.Distribution))
+
+            #  Simple values
+            items = [
+                ('name', DCT.title, None),
+                ('description', DCT.description, None),
+                ('status', ADMS.status, None),
+                ('rights', DCT.rights, None),
+                ('license', DCT.license, None),
+            ]
+
+            self._add_triples_from_dict(resource_dict, distribution, items)
+
+            # Format
+            if '/' in resource_dict.get('format', ''):
+                g.add((distribution, DCAT.mediaType,
+                       Literal(resource_dict['format'])))
+            else:
+                if resource_dict.get('format'):
+                    g.add((distribution, DCT['format'],
+                           Literal(resource_dict['format'])))
+
+                if resource_dict.get('mimetype'):
+                    g.add((distribution, DCAT.mediaType,
+                           Literal(resource_dict['mimetype'])))
+
+            # URL
+            url = resource_dict.get('url')
+            download_url = resource_dict.get('download_url')
+            if download_url:
+                g.add((distribution, DCAT.downloadURL, Literal(download_url)))
+            if (url and not download_url) or (url and url != download_url):
+                g.add((distribution, DCAT.accessURL, Literal(url)))
+
+            # Dates
+            items = [
+                ('issued', DCT.issued, None),
+                ('modified', DCT.modified, None),
+            ]
+
+            self._add_date_triples_from_dict(resource_dict, distribution, items)
+
+            # Numbers
+            if resource_dict.get('size'):
+                try:
+                    g.add((distribution, DCAT.byteSize,
+                           Literal(float(resource_dict['size']),
+                                   datatype=XSD.decimal)))
+                except (ValueError, TypeError):
+                    g.add((distribution, DCAT.byteSize,
+                           Literal(resource_dict['size'])))
+
+    def graph_from_catalog(self, catalog_dict, catalog_ref):
+
+        g = self.g
+
+        for prefix, namespace in namespaces.iteritems():
+            g.bind(prefix, namespace)
+
+        g.add((catalog_ref, RDF.type, DCAT.Catalog))
+
+        # Basic fields
+        items = [
+            ('title', DCT.title, config.get('ckan.site_title')),
+            ('description', DCT.description, config.get('ckan.site_description')),
+            ('homepage', FOAF.homepage, config.get('ckan.site_url')),
+            ('language', DCT.language, config.get('it_dcat_ap.language')),
+            ('themeTaxonomy', DCAT.themeTaxonomy, config.get('it_dcat_ap.themeTaxonomy')),
+            ('publisher', DCT.publisher, config.get('it_dcat_ap.publisher'))
+        ]
+        for item in items:
+            key, predicate, fallback = item
+            if catalog_dict:
+                value = catalog_dict.get(key, fallback)
+            else:
+                value = fallback
+            if value:
+                g.add((catalog_ref, predicate, Literal(value)))
 
         # Dates
         modified = self._last_catalog_modification()
