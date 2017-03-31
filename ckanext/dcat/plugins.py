@@ -93,27 +93,6 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             'dcat_catalog_search': dcat_auth,
         }
 
-    # IPackageController
-    def after_show(self, context, data_dict):
-
-        if context.get('for_view'):
-            field_labels = utils.field_labels()
-
-            def set_titles(object_dict):
-                for key, value in object_dict.iteritems():
-                    if key in field_labels:
-                        object_dict[field_labels[key]] = object_dict[key]
-                        del object_dict[key]
-
-            for resource in data_dict.get('resources', []):
-                set_titles(resource)
-
-            for extra in data_dict.get('extras', []):
-                if extra['key'] in field_labels:
-                    extra['key'] = field_labels[extra['key']]
-
-        return data_dict
-
 
 class DCATJSONInterface(p.SingletonPlugin):
 
