@@ -14,6 +14,7 @@ if [ $CKANVERSION != 'master' ]
 then
     git checkout release-v$CKANVERSION-latest
 fi
+pip install setuptools --upgrade
 python setup.py develop
 
 
