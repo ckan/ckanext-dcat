@@ -1,5 +1,6 @@
 from __future__ import division
 import math
+import json
 
 from pylons import config
 from dateutil.parser import parse as dateutil_parse
@@ -22,6 +23,18 @@ def dcat_dataset_show(context, data_dict):
     toolkit.check_access('dcat_dataset_show', context, data_dict)
 
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
+    try:
+        if dataset_dict['program_page_url']:
+            dataset_dict['url'] = dataset_dict['program_page_url']
+        elif dataset_dict.get('url'):
+            url = dataset_dict['url']
+            if url.find("'en':") != -1 or url.find("'fr':") != -1:
+                url = url.replace("u'en': u'", '"en": "', 1)
+                url = url.replace("u'fr': u'", '"fr": "', 1)
+                url = url.replace("'", '"')
+                dataset_dict['url'] = json.loads(url)
+    except:
+        dataset_dict['url'] = None
 
     serializer = RDFSerializer()
 
