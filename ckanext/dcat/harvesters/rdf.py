@@ -304,7 +304,7 @@ class DCATRDFHarvester(DCATHarvester):
             harvester_tmp_dict = {}
 
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                harvester.before_update(harvest_object, dataset, harvester_tmp_dict)
+                harvester.before_update(harvest_object, dataset, harvester_tmp_dict, context)
 
             try:
                 if dataset:
@@ -321,7 +321,7 @@ class DCATRDFHarvester(DCATHarvester):
                 return False
 
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                err = harvester.after_update(harvest_object, dataset, harvester_tmp_dict)
+                err = harvester.after_update(harvest_object, dataset, harvester_tmp_dict, context)
 
                 if err:
                     self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')
@@ -343,7 +343,7 @@ class DCATRDFHarvester(DCATHarvester):
 
             name = dataset['name']
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                harvester.before_create(harvest_object, dataset, harvester_tmp_dict)
+                harvester.before_create(harvest_object, dataset, harvester_tmp_dict, context)
 
             try:
                 if dataset:
@@ -366,7 +366,7 @@ class DCATRDFHarvester(DCATHarvester):
                 return False
 
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                err = harvester.after_create(harvest_object, dataset, harvester_tmp_dict)
+                err = harvester.after_create(harvest_object, dataset, harvester_tmp_dict, context)
 
                 if err:
                     self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')

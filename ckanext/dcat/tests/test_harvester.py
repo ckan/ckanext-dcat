@@ -73,17 +73,17 @@ class TestRDFHarvester(p.SingletonPlugin):
         else:
             return content, []
 
-    def before_update(self, harvest_object, dataset_dict, temp_dict):
+    def before_update(self, harvest_object, dataset_dict, temp_dict, context=None):
         self.calls['before_update'] += 1
 
-    def after_update(self, harvest_object, dataset_dict, temp_dict):
+    def after_update(self, harvest_object, dataset_dict, temp_dict, context=None):
         self.calls['after_update'] += 1
         return None
 
-    def before_create(self, harvest_object, dataset_dict, temp_dict):
+    def before_create(self, harvest_object, dataset_dict, temp_dict, context=None):
         self.calls['before_create'] += 1
 
-    def after_create(self, harvest_object, dataset_dict, temp_dict):
+    def after_create(self, harvest_object, dataset_dict, temp_dict, context=None):
         self.calls['after_create'] += 1
         return None
 
