@@ -311,6 +311,14 @@ class DCATRDFHarvester(DCATHarvester):
 
                 harvester_tmp_dict = {}
 
+                # check if resources already exist based on their URI
+                existing_resources =  existing_dataset.get('resources')
+                resource_mapping = {r.get('uri'): r.get('id') for r in existing_resources if r.get('uri')}
+                for resource in dataset.get('resources'):
+                    res_uri = resource.get('uri')
+                    if res_uri and res_uri in resource_mapping:
+                        resource['id'] = resource_mapping[res_uri]
+
                 for harvester in p.PluginImplementations(IDCATRDFHarvester):
                     harvester.before_update(harvest_object, dataset, harvester_tmp_dict)
 
