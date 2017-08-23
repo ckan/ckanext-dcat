@@ -734,7 +734,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Dataset URI (explicitly show the missing ones)
         dataset_uri = (unicode(dataset_ref)
                        if isinstance(dataset_ref, rdflib.term.URIRef)
-                       else None)
+                       else '')
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
 
         # License
@@ -807,7 +807,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             resource_dict['uri'] = (unicode(distribution)
                                     if isinstance(distribution,
                                                   rdflib.term.URIRef)
-                                    else None)
+                                    else '')
 
             dataset_dict['resources'].append(resource_dict)
 

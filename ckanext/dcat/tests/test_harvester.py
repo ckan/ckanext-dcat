@@ -762,8 +762,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         existing, new = self._test_harvest_update_resources(self.rdf_mock_url,
                                   self.rdf_content_with_distribution,
                                   self.rdf_content_type)
-        nose.tools.assert_is_none(existing['uri'])
-        nose.tools.assert_is_none(new['uri'])
+        eq_(existing['uri'], '')
+        eq_(new['uri'], '')
         nose.tools.assert_is_not(new['id'], existing['id'])
 
     def _test_harvest_update_resources(self, url, content, content_type):
