@@ -2,6 +2,7 @@ import json
 import uuid
 import logging
 import hashlib
+import traceback
 
 import ckan.plugins as p
 import ckan.model as model
@@ -175,7 +176,8 @@ class DCATRDFHarvester(DCATHarvester):
             content, rdf_format = self._get_content_and_type(next_page_url, harvest_job, 1, content_type=rdf_format)
 
             content_hash = hashlib.md5()
-            content_hash.update(content)
+            if content:
+                content_hash.update(content)
 
             if last_content_hash:
                 if content_hash.digest() == last_content_hash.digest():
@@ -203,33 +205,41 @@ class DCATRDFHarvester(DCATHarvester):
                 self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
                 return []
 
-            for dataset in parser.datasets():
-                if not dataset.get('name'):
-                    dataset['name'] = self._gen_new_name(dataset['title'])
+            while True:
+                try:
+                    dataset = next(parser.datasets())
+                    if not dataset.get('name'):
+                        dataset['name'] = self._gen_new_name(dataset['title'])
 
-                # Unless already set by the parser, get the owner organization (if any)
-                # from the harvest source dataset
-                if not dataset.get('owner_org'):
-                    source_dataset = model.Package.get(harvest_job.source.id)
-                    if source_dataset.owner_org:
-                        dataset['owner_org'] = source_dataset.owner_org
+                    # Unless already set by the parser, get the owner organization (if any)
+                    # from the harvest source dataset
+                    if not dataset.get('owner_org'):
+                        source_dataset = model.Package.get(harvest_job.source.id)
+                        if source_dataset.owner_org:
+                            dataset['owner_org'] = source_dataset.owner_org
 
-                # Try to get a unique identifier for the harvested dataset
-                guid = self._get_guid(dataset)
+                    # Try to get a unique identifier for the harvested dataset
+                    guid = self._get_guid(dataset)
 
-                if not guid:
-                    self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
+                    if not guid:
+                        self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
+                                                harvest_job)
+                        continue
+
+                    dataset['extras'].append({'key': 'guid', 'value': guid})
+                    guids_in_source.append(guid)
+
+                    obj = HarvestObject(guid=guid, job=harvest_job,
+                                        content=json.dumps(dataset))
+
+                    obj.save()
+                    object_ids.append(obj.id)
+                except StopIteration:
+                    break;
+                except RDFParserException, e:
+                    self._save_gather_error('Error when processsing dataset: %r / %s' % (e, traceback.format_exc()),
                                             harvest_job)
-                    continue
-
-                dataset['extras'].append({'key': 'guid', 'value': guid})
-                guids_in_source.append(guid)
-
-                obj = HarvestObject(guid=guid, job=harvest_job,
-                                    content=json.dumps(dataset))
-
-                obj.save()
-                object_ids.append(obj.id)
+                    return []
 
             # get the next page
             next_page_url = parser.next_page()
