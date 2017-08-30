@@ -170,20 +170,14 @@ class RDFParser(RDFProcessor):
         Each dataset is passed to all the loaded profiles before being
         yielded, so it can be further modified by each one of them.
 
-        It raises a ``RDFParserException`` if there was some error during
-        the parsing.
-
         Returns a dataset dict that can be passed to eg `package_create`
         or `package_update`
         '''
         for dataset_ref in self._datasets():
             dataset_dict = {}
             for profile_class in self._profiles:
-                try:
-                    profile = profile_class(self.g, self.compatibility_mode)
-                    profile.parse_dataset(dataset_dict, dataset_ref)
-                except Exception, e:
-                    raise RDFParserException(e)
+                profile = profile_class(self.g, self.compatibility_mode)
+                profile.parse_dataset(dataset_dict, dataset_ref)
 
             yield dataset_dict
 
