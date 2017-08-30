@@ -14,6 +14,14 @@ if [ $CKANVERSION != 'master' ]
 then
     git checkout release-v$CKANVERSION-latest
 fi
+
+# install the recommended version of setuptools
+if [ -f requirement-setuptools.txt ]
+then
+    echo "Updating setuptools..."
+    pip install -r requirement-setuptools.txt
+fi
+
 python setup.py develop
 
 
