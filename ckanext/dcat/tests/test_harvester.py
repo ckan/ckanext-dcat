@@ -4,6 +4,7 @@ from collections import defaultdict
 
 import nose
 import httpretty
+from mock import patch
 
 import ckan.plugins as p
 try:
@@ -776,6 +777,37 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         eq_(last_job_status['status'], 'Finished')
         assert ('Error parsing the RDF file'
+                in last_job_status['gather_error_summary'][0][0])
+
+    @patch.object('ckanext.dcat.harvesters.rdf.RDFParser', 'datasets')
+    def test_harvest_exception_in_profile(self, mock_datasets):
+        mock_datasets.side_effect = Exception
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url,
+                               body=self.rdf_content, content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url,
+                               status=405, content_type=selt.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
+        self._create_harvest_job(harvest_source['id'])
+        self._run_jobs(harvest_source['id'])
+        self._gather_queue(1)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # Get the harvest source with the udpated status
+        harvest_source = h.call_action('harvest_source_show',
+                                       id=harvest_source['id'])
+
+        last_job_status = harvest_source['status']['last_job']
+
+        eq_(last_job_status['status'], 'Finished')
+        assert ('Error when processsing dataset'
                 in last_job_status['gather_error_summary'][0][0])
 
 
