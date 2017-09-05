@@ -4,6 +4,7 @@ from collections import defaultdict
 
 import nose
 import httpretty
+from mock import patch
 
 import ckan.plugins as p
 try:
@@ -16,6 +17,7 @@ from ckanext.harvest import queue
 
 from ckanext.dcat.harvesters import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
+import ckanext.dcat.harvesters.rdf
 
 
 eq_ = nose.tools.eq_
@@ -97,6 +99,18 @@ class TestRDFNullHarvester(TestRDFHarvester):
     def before_create(self, harvest_object, dataset_dict, temp_dict):
         super(TestRDFNullHarvester, self).before_create(harvest_object, dataset_dict, temp_dict)
         dataset_dict.clear()
+
+
+class TestRDFExceptionHarvester(TestRDFHarvester):
+    p.implements(IDCATRDFHarvester)
+
+    raised_exception = False
+
+    def before_create(self, harvest_object, dataset_dict, temp_dict):
+        super(TestRDFExceptionHarvester, self).before_create(harvest_object, dataset_dict, temp_dict)
+        if not self.raised_exception:
+            self.raised_exception = True
+            raise Exception("raising exception in before_create")
 
 
 class TestDCATHarvestUnit(object):
@@ -778,6 +792,37 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         assert ('Error parsing the RDF file'
                 in last_job_status['gather_error_summary'][0][0])
 
+    @patch.object(ckanext.dcat.harvesters.rdf.RDFParser, 'datasets')
+    def test_harvest_exception_in_profile(self, mock_datasets):
+        mock_datasets.side_effect = Exception
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url,
+                               body=self.rdf_content, content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url,
+                               status=405, content_type=self.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
+        self._create_harvest_job(harvest_source['id'])
+        self._run_jobs(harvest_source['id'])
+        self._gather_queue(1)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # Get the harvest source with the udpated status
+        harvest_source = h.call_action('harvest_source_show',
+                                       id=harvest_source['id'])
+
+        last_job_status = harvest_source['status']['last_job']
+
+        eq_(last_job_status['status'], 'Finished')
+        assert ('Error when processsing dataset'
+                in last_job_status['gather_error_summary'][0][0])
+
 
 class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
@@ -1059,6 +1104,18 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
     def teardown_class(self):
         p.unload('test_rdf_null_harvester')
 
+    def setup(self):
+        super(TestDCATHarvestFunctionalSetNull, self).setup()
+
+        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin.calls = defaultdict(int)
+
+    def teardown(self):
+        super(TestDCATHarvestFunctionalSetNull, self).teardown()
+
+        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin.calls = defaultdict(int)
+
     def test_harvest_with_before_create_null(self):
         plugin = p.get_plugin('test_rdf_null_harvester')
 
@@ -1101,6 +1158,78 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
 
         eq_(plugin.calls['before_create'], 2)
         eq_(plugin.calls['after_create'], 0)
+        eq_(plugin.calls['before_update'], 0)
+        eq_(plugin.calls['after_update'], 0)
+
+
+class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
+
+    @classmethod
+    def setup_class(self):
+        super(TestDCATHarvestFunctionalRaiseExcpetion, self).setup_class()
+        p.load('test_rdf_exception_harvester')
+
+    @classmethod
+    def teardown_class(self):
+        p.unload('test_rdf_exception_harvester')
+
+    def setup(self):
+        super(TestDCATHarvestFunctionalRaiseExcpetion, self).setup()
+
+        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin.calls = defaultdict(int)
+
+    def teardown(self):
+        super(TestDCATHarvestFunctionalRaiseExcpetion, self).teardown()
+
+        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin.calls = defaultdict(int)
+
+    def test_harvest_with_before_create_raising_exception(self):
+        plugin = p.get_plugin('test_rdf_exception_harvester')
+
+        url = self.rdf_mock_url
+        content =  self.rdf_content
+        content_type = self.rdf_content_type
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
+
+        harvest_source = self._create_harvest_source(url)
+
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # Get the harvest source with the updated status
+        harvest_source = h.call_action('harvest_source_show',
+                                       id=harvest_source['id'])
+        last_job_status = harvest_source['status']['last_job']
+        eq_(last_job_status['status'], 'Finished')
+
+        assert ('Error importing dataset'
+                in last_job_status['object_error_summary'][0][0])
+
+        nose.tools.assert_dict_equal(
+            last_job_status['stats'],
+            {
+                'deleted': 0,
+                'added': 1,
+                'updated': 0,
+                'not modified': 0,
+                'errored': 1
+            }
+        )
+
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 1)
         eq_(plugin.calls['before_update'], 0)
         eq_(plugin.calls['after_update'], 0)
 
