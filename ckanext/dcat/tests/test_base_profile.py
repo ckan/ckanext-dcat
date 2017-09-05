@@ -78,7 +78,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.unknown_property)
 
-        eq_(value, None)
+        eq_(value, '')
 
     def test_object_int(self):
 
