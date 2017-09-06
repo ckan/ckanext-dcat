@@ -359,6 +359,51 @@ class FunctionalHarvestTest(object):
         </dcat:Catalog>
         </rdf:RDF>
         '''
+
+        # RDF with minimal distribution
+        cls.rdf_content_with_distribution_uri = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset 1</dct:title>
+              <dcat:distribution>
+                <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/1/resource/1">
+                  <dct:title>Example resource 1</dct:title>
+                  <dcat:accessURL>http://data.some.org/download.zip</dcat:accessURL>
+                </dcat:Distribution>
+              </dcat:distribution>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        </rdf:RDF>
+        '''
+        cls.rdf_content_with_distribution = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset 1</dct:title>
+              <dcat:distribution>
+                <dcat:Distribution>
+                  <dct:title>Example resource 1</dct:title>
+                  <dcat:accessURL>http://data.some.org/download.zip</dcat:accessURL>
+                </dcat:Distribution>
+              </dcat:distribution>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        </rdf:RDF>
+        '''
+
         cls.rdf_remote_file_invalid = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dcat="http://www.w3.org/ns/dcat#"
@@ -702,6 +747,71 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         for result in results['results']:
             assert result['title'] in ('Example dataset 1 (updated)',
                                        'Example dataset 2')
+
+    def test_harvest_update_existing_resources(self):
+
+        existing, new = self._test_harvest_update_resources(self.rdf_mock_url,
+                                  self.rdf_content_with_distribution_uri,
+                                  self.rdf_content_type)
+        eq_(new['uri'], 'https://data.some.org/catalog/datasets/1/resource/1')
+        eq_(new['uri'], existing['uri'])
+        eq_(new['id'], existing['id'])
+
+    def test_harvest_update_new_resources(self):
+
+        existing, new = self._test_harvest_update_resources(self.rdf_mock_url,
+                                  self.rdf_content_with_distribution,
+                                  self.rdf_content_type)
+        eq_(existing['uri'], '')
+        eq_(new['uri'], '')
+        nose.tools.assert_is_not(new['id'], existing['id'])
+
+    def _test_harvest_update_resources(self, url, content, content_type):
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, url,
+                               body=content, content_type=content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, url,
+                               status=405, content_type=content_type)
+
+        harvest_source = self._create_harvest_source(url)
+
+        # First run, create the dataset with the resource
+        self._run_full_job(harvest_source['id'], num_objects=1)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # get the created dataset
+        fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
+        results = h.call_action('package_search', {}, fq=fq)
+        eq_(results['count'], 1)
+
+	existing_dataset = results['results'][0]
+        existing_resource = existing_dataset.get('resources')[0]
+
+        # Mock an update in the remote file
+        new_file = content.replace('Example resource 1',
+                                   'Example resource 1 (updated)')
+        httpretty.register_uri(httpretty.GET, url,
+                               body=new_file, content_type=content_type)
+
+        # Run a second job
+        self._run_full_job(harvest_source['id'])
+
+        # get the updated dataset
+        new_results = h.call_action('package_search', {}, fq=fq)
+        eq_(new_results['count'], 1)
+
+	new_dataset = new_results['results'][0]
+	new_resource = new_dataset.get('resources')[0]
+
+        eq_(existing_resource['name'], 'Example resource 1')
+        eq_(len(new_dataset.get('resources')), 1)
+        eq_(new_resource['name'], 'Example resource 1 (updated)')
+        return (existing_resource, new_resource)
 
     def test_harvest_delete_rdf(self):
 

@@ -109,11 +109,11 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        If found, the unicode representation is returned, else None
+        If found, the unicode representation is returned, else an empty string
         '''
         for o in self.g.objects(subject, predicate):
             return unicode(o)
-        return None
+        return ''
 
     def _object_value_int(self, subject, predicate):
         '''
@@ -215,7 +215,7 @@ class RDFProfile(object):
         }
 
         Returns keys for uri, name, email, url and type with the values set to
-        None if they could not be found
+        an empty string if they could not be found
         '''
 
         publisher = {}
@@ -223,7 +223,7 @@ class RDFProfile(object):
         for agent in self.g.objects(subject, predicate):
 
             publisher['uri'] = (unicode(agent) if isinstance(agent,
-                                rdflib.term.URIRef) else None)
+                                rdflib.term.URIRef) else '')
 
             publisher['name'] = self._object_value(agent, FOAF.name)
 
@@ -242,7 +242,7 @@ class RDFProfile(object):
         Both subject and predicate must be rdflib URIRef or BNode objects
 
         Returns keys for uri, name and email with the values set to
-        None if they could not be found
+        an empty string if they could not be found
         '''
 
         contact = {}
@@ -250,7 +250,7 @@ class RDFProfile(object):
         for agent in self.g.objects(subject, predicate):
 
             contact['uri'] = (unicode(agent) if isinstance(agent,
-                              rdflib.term.URIRef) else None)
+                              rdflib.term.URIRef) else '')
 
             contact['name'] = self._object_value(agent, VCARD.fn)
 
@@ -316,7 +316,7 @@ class RDFProfile(object):
         '''
         Returns a license identifier if one of the distributions license is
         found in CKAN license registry. If no distribution's license matches,
-        None is returned.
+        an empty string is returned.
 
         The first distribution with a license found in the registry is used so
         that if distributions have different licenses we'll only get the first
@@ -338,12 +338,12 @@ class RDFProfile(object):
             if license:
                 # Try to find a matching license comparing URIs, then titles
                 license_id = license_uri2id.get(license.toPython())
-                if license_id is None:
+                if not license_id:
                     license_id = license_title2id.get(
                         self._object_value(license, DCT.title))
-                if license_id is not None:
+                if license_id:
                     return license_id
-        return None
+        return ''
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
@@ -734,7 +734,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Dataset URI (explicitly show the missing ones)
         dataset_uri = (unicode(dataset_ref)
                        if isinstance(dataset_ref, rdflib.term.URIRef)
-                       else None)
+                       else '')
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
 
         # License
@@ -807,7 +807,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             resource_dict['uri'] = (unicode(distribution)
                                     if isinstance(distribution,
                                                   rdflib.term.URIRef)
-                                    else None)
+                                    else '')
 
             dataset_dict['resources'].append(resource_dict)
 
