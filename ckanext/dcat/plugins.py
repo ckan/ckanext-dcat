@@ -17,6 +17,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
 from ckanext.dcat import utils
 
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
+TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
 
@@ -95,22 +96,22 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     # IPackageController
     def after_show(self, context, data_dict):
+        if p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG)):
+            if context.get('for_view'):
+                field_labels = utils.field_labels()
 
-        if context.get('for_view'):
-            field_labels = utils.field_labels()
+                def set_titles(object_dict):
+                    for key, value in object_dict.iteritems():
+                        if key in field_labels:
+                            object_dict[field_labels[key]] = object_dict[key]
+                            del object_dict[key]
 
-            def set_titles(object_dict):
-                for key, value in object_dict.iteritems():
-                    if key in field_labels:
-                        object_dict[field_labels[key]] = object_dict[key]
-                        del object_dict[key]
+                for resource in data_dict.get('resources', []):
+                    set_titles(resource)
 
-            for resource in data_dict.get('resources', []):
-                set_titles(resource)
-
-            for extra in data_dict.get('extras', []):
-                if extra['key'] in field_labels:
-                    extra['key'] = field_labels[extra['key']]
+                for extra in data_dict.get('extras', []):
+                    if extra['key'] in field_labels:
+                        extra['key'] = field_labels[extra['key']]
 
         return data_dict
 
