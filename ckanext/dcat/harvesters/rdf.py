@@ -300,6 +300,8 @@ class DCATRDFHarvester(DCATHarvester):
             'ignore_auth': True,
         }
 
+        dataset = self.modify_package_dict(dataset, {}, harvest_object)
+
         # Check if a dataset with the same guid exists
         existing_dataset = self._get_existing_dataset(harvest_object.guid)
 
