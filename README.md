@@ -122,7 +122,7 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_date={date}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -163,7 +163,7 @@ The default number of datasets returned (100) can be modified by CKAN site maint
 
     ckanext.dcat.datasets_per_page = 20
 
-The catalog endpoint also supports a `modified_date` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
+The catalog endpoint also supports a `modified_since` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
 
 http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
 
