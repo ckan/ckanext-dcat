@@ -26,10 +26,16 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IActions, inherit=True)
+    p.implements(p.IFacets, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
     p.implements(p.IPackageController, inherit=True)
     if p.toolkit.check_ckan_version(min_version='2.5.0'):
         p.implements(p.ITranslation, inherit=True)
+
+    # IFacets
+    def dataset_facets(self, facets_dict, package_type):
+        facets_dict['source_title'] = p.toolkit._("Sources")
+        return facets_dict
 
     # IConfigurer
     def update_config(self, config):

@@ -5,6 +5,7 @@ import json
 from pkg_resources import iter_entry_points
 
 from pylons import config
+from paste.deploy.converters import asbool
 
 import rdflib
 import rdflib.parser
@@ -13,7 +14,8 @@ from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
 
-from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format
+from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.profiles import DCAT, DCT, FOAF
 
 
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
@@ -320,7 +322,9 @@ class RDFSerializer(RDFProcessor):
             for dataset_dict in dataset_dicts:
                 dataset_ref = self.graph_from_dataset(dataset_dict)
 
-                self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
+                cat_ref = self._add_source_catalog(catalog_ref, dataset_dict, dataset_ref)
+                if not cat_ref:
+                    self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
 
         if pagination_info:
             self._add_pagination_triples(pagination_info)
@@ -330,6 +334,70 @@ class RDFSerializer(RDFProcessor):
 
         return output
 
+    def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
+        if not asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+            return
+
+        def _get_from_extra(key):
+            for ex in dataset_dict.get('extras', []):
+                if ex['key'] == key:
+                    return ex['value']
+
+        source_uri = _get_from_extra('source_catalog_homepage')
+        if not source_uri:
+            return
+        
+        g = self.g
+        catalog_ref = URIRef(source_uri)
+
+        catalog_added = g.value(root_catalog_ref, DCT.hasPart) == catalog_ref
+
+        g.add((root_catalog_ref, DCT.hasPart, catalog_ref))
+        g.add((catalog_ref, DCAT.dataset, dataset_ref))
+        g.add((catalog_ref, RDF.type, DCAT.Catalog))
+
+        if not catalog_added:
+            sources = (('source_catalog_title', DCT.title, Literal,),
+                       ('source_catalog_description', DCT.description, Literal,),
+                       ('source_catalog_homepage', FOAF.homepage, URIRef,),
+                       ('source_catalog_language', DCT.language, Literal,),
+                       ('source_catalog_modified', DCT.modified, Literal,),)
+
+
+            # base catalog struct
+            for item in sources:
+                key, predicate, _type = item
+                value = _get_from_extra(key)
+                if value:
+                    g.add((catalog_ref, predicate, _type(value)))
+
+            publisher_sources = (
+            #('uri', URIRef, DCT.publisher, True,),
+                                 ('name', Literal, FOAF.name, True,),
+                                 ('email', Literal, FOAF.mbox, False,),
+                                 ('url', URIRef, FOAF.homepage,False,),
+                                 ('type', Literal, DCT.type, False,))
+
+            _pub = _get_from_extra('source_catalog_publisher')
+            if _pub:
+                pub = json.loads(_pub)
+
+                #pub_uri = URIRef(pub.get('uri'))
+
+                agent = BNode()
+                g.add((agent, RDF.type, FOAF.Agent))
+                g.add((catalog_ref, DCT.publisher, agent))
+
+                for src_key, _type, predicate, required in publisher_sources:
+                    val = pub.get(src_key)
+                    if val is None and required:
+                        raise ValueError("Value for %s (%s) is required" % (src_key, predicate))
+                    elif val is None:
+                        continue
+                    g.add((agent, predicate, _type(val)))
+        
+        return catalog_ref
+        
 
 if __name__ == '__main__':
 
@@ -359,9 +427,14 @@ Operation mode.
                         action='store_true',
                         help='Enable compatibility mode')
 
+    parser.add_argument('-s', '--subcatalogs', action='store_true', dest='subcatalogs',
+                        default=False,
+                        help="Enable subcatalogs handling (dct:hasPart support)")
     args = parser.parse_args()
 
     contents = args.file.read()
+
+    config.update({DCAT_EXPOSE_SUBCATALOGS: args.subcatalogs})
 
     if args.mode == 'produce':
         serializer = RDFSerializer(profiles=args.profile,
