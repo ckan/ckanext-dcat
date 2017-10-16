@@ -4,6 +4,7 @@ import json
 from dateutil.parser import parse as parse_date
 
 from pylons import config
+from paste.deploy.converters import asbool
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
@@ -13,8 +14,9 @@ from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
+from ckan.lib.munge import munge_tag
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -655,8 +657,16 @@ class EuropeanDCATAPProfile(RDFProfile):
             keywords.remove(keyword)
             keywords.extend([k.strip() for k in keyword.split(',')])
 
+        # replace munge_tag to noop if there's no need to clean tags
+
+        clean_tags = asbool(config.get(DCAT_CLEAN_TAGS, False))
+        def clean_tag(value):
+            if clean_tags:
+                return munge_tag(value)
+            return value
+        
         for keyword in keywords:
-            dataset_dict['tags'].append({'name': keyword})
+            dataset_dict['tags'].append({'name': clean_tag(keyword)})
 
         # Extras
 
