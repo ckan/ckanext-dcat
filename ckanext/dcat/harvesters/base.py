@@ -56,12 +56,17 @@ class DCATHarvester(HarvesterBase):
 
 
             log.debug('Getting file %s', url)
+            
+            # get the `requests` session object
+            session = requests.Session()
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                session = harvester.update_requests_session(session)
 
             # first we try a HEAD request which may not be supported
             did_get = False
-            r = requests.head(url)
+            r = session.head(url)
             if r.status_code == 405 or r.status_code == 400:
-                r = requests.get(url, stream=True)
+                r = session.get(url, stream=True)
                 did_get = True
             r.raise_for_status()
 
@@ -74,7 +79,7 @@ class DCATHarvester(HarvesterBase):
                 return None, None
 
             if not did_get:
-                r = requests.get(url, stream=True)
+                r = session.get(url, stream=True)
 
             length = 0
             content = ''
