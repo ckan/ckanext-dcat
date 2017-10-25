@@ -31,6 +31,24 @@ class IDCATRDFHarvester(Interface):
         '''
         return url, []
 
+    def update_session(self, session):
+        '''
+        Called before making the HTTP request to the remote site to download
+        the RDF file.
+
+        It returns a valid `requests` session object.
+
+        This extension point can be useful to add special parameters to the 
+        request (e.g. add client certificates).
+
+        :param session: The requests session object
+        :type session: object
+
+        :returns: The updated requests session object
+        :rtype: object
+        '''
+        return session
+
     def after_download(self, content, harvest_job):
         '''
         Called just after the remote RDF file has been downloaded

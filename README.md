@@ -230,8 +230,12 @@ The harvester will look at the `content-type` HTTP header field to determine the
 ### Extending the RDF harvester
 
 The DCAT RDF harvester has extension points that allow to modify its behaviour from other extensions. These can be used by extensions implementing
-the `IDCATRDFHarvester` interface. Right now it provides the `before_download` and `after_download` methods that are called just before and after
-retrieving the remote file, and can be used for instance to validate the contents.
+the `IDCATRDFHarvester` interface. Right now it provides the following methods:
+
+* `before_download` and `after_download`: called just before and after retrieving the remote file, and can be used for instance to validate the contents.
+* `update_session`: called before making the remote requests to update the `requests` session object, useful to add additional headers or for setting client certificates. Check the [`requests` documentation](http://docs.python-requests.org/en/master/user/advanced/#session-objects) for details.
+* `before_create` / `after_create`: called before and after the `package_create` action has been performed
+* `before_update` / `after_update`: called before and after the `package_update` action has been performed
 
 To know more about these methods, please check the source of [`ckanext-dcat/ckanext/dcat/interfaces.py`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/interfaces.py).
 
