@@ -64,6 +64,11 @@ class TestRDFHarvester(p.SingletonPlugin):
         else:
             return url, []
 
+    def update_session(self, session):
+        self.calls['update_session'] += 1
+        session.headers.update({'x-test': 'true'})
+        return session
+
     def after_download(self, content, harvest_job):
 
         self.calls['after_download'] += 1
@@ -1051,6 +1056,35 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         eq_('Error 1', last_job_status['gather_error_summary'][0][0])
         eq_('Error 2', last_job_status['gather_error_summary'][1][0])
+
+    def test_harvest_update_session_extension_point_gets_called(self):
+
+        plugin = p.get_plugin('test_rdf_harvester')
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
+        self._create_harvest_job(harvest_source['id'])
+        self._run_jobs(harvest_source['id'])
+        self._gather_queue(1)
+
+        eq_(plugin.calls['update_session'], 1)
+
+    def test_harvest_update_session_add_header(self):
+
+        plugin = p.get_plugin('test_rdf_harvester')
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
+        self._create_harvest_job(harvest_source['id'])
+        self._run_jobs(harvest_source['id'])
+        self._gather_queue(1)
+
+        eq_(plugin.calls['update_session'], 1)
+
+        # Run the jobs to mark the previous one as Finished
+        self._run_jobs()
+
+        # Check that the header was actually set
+        assert ('true'
+                in httpretty.last_request().headers['x-test'])
 
     def test_harvest_after_download_extension_point_gets_called(self):
 
