@@ -13,6 +13,8 @@ from ckan import model
 from ckanext.harvest.harvesters import HarvesterBase
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
+from ckanext.dcat.interfaces import IDCATRDFHarvester
+
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ class DCATHarvester(HarvesterBase):
             # get the `requests` session object
             session = requests.Session()
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                session = harvester.update_requests_session(session)
+                session = harvester.update_session(session)
 
             # first we try a HEAD request which may not be supported
             did_get = False

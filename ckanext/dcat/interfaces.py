@@ -31,7 +31,7 @@ class IDCATRDFHarvester(Interface):
         '''
         return url, []
 
-    def update_requests_session(self, session):
+    def update_session(self, session):
         '''
         Called before making the HTTP request to the remote site to download
         the RDF file.
