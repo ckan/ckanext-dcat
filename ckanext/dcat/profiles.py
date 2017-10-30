@@ -587,7 +587,7 @@ class RDFProfile(object):
         if not asbool(config.get(DCAT_EXPOSE_SUBCATALOGS)):
             return
         cats = set(self.g.subjects(DCAT.dataset, dataset_ref))
-        root = self._get_root()
+        root = self._get_root_catalog_ref()
         try:
             cats.remove(root)
         except KeyError:
@@ -597,7 +597,7 @@ class RDFProfile(object):
             return cats.pop()
         return root
     
-    def _get_root(self):
+    def _get_root_catalog_ref(self):
         roots = list(self.g.subjects(DCT.hasPart))
         if not roots:
             roots = list(self.g.subjects(RDF.type, DCAT.Catalog))

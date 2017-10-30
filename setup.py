@@ -30,6 +30,7 @@ setup(
     dcat_rdf_harvester=ckanext.dcat.harvesters:DCATRDFHarvester
 
     dcat_json_interface=ckanext.dcat.plugins:DCATJSONInterface
+    dcat_facets=ckanext.dcat.plugins:DCATFacetsPlugin
 
     dcat=ckanext.dcat.plugins:DCATPlugin
 

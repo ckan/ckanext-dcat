@@ -5,7 +5,6 @@ import json
 from pkg_resources import iter_entry_points
 
 from pylons import config
-from paste.deploy.converters import asbool
 
 import rdflib
 import rdflib.parser
@@ -335,7 +334,7 @@ class RDFSerializer(RDFProcessor):
         return output
 
     def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
-        if not asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+        if not p.toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
             return
 
         def _get_from_extra(key):
