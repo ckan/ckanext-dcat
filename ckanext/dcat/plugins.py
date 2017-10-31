@@ -141,15 +141,3 @@ class DCATJSONInterface(p.SingletonPlugin):
         return {
             'dcat_datasets_list': dcat_auth,
         }
-
-
-class DCATFacetsPlugin(p.SingletonPlugin, DefaultTranslation):
-    
-    p.implements(p.IFacets, inherit=True)
-    if p.toolkit.check_ckan_version(min_version='2.5.0'):
-        p.implements(p.ITranslation, inherit=True)
-
-    # IFacets
-    def dataset_facets(self, facets_dict, package_type):
-        facets_dict['source_title'] = p.toolkit._("Sources")
-        return facets_dict
