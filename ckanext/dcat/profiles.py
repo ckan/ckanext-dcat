@@ -4,6 +4,7 @@ import json
 from dateutil.parser import parse as parse_date
 
 from pylons import config
+from paste.deploy.converters import asbool
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
@@ -14,7 +15,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -45,8 +46,10 @@ namespaces = {
 }
 
 
+
 class RDFProfile(object):
     '''Base class with helper methods for implementing RDF parsing profiles
+
 
        This class should not be used directly, but rather extended to create
        custom profiles
@@ -570,6 +573,36 @@ class RDFProfile(object):
             return result['results'][0]['metadata_modified']
         return None
 
+    def _get_source_catalog(self, dataset_ref):
+        '''
+        Returns Catalog reference that is source for this dataset. 
+
+        Catalog referenced in dct:hasPart is returned, 
+        if dataset is linked there, otherwise main catalog 
+        will be returned.
+
+        This will not be used if ckanext.dcat.expose_subcatalogs
+        configuration option is set to False.
+        '''
+        if not asbool(config.get(DCAT_EXPOSE_SUBCATALOGS)):
+            return
+        cats = set(self.g.subjects(DCAT.dataset, dataset_ref))
+        root = self._get_root_catalog_ref()
+        try:
+            cats.remove(root)
+        except KeyError:
+            pass
+        assert len(cats) in (0, 1,), "len %s" %cats
+        if cats:
+            return cats.pop()
+        return root
+    
+    def _get_root_catalog_ref(self):
+        roots = list(self.g.subjects(DCT.hasPart))
+        if not roots:
+            roots = list(self.g.subjects(RDF.type, DCAT.Catalog))
+        return roots[0]
+
     # Public methods for profiles to implement
 
     def parse_dataset(self, dataset_dict, dataset_ref):
@@ -585,6 +618,25 @@ class RDFProfile(object):
         or `package_update`
         '''
         return dataset_dict
+
+    def _extract_catalog_dict(self, catalog_ref):
+        '''
+        Returns list of key/value dictionaries with catalog
+        '''
+
+        out = []
+        sources = (('source_catalog_title', DCT.title,),
+                   ('source_catalog_description', DCT.description,),
+                   ('source_catalog_homepage', FOAF.homepage,),
+                   ('source_catalog_language', DCT.language,),
+                   ('source_catalog_modified', DCT.modified,),)
+
+        for key, predicate in sources:
+            val = self._object_value(catalog_ref, predicate)
+            out.append({'key': key, 'value': val})
+
+        out.append({'key': 'source_catalog_publisher', 'value': json.dumps(self._publisher(catalog_ref, DCT.publisher))})
+        return out
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         '''
@@ -625,6 +677,7 @@ class EuropeanDCATAPProfile(RDFProfile):
     '''
 
     def parse_dataset(self, dataset_dict, dataset_ref):
+        catalog_src = self._get_source_catalog(dataset_ref)
 
         dataset_dict['tags'] = []
         dataset_dict['extras'] = []
@@ -740,6 +793,12 @@ class EuropeanDCATAPProfile(RDFProfile):
         # License
         if 'license_id' not in dataset_dict:
             dataset_dict['license_id'] = self._license(dataset_ref)
+        
+        # Source Catalog
+        if catalog_src is not None:
+            src_data = self._extract_catalog_dict(catalog_src)
+            dataset_dict['extras'].extend(src_data)
+            
 
         # Resources
         for distribution in self._distributions(dataset_ref):
@@ -827,7 +886,6 @@ class EuropeanDCATAPProfile(RDFProfile):
         return dataset_dict
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
-
         g = self.g
 
         for prefix, namespace in namespaces.iteritems():
