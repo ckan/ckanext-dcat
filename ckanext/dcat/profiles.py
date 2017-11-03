@@ -4,7 +4,6 @@ import json
 from dateutil.parser import parse as parse_date
 
 from pylons import config
-from paste.deploy.converters import asbool
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
@@ -46,10 +45,8 @@ namespaces = {
 }
 
 
-
 class RDFProfile(object):
     '''Base class with helper methods for implementing RDF parsing profiles
-
 
        This class should not be used directly, but rather extended to create
        custom profiles
@@ -584,7 +581,7 @@ class RDFProfile(object):
         This will not be used if ckanext.dcat.expose_subcatalogs
         configuration option is set to False.
         '''
-        if not asbool(config.get(DCAT_EXPOSE_SUBCATALOGS)):
+        if not toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
             return
         cats = set(self.g.subjects(DCAT.dataset, dataset_ref))
         root = self._get_root_catalog_ref()
@@ -798,7 +795,6 @@ class EuropeanDCATAPProfile(RDFProfile):
         if catalog_src is not None:
             src_data = self._extract_catalog_dict(catalog_src)
             dataset_dict['extras'].extend(src_data)
-            
 
         # Resources
         for distribution in self._distributions(dataset_ref):
@@ -886,6 +882,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         return dataset_dict
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
+
         g = self.g
 
         for prefix, namespace in namespaces.iteritems():
