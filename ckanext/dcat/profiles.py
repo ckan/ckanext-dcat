@@ -588,6 +588,10 @@ class RDFProfile(object):
             return
         cats = set(self.g.subjects(DCAT.dataset, dataset_ref))
         root = self._get_root_catalog_ref()
+        # this is a case for tests, where rdf doesn't contain full
+        # catalog structure, only a dataset
+        if not root:
+            return
         try:
             cats.remove(root)
         except KeyError:
@@ -601,7 +605,8 @@ class RDFProfile(object):
         roots = list(self.g.subjects(DCT.hasPart))
         if not roots:
             roots = list(self.g.subjects(RDF.type, DCAT.Catalog))
-        return roots[0]
+        if roots:
+            return roots[0]
 
     # Public methods for profiles to implement
 
