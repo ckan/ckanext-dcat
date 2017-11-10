@@ -4,7 +4,6 @@ import json
 from dateutil.parser import parse as parse_date
 
 from pylons import config
-from paste.deploy.converters import asbool
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
@@ -628,7 +627,6 @@ class EuropeanDCATAPProfile(RDFProfile):
 
     def parse_dataset(self, dataset_dict, dataset_ref):
 
-        dataset_dict['tags'] = []
         dataset_dict['extras'] = []
         dataset_dict['resources'] = []
 
@@ -658,15 +656,10 @@ class EuropeanDCATAPProfile(RDFProfile):
             keywords.extend([k.strip() for k in keyword.split(',')])
 
         # replace munge_tag to noop if there's no need to clean tags
-
-        clean_tags = asbool(config.get(DCAT_CLEAN_TAGS, False))
-        def clean_tag(value):
-            if clean_tags:
-                return munge_tag(value)
-            return value
-        
-        for keyword in keywords:
-            dataset_dict['tags'].append({'name': clean_tag(keyword)})
+        do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
+        tags_val = [munge_tag(tag) if do_clean else tag[:100] for tag in keywords]
+        tags = [{'name': tag} for tag in tags_val]
+        dataset_dict['tags'] = tags
 
         # Extras
 

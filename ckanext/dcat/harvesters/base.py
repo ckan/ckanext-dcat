@@ -1,7 +1,6 @@
 import os
 import uuid
 import logging
-import json
 
 import requests
 import rdflib
@@ -9,7 +8,6 @@ import rdflib
 from ckan import plugins as p
 from ckan import logic
 from ckan import model
-from ckan.lib.munge import munge_tag
 
 
 from ckanext.harvest.harvesters import HarvesterBase
@@ -167,7 +165,6 @@ class DCATHarvester(HarvesterBase):
             Allows custom harvesters to modify the package dict before
             creating or updating the actual package.
         '''
-
         return package_dict
 
     ## End hooks
