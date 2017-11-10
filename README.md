@@ -18,6 +18,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
+    - [Transitive harvesting](#transitive-harvesting)
     - [Extending the RDF harvester](#extending-the-rdf-harvester)
 - [JSON DCAT harvester](#json-dcat-harvester)
 - [RDF DCAT to CKAN dataset mapping](#rdf-dcat-to-ckan-dataset-mapping)
@@ -227,6 +228,7 @@ The harvester will look at the `content-type` HTTP header field to determine the
 
 *TODO*: configure profiles.
 
+
 ### Transitive harvesting
 
 In transitive harvesting (i.e., when you harvest a catalog A, and a catalog X harvests your catalog), you may want to provide the original catalog info for each harvested dataset.
@@ -243,6 +245,7 @@ When serializing, your Catalog will expose the harvested Catalog using the `dct:
   - `dct:hasPart` 
      - `dcat:Catalog` (info of one of another harvester catalog)
      ...   
+
 
 ### Extending the RDF harvester
 
