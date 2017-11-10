@@ -349,19 +349,18 @@ class RDFSerializer(RDFProcessor):
         g = self.g
         catalog_ref = URIRef(source_uri)
 
-        catalog_added = g.value(root_catalog_ref, DCT.hasPart) == catalog_ref
+        # we may have multiple subcatalogs, let's check if this one has been already added
+        if (root_catalog_ref, DCT.hasPart, catalog_ref) not in g:
 
-        g.add((root_catalog_ref, DCT.hasPart, catalog_ref))
-        g.add((catalog_ref, DCAT.dataset, dataset_ref))
-        g.add((catalog_ref, RDF.type, DCAT.Catalog))
+            g.add((root_catalog_ref, DCT.hasPart, catalog_ref))
+            g.add((catalog_ref, RDF.type, DCAT.Catalog))
+            g.add((catalog_ref, DCAT.dataset, dataset_ref))
 
-        if not catalog_added:
             sources = (('source_catalog_title', DCT.title, Literal,),
                        ('source_catalog_description', DCT.description, Literal,),
                        ('source_catalog_homepage', FOAF.homepage, URIRef,),
                        ('source_catalog_language', DCT.language, Literal,),
                        ('source_catalog_modified', DCT.modified, Literal,),)
-
 
             # base catalog struct
             for item in sources:
@@ -371,7 +370,6 @@ class RDFSerializer(RDFProcessor):
                     g.add((catalog_ref, predicate, _type(value)))
 
             publisher_sources = (
-            #('uri', URIRef, DCT.publisher, True,),
                                  ('name', Literal, FOAF.name, True,),
                                  ('email', Literal, FOAF.mbox, False,),
                                  ('url', URIRef, FOAF.homepage,False,),

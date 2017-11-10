@@ -583,15 +583,15 @@ class RDFProfile(object):
         '''
         if not toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
             return
-        cats = set(self.g.subjects(DCAT.dataset, dataset_ref))
+        catalogs = set(self.g.subjects(DCAT.dataset, dataset_ref))
         root = self._get_root_catalog_ref()
         try:
-            cats.remove(root)
+            catalogs.remove(root)
         except KeyError:
             pass
-        assert len(cats) in (0, 1,), "len %s" %cats
-        if cats:
-            return cats.pop()
+        assert len(catalogs) in (0, 1,), "len %s" %catalogs
+        if catalogs:
+            return catalogs.pop()
         return root
     
     def _get_root_catalog_ref(self):
@@ -630,7 +630,8 @@ class RDFProfile(object):
 
         for key, predicate in sources:
             val = self._object_value(catalog_ref, predicate)
-            out.append({'key': key, 'value': val})
+            if val:
+                out.append({'key': key, 'value': val})
 
         out.append({'key': 'source_catalog_publisher', 'value': json.dumps(self._publisher(catalog_ref, DCT.publisher))})
         return out
@@ -674,7 +675,6 @@ class EuropeanDCATAPProfile(RDFProfile):
     '''
 
     def parse_dataset(self, dataset_dict, dataset_ref):
-        catalog_src = self._get_source_catalog(dataset_ref)
 
         dataset_dict['tags'] = []
         dataset_dict['extras'] = []
@@ -790,11 +790,13 @@ class EuropeanDCATAPProfile(RDFProfile):
         # License
         if 'license_id' not in dataset_dict:
             dataset_dict['license_id'] = self._license(dataset_ref)
-        
+
         # Source Catalog
-        if catalog_src is not None:
-            src_data = self._extract_catalog_dict(catalog_src)
-            dataset_dict['extras'].extend(src_data)
+        if toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
+            catalog_src = self._get_source_catalog(dataset_ref)
+            if catalog_src is not None:
+                src_data = self._extract_catalog_dict(catalog_src)
+                dataset_dict['extras'].extend(src_data)
 
         # Resources
         for distribution in self._distributions(dataset_ref):
