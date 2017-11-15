@@ -692,7 +692,8 @@ class EuropeanDCATAPProfile(RDFProfile):
             if values:
                 dataset_dict['extras'].append({'key': key,
                                                'value': json.dumps(values)})
-
+        #print "******************dcat 1"
+        #print json.dumps(data_dict)
         # Contact details
         contact = self._contact_details(dataset_ref, DCAT.contactPoint)
         if not contact:
@@ -837,18 +838,21 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         items = [
-            ('title', DCT.title, None, Literal),
-            ('notes', DCT.description, None, Literal),
-            ('url', DCAT.landingPage, None, URIRef),
-            ('identifier', DCT.identifier, ['guid', 'id'], Literal),
-            ('version', OWL.versionInfo, ['dcat_version'], Literal),
-            ('version_notes', ADMS.versionNotes, None, Literal),
-            ('frequency', DCT.accrualPeriodicity, None, Literal),
-            ('access_rights', DCT.accessRights, None, Literal),
-            ('dcat_type', DCT.type, None, Literal),
-            ('provenance', DCT.provenance, None, Literal),
+            ('title', DCT.title, None, Literal),#ok
+            ('notes', DCT.description, None, Literal),#ok
+            ('url', DCAT.landingPage, None, URIRef),#nicht in beispiel, optional lt. GeoDcat
+            ('identifier', DCT.identifier, ['guid', 'id'], Literal),#ok - URI?
+            ('version', OWL.versionInfo, ['dcat_version'], Literal),# optional; not in bsp
+            ('version_notes', ADMS.versionNotes, None, Literal),#nicht in GeoDcat, nicht in bsp
+            ('frequency', DCT.accrualPeriodicity, None, URIRef),# ham wir
+            ('access_rights', DCT.accessRights, None, Literal),# laut geodcat pro resource?
+            ('dcat_type', DCT.type, None, Literal), #' for catalog or datset' - > hier immer http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset
+            ('provenance', DCT.provenance, None, Literal),#ok - lineage
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        # Anja: Try - GEht :-)
+        g.add((dataset_ref, DCT.type, URIRef('http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset')))
 
         # Tags
         for tag in dataset_dict.get('tags', []):
@@ -863,19 +867,23 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         #  Lists
         items = [
-            ('language', DCT.language, None, Literal),
-            ('theme', DCAT.theme, None, URIRef),
-            ('conforms_to', DCT.conformsTo, None, Literal),
-            ('alternate_identifier', ADMS.identifier, None, Literal),
-            ('documentation', FOAF.page, None, Literal),
-            ('related_resource', DCT.relation, None, Literal),
-            ('has_version', DCT.hasVersion, None, Literal),
-            ('is_version_of', DCT.isVersionOf, None, Literal),
-            ('source', DCT.source, None, Literal),
-            ('sample', ADMS.sample, None, Literal),
+            ('language', DCT.language, None, Literal),#ok
+            ('theme', DCAT.theme, None, URIRef), # erstmal nicht
+            ('conforms_to', DCT.conformsTo, None, Literal), # Anja: "prov .."
+            ('alternate_identifier', ADMS.identifier, None, Literal),# Anja: erstmal nicht?
+            ('documentation', FOAF.page, None, Literal), # Anja: erstmal nicht?
+            ('related_resource', DCT.relation, None, Literal),#-> Georg
+            ('has_version', DCT.hasVersion, None, Literal),#-> Georg
+            ('is_version_of', DCT.isVersionOf, None, Literal),#-> Georg
+            ('topic_category', DCT.subject, None, URIRef),#ok
+            ('spatial_resolution', RDFS.comment, None, Literal), #Ok
+            ('source', DCT.source, None, Literal), # Anja: Catalog?
+            ('sample', ADMS.sample, None, Literal),# Anja: Nicht in GeoDcat; nicht in example
         ]
+        #print "******************dcat 2"
+        #print items
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
-
+        #print json.dumps(dataset_dict,indent=3)
         # Contact details
         if any([
             self._get_dataset_value(dataset_dict, 'contact_uri'),
@@ -893,16 +901,38 @@ class EuropeanDCATAPProfile(RDFProfile):
             else:
                 contact_details = BNode()
 
-            g.add((contact_details, RDF.type, VCARD.Organization))
+            g.add((contact_details, RDF.type, VCARD.Kind))
+            print "******* dcat"
+            print contact_details
             g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
             items = [
-                ('contact_name', VCARD.fn, ['maintainer', 'author'], Literal),
-                ('contact_email', VCARD.hasEmail, ['maintainer_email',
-                                                   'author_email'], Literal),
+                ('contact_name', VCARD.fn, ['maintainer'], Literal),
+                ('contact_email', VCARD.hasEmail, ['maintainer_email'], Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_details, items)
+
+        #Author - Anja 14.11.17
+        if any([
+            self._get_dataset_value(dataset_dict, 'author'),
+            self._get_dataset_value(dataset_dict, 'author_email'),
+        ]):
+
+            contact_details = BNode()
+            g.add((contact_details, RDF.type, VCARD.Individual))
+            g.add((dataset_ref, DCAT.creator, contact_details))
+            #print "************Dcat"
+            #print g
+
+            items = [
+                ('author', VCARD.fn, None, Literal),
+                ('author_email', VCARD.hasEmail, None, Literal),
+            ]
+
+            self._add_triples_from_dict(dataset_dict, contact_details, items)
+
+
 
         # Publisher
         if any([
@@ -918,7 +948,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 # No organization nor publisher_uri
                 publisher_details = BNode()
 
-            g.add((publisher_details, RDF.type, FOAF.Organization))
+            g.add((publisher_details, RDF.type, FOAF.Agent))
             g.add((dataset_ref, DCT.publisher, publisher_details))
 
             publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
@@ -932,7 +962,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             # custom fields
             items = [
                 ('publisher_email', FOAF.mbox, None, Literal),
-                ('publisher_url', FOAF.homepage, None, URIRef),
+                ('publisher_url', FOAF.homepage, 'url', URIRef),
                 ('publisher_type', DCT.type, None, Literal),
             ]
 
@@ -982,6 +1012,9 @@ class EuropeanDCATAPProfile(RDFProfile):
                                    datatype=GSP.wktLiteral)))
                 except (TypeError, ValueError, InvalidGeoJSONException):
                     pass
+
+
+
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
