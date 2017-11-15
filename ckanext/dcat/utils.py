@@ -10,6 +10,7 @@ _ = toolkit._
 
 log = logging.getLogger(__name__)
 
+DCAT_EXPOSE_SUBCATALOGS = 'ckanext.dcat.expose_subcatalogs'
 
 CONTENT_TYPES = {
     'rdf': 'application/rdf+xml',

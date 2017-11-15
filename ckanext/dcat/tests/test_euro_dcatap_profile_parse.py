@@ -3,10 +3,10 @@ import json
 
 import nose
 
+from pylons import config
+
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF
-
-from pylons import config
 
 from ckan.plugins import toolkit
 
@@ -16,10 +16,10 @@ except ImportError:
     from ckan.new_tests import helpers
 
 from ckan import plugins
-from ckanext.dcat.processors import RDFParser
+from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT)
-from ckanext.dcat.utils import DCAT_CLEAN_TAGS
+from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -591,6 +591,68 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('dcat_publisher_email'), 'contact@some.org')
         eq_(_get_extra_value('language'), 'ca,en,es')
 
+    def test_parse_subcatalog(self):
+        publisher = {'name': 'Publisher',
+                     'email': 'email@test.com',
+                     'type': 'Publisher',
+                     'uri': 'http://pub.lish.er'}
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'test dataset',
+            'extras': [
+                {'key': 'source_catalog_title', 'value': 'Subcatalog example'},
+                {'key': 'source_catalog_homepage', 'value': 'http://subcatalog.example'},
+                {'key': 'source_catalog_description', 'value': 'Subcatalog example description'},
+                {'key': 'source_catalog_language', 'value': 'http://publications.europa.eu/resource/authority/language/ITA'},
+                {'key': 'source_catalog_modified', 'value': '2000-01-01'},
+                {'key': 'source_catalog_publisher', 'value': json.dumps(publisher)}
+            ]
+        }        
+        catalog_dict = {
+            'title': 'My Catalog',
+            'description': 'An Open Data Catalog',
+            'homepage': 'http://example.com',
+            'language': 'de',
+        }
+
+        s = RDFSerializer()
+        config[DCAT_EXPOSE_SUBCATALOGS] = 'true'
+        s.serialize_catalog(catalog_dict, dataset_dicts=[dataset])
+        g = s.g
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        # at least one subcatalog with hasPart
+        subcatalogs = list(p.g.objects(None, DCT.hasPart))
+        assert_true(subcatalogs)
+
+        # at least one dataset in subcatalogs
+        subdatasets = []
+        for subcatalog in subcatalogs:
+            datasets = p.g.objects(subcatalog, DCAT.dataset)
+            for dataset in datasets:
+                subdatasets.append((dataset,subcatalog,))
+        assert_true(subdatasets)
+        
+        datasets = dict([(d['title'], d) for d in p.datasets()])
+
+        for subdataset, subcatalog in subdatasets:
+            title = unicode(list(p.g.objects(subdataset, DCT.title))[0])
+            dataset = datasets[title]
+            has_subcat = False
+            for ex in dataset['extras']:
+                exval = ex['value']
+                exkey = ex['key']
+                if exkey == 'source_catalog_homepage':
+                    has_subcat = True
+                    eq_(exval, unicode(subcatalog))
+            # check if we had subcatalog in extras
+            assert_true(has_subcat)
+
+        config[DCAT_EXPOSE_SUBCATALOGS] = 'false'
 
 class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
@@ -833,7 +895,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         p.g = g
 
         datasets = [d for d in p.datasets()]
-
+        
         eq_(len(datasets[0]['tags']), 3)
 
     INVALID_TAG = "Som`E-in.valid tag!;"
