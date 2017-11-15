@@ -18,6 +18,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
+    - [Transitive harvesting](#transitive-harvesting)
     - [Extending the RDF harvester](#extending-the-rdf-harvester)
 - [JSON DCAT harvester](#json-dcat-harvester)
 - [RDF DCAT to CKAN dataset mapping](#rdf-dcat-to-ckan-dataset-mapping)
@@ -226,6 +227,25 @@ The harvester will look at the `content-type` HTTP header field to determine the
     {"rdf_format":"text/turtle"}
 
 *TODO*: configure profiles.
+
+
+### Transitive harvesting
+
+In transitive harvesting (i.e., when you harvest a catalog A, and a catalog X harvests your catalog), you may want to provide the original catalog info for each harvested dataset.
+
+By setting the configuration option `ckanext.dcat.expose_subcatalogs = True` in your ini file, you'll enable the storing and publication of the source catalog for each harvested dataset.
+
+The information contained in the harvested `dcat:Catalog` node will be stored as extras into the harvested datasets.
+When serializing, your Catalog will expose the harvested Catalog using the `dct:hasPart` relation. This means that your catalog will have this structure:
+- `dcat:Catalog` (represents your current catalog)
+  - `dcat:dataset` (1..n, the dataset created withing your catalog)
+  - `dct:hasPart` 
+     - `dcat:Catalog` (info of one of the harvested catalogs)
+        - `dcat:dataset` (dataset in the harvested catalog)
+  - `dct:hasPart` 
+     - `dcat:Catalog` (info of one of another harvester catalog)
+     ...   
+
 
 ### Extending the RDF harvester
 
