@@ -14,6 +14,9 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 
+from ckanext.dcat import helpers as h
+
+
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
 
 DCT = Namespace("http://purl.org/dc/terms/")
@@ -27,6 +30,7 @@ LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
 OWL = Namespace('http://www.w3.org/2002/07/owl#')
 SPDX = Namespace('http://spdx.org/rdf/terms#')
+
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -845,7 +849,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('version', OWL.versionInfo, ['dcat_version'], Literal),# optional; not in bsp
             ('version_notes', ADMS.versionNotes, None, Literal),#nicht in GeoDcat, nicht in bsp
             ('frequency', DCT.accrualPeriodicity, None, URIRef),# ham wir
-            ('access_rights', DCT.accessRights, None, Literal),# laut geodcat pro resource?
+            ('access_rights', DCT.accessRights, None, Literal),# laut geodcat pro resource - auf distribution!
             ('dcat_type', DCT.type, None, Literal), #' for catalog or datset' - > hier immer http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset
             ('provenance', DCT.provenance, None, Literal),#ok - lineage
         ]
@@ -854,8 +858,37 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Anja: Try - GEht :-)
         g.add((dataset_ref, DCT.type, URIRef('http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset')))
 
-        # Tags
+        # Controlled vocabularies and tags - Anja, 16.11
+        #print "Hi"
+        controlled_tags = dataset_dict.get('controlled_tags',[])
+        if controlled_tags:
+            voc_list = json.loads(controlled_tags)
+            for x in voc_list:
+                #print x
+                if x['taxonomy'] == "gemet":
+                    tag_details = URIRef(x['uri'])
+                    g.add( (tag_details, RDF.type, SKOS.Concept) )
+                    g.add( (tag_details, SKOS.prefLabel, Literal(x['taxonomy_term'])) )
+                    g.add((dataset_ref, DCAT.theme, tag_details))
+
+
+                if x['taxonomy'] == "cf conventions":
+
+                    skos_scheme = BNode()
+                    g.add((skos_scheme, RDF.type, SKOS.ConceptScheme ))
+                    g.add((skos_scheme, DCT.title, Literal(x['taxonomy']) ))
+                    g.add((skos_scheme, DCT.issued, Literal(x['taxonomy_date']) ))
+
+                    tag_details = BNode()
+                    g.add( (tag_details, RDF.type, SKOS.Concept) )
+                    g.add( (tag_details, SKOS.prefLabel, Literal(x['taxonomy_term'])) )
+                    g.add((tag_details, SKOS.inScheme, skos_scheme))
+                    g.add((dataset_ref, DCAT.theme, tag_details))
+
+
+        # Tags - Free // ANja: No longer allowed
         for tag in dataset_dict.get('tags', []):
+            #print tag
             g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
 
         # Dates
@@ -868,13 +901,13 @@ class EuropeanDCATAPProfile(RDFProfile):
         #  Lists
         items = [
             ('language', DCT.language, None, Literal),#ok
-            ('theme', DCAT.theme, None, URIRef), # erstmal nicht
-            ('conforms_to', DCT.conformsTo, None, Literal), # Anja: "prov .."
+            ('theme', DCAT.theme, None, URIRef), # erstmal nicht - bzw : controlled vocabulary
+            ('conforms_to', DCT.conformsTo, None, Literal), # Anja:Catalog?! Bzw SpatialRefSystem?
             ('alternate_identifier', ADMS.identifier, None, Literal),# Anja: erstmal nicht?
             ('documentation', FOAF.page, None, Literal), # Anja: erstmal nicht?
-            ('related_resource', DCT.relation, None, Literal),#-> Georg
-            ('has_version', DCT.hasVersion, None, Literal),#-> Georg
-            ('is_version_of', DCT.isVersionOf, None, Literal),#-> Georg
+            ('related_resource', DCT.relation, None, Literal),#-> erstmal nich
+            ('has_version', DCT.hasVersion, None, Literal),#-> erstmal nich
+            ('is_version_of', DCT.isVersionOf, None, Literal),#-> erstmal nich
             ('topic_category', DCT.subject, None, URIRef),#ok
             ('spatial_resolution', RDFS.comment, None, Literal), #Ok
             ('source', DCT.source, None, Literal), # Anja: Catalog?
@@ -884,6 +917,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         #print items
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
         #print json.dumps(dataset_dict,indent=3)
+
         # Contact details
         if any([
             self._get_dataset_value(dataset_dict, 'contact_uri'),
@@ -902,8 +936,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 contact_details = BNode()
 
             g.add((contact_details, RDF.type, VCARD.Kind))
-            print "******* dcat"
-            print contact_details
             g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
             items = [
@@ -942,6 +974,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         ]):
 
             publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
+
             if publisher_uri:
                 publisher_details = URIRef(publisher_uri)
             else:
@@ -956,14 +989,46 @@ class EuropeanDCATAPProfile(RDFProfile):
                 publisher_name = dataset_dict['organization']['title']
 
             g.add((publisher_details, FOAF.name, Literal(publisher_name)))
+
+            #Get Org
+            org = {}
+            try:
+                org_id = dataset_dict.get('organization')
+                if org_id:
+                    org = h.dcat_get_org(org_id['id'])
+            except:
+                pass
+
+            print org
+
+            # Get homepage
+            publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
+
+            if org and 'homepage' in org and not publisher_url:
+                publisher_url = org['homepage']
+
+            if publisher_url:
+                g.add((publisher_details, FOAF.homepage, URIRef(publisher_url)))
+
+            #Get publisher type
+            publisher_type = self._get_dataset_value(dataset_dict, 'publisher_type')
+
+            if org and not publisher_type:
+                publisher_type = org['organization_type']
+
+            if publisher_type:
+                g.add((publisher_details, DCT.type,URIRef(publisher_type)))
+
+
+
             # TODO: It would make sense to fallback these to organization
             # fields but they are not in the default schema and the
             # `organization` object in the dataset_dict does not include
             # custom fields
             items = [
                 ('publisher_email', FOAF.mbox, None, Literal),
-                ('publisher_url', FOAF.homepage, 'url', URIRef),
-                ('publisher_type', DCT.type, None, Literal),
+                #('publisher_url', FOAF.homepage, None, URIRef),
+                #('publisher_type', DCT.type, None, Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, publisher_details, items)

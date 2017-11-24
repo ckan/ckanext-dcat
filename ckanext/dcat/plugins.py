@@ -1,4 +1,5 @@
 from pylons import config
+from ckanext.dcat import helpers
 
 from ckan import plugins as p
 try:
@@ -29,6 +30,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
     p.implements(p.IPackageController, inherit=True)
+    p.implements(p.ITemplateHelpers)
     if p.toolkit.check_ckan_version(min_version='2.5.0'):
         p.implements(p.ITranslation, inherit=True)
 
@@ -93,7 +95,11 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             'dcat_catalog_show': dcat_auth,
             'dcat_catalog_search': dcat_auth,
         }
-
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'dcat_get_org': helpers.dcat_get_org,
+            }
     # IPackageController
     def after_show(self, context, data_dict):
         if p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG)):
