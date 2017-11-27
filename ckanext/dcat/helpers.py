@@ -11,5 +11,5 @@ log = logging.getLogger(__name__)
 
 def dcat_get_org (id):
     org_dict = logic.get_action('organization_show')({}, {'id': id})
-    print org_dict
+    #print org_dict
     return org_dict

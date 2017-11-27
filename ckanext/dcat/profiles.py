@@ -898,6 +898,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         ]
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
+
         #  Lists
         items = [
             ('language', DCT.language, None, Literal),#ok
@@ -908,7 +909,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('related_resource', DCT.relation, None, Literal),#-> erstmal nich
             ('has_version', DCT.hasVersion, None, Literal),#-> erstmal nich
             ('is_version_of', DCT.isVersionOf, None, Literal),#-> erstmal nich
-            ('topic_category', DCT.subject, None, URIRef),#ok
+            #('topic_category', DCT.subject, None, URIRef),#ok - see blow
             ('spatial_resolution', RDFS.comment, None, Literal), #Ok
             ('source', DCT.source, None, Literal), # Anja: Catalog?
             ('sample', ADMS.sample, None, Literal),# Anja: Nicht in GeoDcat; nicht in example
@@ -917,6 +918,30 @@ class EuropeanDCATAPProfile(RDFProfile):
         #print items
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
         #print json.dumps(dataset_dict,indent=3)
+
+        # Get topic rdf from scheming
+            # Get schema from scheming
+        try:
+            from ckanext.scheming import helpers as hs
+            schema = hs.scheming_dataset_schemas()
+            #print "**************** schema"
+            dataset = schema['dataset']
+            field_list = dataset['dataset_fields']
+            for x in field_list:
+                if x['field_name'] == 'topic_category':
+                    rdf_list = x['choices']
+                    #print json.dumps(rdf_list, indent=3)
+
+            for value in dataset_dict.get('topic_category', []):
+                for r in rdf_list:
+                    if r['value']==value:
+                        uri_ref = r['rdf']
+                        break
+
+                g.add((dataset_ref, DCAT.subject, URIRef(uri_ref)))
+
+        except:
+            print "dcat - something did not work"
 
         # Contact details
         if any([
@@ -999,7 +1024,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             except:
                 pass
 
-            print org
+            #print org
 
             # Get homepage
             publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
