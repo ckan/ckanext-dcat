@@ -955,10 +955,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         ]):
 
             contact_uri = self._get_dataset_value(dataset_dict, 'contact_uri')
+
+            #contact_uri = 'xy'
+
             if contact_uri:
                 contact_details = URIRef(contact_uri)
             else:
                 contact_details = BNode()
+                #contact_details = Literal("abc")
 
             g.add((contact_details, RDF.type, VCARD.Kind))
             g.add((dataset_ref, DCAT.contactPoint, contact_details))
@@ -1007,7 +1011,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 publisher_details = BNode()
 
             g.add((publisher_details, RDF.type, FOAF.Agent))
-            g.add((dataset_ref, DCT.publisher, publisher_details))
 
             publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if not publisher_name and dataset_dict.get('organization'):
@@ -1038,12 +1041,15 @@ class EuropeanDCATAPProfile(RDFProfile):
             #Get publisher type
             publisher_type = self._get_dataset_value(dataset_dict, 'publisher_type')
 
-            if org and not publisher_type:
+            #
+            if org  and 'organization_type' in org and not publisher_type:
+                #print json.dumps(org, indent=3)
                 publisher_type = org['organization_type']
 
             if publisher_type:
                 g.add((publisher_details, DCT.type,URIRef(publisher_type)))
 
+            g.add((dataset_ref, DCT.publisher, publisher_details))
 
 
             # TODO: It would make sense to fallback these to organization
@@ -1103,8 +1109,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                 except (TypeError, ValueError, InvalidGeoJSONException):
                     pass
 
-
-
+        # Store licenses for usage in resources
+        lici = self._get_dataset_value(dataset_dict, 'license_id')
+        licu = self._get_dataset_value(dataset_dict, 'license_url')
+        lict = self._get_dataset_value(dataset_dict, 'license_title')
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
@@ -1117,20 +1125,46 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             #  Simple values
             items = [
-                ('name', DCT.title, None, Literal),
-                ('description', DCT.description, None, Literal),
-                ('status', ADMS.status, None, Literal),
-                ('rights', DCT.rights, None, Literal),
-                ('license', DCT.license, None, Literal),
+                ('name', DCT.title, None, Literal), # ok
+                ('description', DCT.description, None, Literal), #ok
+                ('status', ADMS.status, None, Literal), #not in geodcat
+                ('rights', DCT.rights, None, Literal), # We have access_rights - accessRights - see geodcat
+            #    ('license', DCT.license, None, Literal), # Anja: This appears to be not the right way: load licenses from dataset anyway
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
 
+            # Licenses - Anja - first version - if Standard License
+            if licu:
+                g.add((distribution,DCT.license, URIRef(licu)))
+
+            # Licenses - Anja - second version - if a statement concerning usage is used - not for us
+            #eg:
+            #rdfs:label xml:lang="en">EEA standard re-use policy: unless otherwise indicated,
+            # re-use of content on the EEA website for commercial or non-commercial purposes
+            #is permitted free of charge, provided that the source is acknowledged (http://www.eea.europa.eu/legal/copyright).
+            # Copyright holder: Directorate-General for Environment (DG ENV), European Environment Agency (EEA).
+            #g.add((distribution,RDF.type, DCT.LicenseDocument))
+
+            #if licu:
+            #    license_details =  BNode()
+            #    g.add((license_details,RDF.type, DCT.LicenseDocument))
+            #    g.add ((license_details, RDFS.label, Literal(lict)))
+            #    g.add ((distribution, DCT.license,license_details))
+
+            # Access Rights - Anja, 28.11.2017
+            ac = self._get_dataset_value(resource_dict, 'access_rights')
+            if ac:
+                access_details = BNode()
+                g.add ((access_details,RDF.type, DCT.RightsStatement))
+                g.add ((access_details, RDFS.label, Literal(ac)))
+                g.add ((distribution, DCT.accessRights,access_details))
+
             #  Lists
             items = [
-                ('documentation', FOAF.page, None, Literal),
-                ('language', DCT.language, None, Literal),
-                ('conforms_to', DCT.conformsTo, None, Literal),
+                ('documentation', FOAF.page, None, Literal), # not in geodcat
+                ('language', DCT.language, None, Literal), # dataset*
+                ('conforms_to', DCT.conformsTo, None, Literal), # catalog / catalog record?
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
@@ -1159,6 +1193,12 @@ class EuropeanDCATAPProfile(RDFProfile):
             items = [
                 ('issued', DCT.issued, None, Literal),
                 ('modified', DCT.modified, None, Literal),
+            ]
+
+            # Dates - Anja
+            items = [
+                ('created', DCT.issued, None, Literal),
+                ('last_modified', DCT.modified, None, Literal),
             ]
 
             self._add_date_triples_from_dict(resource_dict, distribution, items)

@@ -283,12 +283,17 @@ class RDFSerializer(RDFProcessor):
 
         self.graph_from_dataset(dataset_dict)
 
+
+
         _format = url_to_rdflib_format(_format)
 
         if _format == 'json-ld':
             output = self.g.serialize(format=_format, auto_compact=True)
         else:
             output = self.g.serialize(format=_format)
+
+        #print "serialize dataset**********"
+        #print output
 
         return output
 
@@ -326,7 +331,11 @@ class RDFSerializer(RDFProcessor):
             self._add_pagination_triples(pagination_info)
 
         _format = url_to_rdflib_format(_format)
+        #print _format
         output = self.g.serialize(format=_format)
+
+        #print "serialize catalog**********"
+        #print output
 
         return output
 
