@@ -30,7 +30,7 @@ LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
 OWL = Namespace('http://www.w3.org/2002/07/owl#')
 SPDX = Namespace('http://spdx.org/rdf/terms#')
-
+PROV = Namespace('http://www.w3.org/ns/prov#') # Anja
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -46,6 +46,7 @@ namespaces = {
     'locn': LOCN,
     'gsp': GSP,
     'owl': OWL,
+    'prov': PROV,
 }
 
 
@@ -862,7 +863,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         #print "Hi"
         controlled_tags = dataset_dict.get('controlled_tags',[])
         if controlled_tags:
-            voc_list = json.loads(controlled_tags)
+            voc_list = json.loads(controlled_tags) # demnchst raus :-)
             for x in voc_list:
                 #print x
                 if x['taxonomy'] == "gemet":
@@ -886,7 +887,8 @@ class EuropeanDCATAPProfile(RDFProfile):
                     g.add((dataset_ref, DCAT.theme, tag_details))
 
 
-        # Tags - Free // ANja: No longer allowed
+        # Tags - Free // Anja: No longer allowed but cpoied from controlled_vocabulary
+        # If no keyword in datset:
         for tag in dataset_dict.get('tags', []):
             #print tag
             g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
@@ -914,13 +916,12 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('source', DCT.source, None, Literal), # Anja: Catalog?
             ('sample', ADMS.sample, None, Literal),# Anja: Nicht in GeoDcat; nicht in example
         ]
-        #print "******************dcat 2"
-        #print items
-        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
-        #print json.dumps(dataset_dict,indent=3)
 
+        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        # topic_category
         # Get topic rdf from scheming
-            # Get schema from scheming
+        # Get schema from scheming
         try:
             from ckanext.scheming import helpers as hs
             schema = hs.scheming_dataset_schemas()
@@ -943,20 +944,18 @@ class EuropeanDCATAPProfile(RDFProfile):
         except:
             print "dcat - something did not work"
 
-        # Contact details
+        # Maintainer - Metadata Point of Contact
         if any([
-            self._get_dataset_value(dataset_dict, 'contact_uri'),
-            self._get_dataset_value(dataset_dict, 'contact_name'),
-            self._get_dataset_value(dataset_dict, 'contact_email'),
+            #self._get_dataset_value(dataset_dict, 'contact_uri'),
+            #self._get_dataset_value(dataset_dict, 'contact_name'),
+            #self._get_dataset_value(dataset_dict, 'contact_email'),
             self._get_dataset_value(dataset_dict, 'maintainer'),
             self._get_dataset_value(dataset_dict, 'maintainer_email'),
-            self._get_dataset_value(dataset_dict, 'author'),
-            self._get_dataset_value(dataset_dict, 'author_email'),
+            #self._get_dataset_value(dataset_dict, 'author'),
+            #self._get_dataset_value(dataset_dict, 'author_email'),
         ]):
 
             contact_uri = self._get_dataset_value(dataset_dict, 'contact_uri')
-
-            #contact_uri = 'xy'
 
             if contact_uri:
                 contact_details = URIRef(contact_uri)
@@ -965,7 +964,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 #contact_details = Literal("abc")
 
             g.add((contact_details, RDF.type, VCARD.Kind))
-            g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
             items = [
                 ('contact_name', VCARD.fn, ['maintainer'], Literal),
@@ -974,7 +972,24 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             self._add_triples_from_dict(dataset_dict, contact_details, items)
 
-        #Author - Anja 14.11.17
+            g.add((dataset_ref, DCAT.contactPoint, contact_details))
+
+            # qualified attribution separate - like in example geodcat xml
+
+            agent_details = BNode()
+            g.add((agent_details, RDF.type, VCARD.Kind))
+            self._add_triples_from_dict(dataset_dict, agent_details, items)
+
+            attribution_details = BNode()
+
+            g.add((attribution_details, RDF.type, PROV.Attribution))
+            g.add((attribution_details, DCT.type, URIRef('http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/pointOfContact')))
+            g.add((attribution_details, PROV.agent, agent_details))
+
+            g.add((dataset_ref, PROV.qualifiedAttribution, attribution_details))
+
+
+        #Author - Anja 28.11.17 - > Datset Creator - Organization VCARD
         if any([
             self._get_dataset_value(dataset_dict, 'author'),
             self._get_dataset_value(dataset_dict, 'author_email'),
@@ -982,7 +997,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             contact_details = BNode()
             g.add((contact_details, RDF.type, VCARD.Individual))
-            g.add((dataset_ref, DCAT.creator, contact_details))
+            g.add((dataset_ref, DCT.creator, contact_details))
             #print "************Dcat"
             #print g
 
@@ -993,9 +1008,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             self._add_triples_from_dict(dataset_dict, contact_details, items)
 
-
-
-        # Publisher
+        # Publisher - Anja: Is the organization
         if any([
             self._get_dataset_value(dataset_dict, 'publisher_uri'),
             self._get_dataset_value(dataset_dict, 'publisher_name'),
@@ -1191,14 +1204,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             # Dates
             items = [
-                ('issued', DCT.issued, None, Literal),
-                ('modified', DCT.modified, None, Literal),
-            ]
-
-            # Dates - Anja
-            items = [
-                ('created', DCT.issued, None, Literal),
-                ('last_modified', DCT.modified, None, Literal),
+                ('issued', DCT.issued, 'created', Literal),
+                ('modified', DCT.modified, 'last_modified', Literal),
             ]
 
             self._add_date_triples_from_dict(resource_dict, distribution, items)
@@ -1237,6 +1244,9 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g.add((catalog_ref, RDF.type, DCAT.Catalog))
 
+        print "dcat catalog************+"
+        print catalog_dict
+
         # Basic fields
         items = [
             ('title', DCT.title, config.get('ckan.site_title'), Literal),
@@ -1257,3 +1267,23 @@ class EuropeanDCATAPProfile(RDFProfile):
         modified = self._last_catalog_modification()
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
+
+
+        # Anja: publisher - Sind wir :-)
+
+        publisher_details = URIRef('http://ccca.ac.at')
+
+        g.add((publisher_details, RDF.type, FOAF.Agent))
+
+        publisher_name = ' Climate Change Center Austria (CCCA)'
+
+        g.add((publisher_details, FOAF.name, Literal(publisher_name)))
+
+        g.add((publisher_details, FOAF.homepage, URIRef('http://data.ccca.ac.at')))
+
+        publisher_type = 'Academic/Scientific'
+
+        if publisher_type:
+            g.add((publisher_details, DCT.type,URIRef(publisher_type)))
+
+        g.add((catalog_ref, DCT.publisher, publisher_details))
