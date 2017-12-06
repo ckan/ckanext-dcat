@@ -853,6 +853,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         assert self._triple(g, catalog, DCT.modified, dataset['metadata_modified'], XSD.dateTime)
 
+    @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
     def test_subcatalog(self):
         publisher = {'name': 'Publisher',
                      'email': 'email@test.com',
@@ -878,7 +879,6 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
             'language': 'de',
         }
 
-        config[DCAT_EXPOSE_SUBCATALOGS] = 'true'
         s = RDFSerializer()
         g = s.g
 
@@ -906,4 +906,3 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         dataset_title = list(g.objects(dataset_ref, DCT.title))
         assert_true(len(dataset_title) == 1)
         assert_true(unicode(dataset_title[0]) == dataset['title'])
-        config[DCAT_EXPOSE_SUBCATALOGS] = 'false'

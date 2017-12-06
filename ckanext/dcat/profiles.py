@@ -707,7 +707,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # replace munge_tag to noop if there's no need to clean tags
         do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
-        tags_val = [munge_tag(tag) if do_clean else tag[:100] for tag in keywords]
+        tags_val = [munge_tag(tag) if do_clean else tag for tag in keywords]
         tags = [{'name': tag} for tag in tags_val]
         dataset_dict['tags'] = tags
 
