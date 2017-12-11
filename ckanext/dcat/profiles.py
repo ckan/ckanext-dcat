@@ -1252,6 +1252,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('title', DCT.title, config.get('ckan.site_title'), Literal),
             ('description', DCT.description, config.get('ckan.site_description'), Literal),
             ('homepage', FOAF.homepage, config.get('ckan.site_url'), URIRef),
+            #('homepage', FOAF.homepage, 'http://data.ccca.ac.at', URIRef), # Anja: getestet: geht
             ('language', DCT.language, config.get('ckan.locale_default', 'en'), Literal),
         ]
         for item in items:
@@ -1265,12 +1266,39 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Dates
         modified = self._last_catalog_modification()
+        print modified
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
 
+        # Anja: Issued
+        issued = "2016-12-01T10:00:00.000000"  # First time data online
+        print issued
+        if issued:
+            self._add_date_triple(catalog_ref, DCT.issued, issued)
+
+        #Anja: ThemeTaxonomy - aud dcat.rdf: https://www.w3.org/ns/dcat.rdf
+        #'http://www.w3.org/ns/dcat#themeTaxonomy'
+        # 'http://www.w3.org/2002/07/owl#ObjectProperty'
+        # 'http://www.w3.org/TR/vocab-dcat/'
+        #'http://www.w3.org/2004/02/skos/core#ConceptScheme'
+
+        tt_uri = 'http://www.w3.org/ns/dcat#themeTaxonomy'
+
+        tt_details = URIRef(tt_uri)
+
+        g.add((tt_details, RDF.type, SKOS.ConceptScheme))
+        g.add((tt_details, RDF.type, URIRef('http://www.w3.org/2002/07/owl#ObjectProperty')))
+        g.add((tt_details, RDFS.isDefinedBy,URIRef('http://www.w3.org/TR/vocab-dcat/') ))
+        g.add((tt_details, SKOS.prefLabel, Literal('theme taxonomy')))
+        g.add((tt_details, RDFS.comment, Literal('The knowledge organization system (KOS) used to classify catalogs datasets.')))
+        #g.add((tt_details, RDFS.range, URIRef('http://www.w3.org/2004/02/skos/core#ConceptScheme')))
+
+        g.add((catalog_ref,DCAT.themeTaxonomy , tt_details))
+
+        # License of our catalog
+        g.add((catalog_ref,DCT.license, URIRef('https://creativecommons.org/licenses/by/4.0/')))
 
         # Anja: publisher - Sind wir :-)
-
         publisher_details = URIRef('http://ccca.ac.at')
 
         g.add((publisher_details, RDF.type, FOAF.Agent))
