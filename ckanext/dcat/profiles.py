@@ -1244,8 +1244,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g.add((catalog_ref, RDF.type, DCAT.Catalog))
 
-        print "dcat catalog************+"
-        print catalog_dict
+        #print "dcat catalog************+"
+        #print catalog_dict
 
         # Basic fields
         items = [
@@ -1266,13 +1266,13 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Dates
         modified = self._last_catalog_modification()
-        print modified
+        #print modified
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
 
         # Anja: Issued
         issued = "2016-12-01T10:00:00.000000"  # First time data online
-        print issued
+        #print issued
         if issued:
             self._add_date_triple(catalog_ref, DCT.issued, issued)
 
