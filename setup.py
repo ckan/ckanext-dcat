@@ -33,6 +33,8 @@ setup(
 
     dcat=ckanext.dcat.plugins:DCATPlugin
 
+    schemaorg=ckanext.dcat.plugins.SchemaOrgPlugin
+
     # Test plugins
     test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
     test_rdf_null_harvester=ckanext.dcat.tests.test_harvester:TestRDFNullHarvester
@@ -40,6 +42,8 @@ setup(
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
+    euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
+    schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
     [paste.paster_command]
     generate_static = ckanext.dcat.commands:GenerateStaticDCATCommand

@@ -146,3 +146,9 @@ class DCATJSONInterface(p.SingletonPlugin):
         return {
             'dcat_datasets_list': dcat_auth,
         }
+
+
+class SchemaOrgPlugin(p.SinlgetonPlugin):
+    # TODO: add template helper to output JSON-LD in read.html
+    pass
+

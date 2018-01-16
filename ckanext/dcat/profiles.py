@@ -1154,3 +1154,213 @@ class EuropeanDCATAPProfile(RDFProfile):
         modified = self._last_catalog_modification()
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
+
+
+class SchemaOrgProfile(RDFProfile):
+    '''
+    An RDF profile based on the schema.org Dataset
+
+    More information and specification:
+
+    http://schema.org/Dataset
+
+    Mapping between schema.org Dataset and DCAT:
+
+    https://www.w3.org/wiki/WebSchemas/Datasets
+    '''
+    def graph_from_dataset(self, dataset_dict, dataset_ref):
+
+        g = self.g
+
+        for prefix, namespace in namespaces.iteritems():
+            g.bind(prefix, namespace)
+
+        g.add((dataset_ref, RDF.type, SCHEMA.Dataset))
+
+        # Basic fields
+        items = [
+            ('title', SCHEMA.name, None, Literal),
+            ('notes', SCHEMA.description, None, Literal),
+            ('version', SCHEMA.version, ['dcat_version'], Literal),
+        ]
+        self._add_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        # Tags
+        for tag in dataset_dict.get('tags', []):
+            g.add((dataset_ref, SCHEMA.keywords, Literal(tag['name'])))
+
+        # Dates
+        items = [
+            ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
+            ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
+        ]
+        self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        #  Lists
+        items = [
+            ('language', SCHEMA.inLanguage, None, Literal),
+            ('theme', SCHEMA.about, None, URIRef),
+        ]
+        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        # Publisher
+        if any([
+            self._get_dataset_value(dataset_dict, 'publisher_uri'),
+            self._get_dataset_value(dataset_dict, 'publisher_name'),
+            dataset_dict.get('organization'),
+        ]):
+
+            publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
+            if publisher_uri:
+                publisher_details = URIRef(publisher_uri)
+            else:
+                # No organization nor publisher_uri
+                publisher_details = BNode()
+
+            g.add((publisher_details, RDF.type, SCHEMA.Organization))
+            g.add((dataset_ref, SCHEMA.publisher, publisher_details))
+
+            contact_point = BNode()
+            g.add((publisher_details, SCHEMA.contactPoint, contact_point))
+
+            g.add((contact_point, SCHEMA.contactType, Literal('customer service')))
+
+            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
+            if not publisher_name and dataset_dict.get('organization'):
+                publisher_name = dataset_dict['organization']['title']
+
+            g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
+            items = [
+                ('publisher_email', SCHEMA.email, None, Literal),
+                ('publisher_url', SCHEMA.url, None, URIRef),
+            ]
+
+            self._add_triples_from_dict(dataset_dict, contact_point, items)
+
+        # # Temporal
+        # start = self._get_dataset_value(dataset_dict, 'temporal_start')
+        # end = self._get_dataset_value(dataset_dict, 'temporal_end')
+        # if start or end:
+        #     temporal_extent = BNode()
+
+        #     g.add((temporal_extent, RDF.type, DCT.PeriodOfTime))
+        #     if start:
+        #         self._add_date_triple(temporal_extent, SCHEMA.startDate, start)
+        #     if end:
+        #         self._add_date_triple(temporal_extent, SCHEMA.endDate, end)
+        #     g.add((dataset_ref, DCT.temporal, temporal_extent))
+
+        # # Spatial
+        # spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
+        # spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
+        # spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
+
+        # if spatial_uri or spatial_text or spatial_geom:
+        #     if spatial_uri:
+        #         spatial_ref = URIRef(spatial_uri)
+        #     else:
+        #         spatial_ref = BNode()
+
+        #     g.add((spatial_ref, RDF.type, DCT.Location))
+        #     g.add((dataset_ref, DCT.spatial, spatial_ref))
+
+        #     if spatial_text:
+        #         g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
+
+        #     if spatial_geom:
+        #         # GeoJSON
+        #         g.add((spatial_ref,
+        #                LOCN.geometry,
+        #                Literal(spatial_geom, datatype=GEOJSON_IMT)))
+        #         # WKT, because GeoDCAT-AP says so
+        #         try:
+        #             g.add((spatial_ref,
+        #                    LOCN.geometry,
+        #                    Literal(wkt.dumps(json.loads(spatial_geom),
+        #                                      decimals=4),
+        #                            datatype=GSP.wktLiteral)))
+        #         except (TypeError, ValueError, InvalidGeoJSONException):
+        #             pass
+
+        # # Resources
+        # for resource_dict in dataset_dict.get('resources', []):
+
+        #     distribution = URIRef(resource_uri(resource_dict))
+
+        #     g.add((dataset_ref, DCAT.distribution, distribution))
+
+        #     g.add((distribution, RDF.type, DCAT.Distribution))
+
+        #     #  Simple values
+        #     items = [
+        #         ('name', DCT.title, None, Literal),
+        #         ('description', DCT.description, None, Literal),
+        #         ('status', ADMS.status, None, Literal),
+        #         ('rights', DCT.rights, None, Literal),
+        #         ('license', DCT.license, None, Literal),
+        #     ]
+
+        #     self._add_triples_from_dict(resource_dict, distribution, items)
+
+        #     #  Lists
+        #     items = [
+        #         ('documentation', FOAF.page, None, Literal),
+        #         ('language', DCT.language, None, Literal),
+        #         ('conforms_to', DCT.conformsTo, None, Literal),
+        #     ]
+        #     self._add_list_triples_from_dict(resource_dict, distribution, items)
+
+        #     # Format
+        #     if '/' in resource_dict.get('format', ''):
+        #         g.add((distribution, DCAT.mediaType,
+        #                Literal(resource_dict['format'])))
+        #     else:
+        #         if resource_dict.get('format'):
+        #             g.add((distribution, DCT['format'],
+        #                    Literal(resource_dict['format'])))
+
+        #         if resource_dict.get('mimetype'):
+        #             g.add((distribution, DCAT.mediaType,
+        #                    Literal(resource_dict['mimetype'])))
+
+        #     # URL
+        #     url = resource_dict.get('url')
+        #     download_url = resource_dict.get('download_url')
+        #     if download_url:
+        #         g.add((distribution, DCAT.downloadURL, URIRef(download_url)))
+        #     if (url and not download_url) or (url and url != download_url):
+        #         g.add((distribution, DCAT.accessURL, URIRef(url)))
+
+        #     # Dates
+        #     items = [
+        #         ('issued', DCT.issued, None, Literal),
+        #         ('modified', DCT.modified, None, Literal),
+        #     ]
+
+        #     self._add_date_triples_from_dict(resource_dict, distribution, items)
+
+        #     # Numbers
+        #     if resource_dict.get('size'):
+        #         try:
+        #             g.add((distribution, DCAT.byteSize,
+        #                    Literal(float(resource_dict['size']),
+        #                            datatype=XSD.decimal)))
+        #         except (ValueError, TypeError):
+        #             g.add((distribution, DCAT.byteSize,
+        #                    Literal(resource_dict['size'])))
+        #     # Checksum
+        #     if resource_dict.get('hash'):
+        #         checksum = BNode()
+        #         g.add((checksum, SPDX.checksumValue,
+        #                Literal(resource_dict['hash'],
+        #                        datatype=XSD.hexBinary)))
+
+        #         if resource_dict.get('hash_algorithm'):
+        #             if resource_dict['hash_algorithm'].startswith('http'):
+        #                 g.add((checksum, SPDX.algorithm,
+        #                        URIRef(resource_dict['hash_algorithm'])))
+        #             else:
+        #                 g.add((checksum, SPDX.algorithm,
+        #                        Literal(resource_dict['hash_algorithm'])))
+        #         g.add((distribution, SPDX.checksum, checksum))
+
