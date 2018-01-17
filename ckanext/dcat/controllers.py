@@ -32,10 +32,15 @@ class DCATController(BaseController):
         if not _format:
             return HomeController().index()
 
+        _profiles = toolkit.request.params.get('profiles')
+        if _profiles:
+            _profiles = _profiles.split(',')
+
         data_dict = {
             'page': toolkit.request.params.get('page'),
             'modified_since': toolkit.request.params.get('modified_since'),
             'format': _format,
+            'profiles': _profiles,
         }
 
         toolkit.response.headers.update(
@@ -52,13 +57,17 @@ class DCATController(BaseController):
 
         if not _format:
             return PackageController().read(_id)
+        
+        _profiles = toolkit.request.params.get('profiles')
+        if _profiles:
+            _profiles = _profiles.split(',')
 
         toolkit.response.headers.update(
             {'Content-type': CONTENT_TYPES[_format]})
 
         try:
             result = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
-                'format': _format})
+                'format': _format, 'profiles': _profiles})
         except toolkit.ObjectNotFound:
             toolkit.abort(404)
 
