@@ -3,17 +3,15 @@ import json
 
 import nose
 
+from ckantoolkit import config
+
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF
 
 from ckan.plugins import toolkit
 
-try:
-    from ckan.tests import helpers
-except ImportError:
-    from ckan.new_tests import helpers
+from ckantoolkit.tests import helpers, factories
 
-from ckan import plugins
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT)

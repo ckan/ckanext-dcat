@@ -6,14 +6,11 @@ import nose
 from ckan import plugins as p
 from ckan.lib.helpers import url_for
 
-from pylons import config
+from ckantoolkit import config
 
 from rdflib import Graph
 
-try:
-    from ckan.tests import helpers, factories
-except ImportError:
-    from ckan.new_tests import helpers, factories
+from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT

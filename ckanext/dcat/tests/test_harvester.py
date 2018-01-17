@@ -7,10 +7,7 @@ import httpretty
 from mock import patch
 
 import ckan.plugins as p
-try:
-    import ckan.new_tests.helpers as h
-except ImportError:
-    import ckan.tests.helpers as h
+import ckantoolkit.tests.helpers as h
 
 import ckanext.harvest.model as harvest_model
 from ckanext.harvest import queue

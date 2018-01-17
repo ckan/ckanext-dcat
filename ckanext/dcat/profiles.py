@@ -3,7 +3,7 @@ import json
 
 from dateutil.parser import parse as parse_date
 
-from pylons import config
+from ckantoolkit import config
 
 import rdflib
 from rdflib import URIRef, BNode, Literal

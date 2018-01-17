@@ -1,14 +1,11 @@
 import nose
 import mock
 
-from pylons import config
+from ckantoolkit import config
 
 from ckan.plugins import toolkit
 
-try:
-    from ckan.tests import helpers
-except ImportError:
-    from ckan.new_tests import helpers
+from ckantoolkit.tests import helpers
 
 from ckanext.dcat.logic import _pagination_info
 

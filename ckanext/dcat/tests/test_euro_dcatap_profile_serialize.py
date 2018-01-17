@@ -2,7 +2,7 @@ import json
 
 import nose
 
-from pylons import config
+from ckantoolkit import config
 
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
@@ -10,10 +10,7 @@ from rdflib.namespace import RDF
 
 from geomet import wkt
 
-try:
-    from ckan.tests import helpers, factories
-except ImportError:
-    from ckan.new_tests import helpers, factories
+from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
