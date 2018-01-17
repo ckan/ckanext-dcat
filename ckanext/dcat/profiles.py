@@ -1033,7 +1033,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 g.add((spatial_ref,
                        LOCN.geometry,
                        Literal(spatial_geom, datatype=GEOJSON_IMT)))
-                # WKT, because GeoDCAT-AP says so
                 try:
                     g.add((spatial_ref,
                            LOCN.geometry,
@@ -1178,32 +1177,45 @@ class SchemaOrgProfile(RDFProfile):
         g.add((dataset_ref, RDF.type, SCHEMA.Dataset))
 
         # Basic fields
+        self._basic_fields_graph(dataset_ref, dataset_dict)
+
+        # Tags
+        self._tags_graph(dataset_ref, dataset_dict)
+
+        #  Lists
+        self._list_fields_graph(dataset_ref, dataset_dict)
+
+        # Publisher
+        self._publisher_graph(dataset_ref, dataset_dict)
+
+        # Temporal
+        self._temporal_graph(dataset_ref, dataset_dict)
+
+        # Spatial
+        self._spatial_graph(dataset_ref, dataset_dict)
+
+    def _basic_fields_graph(self, dataset_ref, dataset_dict):
         items = [
             ('title', SCHEMA.name, None, Literal),
             ('notes', SCHEMA.description, None, Literal),
             ('version', SCHEMA.version, ['dcat_version'], Literal),
-        ]
-        self._add_triples_from_dict(dataset_dict, dataset_ref, items)
-
-        # Tags
-        for tag in dataset_dict.get('tags', []):
-            g.add((dataset_ref, SCHEMA.keywords, Literal(tag['name'])))
-
-        # Dates
-        items = [
             ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
             ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
         ]
-        self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
+        self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        #  Lists
+    def _tags_graph(self, dataset_ref, dataset_dict):
+        for tag in dataset_dict.get('tags', []):
+            self.g.add((dataset_ref, SCHEMA.keywords, Literal(tag['name'])))
+
+    def _list_fields_graph(self, dataset_ref, dataset_dict):
         items = [
             ('language', SCHEMA.inLanguage, None, Literal),
             ('theme', SCHEMA.about, None, URIRef),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        # Publisher
+    def _publisher_graph(self, dataset_ref, dataset_dict):
         if any([
             self._get_dataset_value(dataset_dict, 'publisher_uri'),
             self._get_dataset_value(dataset_dict, 'publisher_name'),
@@ -1217,70 +1229,69 @@ class SchemaOrgProfile(RDFProfile):
                 # No organization nor publisher_uri
                 publisher_details = BNode()
 
-            g.add((publisher_details, RDF.type, SCHEMA.Organization))
-            g.add((dataset_ref, SCHEMA.publisher, publisher_details))
+            self.g.add((publisher_details, RDF.type, SCHEMA.Organization))
+            self.g.add((dataset_ref, SCHEMA.publisher, publisher_details))
 
-            contact_point = BNode()
-            g.add((publisher_details, SCHEMA.contactPoint, contact_point))
-
-            g.add((contact_point, SCHEMA.contactType, Literal('customer service')))
 
             publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if not publisher_name and dataset_dict.get('organization'):
                 publisher_name = dataset_dict['organization']['title']
+            self.g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
 
-            g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
+            contact_point = BNode()
+            self.g.add((publisher_details, SCHEMA.contactPoint, contact_point))
+
+            self.g.add((contact_point, SCHEMA.contactType, Literal('customer service')))
+
+            publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
+            if not publisher_url and dataset_dict.get('organization'):
+                publisher_url = dataset_dict['organization'].get('url') or config.get('ckan.site_url')
+
+            self.g.add((contact_point, SCHEMA.url, Literal(publisher_url)))
             items = [
-                ('publisher_email', SCHEMA.email, None, Literal),
-                ('publisher_url', SCHEMA.url, None, URIRef),
+                ('publisher_email', SCHEMA.email, ['contact_email', 'maintainer_email', 'author_email'], Literal),
+                ('publisher_name', SCHEMA.name, ['contact_name', 'maintainer', 'author'], Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_point, items)
 
-        # # Temporal
-        # start = self._get_dataset_value(dataset_dict, 'temporal_start')
-        # end = self._get_dataset_value(dataset_dict, 'temporal_end')
-        # if start or end:
-        #     temporal_extent = BNode()
+    def _temporal_graph(self, dataset_ref, dataset_dict):
+        start = self._get_dataset_value(dataset_dict, 'temporal_start')
+        end = self._get_dataset_value(dataset_dict, 'temporal_end')
+        if start or end:
+            if start and end:
+                g.add((dataset_ref, SCHEMA.temporalCoverage, Literal('%s/%s' % (start, end))))
+            elif start:
+                self._add_date_triple(dataset_ref, SCHEMA.temporalCoverage, start)
+            elif end:
+                self._add_date_triple(dataset_ref, SCHEMA.temporalCoverage, end)
 
-        #     g.add((temporal_extent, RDF.type, DCT.PeriodOfTime))
-        #     if start:
-        #         self._add_date_triple(temporal_extent, SCHEMA.startDate, start)
-        #     if end:
-        #         self._add_date_triple(temporal_extent, SCHEMA.endDate, end)
-        #     g.add((dataset_ref, DCT.temporal, temporal_extent))
+    def _spatial_graph(self, dataset_ref, dataset_dict):
+        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
+        spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
+        spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
 
-        # # Spatial
-        # spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
-        # spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
-        # spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
+        if spatial_uri or spatial_text or spatial_geom:
+            if spatial_uri:
+                spatial_ref = URIRef(spatial_uri)
+            else:
+                spatial_ref = BNode()
 
-        # if spatial_uri or spatial_text or spatial_geom:
-        #     if spatial_uri:
-        #         spatial_ref = URIRef(spatial_uri)
-        #     else:
-        #         spatial_ref = BNode()
+            self.g.add((spatial_ref, RDF.type, SCHEMA.Place))
+            self.g.add((dataset_ref, SCHEMA.spatialCoverage, spatial_ref))
 
-        #     g.add((spatial_ref, RDF.type, DCT.Location))
-        #     g.add((dataset_ref, DCT.spatial, spatial_ref))
+            if spatial_text:
+                g.add((spatial_ref, SCHEMA.description, Literal(spatial_text)))
 
-        #     if spatial_text:
-        #         g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
+            if spatial_geom:
+                geo_shape = BNode()
+                self.g.add((geo_shape, RDF.type, SCHEMA.GeoShape))
+                self.g.add((spatial_ref, SCHEMA.geo, geo_shape))
 
-        #     if spatial_geom:
-        #         # GeoJSON
-        #         g.add((spatial_ref,
-        #                LOCN.geometry,
-        #                Literal(spatial_geom, datatype=GEOJSON_IMT)))
-        #         # WKT, because GeoDCAT-AP says so
-        #         try:
-        #             g.add((spatial_ref,
-        #                    LOCN.geometry,
-        #                    Literal(wkt.dumps(json.loads(spatial_geom),
-        #                                      decimals=4),
-        #                            datatype=GSP.wktLiteral)))
-        #         except (TypeError, ValueError, InvalidGeoJSONException):
-        #             pass
+                # GeoJSON
+                g.add((geo_shape,
+                       SCHEMA.polygon,
+                       Literal(spatial_geom, datatype=GEOJSON_IMT)))
 
         # # Resources
         # for resource_dict in dataset_dict.get('resources', []):

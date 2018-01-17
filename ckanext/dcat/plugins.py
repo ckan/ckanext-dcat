@@ -148,7 +148,8 @@ class DCATJSONInterface(p.SingletonPlugin):
         }
 
 
-class SchemaOrgPlugin(p.SinlgetonPlugin):
+class SchemaOrgPlugin(p.SingletonPlugin):
     # TODO: add template helper to output JSON-LD in read.html
+    # TODO: allow loading of values from a specific profile
     pass
 
