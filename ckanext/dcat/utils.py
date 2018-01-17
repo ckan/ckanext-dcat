@@ -1,10 +1,16 @@
 import logging
 import uuid
+import urllib
 
 from pylons import config
 
 from ckan import model
 import ckan.plugins.toolkit as toolkit
+import re
+import operator
+
+# For parsing {name};q=x and {name} style fields from the accept header
+accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
 _ = toolkit._
 
@@ -92,7 +98,7 @@ def catalog_uri():
                          'the `ckanext.dcat.base_uri` or `ckan.site_url` ' +
                          'option')
 
-    return uri
+    return url_quote(uri)
 
 
 def dataset_uri(dataset_dict):
@@ -128,7 +134,7 @@ def dataset_uri(dataset_dict):
                                        str(uuid.uuid4()))
         log.warning('Using a random id for dataset URI')
 
-    return uri
+    return url_quote(uri)
 
 
 def resource_uri(resource_dict):
@@ -158,7 +164,7 @@ def resource_uri(resource_dict):
                                                     dataset_id,
                                                     resource_dict['id'])
 
-    return uri
+    return url_quote(uri)
 
 
 def publisher_uri_from_dataset_dict(dataset_dict):
@@ -191,7 +197,7 @@ def publisher_uri_from_dataset_dict(dataset_dict):
         uri = '{0}/organization/{1}'.format(catalog_uri().rstrip('/'),
                                             dataset_dict['organization']['id'])
 
-    return uri
+    return url_quote(uri)
 
 
 def dataset_id_from_resource(resource_dict):
@@ -222,6 +228,10 @@ def url_to_rdflib_format(_format):
     return _format
 
 
+def url_quote(url):
+    return urllib.quote(url, safe="%/:=&?~#+!$,;'@()[]")
+
+
 def rdflib_to_url_format(_format):
     '''
     Translates RDF formats used by rdflib to the ones used on the endpoints
@@ -234,11 +244,6 @@ def rdflib_to_url_format(_format):
         _format = 'jsonld'
 
     return _format
-
-import re
-import operator
-# For parsing {name};q=x and {name} style fields from the accept header
-accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
 
 def parse_accept_header(accept_header=''):

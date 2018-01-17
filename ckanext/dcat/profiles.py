@@ -14,7 +14,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, url_quote
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -1085,9 +1085,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             url = resource_dict.get('url')
             download_url = resource_dict.get('download_url')
             if download_url:
-                g.add((distribution, DCAT.downloadURL, URIRef(download_url)))
+                g.add((distribution, DCAT.downloadURL, URIRef(url_quote(download_url))))
             if (url and not download_url) or (url and url != download_url):
-                g.add((distribution, DCAT.accessURL, URIRef(url)))
+                g.add((distribution, DCAT.accessURL, URIRef(url_quote(url))))
 
             # Dates
             items = [

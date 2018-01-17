@@ -13,9 +13,8 @@ from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
 
-from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS, url_quote
 from ckanext.dcat.profiles import DCAT, DCT, FOAF
-
 
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -243,7 +242,7 @@ class RDFSerializer(RDFProcessor):
         if not uri_value:
             for extra in dataset_dict.get('extras', []):
                 if extra['key'] == 'uri':
-                    uri_value = extra['value']
+                    uri_value = url_quote(extra['value'])
                     break
 
         dataset_ref = URIRef(dataset_uri(dataset_dict))
