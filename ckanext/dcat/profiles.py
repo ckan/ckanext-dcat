@@ -1171,8 +1171,8 @@ class SchemaOrgProfile(RDFProfile):
 
         g = self.g
 
-        for prefix, namespace in namespaces.iteritems():
-            g.bind(prefix, namespace)
+        # Namespaces
+        self._bind_namespaces()
 
         g.add((dataset_ref, RDF.type, SCHEMA.Dataset))
 
@@ -1194,8 +1194,35 @@ class SchemaOrgProfile(RDFProfile):
         # Spatial
         self._spatial_graph(dataset_ref, dataset_dict)
 
+        # Resources
+        self._resources_graph(dataset_ref, dataset_dict)
+
+    def _add_date_triple(self, subject, predicate, value, _type=Literal):
+        '''
+        Adds a new triple with a date object
+
+        Dates are parsed using dateutil, and if the date obtained is correct,
+        added to the graph as an SCHEMA.DateTime value.
+
+        If there are parsing errors, the literal string value is added.
+        '''
+        if not value:
+            return
+        try:
+            default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
+            _date = parse_date(value, default=default_datetime)
+
+            self.g.add((subject, predicate, _type(_date.isoformat(),
+                                                  datatype=SCHEMA.DateTime)))
+        except ValueError:
+            self.g.add((subject, predicate, _type(value)))
+
+    def _bind_namespaces(self):
+        self.g.bind('schema', namespaces['schema'])
+
     def _basic_fields_graph(self, dataset_ref, dataset_dict):
         items = [
+            ('identifier', SCHEMA.identifier, None, Literal),
             ('title', SCHEMA.name, None, Literal),
             ('notes', SCHEMA.description, None, Literal),
             ('version', SCHEMA.version, ['dcat_version'], Literal),
@@ -1203,6 +1230,13 @@ class SchemaOrgProfile(RDFProfile):
             ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
+
+        items = [
+            ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
+            ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
+        ]
+
+        self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
     def _tags_graph(self, dataset_ref, dataset_dict):
         for tag in dataset_dict.get('tags', []):
@@ -1239,6 +1273,7 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
 
             contact_point = BNode()
+            self.g.add((contact_point, RDF.type, SCHEMA.ContactPoint))
             self.g.add((publisher_details, SCHEMA.contactPoint, contact_point))
 
             self.g.add((contact_point, SCHEMA.contactType, Literal('customer service')))
@@ -1260,7 +1295,7 @@ class SchemaOrgProfile(RDFProfile):
         end = self._get_dataset_value(dataset_dict, 'temporal_end')
         if start or end:
             if start and end:
-                g.add((dataset_ref, SCHEMA.temporalCoverage, Literal('%s/%s' % (start, end))))
+                self.g.add((dataset_ref, SCHEMA.temporalCoverage, Literal('%s/%s' % (start, end))))
             elif start:
                 self._add_date_triple(dataset_ref, SCHEMA.temporalCoverage, start)
             elif end:
@@ -1281,97 +1316,88 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((dataset_ref, SCHEMA.spatialCoverage, spatial_ref))
 
             if spatial_text:
-                g.add((spatial_ref, SCHEMA.description, Literal(spatial_text)))
+                self.g.add((spatial_ref, SCHEMA.description, Literal(spatial_text)))
 
             if spatial_geom:
                 geo_shape = BNode()
                 self.g.add((geo_shape, RDF.type, SCHEMA.GeoShape))
                 self.g.add((spatial_ref, SCHEMA.geo, geo_shape))
 
-                # GeoJSON
-                g.add((geo_shape,
+                # the spatial_geom typically contains GeoJSON
+                self.g.add((geo_shape,
                        SCHEMA.polygon,
-                       Literal(spatial_geom, datatype=GEOJSON_IMT)))
+                       Literal(spatial_geom)))
 
-        # # Resources
-        # for resource_dict in dataset_dict.get('resources', []):
+    def _resources_graph(self, dataset_ref, dataset_dict):
+        g = self.g
+        for resource_dict in dataset_dict.get('resources', []):
+            distribution = URIRef(resource_uri(resource_dict))
+            g.add((dataset_ref, SCHEMA.distribution, distribution))
+            g.add((distribution, RDF.type, SCHEMA.DataDownload))
 
-        #     distribution = URIRef(resource_uri(resource_dict))
+            self._distribution_graph(distribution, resource_dict)
 
-        #     g.add((dataset_ref, DCAT.distribution, distribution))
+    def _distribution_graph(self, distribution, resource_dict):
+        #  Simple values
+        self._distribution_basic_fields_graph(distribution, resource_dict)
 
-        #     g.add((distribution, RDF.type, DCAT.Distribution))
+        # Lists
+        self._distribution_list_fields_graph(distribution, resource_dict)
 
-        #     #  Simple values
-        #     items = [
-        #         ('name', DCT.title, None, Literal),
-        #         ('description', DCT.description, None, Literal),
-        #         ('status', ADMS.status, None, Literal),
-        #         ('rights', DCT.rights, None, Literal),
-        #         ('license', DCT.license, None, Literal),
-        #     ]
+        # Format
+        self._distribution_format_graph(distribution, resource_dict)
 
-        #     self._add_triples_from_dict(resource_dict, distribution, items)
+        # URL
+        self._distribution_url_graph(distribution, resource_dict)
 
-        #     #  Lists
-        #     items = [
-        #         ('documentation', FOAF.page, None, Literal),
-        #         ('language', DCT.language, None, Literal),
-        #         ('conforms_to', DCT.conformsTo, None, Literal),
-        #     ]
-        #     self._add_list_triples_from_dict(resource_dict, distribution, items)
+        # Numbers
+        self._distribution_numbers_graph(distribution, resource_dict)
 
-        #     # Format
-        #     if '/' in resource_dict.get('format', ''):
-        #         g.add((distribution, DCAT.mediaType,
-        #                Literal(resource_dict['format'])))
-        #     else:
-        #         if resource_dict.get('format'):
-        #             g.add((distribution, DCT['format'],
-        #                    Literal(resource_dict['format'])))
+    def _distribution_basic_fields_graph(self, distribution, resource_dict):
+        items = [
+            ('name', SCHEMA.name, None, Literal),
+            ('description', SCHEMA.description, None, Literal),
+            ('license', SCHEMA.license, ['rights'], Literal),
+        ]
 
-        #         if resource_dict.get('mimetype'):
-        #             g.add((distribution, DCAT.mediaType,
-        #                    Literal(resource_dict['mimetype'])))
+        self._add_triples_from_dict(resource_dict, distribution, items)
 
-        #     # URL
-        #     url = resource_dict.get('url')
-        #     download_url = resource_dict.get('download_url')
-        #     if download_url:
-        #         g.add((distribution, DCAT.downloadURL, URIRef(download_url)))
-        #     if (url and not download_url) or (url and url != download_url):
-        #         g.add((distribution, DCAT.accessURL, URIRef(url)))
+        items = [
+            ('issued', SCHEMA.datePublished, None, Literal),
+            ('modified', SCHEMA.dateModified, None, Literal),
+        ]
 
-        #     # Dates
-        #     items = [
-        #         ('issued', DCT.issued, None, Literal),
-        #         ('modified', DCT.modified, None, Literal),
-        #     ]
+        self._add_date_triples_from_dict(resource_dict, distribution, items)
 
-        #     self._add_date_triples_from_dict(resource_dict, distribution, items)
+    def _distribution_list_fields_graph(self, distribution, resource_dict):
+        items = [
+            ('language', SCHEMA.inLanguage, None, Literal),
+        ]
+        self._add_list_triples_from_dict(resource_dict, distribution, items)
 
-        #     # Numbers
-        #     if resource_dict.get('size'):
-        #         try:
-        #             g.add((distribution, DCAT.byteSize,
-        #                    Literal(float(resource_dict['size']),
-        #                            datatype=XSD.decimal)))
-        #         except (ValueError, TypeError):
-        #             g.add((distribution, DCAT.byteSize,
-        #                    Literal(resource_dict['size'])))
-        #     # Checksum
-        #     if resource_dict.get('hash'):
-        #         checksum = BNode()
-        #         g.add((checksum, SPDX.checksumValue,
-        #                Literal(resource_dict['hash'],
-        #                        datatype=XSD.hexBinary)))
+    def _distribution_format_graph(self, distribution, resource_dict):
+        if '/' in resource_dict.get('format', ''):
+            self.g.add((distribution, SCHEMA.fileType,
+                   Literal(resource_dict['format'])))
+            self.g.add((distribution, SCHEMA.encodingFormat,
+                   Literal(resource_dict['format'])))
+        else:
+            if resource_dict.get('format'):
+                self.g.add((distribution, SCHEMA.encodingFormat,
+                       Literal(resource_dict['format'])))
 
-        #         if resource_dict.get('hash_algorithm'):
-        #             if resource_dict['hash_algorithm'].startswith('http'):
-        #                 g.add((checksum, SPDX.algorithm,
-        #                        URIRef(resource_dict['hash_algorithm'])))
-        #             else:
-        #                 g.add((checksum, SPDX.algorithm,
-        #                        Literal(resource_dict['hash_algorithm'])))
-        #         g.add((distribution, SPDX.checksum, checksum))
+            if resource_dict.get('mimetype'):
+                self.g.add((distribution, SCHEMA.fileType,
+                       Literal(resource_dict['mimetype'])))
 
+    def _distribution_url_graph(self, distribution, resource_dict):
+        url = resource_dict.get('url')
+        download_url = resource_dict.get('download_url')
+        if download_url:
+            self.g.add((distribution, SCHEMA.contentUrl, Literal(download_url)))
+        if (url and not download_url) or (url and url != download_url):
+            self.g.add((distribution, SCHEMA.url, Literal(url)))
+
+    def _distribution_numbers_graph(self, distribution, resource_dict):
+        if resource_dict.get('size'):
+            self.g.add((distribution, SCHEMA.contentSize, Literal(resource_dict['size'])))
