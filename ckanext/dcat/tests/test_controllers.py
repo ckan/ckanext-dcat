@@ -182,6 +182,26 @@ class TestEndpoints(helpers.FunctionalTestBase):
         eq_(dcat_dataset['title'], dataset['title'])
         eq_(dcat_dataset['notes'], dataset['notes'])
 
+    def test_dataset_profiles_jsonld(self):
+
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        url = url_for('dcat_dataset', _id=dataset['id'], _format='jsonld', profiles='schemaorg')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        eq_(response.headers['Content-Type'], 'application/ld+json')
+
+        content = response.body
+
+        assert '"@id": "/dataset/%s"' % dataset['id'] in content
+        assert '"@type": "schema:Dataset"' in content
+        assert '"schema:description": "%s"' % dataset['notes'] in content
+
     def test_dataset_not_found(self):
         import uuid
 
