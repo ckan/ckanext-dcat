@@ -198,7 +198,6 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
         content = response.body
 
-        assert '"@id": "/dataset/%s"' % dataset['id'] in content
         assert '"@type": "schema:Dataset"' in content
         assert '"schema:description": "%s"' % dataset['notes'] in content
 

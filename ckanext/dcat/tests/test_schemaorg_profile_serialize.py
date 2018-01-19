@@ -67,8 +67,11 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, SCHEMA.name, dataset['title'])
         assert self._triple(g, dataset_ref, SCHEMA.description, dataset['notes'])
         assert self._triple(g, dataset_ref, SCHEMA.version, dataset['version'])
-        assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'])
-        assert self._triple(g, dataset_ref, SCHEMA.dateModified, dataset['metadata_modified'])
+        assert self._triple(g, dataset_ref, SCHEMA.identifier, extras['identifier'])
+
+        # Dates
+        assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'], SCHEMA.DateTime)
+        assert self._triple(g, dataset_ref, SCHEMA.dateModified, dataset['metadata_modified'], SCHEMA.DateTime)
 
         # Tags
         eq_(len([t for t in g.triples((dataset_ref, SCHEMA.keywords, None))]), 2)
@@ -85,461 +88,399 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
             for value in values:
                 assert self._triple(g, dataset_ref, item[1], item[2](value))
 
-    # def test_contact_details_extras(self):
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'maintainer': 'Example Maintainer',
-    #         'maintainer_email': 'dep@example.com',
-    #         'author': 'Example Author',
-    #         'author_email': 'ped@example.com',
-    #         'extras': [
-    #             {'key': 'contact_uri', 'value': 'http://example.com/contact'},
-    #             {'key': 'contact_name', 'value': 'Example Contact'},
-    #             {'key': 'contact_email', 'value': 'contact@example.com'},
-
-    #         ]
-
-
-    #     }
-    #     extras = self._extras(dataset)
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     # Contact details
-
-    #     contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
-    #     assert contact_details
-    #     eq_(unicode(contact_details), extras['contact_uri'])
-    #     assert self._triple(g, contact_details, VCARD.fn, extras['contact_name'])
-    #     assert self._triple(g, contact_details, VCARD.hasEmail, extras['contact_email'])
-
-    # def test_publisher_extras(self):
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'organization': {
-    #             'id': '',
-    #             'name': 'publisher1',
-    #             'title': 'Example Publisher from Org',
-    #         },
-    #         'extras': [
-    #             {'key': 'publisher_uri', 'value': 'http://example.com/publisher'},
-    #             {'key': 'publisher_name', 'value': 'Example Publisher'},
-    #             {'key': 'publisher_email', 'value': 'publisher@example.com'},
-    #             {'key': 'publisher_url', 'value': 'http://example.com/publisher/home'},
-    #             {'key': 'publisher_type', 'value': 'http://purl.org/adms/publishertype/Company'},
-    #         ]
-
-
-    #     }
-    #     extras = self._extras(dataset)
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
-    #     assert publisher
-    #     eq_(unicode(publisher), extras['publisher_uri'])
-
-    #     assert self._triple(g, publisher, RDF.type, FOAF.Organization)
-    #     assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
-    #     assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
-    #     assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
-    #     assert self._triple(g, publisher, DCT.type, extras['publisher_type'])
-
-    # def test_publisher_org(self):
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'organization': {
-    #             'id': '',
-    #             'name': 'publisher1',
-    #             'title': 'Example Publisher from Org',
-    #         }
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
-    #     assert publisher
-
-    #     assert self._triple(g, publisher, RDF.type, FOAF.Organization)
-    #     assert self._triple(g, publisher, FOAF.name, dataset['organization']['title'])
-
-    # def test_temporal(self):
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'extras': [
-    #             {'key': 'temporal_start', 'value': '2015-06-26T15:21:09.075774'},
-    #             {'key': 'temporal_end', 'value': '2015-07-14'},
-    #         ]
-    #     }
-    #     extras = self._extras(dataset)
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     temporal = self._triple(g, dataset_ref, DCT.temporal, None)[2]
-    #     assert temporal
-
-    #     assert self._triple(g, temporal, RDF.type, DCT.PeriodOfTime)
-    #     assert self._triple(g, temporal, SCHEMA.startDate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime)
-    #     assert self._triple(g, temporal, SCHEMA.endDate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime)
-
-    # def test_spatial(self):
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'extras': [
-    #             {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
-    #             {'key': 'spatial_text', 'value': 'Tarragona'},
-    #             {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": [[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
-
-    #         ]
-    #     }
-    #     extras = self._extras(dataset)
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
-    #     assert spatial
-    #     eq_(unicode(spatial), extras['spatial_uri'])
-    #     assert self._triple(g, spatial, RDF.type, DCT.Location)
-    #     assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
-
-    #     eq_(len([t for t in g.triples((spatial, LOCN.geometry, None))]), 2)
-    #     # Geometry in GeoJSON
-    #     assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-
-    #     # Geometry in WKT
-    #     wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
-    #     assert self._triple(g, spatial, LOCN.geometry, wkt_geom, GSP.wktLiteral)
-
-    # def test_spatial_bad_geojson_no_wkt(self):
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'extras': [
-    #             {'key': 'spatial', 'value': '{"key": "NotGeoJSON"}'},
-
-    #         ]
-    #     }
-    #     extras = self._extras(dataset)
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
-    #     assert spatial
-    #     assert_true(isinstance(spatial, BNode))
-    #     # Geometry in GeoJSON
-    #     assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-
-    #     # Geometry in WKT
-    #     eq_(len([t for t in g.triples((spatial, LOCN.geometry, None))]), 1)
-
-    # def test_distributions(self):
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             {
-    #                 'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #                 'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #                 'name': 'CSV file'
-    #             },
-    #             {
-    #                 'id': '8bceeda9-0084-477f-aa33-dad6148900d5',
-    #                 'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #                 'name': 'XLS file'
-    #             },
-    #             {
-    #                 'id': 'da73d939-0f11-45a1-9733-5de108383133',
-    #                 'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #                 'name': 'PDF file'
-    #             },
-
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     eq_(len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]), 3)
-
-    #     for resource in dataset['resources']:
-    #         distribution = self._triple(g,
-    #                                     dataset_ref,
-    #                                     DCAT.distribution,
-    #                                     URIRef(utils.resource_uri(resource)))[2]
-
-    #         assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
-    #         assert self._triple(g, distribution, DCT.title, resource['name'])
-
-    # def test_distribution_fields(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'description': 'A CSV file',
-    #         'url': 'http://example.com/data/file.csv',
-    #         'status': 'http://purl.org/adms/status/Completed',
-    #         'rights': 'Some statement about rights',
-    #         'license': 'http://creativecommons.org/licenses/by/3.0/',
-    #         'issued': '2015-06-26T15:21:09.034694',
-    #         'modified': '2015-06-26T15:21:09.075774',
-    #         'size': 1234,
-    #         'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
-    #         'language': '[\"en\", \"es\", \"ca\"]',
-    #         'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
-    #         'hash': '4304cf2e751e6053c90b1804c89c0ebb758f395a',
-    #         'hash_algorithm': 'http://spdx.org/rdf/terms#checksumAlgorithm_sha1',
-
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     eq_(len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]), 1)
-
-    #     # URI
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-    #     eq_(unicode(distribution), utils.resource_uri(resource))
-
-    #     # Basic fields
-    #     assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
-    #     assert self._triple(g, distribution, DCT.title, resource['name'])
-    #     assert self._triple(g, distribution, DCT.description, resource['description'])
-    #     assert self._triple(g, distribution, DCT.rights, resource['rights'])
-    #     assert self._triple(g, distribution, DCT.license, resource['license'])
-    #     assert self._triple(g, distribution, ADMS.status, resource['status'])
-
-    #     # List
-    #     for item in [
-    #         ('documentation', FOAF.page),
-    #         ('language', DCT.language),
-    #         ('conforms_to', DCT.conformsTo),
-    #     ]:
-    #         values = json.loads(resource[item[0]])
-    #         eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
-    #         for value in values:
-    #             assert self._triple(g, distribution, item[1], value)
-
-    #     # Dates
-    #     assert self._triple(g, distribution, DCT.issued, resource['issued'], XSD.dateTime)
-    #     assert self._triple(g, distribution, DCT.modified, resource['modified'], XSD.dateTime)
-
-    #     # Numbers
-    #     assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
-
-    #     # Checksum
-    #     checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
-    #     assert checksum
-    #     assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
-    #     assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
-
-    # def test_distribution_access_url_only(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'url': 'http://example.com/data/file.csv',
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-    #     assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['url']))
-    #     assert self._triple(g, distribution, DCAT.downloadURL, None) is None
-
-    # def test_distribution_download_url_only(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'download_url': 'http://example.com/data/file.csv',
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-    #     assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
-    #     assert self._triple(g, distribution, DCAT.accessURL, None) is None
-
-    # def test_distribution_both_urls_different(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'url': 'http://example.com/data/file',
-    #         'download_url': 'http://example.com/data/file.csv',
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-    #     assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['url']))
-    #     assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
-
-    # def test_distribution_both_urls_the_same(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'url': 'http://example.com/data/file.csv',
-    #         'download_url': 'http://example.com/data/file.csv',
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-    #     assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['url']))
-    #     assert self._triple(g, distribution, DCAT.accessURL, None) is None
-
-    # def test_distribution_format(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'url': 'http://example.com/data/file.csv',
-    #         'format': 'CSV',
-    #         'mimetype': 'text/csv',
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-    #     assert self._triple(g, distribution, DCT['format'], resource['format'])
-    #     assert self._triple(g, distribution, DCAT.mediaType, resource['mimetype'])
-
-    # def test_distribution_format_with_backslash(self):
-
-    #     resource = {
-    #         'id': 'c041c635-054f-4431-b647-f9186926d021',
-    #         'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'CSV file',
-    #         'url': 'http://example.com/data/file.csv',
-    #         'format': 'text/csv',
-    #     }
-
-    #     dataset = {
-    #         'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-    #         'name': 'test-dataset',
-    #         'title': 'Test DCAT dataset',
-    #         'resources': [
-    #             resource
-    #         ]
-    #     }
-
-    #     s = RDFSerializer(profiles=['schemaorg'])
-    #     g = s.g
-
-    #     dataset_ref = s.graph_from_dataset(dataset)
-
-    #     distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-    #     assert self._triple(g, distribution, DCAT.mediaType, resource['format'])
+    def test_publisher_extras(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'organization': {
+                'id': '',
+                'name': 'publisher1',
+                'title': 'Example Publisher from Org',
+            },
+            'extras': [
+                {'key': 'publisher_uri', 'value': 'http://example.com/publisher'},
+                {'key': 'publisher_name', 'value': 'Example Publisher'},
+                {'key': 'publisher_email', 'value': 'publisher@example.com'},
+                {'key': 'publisher_url', 'value': 'http://example.com/publisher/home'},
+                {'key': 'publisher_type', 'value': 'http://purl.org/adms/publishertype/Company'},
+            ]
+
+
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        publisher = self._triple(g, dataset_ref, SCHEMA.publisher, None)[2]
+        assert publisher
+        eq_(unicode(publisher), extras['publisher_uri'])
+        assert self._triple(g, publisher, RDF.type, SCHEMA.Organization)
+        assert self._triple(g, publisher, SCHEMA.name, extras['publisher_name'])
+
+        contact_point = self._triple(g, publisher, SCHEMA.contactPoint, None)[2]
+        assert contact_point
+        assert self._triple(g, contact_point, RDF.type, SCHEMA.ContactPoint)
+        assert self._triple(g, contact_point, SCHEMA.name, extras['publisher_name'])
+        assert self._triple(g, contact_point, SCHEMA.email, extras['publisher_email'])
+        assert self._triple(g, contact_point, SCHEMA.url, extras['publisher_url'])
+        assert self._triple(g, contact_point, SCHEMA.contactType, 'customer service')
+
+    def test_publisher_org(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'organization': {
+                'id': '',
+                'name': 'publisher1',
+                'title': 'Example Publisher from Org',
+            }
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        publisher = self._triple(g, dataset_ref, SCHEMA.publisher, None)[2]
+        assert publisher
+        assert self._triple(g, publisher, RDF.type, SCHEMA.Organization)
+        assert self._triple(g, publisher, SCHEMA.name, dataset['organization']['title'])
+
+    def test_temporal_start_and_end(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'temporal_start', 'value': '2015-06-26T15:21:09.075774'},
+                {'key': 'temporal_end', 'value': '2015-07-14'},
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert self._triple(g, dataset_ref, SCHEMA.temporalCoverage, '2015-06-26T15:21:09.075774/2015-07-14')
+
+    def test_temporal_start_only(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'temporal_start', 'value': '2015-06-26T15:21:09.075774'},
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert self._triple(g, dataset_ref, SCHEMA.temporalCoverage, parse_date(extras['temporal_start']).isoformat(), SCHEMA.DateTime)
+
+    def test_spatial(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
+                {'key': 'spatial_text', 'value': 'Tarragona'},
+                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": [[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
+
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        spatial = self._triple(g, dataset_ref, SCHEMA.spatialCoverage, None)[2]
+        assert spatial
+        eq_(unicode(spatial), extras['spatial_uri'])
+        assert self._triple(g, spatial, RDF.type, SCHEMA.Place)
+        assert self._triple(g, spatial, SCHEMA.description, extras['spatial_text'])
+        geo = self._triple(g, spatial, SCHEMA.geo, None)[2]
+        assert self._triple(g, geo, RDF.type, SCHEMA.GeoShape)
+        assert self._triple(g, geo, SCHEMA.polygon, extras['spatial'])
+
+    def test_distributions(self):
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                {
+                    'id': 'c041c635-054f-4431-b647-f9186926d021',
+                    'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+                    'name': 'CSV file'
+                },
+                {
+                    'id': '8bceeda9-0084-477f-aa33-dad6148900d5',
+                    'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+                    'name': 'XLS file'
+                },
+                {
+                    'id': 'da73d939-0f11-45a1-9733-5de108383133',
+                    'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+                    'name': 'PDF file'
+                },
+
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        eq_(len([t for t in g.triples((dataset_ref, SCHEMA.distribution, None))]), 3)
+
+        for resource in dataset['resources']:
+            distribution = self._triple(g,
+                                        dataset_ref,
+                                        SCHEMA.distribution,
+                                        URIRef(utils.resource_uri(resource)))[2]
+
+            assert self._triple(g, distribution, RDF.type, SCHEMA.DataDownload)
+            assert self._triple(g, distribution, SCHEMA.name, resource['name'])
+
+    def test_distribution_fields(self):
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'description': 'A CSV file',
+            'url': 'http://example.com/data/file.csv',
+            'status': 'http://purl.org/adms/status/Completed',
+            'rights': 'Some statement about rights',
+            'license': 'http://creativecommons.org/licenses/by/3.0/',
+            'issued': '2015-06-26T15:21:09.034694',
+            'modified': '2015-06-26T15:21:09.075774',
+            'size': 1234,
+            'language': '[\"en\", \"es\", \"ca\"]',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        eq_(len([t for t in g.triples((dataset_ref, SCHEMA.distribution, None))]), 1)
+
+        # URI
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+        eq_(unicode(distribution), utils.resource_uri(resource))
+
+        # Basic fields
+        assert self._triple(g, distribution, RDF.type, SCHEMA.DataDownload)
+        assert self._triple(g, distribution, SCHEMA.name, resource['name'])
+        assert self._triple(g, distribution, SCHEMA.description, resource['description'])
+        assert self._triple(g, distribution, SCHEMA.license, resource['license'])
+
+        # List
+        for item in [
+            ('language', SCHEMA.inLanguage),
+        ]:
+            values = json.loads(resource[item[0]])
+            eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
+            for value in values:
+                assert self._triple(g, distribution, item[1], value)
+
+        # Dates
+        assert self._triple(g, distribution, SCHEMA.datePublished, resource['issued'], SCHEMA.DateTime)
+        assert self._triple(g, distribution, SCHEMA.dateModified, resource['modified'], SCHEMA.DateTime)
+
+        # Numbers
+        assert self._triple(g, distribution, SCHEMA.contentSize, resource['size'])
+
+    def test_distribution_access_url_only(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.url, resource['url'])
+        assert self._triple(g, distribution, SCHEMA.contentUrl, None) is None
+
+    def test_distribution_download_url_only(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.contentUrl, resource['download_url'])
+        assert self._triple(g, distribution, SCHEMA.url, None) is None
+
+    def test_distribution_both_urls_different(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data/file',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.url, resource['url'])
+        assert self._triple(g, distribution, SCHEMA.contentUrl, resource['download_url'])
+
+    def test_distribution_both_urls_the_same(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data/file.csv',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.contentUrl, resource['url'])
+        assert self._triple(g, distribution, SCHEMA.url, None) is None
+
+    def test_distribution_format(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data/file.csv',
+            'format': 'CSV',
+            'mimetype': 'text/csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.encodingFormat, resource['format'])
+        assert self._triple(g, distribution, SCHEMA.fileType, resource['mimetype'])
+
+    def test_distribution_format_with_backslash(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data/file.csv',
+            'format': 'text/csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.fileType, resource['format'])
+        assert self._triple(g, distribution, SCHEMA.encodingFormat, resource['format'])
 
