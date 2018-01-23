@@ -30,7 +30,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [Compatibility mode](#compatibility-mode)
 - [XML DCAT harvester (deprecated)](#xml-dcat-harvester-deprecated)
 - [Translation of fields](#translation-of-fields)
-- [Structured Data](#strucuted-data)
+- [Structured Data](#structured-data)
 - [Running the Tests](#running-the-tests)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)

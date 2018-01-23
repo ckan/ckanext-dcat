@@ -529,14 +529,14 @@ class TestStructuredData(helpers.FunctionalTestBase):
 
     @classmethod
     def teardown_class(cls):
-        super(TestTranslations, cls).teardown_class()
+        super(TestStructuredData, cls).teardown_class()
         helpers.reset_db()
 
     def test_structured_data_generated(self):
 
-        dataset = factories.Dataset(extras=[
-            {'key': 'notes', 'value': 'bla'}
-        ])
+        dataset = factories.Dataset(
+            notes='test description'
+        )
 
         url = url_for('dataset_read', id=dataset['id'])
 
@@ -545,15 +545,15 @@ class TestStructuredData(helpers.FunctionalTestBase):
         response = app.get(url)
 
         assert '<script type="application/ld+json">' in response.body
-        assert '"schema:description": "bla"' in response.body
+        assert '"schema:description": "test description"' in response.body
 
 
-    def test_labels_translated(self):
+    def test_structured_data_not_generated(self):
         p.unload('structured_data')
 
-        dataset = factories.Dataset(extras=[
-            {'key': 'notes', 'value': 'bla'}
-        ])
+        dataset = factories.Dataset(
+            notes='test description'
+        )
 
         url = url_for('dataset_read', id=dataset['id'])
 
