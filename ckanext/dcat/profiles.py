@@ -1212,8 +1212,7 @@ class SchemaOrgProfile(RDFProfile):
             default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
             _date = parse_date(value, default=default_datetime)
 
-            self.g.add((subject, predicate, _type(_date.isoformat(),
-                                                  datatype=SCHEMA.DateTime)))
+            self.g.add((subject, predicate, _type(_date.isoformat())))
         except ValueError:
             self.g.add((subject, predicate, _type(value)))
 
