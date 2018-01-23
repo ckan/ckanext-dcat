@@ -523,3 +523,41 @@ class TestTranslations(helpers.FunctionalTestBase):
         assert not 'Notes de la versió' in response.body
         assert not 'Version notes' in response.body
         assert 'version_notes' in response.body
+
+
+class TestStructuredData(helpers.FunctionalTestBase):
+
+    @classmethod
+    def teardown_class(cls):
+        super(TestTranslations, cls).teardown_class()
+        helpers.reset_db()
+
+    def test_structured_data_generated(self):
+
+        dataset = factories.Dataset(extras=[
+            {'key': 'notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert '<script type="application/ld+json">' in response.body
+        assert '"schema:description": "bla"' in response.body
+
+
+    def test_labels_translated(self):
+        p.unload('structured_data')
+
+        dataset = factories.Dataset(extras=[
+            {'key': 'notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+        assert not '<script type="application/ld+json">' in response.body
