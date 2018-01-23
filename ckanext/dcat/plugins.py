@@ -148,8 +148,11 @@ class DCATJSONInterface(p.SingletonPlugin):
         }
 
 
-class SchemaOrgPlugin(p.SingletonPlugin):
-    # TODO: add template helper to output JSON-LD in read.html
-    # TODO: allow loading of values from a specific profile
-    pass
+class StructuredDataPlugin(p.SingletonPlugin):
+    p.implements(p.ITemplateHelpers, inherit=True)
+
+    def get_helpers(self):
+        return {
+            'structured_data': utils.structured_data,
+        }
 

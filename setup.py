@@ -33,7 +33,7 @@ setup(
 
     dcat=ckanext.dcat.plugins:DCATPlugin
 
-    schemaorg=ckanext.dcat.plugins.SchemaOrgPlugin
+    structured_data=ckanext.dcat.plugins:StructuredDataPlugin
 
     # Test plugins
     test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
