@@ -30,6 +30,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [Compatibility mode](#compatibility-mode)
 - [XML DCAT harvester (deprecated)](#xml-dcat-harvester-deprecated)
 - [Translation of fields](#translation-of-fields)
+- [Structured Data](#strucuted-data)
 - [Running the Tests](#running-the-tests)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
@@ -73,7 +74,7 @@ These are implemented internally using:
 
 4.  Enable the required plugins in your ini file:
 
-        ckan.plugins = dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface
+        ckan.plugins = dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface structured_data
 
 ## RDF DCAT endpoints
 
@@ -117,6 +118,11 @@ RDF representations will be advertised using `<link rel="alternate">` tags on th
 Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details about how these are generated and how to customize the output using [profiles](#profiles).
 
 
+You can specify the profile by using the `profiles=<profile1>,<profile2>` query parameter on the dataset endpoint (as a comma-separated list):
+
+* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml?profiles=euro_dcat_ap,sweden_dcat_ap`
+* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.jsonld?profiles=schemaorg`
+
 *Note*: When using this plugin, the above endpoints will replace the old deprecated ones that were part of CKAN core.
 
 
@@ -124,7 +130,7 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -168,6 +174,10 @@ The default number of datasets returned (100) can be modified by CKAN site maint
 The catalog endpoint also supports a `modified_since` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
 
 http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
+
+It's possible to specify the profile(s) to use for the serialization using the `profiles` parameter:
+
+http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
 
 
 
@@ -628,6 +638,7 @@ need custom logic, you can write a custom to profile that extends or replaces th
 The default profile is mostly based in the
 [DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). It is actually fully-compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11). As mentioned before though, it should be generic enough for most DCAT based representations.
 
+This plugin also contains a profile to serialize a CKAN dataset to a [schema.org Dataset](http://schema.org/Dataset) called `schemaorg`. This is especially useful to provide [JSON-LD structured data](#structured-data).
 
 To define which profiles to use you can:
 
@@ -786,6 +797,88 @@ This makes it very easy to display the fields in the current language.
 To disable this behavior, you can set the following config value in your ini file (default: True):
 
     ckanext.dcat.translate_keys = False
+
+
+## Structured data
+
+To add [structured data](https://developers.google.com/search/docs/guides/intro-structured-data) to dataset pages, activate the `structured_data` plugin in your ini file.
+
+By default this uses the `schemaorg` profile (see [profiles](#profiles)) to serialize the dataset to JSON-LD, which is then added to the dataset detail page.
+Example:
+
+    < ... >
+        <script type="application/ld+json">
+        {
+            "@context": {
+                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                "schema": "http://schema.org/",
+                "xsd": "http://www.w3.org/2001/XMLSchema#"
+            },
+            "@graph": [
+                {
+                    "@id": "http://demo.ckan.org/organization/c64835bf-b3b7-496d-a7cf-ed645dbf4b08",
+                    "@type": "schema:Organization",
+                    "schema:contactPoint": {
+                        "@id": "_:Nb9677036512840e1a00c9fec2818abe4"
+                    },
+                    "schema:name": "Public Transport Organization"
+                },
+                {
+                    "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307/resource/5f1cafa2-3c92-4e89-85d1-60f014c23e0f",
+                    "@type": "schema:DataDownload",
+                    "schema:dateModified": "2018-01-18T00:00:00",
+                    "schema:datePublished": "2018-01-02T00:00:00",
+                    "schema:description": "API for all the public transport stations",
+                    "schema:encodingFormat": "JSON",
+                    "schema:inLanguage": [
+                        "de",
+                        "it",
+                        "fr",
+                        "en"
+                    ],
+                    "schema:license": "https://creativecommons.org/licenses/by/4.0/",
+                    "schema:name": "Stations API",
+                    "schema:url": "http://stations.example.com/api"
+                },
+                {
+                    "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307",
+                    "@type": "schema:Dataset",
+                    "schema:dateModified": "2018-01-18T09:41:21.076522",
+                    "schema:datePublished": "2017-01-01T00:00:00",
+                    "schema:distribution": [
+                        {
+                            "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307/resource/5f1cafa2-3c92-4e89-85d1-60f014c23e0f"
+                        },
+                        {
+                            "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307/resource/bf3a0b61-415b-47b8-9cd0-86a14f8dc165"
+                        }
+                    ],
+                    "schema:identifier": "69a5bc23-3abd-4af7-8d3d-8f0d08698307",
+                    "schema:inLanguage": [
+                        "en",
+                        "de",
+                        "fr",
+                        "it"
+                    ],
+                    "schema:name": "Station list",
+                    "schema:publisher": {
+                        "@id": "http://demo.ckan.org/organization/c64835bf-b3b7-496d-a7cf-ed645dbf4b08"
+                    }
+                },
+                {
+                    "@id": "_:Nb9677036512840e1a00c9fec2818abe4",
+                    "@type": "schema:ContactPoint",
+                    "schema:contactType": "customer service",
+                    "schema:email": "contact@example.com",
+                    "schema:name": "Public Transport Support",
+                    "schema:url": "https://public-transport.example.com"
+                }
+            ]
+        }
+        </script>
+      </body>
+    </html>
 
 
 ## Running the Tests
