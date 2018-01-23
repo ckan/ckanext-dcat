@@ -17,9 +17,9 @@
     https://developers.google.com/search/docs/guides/intro-structured-data
     #}
 
-    {% if structured_data in h %}
+    {% if h.get('structured_data') %}
     <script type="application/ld+json">
-    {{ h.structured_data(pkg.id) }}
+    {{ h.structured_data(pkg.id)|safe }}
     </script>
     {% endif %}
   {% endblock %}
