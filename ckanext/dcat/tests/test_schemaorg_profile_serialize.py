@@ -70,8 +70,8 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, SCHEMA.identifier, extras['identifier'])
 
         # Dates
-        assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'], SCHEMA.DateTime)
-        assert self._triple(g, dataset_ref, SCHEMA.dateModified, dataset['metadata_modified'], SCHEMA.DateTime)
+        assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'])
+        assert self._triple(g, dataset_ref, SCHEMA.dateModified, dataset['metadata_modified'])
 
         # Tags
         eq_(len([t for t in g.triples((dataset_ref, SCHEMA.keywords, None))]), 2)
@@ -182,7 +182,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        assert self._triple(g, dataset_ref, SCHEMA.temporalCoverage, parse_date(extras['temporal_start']).isoformat(), SCHEMA.DateTime)
+        assert self._triple(g, dataset_ref, SCHEMA.temporalCoverage, parse_date(extras['temporal_start']).isoformat())
 
     def test_spatial(self):
         dataset = {
@@ -305,8 +305,8 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
                 assert self._triple(g, distribution, item[1], value)
 
         # Dates
-        assert self._triple(g, distribution, SCHEMA.datePublished, resource['issued'], SCHEMA.DateTime)
-        assert self._triple(g, distribution, SCHEMA.dateModified, resource['modified'], SCHEMA.DateTime)
+        assert self._triple(g, distribution, SCHEMA.datePublished, resource['issued'])
+        assert self._triple(g, distribution, SCHEMA.dateModified, resource['modified'])
 
         # Numbers
         assert self._triple(g, distribution, SCHEMA.contentSize, resource['size'])
