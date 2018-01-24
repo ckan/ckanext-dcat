@@ -29,6 +29,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [Command line interface](#command-line-interface)
     - [Compatibility mode](#compatibility-mode)
 - [XML DCAT harvester (deprecated)](#xml-dcat-harvester-deprecated)
+- [Translation of fields](#translation-of-fields)
 - [Running the Tests](#running-the-tests)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
@@ -776,6 +777,15 @@ The old DCAT XML harvester (`dcat_xml_harvester`) is now deprecated, in favour o
 Loading it on the ini file will result in an exception on startup.
 
 The XML serialization described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site is a valid RDF/XML one, so changing the harvester should have no effect. There might be slight differences in the way CKAN fields are created though, check [Compatibility mode](#compatibility-mode) for more details.
+
+## Translation of fields
+
+The `dcat` plugin automatically translates the keys of the dcat fields used in the frontend.
+This makes it very easy to display the fields in the current language.
+
+To disable this behavior, you can set the following config value in your ini file (default: True):
+
+    ckanext.dcat.translate_keys = False
 
 
 ## Running the Tests
