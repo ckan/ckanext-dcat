@@ -477,7 +477,22 @@ class TestTranslations(helpers.FunctionalTestBase):
 
         assert 'Notes de la versió' in response.body
 
-    @helpers.change_config('ckanext.dcat.translate_keys', 'False')
+    @helpers.change_config('ckanext.dcat.translate_keys', True)
+    def test_labels_enable_by_config(self):
+        dataset = factories.Dataset(extras=[
+            {'key': 'version_notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert 'Notes de la versió' in response.body
+        assert not 'Version notes' in response.body
+
+    @helpers.change_config('ckanext.dcat.translate_keys', False)
     def test_labels_disable_by_config(self):
         dataset = factories.Dataset(extras=[
             {'key': 'version_notes', 'value': 'bla'}
@@ -490,4 +505,5 @@ class TestTranslations(helpers.FunctionalTestBase):
         response = app.get(url)
 
         assert not 'Notes de la versió' in response.body
-        assert 'Version notes' in response.body
+        assert not 'Version notes' in response.body
+        assert 'version_notes' in response.body
