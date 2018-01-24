@@ -2,7 +2,15 @@ import logging
 import uuid
 import json
 
-from pylons import config
+from ckantoolkit import config, h
+
+try:
+    # CKAN >= 2.6
+    from ckan.exceptions import HelperError
+except ImportError:
+    # CKAN < 2.6
+    class HelperError(Exception):
+        pass
 
 from ckan import model
 import ckan.plugins.toolkit as toolkit
@@ -60,6 +68,15 @@ def field_labels():
         'created': _('Created'),
     }
 
+def helper_available(helper_name):
+    '''
+    Checks if a given helper name is available on `h`
+    '''
+    try:
+        getattr(h, helper_name)
+    except (AttributeError, HelperError):
+        return False
+    return True
 
 def structured_data(dataset_id, profiles=None, _format='jsonld'):
     '''

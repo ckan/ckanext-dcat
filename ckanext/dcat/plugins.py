@@ -25,6 +25,7 @@ TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
 class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     p.implements(p.IConfigurer, inherit=True)
+    p.implements(p.ITemplateHelpers, inherit=True)
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
@@ -50,6 +51,12 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                 raise Exception(
                     '"{0}" should contain {{_format}}'.format(
                         CUSTOM_ENDPOINT_CONFIG))
+
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'helper_available': utils.helper_available,
+        }
 
     # IRoutes
     def before_map(self, _map):
@@ -151,6 +158,7 @@ class DCATJSONInterface(p.SingletonPlugin):
 class StructuredDataPlugin(p.SingletonPlugin):
     p.implements(p.ITemplateHelpers, inherit=True)
 
+    # ITemplateHelpers
     def get_helpers(self):
         return {
             'structured_data': utils.structured_data,
