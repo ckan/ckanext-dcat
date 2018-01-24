@@ -19,6 +19,7 @@ from ckanext.dcat import utils
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
+TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
 
 
 class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
@@ -95,6 +96,10 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     # IPackageController
     def after_show(self, context, data_dict):
+
+        # check if config is enabled to translate keys (default: True)
+        if not p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG, True)):
+            return data_dict
 
         if context.get('for_view'):
             field_labels = utils.field_labels()
