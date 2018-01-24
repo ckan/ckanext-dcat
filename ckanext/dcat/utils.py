@@ -20,6 +20,8 @@ CONTENT_TYPES = {
     'jsonld': 'application/ld+json',
 }
 
+DCAT_CLEAN_TAGS = 'ckanext.dcat.clean_tags'
+
 
 def field_labels():
     '''

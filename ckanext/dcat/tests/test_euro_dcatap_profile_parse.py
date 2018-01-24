@@ -3,8 +3,6 @@ import json
 
 import nose
 
-from pylons import config
-
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF
 
@@ -15,10 +13,11 @@ try:
 except ImportError:
     from ckan.new_tests import helpers
 
+from ckan import plugins
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT)
-from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -589,7 +588,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('dcat_publisher_name'), 'Publishing Organization for dataset 1')
         eq_(_get_extra_value('dcat_publisher_email'), 'contact@some.org')
         eq_(_get_extra_value('language'), 'ca,en,es')
-
+    
+    @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
     def test_parse_subcatalog(self):
         publisher = {'name': 'Publisher',
                      'email': 'email@test.com',
@@ -616,7 +616,6 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         }
 
         s = RDFSerializer()
-        config[DCAT_EXPOSE_SUBCATALOGS] = 'true'
         s.serialize_catalog(catalog_dict, dataset_dicts=[dataset])
         g = s.g
 
@@ -651,7 +650,6 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             # check if we had subcatalog in extras
             assert_true(has_subcat)
 
-        config[DCAT_EXPOSE_SUBCATALOGS] = 'false'
 
 class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
@@ -896,3 +894,40 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         datasets = [d for d in p.datasets()]
         
         eq_(len(datasets[0]['tags']), 3)
+
+    INVALID_TAG = "Som`E-in.valid tag!;"
+    VALID_TAG = {'name': 'some-invalid-tag'}
+
+    @helpers.change_config(DCAT_CLEAN_TAGS, 'true')
+    def test_tags_with_commas_clean_tags_on(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert_true(self.VALID_TAG in datasets[0]['tags'])
+        assert_true(self.INVALID_TAG not in datasets[0]['tags'])
+
+
+    @helpers.change_config(DCAT_CLEAN_TAGS, 'false')
+    def test_tags_with_commas_clean_tags_off(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        # when config flag is set to false, bad tags can happen
+        
+        datasets = [d for d in p.datasets()]
+        assert_true(self.VALID_TAG not in datasets[0]['tags'])
+        assert_true({'name': self.INVALID_TAG} in datasets[0]['tags'])

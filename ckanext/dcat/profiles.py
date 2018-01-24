@@ -13,8 +13,9 @@ from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
+from ckanext.harvest.harvesters.base import munge_tag
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -676,7 +677,6 @@ class EuropeanDCATAPProfile(RDFProfile):
 
     def parse_dataset(self, dataset_dict, dataset_ref):
 
-        dataset_dict['tags'] = []
         dataset_dict['extras'] = []
         dataset_dict['resources'] = []
 
@@ -705,8 +705,11 @@ class EuropeanDCATAPProfile(RDFProfile):
             keywords.remove(keyword)
             keywords.extend([k.strip() for k in keyword.split(',')])
 
-        for keyword in keywords:
-            dataset_dict['tags'].append({'name': keyword})
+        # replace munge_tag to noop if there's no need to clean tags
+        do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
+        tags_val = [munge_tag(tag) if do_clean else tag for tag in keywords]
+        tags = [{'name': tag} for tag in tags_val]
+        dataset_dict['tags'] = tags
 
         # Extras
 
