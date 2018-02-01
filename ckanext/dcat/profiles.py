@@ -13,7 +13,7 @@ from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
-from ckanext.harvest.harvesters.base import munge_tag
+from ckan.lib.munge import munge_tag
 
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
