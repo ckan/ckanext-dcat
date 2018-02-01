@@ -1091,12 +1091,12 @@ class EuropeanDCATAPProfile(RDFProfile):
                 self._add_date_triple(temporal_extent, SCHEMA.endDate, end)
             g.add((dataset_ref, DCT.temporal, temporal_extent))
 
-        # Spatial
+        # spatial_name
         spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
-        spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
+        spatial_name = self._get_dataset_value(dataset_dict, 'spatial_name')
         spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
 
-        if spatial_uri or spatial_text or spatial_geom:
+        if spatial_uri or spatial_name or spatial_geom:
             if spatial_uri:
                 spatial_ref = URIRef(spatial_uri)
             else:
@@ -1105,8 +1105,8 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((spatial_ref, RDF.type, DCT.Location))
             g.add((dataset_ref, DCT.spatial, spatial_ref))
 
-            if spatial_text:
-                g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
+            if spatial_name:
+                g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_name)))
 
             if spatial_geom:
                 # GeoJSON
