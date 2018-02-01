@@ -897,6 +897,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         items = [
             ('issued', DCT.issued, ['metadata_created'], Literal),
             ('modified', DCT.modified, ['metadata_modified'], Literal),
+            ('created', DCT.created,None, Literal),
         ]
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
