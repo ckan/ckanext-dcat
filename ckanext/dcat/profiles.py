@@ -1033,6 +1033,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 g.add((spatial_ref,
                        LOCN.geometry,
                        Literal(spatial_geom, datatype=GEOJSON_IMT)))
+                # WKT, because GeoDCAT-AP says so
                 try:
                     g.add((spatial_ref,
                            LOCN.geometry,
