@@ -804,7 +804,15 @@ To disable this behavior, you can set the following config value in your ini fil
 To add [structured data](https://developers.google.com/search/docs/guides/intro-structured-data) to dataset pages, activate the `structured_data` plugin in your ini file.
 
 By default this uses the `schemaorg` profile (see [profiles](#profiles)) to serialize the dataset to JSON-LD, which is then added to the dataset detail page.
-Example:
+To change the schema, you have to override the Jinja template block called `structured_data` in [`templates/package/read_base.html`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/templates/package/read_base.html) and call the template helper function with different parameters:
+
+    {% block structured_data %}
+      <script type="application/ld+json">
+      {{ h.structured_data(pkg.id, ['my_custom_schema'])|safe }}
+      </script>
+    {% endblock %}
+
+Example output of structured data in JSON-LD:
 
     < ... >
         <script type="application/ld+json">
