@@ -78,7 +78,12 @@ These are implemented internally using:
 
 ## RDF DCAT endpoints
 
-When the `dcat` plugin is enabled, the following RDF endpoints are available on your CKAN instance. The schema used on the serializations can be customized using [profiles](#profiles).
+By default when the `dcat` plugin is enabled, the following RDF endpoints are available on your CKAN instance. The schema used on the serializations can be customized using [profiles](#profiles).
+
+To disable the RDF endpoints, you can set the following config in your ini file:
+
+    ckanext.dcat.enable_rdf_endpoints = False
+
 
 ### Dataset endpoints
 

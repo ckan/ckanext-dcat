@@ -208,6 +208,16 @@ class TestEndpoints(helpers.FunctionalTestBase):
         app = self._get_test_app()
         app.get(url, status=404)
 
+    @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
+    def test_dataset_endpoint_disabled(self):
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+        url = url_for('dcat_dataset', _id=dataset['id'], _format='xml')
+
+        app = self._get_test_app()
+        app.get(url, status=404)
+
     def test_dataset_form_is_rendered(self):
         sysadmin = factories.Sysadmin()
         env = {'REMOTE_USER': sysadmin['name'].encode('ascii')}
@@ -338,6 +348,13 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
         eq_(self._object_value(g, pagination, HYDRA.lastPage),
             url_for('dcat_catalog', _format='rdf', page=2, host='test.ckan.net'))
+
+    @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
+    def test_catalog_endpoint_disabled(self):
+        url = url_for('dcat_catalog', _format='rdf')
+
+        app = self._get_test_app()
+        app.get(url, status=404)
 
 
 class TestAcceptHeader(helpers.FunctionalTestBase):
