@@ -22,17 +22,13 @@ assert_true = nose.tools.assert_true
 
 class TestEndpoints(helpers.FunctionalTestBase):
 
-    @classmethod
-    def teardown_class(cls):
-        super(TestEndpoints, cls).teardown_class()
-        helpers.reset_db()
-
     def setup(self):
         if not p.plugin_loaded('dcat'):
             p.load('dcat')
 
     def teardown(self):
         p.unload('dcat')
+        helpers.reset_db()
 
     def _object_value(self, graph, subject, predicate):
 
@@ -222,11 +218,10 @@ class TestEndpoints(helpers.FunctionalTestBase):
         dataset = factories.Dataset(
             notes='Test dataset'
         )
+        # without the route, url_for returns the given parameters
         url = url_for('dcat_dataset', _id=dataset['id'], _format='xml')
-        print url
-
-        app = self._get_test_app()
-        app.get(url, status=404)
+        assert not url.startswith('/')
+        assert url.startswith('dcat_dataset')
 
     def test_dataset_form_is_rendered(self):
         sysadmin = factories.Sysadmin()
@@ -363,11 +358,10 @@ class TestEndpoints(helpers.FunctionalTestBase):
     def test_catalog_endpoint_disabled(self):
         p.unload('dcat')
         p.load('dcat')
+        # without the route, url_for returns the given parameters
         url = url_for('dcat_catalog', _format='rdf')
-        print url
-
-        app = self._get_test_app()
-        app.get(url, status=404)
+        assert not url.startswith('/')
+        assert url.startswith('dcat_catalog')
 
 
 class TestAcceptHeader(helpers.FunctionalTestBase):
