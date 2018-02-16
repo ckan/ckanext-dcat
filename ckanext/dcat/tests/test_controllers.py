@@ -27,6 +27,13 @@ class TestEndpoints(helpers.FunctionalTestBase):
         super(TestEndpoints, cls).teardown_class()
         helpers.reset_db()
 
+    def setup(self):
+        if not p.plugin_loaded('dcat'):
+            p.load('dcat')
+
+    def teardown(self):
+        p.unload('dcat')
+
     def _object_value(self, graph, subject, predicate):
 
         objects = [o for o in graph.objects(subject, predicate)]
