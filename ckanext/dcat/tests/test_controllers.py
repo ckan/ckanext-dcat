@@ -23,12 +23,12 @@ assert_true = nose.tools.assert_true
 class TestEndpoints(helpers.FunctionalTestBase):
 
     def setup(self):
+        super(TestEndpoints, self).setup()
         if not p.plugin_loaded('dcat'):
             p.load('dcat')
 
     def teardown(self):
         p.unload('dcat')
-        helpers.reset_db()
 
     def _object_value(self, graph, subject, predicate):
 
