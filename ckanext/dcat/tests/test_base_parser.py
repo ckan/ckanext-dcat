@@ -1,6 +1,6 @@
 import nose
 
-from pylons import config
+from ckantoolkit import config
 
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace, RDF

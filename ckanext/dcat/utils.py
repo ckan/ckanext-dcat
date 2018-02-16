@@ -1,7 +1,16 @@
 import logging
 import uuid
+import json
 
-from pylons import config
+from ckantoolkit import config, h
+
+try:
+    # CKAN >= 2.6
+    from ckan.exceptions import HelperError
+except ImportError:
+    # CKAN < 2.6
+    class HelperError(Exception):
+        pass
 
 from ckan import model
 import ckan.plugins.toolkit as toolkit
@@ -59,6 +68,43 @@ def field_labels():
         'created': _('Created'),
     }
 
+def helper_available(helper_name):
+    '''
+    Checks if a given helper name is available on `h`
+    '''
+    try:
+        getattr(h, helper_name)
+    except (AttributeError, HelperError):
+        return False
+    return True
+
+def structured_data(dataset_id, profiles=None, _format='jsonld'):
+    '''
+    Returns a string containing the structured data of the given
+    dataset id and using the given profiles (if no profiles are supplied
+    the default profiles are used).
+
+    This string can be used in the frontend.
+    '''
+    if not profiles:
+        profiles = ['schemaorg']
+
+    data = toolkit.get_action('dcat_dataset_show')(
+        {},
+        {
+            'id': dataset_id, 
+            'profiles': profiles, 
+            'format': _format, 
+        }
+    )
+    # parse result again to prevent UnicodeDecodeError and add formatting
+    try:
+        json_data = json.loads(data)
+        return json.dumps(json_data, sort_keys=True,
+                          indent=4, separators=(',', ': '))
+    except ValueError:
+        # result was not JSON, return anyway
+        return data
 
 def catalog_uri():
     '''
