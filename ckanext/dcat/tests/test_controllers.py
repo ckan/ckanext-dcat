@@ -210,10 +210,13 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
     @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
     def test_dataset_endpoint_disabled(self):
+        p.unload('dcat')
+        p.load('dcat')
         dataset = factories.Dataset(
             notes='Test dataset'
         )
         url = url_for('dcat_dataset', _id=dataset['id'], _format='xml')
+        print url
 
         app = self._get_test_app()
         app.get(url, status=404)
@@ -351,7 +354,10 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
     @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
     def test_catalog_endpoint_disabled(self):
+        p.unload('dcat')
+        p.load('dcat')
         url = url_for('dcat_catalog', _format='rdf')
+        print url
 
         app = self._get_test_app()
         app.get(url, status=404)
