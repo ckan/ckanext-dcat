@@ -5,9 +5,10 @@ from ckantoolkit import config
 
 from ckan.plugins import toolkit
 
-from ckantoolkit.tests import helpers
+from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.logic import _pagination_info
+from ckanext.dcat.processors import RDFParser
 
 eq_ = nose.tools.eq_
 assert_raises = nose.tools.assert_raises
@@ -256,3 +257,47 @@ class TestPagination(object):
 
         assert_raises(toolkit.ValidationError,
                       _pagination_info, query, data_dict)
+
+
+class TestActions(helpers.FunctionalTestBase):
+   def test_dataset_show_with_format(self):
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        content = helpers.call_action('dcat_dataset_show', id=dataset['id'], _format='xml')
+
+        # Parse the contents to check it's an actual serialization
+        p = RDFParser()
+
+        p.parse(content, _format='xml')
+
+        dcat_datasets = [d for d in p.datasets()]
+
+        eq_(len(dcat_datasets), 1)
+
+        dcat_dataset = dcat_datasets[0]
+
+        eq_(dcat_dataset['title'], dataset['title'])
+        eq_(dcat_dataset['notes'], dataset['notes'])
+
+   def test_dataset_show_without_format(self):
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        content = helpers.call_action('dcat_dataset_show', id=dataset['id'])
+
+        # Parse the contents to check it's an actual serialization
+        p = RDFParser()
+
+        p.parse(content)
+
+        dcat_datasets = [d for d in p.datasets()]
+
+        eq_(len(dcat_datasets), 1)
+
+        dcat_dataset = dcat_datasets[0]
+
+        eq_(dcat_dataset['title'], dataset['title'])
+        eq_(dcat_dataset['notes'], dataset['notes'])
