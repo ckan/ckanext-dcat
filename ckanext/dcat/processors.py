@@ -142,7 +142,7 @@ class RDFParser(RDFProcessor):
         '''
 
         _format = url_to_rdflib_format(_format)
-        if _format == 'pretty-xml':
+        if not _format or _format == 'pretty-xml':
             _format = 'xml'
 
         try:
@@ -284,6 +284,8 @@ class RDFSerializer(RDFProcessor):
 
         self.graph_from_dataset(dataset_dict)
 
+        if not _format:
+            _format = 'xml'
         _format = url_to_rdflib_format(_format)
 
         if _format == 'json-ld':
@@ -328,6 +330,8 @@ class RDFSerializer(RDFProcessor):
         if pagination_info:
             self._add_pagination_triples(pagination_info)
 
+        if not _format:
+            _format = 'xml'
         _format = url_to_rdflib_format(_format)
         output = self.g.serialize(format=_format)
 
