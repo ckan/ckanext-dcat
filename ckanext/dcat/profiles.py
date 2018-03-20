@@ -924,26 +924,16 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Get topic rdf from scheming
         # Get schema from scheming
         try:
-            from ckanext.scheming import helpers as hs
-            schema = hs.scheming_dataset_schemas()
-            #print "**************** schema"
-            dataset = schema['dataset']
-            field_list = dataset['dataset_fields']
-            for x in field_list:
-                if x['field_name'] == 'topic_category':
-                    rdf_list = x['choices']
-                    #print json.dumps(rdf_list, indent=3)
-
-            for value in dataset_dict.get('topic_category', []):
-                for r in rdf_list:
-                    if r['value']==value:
-                        uri_ref = r['rdf']
-                        break
-
+            groups=  dataset_dict.get('groups', [])
+            for gr in groups:
+                value = toolkit.get_action('group_show')({},{'id':gr['name'], 'include_users': False})
+                uri_ref = value['homepage']
                 g.add((dataset_ref, DCAT.subject, URIRef(uri_ref)))
 
-        except:
-            print "dcat - something did not work"
+        except (ValueError):
+            print "dcat - something did not work:"
+            print ValueError
+
 
         # Maintainer - Metadata Point of Contact
         if any([
