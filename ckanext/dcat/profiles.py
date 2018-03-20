@@ -927,6 +927,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             groups=  dataset_dict.get('groups', [])
             for gr in groups:
                 value = toolkit.get_action('group_show')({},{'id':gr['name'], 'include_users': False})
+                print value
+                if value['type_of_group']!= 'categories':
+                    continue
                 uri_ref = value['homepage']
                 g.add((dataset_ref, DCAT.subject, URIRef(uri_ref)))
 
