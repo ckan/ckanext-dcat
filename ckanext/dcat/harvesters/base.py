@@ -351,14 +351,7 @@ class DCATHarvester(HarvesterBase):
         if status == 'change':
             existing_dataset = self._get_existing_dataset(harvest_object.guid)
             if existing_dataset:
-                # check if resources already exist based on their URL
-                existing_resources = existing_dataset.get('resources')
-                resource_mapping = {r.get('url'): r.get('id')
-                                    for r in existing_resources}
-                for resource in package_dict.get('resources'):
-                    res_url = resource.get('url')
-                    if res_url and res_url in resource_mapping:
-                        resource['id'] = resource_mapping[res_url]
+                copy_across_resource_ids(existing_dataset, package_dict)
 
         # Allow custom harvesters to modify the package dict before creating
         # or updating the package
@@ -413,3 +406,52 @@ class DCATHarvester(HarvesterBase):
         model.Session.commit()
 
         return True
+
+def copy_across_resource_ids(existing_dataset, harvested_dataset):
+    '''Compare the resources in a dataset existing in the CKAN database with
+    the resources in a freshly harvested copy, and for any resources that are
+    the same, copy the resource ID into the harvested_dataset dict.
+    '''
+    # take a copy of the existing_resources so we can remove them when they are
+    # matched - we don't want to match them more than once.
+    existing_resources_still_to_match = \
+        [r for r in existing_dataset.get('resources')]
+
+    # we match resources a number of ways. we'll compute an 'identity' of a
+    # resource in both datasets and see if they match.
+    # start with the surest way of identifying a resource, before reverting
+    # to closest matches.
+    resource_identity_functions = [
+        lambda r: r['uri'],  # URI is best
+        lambda r: (r['url'], r['title'], r['format']),
+        lambda r: (r['url'], r['title']),
+        lambda r: r['url'],  # same URL is fine if nothing else matches
+    ]
+
+    for resource_identity_function in resource_identity_functions:
+        # calculate the identities of the existing_resources
+        existing_resource_identities = {}
+        for r in existing_resources_still_to_match:
+            try:
+                identity = resource_identity_function(r)
+                existing_resource_identities[identity] = r
+            except KeyError:
+                pass
+
+        # calculate the identities of the harvested_resources
+        for resource in harvested_dataset.get('resources'):
+            try:
+                identity = resource_identity_function(resource)
+            except KeyError:
+                identity = None
+            if identity and identity in existing_resource_identities:
+                # we got a match with the existing_resources - copy the id
+                matching_existing_resource = \
+                    existing_resource_identities[identity]
+                resource['id'] = matching_existing_resource['id']
+                # make sure we don't match this existing_resource again
+                del existing_resource_identities[identity]
+                existing_resources_still_to_match.remove(
+                    matching_existing_resource)
+        if not existing_resources_still_to_match:
+            break

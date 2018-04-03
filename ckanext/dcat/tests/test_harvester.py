@@ -511,8 +511,6 @@ class FunctionalHarvestTest(object):
         harvest_source = h.call_action('harvest_source_create',
                                        {}, **source_dict)
 
-        eq_(harvest_source['source_type'], 'dcat_rdf')
-
         return harvest_source
 
     def _create_harvest_job(self, harvest_source_id):
