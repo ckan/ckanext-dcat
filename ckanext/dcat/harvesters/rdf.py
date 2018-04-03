@@ -66,27 +66,6 @@ class DCATRDFHarvester(DCATHarvester):
 
         return guid
 
-    def _get_existing_dataset(self, guid):
-        '''
-        Checks if a dataset with a certain guid extra already exists
-
-        Returns a dict as the ones returned by package_show
-        '''
-
-        datasets = model.Session.query(model.Package.id) \
-                                .join(model.PackageExtra) \
-                                .filter(model.PackageExtra.key=='guid') \
-                                .filter(model.PackageExtra.value==guid) \
-                                .filter(model.Package.state=='active') \
-                                .all()
-
-        if not datasets:
-            return None
-        elif len(datasets) > 1:
-            log.error('Found more than one dataset with the same guid: {0}'.format(guid))
-
-        return p.toolkit.get_action('package_show')({}, {'id': datasets[0][0]})
-
     def _mark_datasets_for_deletion(self, guids_in_source, harvest_job):
         '''
         Given a list of guids in the remote source, checks which in the DB

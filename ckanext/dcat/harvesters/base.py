@@ -58,7 +58,7 @@ class DCATHarvester(HarvesterBase):
 
 
             log.debug('Getting file %s', url)
-            
+
             # get the `requests` session object
             session = requests.Session()
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
@@ -158,6 +158,28 @@ class DCATHarvester(HarvesterBase):
             return obj.source.url
         return None
 
+    def _get_existing_dataset(self, guid):
+        '''
+        Checks if a dataset with a certain guid extra already exists
+
+        Returns a dict as the ones returned by package_show
+        '''
+
+        datasets = model.Session.query(model.Package.id) \
+                                .join(model.PackageExtra) \
+                                .filter(model.PackageExtra.key == 'guid') \
+                                .filter(model.PackageExtra.value == guid) \
+                                .filter(model.Package.state == 'active') \
+                                .all()
+
+        if not datasets:
+            return None
+        elif len(datasets) > 1:
+            log.error('Found more than one dataset with the same guid: {0}'
+                      .format(guid))
+
+        return p.toolkit.get_action('package_show')({}, {'id': datasets[0][0]})
+
     ## Start hooks
 
     def modify_package_dict(self, package_dict, dcat_dict, harvest_object):
@@ -171,7 +193,6 @@ class DCATHarvester(HarvesterBase):
 
     def gather_stage(self,harvest_job):
         log.debug('In DCATHarvester gather_stage')
-
 
         ids = []
 
@@ -324,6 +345,20 @@ class DCATHarvester(HarvesterBase):
 
         if not package_dict.get('name'):
             package_dict['name'] = self._get_package_name(harvest_object, package_dict['title'])
+
+        # copy across resource ids from the existing dataset, otherwise they'll
+        # be recreated with new ids
+        if status == 'change':
+            existing_dataset = self._get_existing_dataset(harvest_object.guid)
+            if existing_dataset:
+                # check if resources already exist based on their URL
+                existing_resources = existing_dataset.get('resources')
+                resource_mapping = {r.get('url'): r.get('id')
+                                    for r in existing_resources}
+                for resource in package_dict.get('resources'):
+                    res_url = resource.get('url')
+                    if res_url and res_url in resource_mapping:
+                        resource['id'] = resource_mapping[res_url]
 
         # Allow custom harvesters to modify the package dict before creating
         # or updating the package

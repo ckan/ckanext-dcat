@@ -12,7 +12,7 @@ import ckantoolkit.tests.helpers as h
 import ckanext.harvest.model as harvest_model
 from ckanext.harvest import queue
 
-from ckanext.dcat.harvesters import DCATRDFHarvester
+from ckanext.dcat.harvesters import DCATRDFHarvester, DCATJSONHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
@@ -26,20 +26,33 @@ eq_ = nose.tools.eq_
 
 # Start monkey-patch
 
-original_get_content_and_type = DCATRDFHarvester._get_content_and_type
+original_rdf_get_content_and_type = DCATRDFHarvester._get_content_and_type
 
-
-def _patched_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+def _patched_rdf_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
 
     httpretty.enable()
 
-    value1, value2 = original_get_content_and_type(self, url, harvest_job, page, content_type)
+    value1, value2 = original_rdf_get_content_and_type(self, url, harvest_job, page, content_type)
 
     httpretty.disable()
 
     return value1, value2
 
-DCATRDFHarvester._get_content_and_type = _patched_get_content_and_type
+DCATRDFHarvester._get_content_and_type = _patched_rdf_get_content_and_type
+
+original_json_get_content_and_type = DCATJSONHarvester._get_content_and_type
+
+def _patched_json_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+
+    httpretty.enable()
+
+    value1, value2 = original_json_get_content_and_type(self, url, harvest_job, page, content_type)
+
+    httpretty.disable()
+
+    return value1, value2
+
+DCATJSONHarvester._get_content_and_type = _patched_json_get_content_and_type
 
 # End monkey-patch
 
@@ -791,7 +804,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         results = h.call_action('package_search', {}, fq=fq)
         eq_(results['count'], 1)
 
-	existing_dataset = results['results'][0]
+        existing_dataset = results['results'][0]
         existing_resource = existing_dataset.get('resources')[0]
 
         # Mock an update in the remote file
@@ -807,8 +820,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         new_results = h.call_action('package_search', {}, fq=fq)
         eq_(new_results['count'], 1)
 
-	new_dataset = new_results['results'][0]
-	new_resource = new_dataset.get('resources')[0]
+        new_dataset = new_results['results'][0]
+        new_resource = new_dataset.get('resources')[0]
 
         eq_(existing_resource['name'], 'Example resource 1')
         eq_(len(new_dataset.get('resources')), 1)
