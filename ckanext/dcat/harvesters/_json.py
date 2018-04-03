@@ -1,6 +1,12 @@
 import json
 import logging
 from hashlib import sha1
+import uuid
+
+from ckan import model
+from ckan import logic
+from ckan import plugins as p
+from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
 from ckanext.dcat import converters
 from ckanext.dcat.harvesters.base import DCATHarvester
