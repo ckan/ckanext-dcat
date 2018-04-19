@@ -6,14 +6,11 @@ import nose
 from ckan import plugins as p
 from ckan.lib.helpers import url_for
 
-from pylons import config
+from ckantoolkit import config
 
 from rdflib import Graph
 
-try:
-    from ckan.tests import helpers, factories
-except ImportError:
-    from ckan.new_tests import helpers, factories
+from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
@@ -25,10 +22,13 @@ assert_true = nose.tools.assert_true
 
 class TestEndpoints(helpers.FunctionalTestBase):
 
-    @classmethod
-    def teardown_class(cls):
-        super(TestEndpoints, cls).teardown_class()
-        helpers.reset_db()
+    def setup(self):
+        super(TestEndpoints, self).setup()
+        if not p.plugin_loaded('dcat'):
+            p.load('dcat')
+
+    def teardown(self):
+        p.unload('dcat')
 
     def _object_value(self, graph, subject, predicate):
 
@@ -185,12 +185,43 @@ class TestEndpoints(helpers.FunctionalTestBase):
         eq_(dcat_dataset['title'], dataset['title'])
         eq_(dcat_dataset['notes'], dataset['notes'])
 
+    def test_dataset_profiles_jsonld(self):
+
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        url = url_for('dcat_dataset', _id=dataset['id'], _format='jsonld', profiles='schemaorg')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        eq_(response.headers['Content-Type'], 'application/ld+json')
+
+        content = response.body
+
+        assert '"@type": "schema:Dataset"' in content
+        assert '"schema:description": "%s"' % dataset['notes'] in content
+
     def test_dataset_not_found(self):
         import uuid
 
         url = url_for('dcat_dataset', _id=str(uuid.uuid4()), _format='n3')
         app = self._get_test_app()
         app.get(url, status=404)
+
+    @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
+    def test_dataset_endpoint_disabled(self):
+        p.unload('dcat')
+        p.load('dcat')
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+        # without the route, url_for returns the given parameters
+        url = url_for('dcat_dataset', _id=dataset['id'], _format='xml')
+        assert not url.startswith('/')
+        assert url.startswith('dcat_dataset')
 
     def test_dataset_form_is_rendered(self):
         sysadmin = factories.Sysadmin()
@@ -322,6 +353,15 @@ class TestEndpoints(helpers.FunctionalTestBase):
 
         eq_(self._object_value(g, pagination, HYDRA.lastPage),
             url_for('dcat_catalog', _format='rdf', page=2, host='test.ckan.net'))
+
+    @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
+    def test_catalog_endpoint_disabled(self):
+        p.unload('dcat')
+        p.load('dcat')
+        # without the route, url_for returns the given parameters
+        url = url_for('dcat_catalog', _format='rdf')
+        assert not url.startswith('/')
+        assert url.startswith('dcat_catalog')
 
 
 class TestAcceptHeader(helpers.FunctionalTestBase):
@@ -476,3 +516,72 @@ class TestTranslations(helpers.FunctionalTestBase):
         response = app.get(url)
 
         assert 'Notes de la versió' in response.body
+
+    @helpers.change_config('ckanext.dcat.translate_keys', True)
+    def test_labels_enable_by_config(self):
+        dataset = factories.Dataset(extras=[
+            {'key': 'version_notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert 'Notes de la versió' in response.body
+        assert not 'Version notes' in response.body
+
+    @helpers.change_config('ckanext.dcat.translate_keys', False)
+    def test_labels_disable_by_config(self):
+        dataset = factories.Dataset(extras=[
+            {'key': 'version_notes', 'value': 'bla'}
+        ])
+
+        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert not 'Notes de la versió' in response.body
+        assert not 'Version notes' in response.body
+        assert 'version_notes' in response.body
+
+
+class TestStructuredData(helpers.FunctionalTestBase):
+
+    @classmethod
+    def teardown_class(cls):
+        super(TestStructuredData, cls).teardown_class()
+        helpers.reset_db()
+
+    def test_structured_data_generated(self):
+
+        dataset = factories.Dataset(
+            notes='test description'
+        )
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+
+        assert '<script type="application/ld+json">' in response.body
+        assert '"schema:description": "test description"' in response.body
+
+
+    def test_structured_data_not_generated(self):
+        p.unload('structured_data')
+
+        dataset = factories.Dataset(
+            notes='test description'
+        )
+
+        url = url_for('dataset_read', id=dataset['id'])
+
+        app = self._get_test_app()
+
+        response = app.get(url)
+        assert not '<script type="application/ld+json">' in response.body

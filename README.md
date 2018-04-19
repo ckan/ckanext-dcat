@@ -18,6 +18,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
+    - [Transitive harvesting](#transitive-harvesting)
     - [Extending the RDF harvester](#extending-the-rdf-harvester)
 - [JSON DCAT harvester](#json-dcat-harvester)
 - [RDF DCAT to CKAN dataset mapping](#rdf-dcat-to-ckan-dataset-mapping)
@@ -28,6 +29,8 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [Command line interface](#command-line-interface)
     - [Compatibility mode](#compatibility-mode)
 - [XML DCAT harvester (deprecated)](#xml-dcat-harvester-deprecated)
+- [Translation of fields](#translation-of-fields)
+- [Structured Data](#structured-data)
 - [Running the Tests](#running-the-tests)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
@@ -71,11 +74,16 @@ These are implemented internally using:
 
 4.  Enable the required plugins in your ini file:
 
-        ckan.plugins = dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface
+        ckan.plugins = dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface structured_data
 
 ## RDF DCAT endpoints
 
-When the `dcat` plugin is enabled, the following RDF endpoints are available on your CKAN instance. The schema used on the serializations can be customized using [profiles](#profiles).
+By default when the `dcat` plugin is enabled, the following RDF endpoints are available on your CKAN instance. The schema used on the serializations can be customized using [profiles](#profiles).
+
+To disable the RDF endpoints, you can set the following config in your ini file:
+
+    ckanext.dcat.enable_rdf_endpoints = False
+
 
 ### Dataset endpoints
 
@@ -115,6 +123,11 @@ RDF representations will be advertised using `<link rel="alternate">` tags on th
 Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details about how these are generated and how to customize the output using [profiles](#profiles).
 
 
+You can specify the profile by using the `profiles=<profile1>,<profile2>` query parameter on the dataset endpoint (as a comma-separated list):
+
+* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml?profiles=euro_dcat_ap,sweden_dcat_ap`
+* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.jsonld?profiles=schemaorg`
+
 *Note*: When using this plugin, the above endpoints will replace the old deprecated ones that were part of CKAN core.
 
 
@@ -122,7 +135,7 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_date={date}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -163,9 +176,13 @@ The default number of datasets returned (100) can be modified by CKAN site maint
 
     ckanext.dcat.datasets_per_page = 20
 
-The catalog endpoint also supports a `modified_date` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
+The catalog endpoint also supports a `modified_since` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
 
 http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
+
+It's possible to specify the profile(s) to use for the serialization using the `profiles` parameter:
+
+http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
 
 
 
@@ -227,11 +244,34 @@ The harvester will look at the `content-type` HTTP header field to determine the
 
 *TODO*: configure profiles.
 
+
+### Transitive harvesting
+
+In transitive harvesting (i.e., when you harvest a catalog A, and a catalog X harvests your catalog), you may want to provide the original catalog info for each harvested dataset.
+
+By setting the configuration option `ckanext.dcat.expose_subcatalogs = True` in your ini file, you'll enable the storing and publication of the source catalog for each harvested dataset.
+
+The information contained in the harvested `dcat:Catalog` node will be stored as extras into the harvested datasets.
+When serializing, your Catalog will expose the harvested Catalog using the `dct:hasPart` relation. This means that your catalog will have this structure:
+- `dcat:Catalog` (represents your current catalog)
+  - `dcat:dataset` (1..n, the dataset created withing your catalog)
+  - `dct:hasPart` 
+     - `dcat:Catalog` (info of one of the harvested catalogs)
+        - `dcat:dataset` (dataset in the harvested catalog)
+  - `dct:hasPart` 
+     - `dcat:Catalog` (info of one of another harvester catalog)
+     ...   
+
+
 ### Extending the RDF harvester
 
 The DCAT RDF harvester has extension points that allow to modify its behaviour from other extensions. These can be used by extensions implementing
-the `IDCATRDFHarvester` interface. Right now it provides the `before_download` and `after_download` methods that are called just before and after
-retrieving the remote file, and can be used for instance to validate the contents.
+the `IDCATRDFHarvester` interface. Right now it provides the following methods:
+
+* `before_download` and `after_download`: called just before and after retrieving the remote file, and can be used for instance to validate the contents.
+* `update_session`: called before making the remote requests to update the `requests` session object, useful to add additional headers or for setting client certificates. Check the [`requests` documentation](http://docs.python-requests.org/en/master/user/advanced/#session-objects) for details.
+* `before_create` / `after_create`: called before and after the `package_create` action has been performed
+* `before_update` / `after_update`: called before and after the `package_update` action has been performed
 
 To know more about these methods, please check the source of [`ckanext-dcat/ckanext/dcat/interfaces.py`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/interfaces.py).
 
@@ -603,6 +643,7 @@ need custom logic, you can write a custom to profile that extends or replaces th
 The default profile is mostly based in the
 [DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). It is actually fully-compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11). As mentioned before though, it should be generic enough for most DCAT based representations.
 
+This plugin also contains a profile to serialize a CKAN dataset to a [schema.org Dataset](http://schema.org/Dataset) called `schemaorg`. This is especially useful to provide [JSON-LD structured data](#structured-data).
 
 To define which profiles to use you can:
 
@@ -752,6 +793,107 @@ The old DCAT XML harvester (`dcat_xml_harvester`) is now deprecated, in favour o
 Loading it on the ini file will result in an exception on startup.
 
 The XML serialization described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site is a valid RDF/XML one, so changing the harvester should have no effect. There might be slight differences in the way CKAN fields are created though, check [Compatibility mode](#compatibility-mode) for more details.
+
+## Translation of fields
+
+The `dcat` plugin automatically translates the keys of the dcat fields used in the frontend.
+This makes it very easy to display the fields in the current language.
+
+To disable this behavior, you can set the following config value in your ini file (default: True):
+
+    ckanext.dcat.translate_keys = False
+
+
+## Structured data
+
+To add [structured data](https://developers.google.com/search/docs/guides/intro-structured-data) to dataset pages, activate the `structured_data` and `dcat` plugins in your ini file:
+
+        ckan.plugins = dcat structured_data
+
+By default this uses the `schemaorg` profile (see [profiles](#profiles)) to serialize the dataset to JSON-LD, which is then added to the dataset detail page.
+To change the schema, you have to override the Jinja template block called `structured_data` in [`templates/package/read_base.html`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/templates/package/read_base.html) and call the template helper function with different parameters:
+
+    {% block structured_data %}
+      <script type="application/ld+json">
+      {{ h.structured_data(pkg.id, ['my_custom_schema'])|safe }}
+      </script>
+    {% endblock %}
+
+Example output of structured data in JSON-LD:
+
+    < ... >
+        <script type="application/ld+json">
+        {
+            "@context": {
+                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                "schema": "http://schema.org/",
+                "xsd": "http://www.w3.org/2001/XMLSchema#"
+            },
+            "@graph": [
+                {
+                    "@id": "http://demo.ckan.org/organization/c64835bf-b3b7-496d-a7cf-ed645dbf4b08",
+                    "@type": "schema:Organization",
+                    "schema:contactPoint": {
+                        "@id": "_:Nb9677036512840e1a00c9fec2818abe4"
+                    },
+                    "schema:name": "Public Transport Organization"
+                },
+                {
+                    "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307/resource/5f1cafa2-3c92-4e89-85d1-60f014c23e0f",
+                    "@type": "schema:DataDownload",
+                    "schema:dateModified": "2018-01-18T00:00:00",
+                    "schema:datePublished": "2018-01-02T00:00:00",
+                    "schema:description": "API for all the public transport stations",
+                    "schema:encodingFormat": "JSON",
+                    "schema:inLanguage": [
+                        "de",
+                        "it",
+                        "fr",
+                        "en"
+                    ],
+                    "schema:license": "https://creativecommons.org/licenses/by/4.0/",
+                    "schema:name": "Stations API",
+                    "schema:url": "http://stations.example.com/api"
+                },
+                {
+                    "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307",
+                    "@type": "schema:Dataset",
+                    "schema:dateModified": "2018-01-18T09:41:21.076522",
+                    "schema:datePublished": "2017-01-01T00:00:00",
+                    "schema:distribution": [
+                        {
+                            "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307/resource/5f1cafa2-3c92-4e89-85d1-60f014c23e0f"
+                        },
+                        {
+                            "@id": "http://demo.ckan.org/dataset/69a5bc23-3abd-4af7-8d3d-8f0d08698307/resource/bf3a0b61-415b-47b8-9cd0-86a14f8dc165"
+                        }
+                    ],
+                    "schema:identifier": "69a5bc23-3abd-4af7-8d3d-8f0d08698307",
+                    "schema:inLanguage": [
+                        "en",
+                        "de",
+                        "fr",
+                        "it"
+                    ],
+                    "schema:name": "Station list",
+                    "schema:publisher": {
+                        "@id": "http://demo.ckan.org/organization/c64835bf-b3b7-496d-a7cf-ed645dbf4b08"
+                    }
+                },
+                {
+                    "@id": "_:Nb9677036512840e1a00c9fec2818abe4",
+                    "@type": "schema:ContactPoint",
+                    "schema:contactType": "customer service",
+                    "schema:email": "contact@example.com",
+                    "schema:name": "Public Transport Support",
+                    "schema:url": "https://public-transport.example.com"
+                }
+            ]
+        }
+        </script>
+      </body>
+    </html>
 
 
 ## Running the Tests

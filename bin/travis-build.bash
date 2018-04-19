@@ -1,4 +1,4 @@
-#!/bin/bash
+    #nex!/bin/bash
 set -e
 
 echo "This is travis-build.bash..."
@@ -10,9 +10,13 @@ sudo apt-get install solr-jetty
 echo "Installing CKAN and its Python dependencies..."
 git clone https://github.com/ckan/ckan
 cd ckan
-if [ $CKANVERSION != 'master' ]
+if [ $CKANVERSION == 'master' ]
 then
-    git checkout release-v$CKANVERSION-latest
+    echo "CKAN version: master"
+else
+    CKAN_TAG=$(git tag | grep ^ckan-$CKANVERSION | sort --version-sort | tail -n 1)
+    git checkout $CKAN_TAG
+    echo "CKAN version: ${CKAN_TAG#ckan-}"
 fi
 
 # install the recommended version of setuptools

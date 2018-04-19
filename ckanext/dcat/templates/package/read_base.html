@@ -6,3 +6,21 @@
    <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='xml', qualified=True) }}"/>
    <link rel="alternate" type="application/ld+json" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='jsonld', qualified=True) }}"/>
 {% endblock -%}
+{% block body_extras %}
+  {{ super() }}
+  {% block structured_data %}
+    {#
+    h.structured_data is defined in the 'structured_data' plugin,
+    you have to activate the plugin (or implement the method yourself)
+    to make use of this feature.
+    More information about structured data:
+    https://developers.google.com/search/docs/guides/intro-structured-data
+    #}
+
+    {% if h.helper_available('structured_data') %}
+    <script type="application/ld+json">
+    {{ h.structured_data(pkg.id)|safe }}
+    </script>
+    {% endif %}
+  {% endblock %}
+{% endblock %}

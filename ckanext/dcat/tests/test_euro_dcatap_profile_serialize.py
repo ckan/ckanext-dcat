@@ -2,7 +2,7 @@ import json
 
 import nose
 
-from pylons import config
+from ckantoolkit import config
 
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
@@ -10,15 +10,13 @@ from rdflib.namespace import RDF
 
 from geomet import wkt
 
-try:
-    from ckan.tests import helpers, factories
-except ImportError:
-    from ckan.new_tests import helpers, factories
+from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
                                    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT)
+from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -851,3 +849,57 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         eq_(unicode(catalog), utils.catalog_uri())
 
         assert self._triple(g, catalog, DCT.modified, dataset['metadata_modified'], XSD.dateTime)
+
+    @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
+    def test_subcatalog(self):
+        publisher = {'name': 'Publisher',
+                     'email': 'email@test.com',
+                     'type': 'Publisher',
+                     'uri': 'http://pub.lish.er'}
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'test dataset',
+            'extras': [
+                {'key': 'source_catalog_title', 'value': 'Subcatalog example'},
+                {'key': 'source_catalog_homepage', 'value': 'http://subcatalog.example'},
+                {'key': 'source_catalog_description', 'value': 'Subcatalog example description'},
+                {'key': 'source_catalog_language', 'value': 'http://publications.europa.eu/resource/authority/language/ITA'},
+                {'key': 'source_catalog_modified', 'value': '2000-01-01'},
+                {'key': 'source_catalog_publisher', 'value': json.dumps(publisher)}
+            ]
+        }        
+        catalog_dict = {
+            'title': 'My Catalog',
+            'description': 'An Open Data Catalog',
+            'homepage': 'http://example.com',
+            'language': 'de',
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        s.serialize_catalog(catalog_dict, dataset_dicts=[dataset])
+
+        # check if we have catalog->hasPart->subcatalog
+        catalogs = list(g.triples((None, RDF.type, DCAT.Catalog,)))
+        root = list(g.subjects(DCT.hasPart, None))
+        assert_true(len(catalogs)>0, catalogs)
+        assert_true(len(root) == 1, root)
+
+        root_ref = root[0]
+        
+        # check subcatalog
+        subcatalogs = list(g.objects(root_ref, DCT.hasPart))
+        assert_true(len(subcatalogs) == 1)
+        stitle = list(g.objects(subcatalogs[0], DCT.title))
+        assert_true(len(stitle) == 1)
+        assert_true(str(stitle[0]) == 'Subcatalog example')
+
+        # check dataset
+        dataset_ref = list(g.subjects(RDF.type, DCAT.Dataset))
+        assert_true(len(dataset_ref) == 1)
+        dataset_ref = dataset_ref[0]
+        dataset_title = list(g.objects(dataset_ref, DCT.title))
+        assert_true(len(dataset_title) == 1)
+        assert_true(unicode(dataset_title[0]) == dataset['title'])

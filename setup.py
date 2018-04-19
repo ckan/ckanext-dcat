@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.0.6'
+version = '0.0.7'
 
 setup(
     name='ckanext-dcat',
@@ -15,7 +15,7 @@ setup(
     url='https://github.com/okfn/ckanext-dcat',
     license='AGPL',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
-    namespace_packages=['ckanext', 'ckanext.dcat'],
+    namespace_packages=['ckanext'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -33,6 +33,8 @@ setup(
 
     dcat=ckanext.dcat.plugins:DCATPlugin
 
+    structured_data=ckanext.dcat.plugins:StructuredDataPlugin
+
     # Test plugins
     test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
     test_rdf_null_harvester=ckanext.dcat.tests.test_harvester:TestRDFNullHarvester
@@ -40,6 +42,7 @@ setup(
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
+    schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
     [paste.paster_command]
     generate_static = ckanext.dcat.commands:GenerateStaticDCATCommand
