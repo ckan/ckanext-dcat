@@ -3,7 +3,7 @@ import nose
 
 import ckantoolkit.tests.helpers as h
 
-from ckanext.dcat.harvesters.base import copy_across_resource_ids
+from ckanext.dcat.harvesters._json import copy_across_resource_ids
 from test_harvester import FunctionalHarvestTest
 
 eq_ = nose.tools.eq_
