@@ -180,6 +180,16 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
 
 class TestCopyAcrossResourceIds:
+    def test_copied_because_same_uri(self):
+        harvested_dataset = {'resources': [
+            {'uri': 'http://abc', 'url': 'http://abc'}]}
+        copy_across_resource_ids({'resources': [
+            {'uri': 'http://abc', 'url': 'http://def', 'id': '1'}]},
+            harvested_dataset,
+        )
+        eq_(harvested_dataset['resources'][0].get('id'), '1')
+        eq_(harvested_dataset['resources'][0].get('url'), 'http://abc')
+
     def test_copied_because_same_url(self):
         harvested_dataset = {'resources': [
             {'url': 'http://abc'}]}
@@ -228,6 +238,3 @@ class TestCopyAcrossResourceIds:
             harvested_dataset,
         )
         eq_(harvested_dataset['resources'][0].get('id'), None)
-
-    def test_uri_is_harvested(self):
-        pass
