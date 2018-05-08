@@ -453,7 +453,35 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
 
         assert self._triple(g, distribution, SCHEMA.encodingFormat, resource['format'])
-        assert self._triple(g, distribution, SCHEMA.fileType, resource['mimetype'])
+
+    def test_distribution_format_with_mimetype_fallback(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data/file.csv',
+            'format': '',
+            'mimetype': 'text/csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
+
+        assert self._triple(g, distribution, SCHEMA.encodingFormat, resource['mimetype'])
 
     def test_distribution_format_with_backslash(self):
 
@@ -481,6 +509,5 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
 
-        assert self._triple(g, distribution, SCHEMA.fileType, resource['format'])
         assert self._triple(g, distribution, SCHEMA.encodingFormat, resource['format'])
 
