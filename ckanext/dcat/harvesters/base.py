@@ -26,8 +26,6 @@ class DCATHarvester(HarvesterBase):
 
     force_import = False
 
-    _user_name = None
-
     def _get_content_and_type(self, url, harvest_job, page=1,
                               content_type=None):
         '''
@@ -118,17 +116,6 @@ class DCATHarvester(HarvesterBase):
                 ' out.' % url
             self._save_gather_error(msg, harvest_job)
             return None, None
-
-    def _get_user_name(self):
-        if self._user_name:
-            return self._user_name
-
-        user = p.toolkit.get_action('get_site_user')(
-            {'ignore_auth': True, 'defer_commit': True},
-            {})
-        self._user_name = user['name']
-
-        return self._user_name
 
     def _get_object_extra(self, harvest_object, key):
         '''
