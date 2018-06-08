@@ -2,6 +2,7 @@
 import time
 import nose
 
+from six.moves import xrange
 
 from ckan import plugins as p
 from ckan.lib.helpers import url_for

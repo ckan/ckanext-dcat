@@ -6,6 +6,8 @@ import nose
 import httpretty
 from mock import patch
 
+from six.moves import xrange
+
 import ckan.plugins as p
 import ckantoolkit.tests.helpers as h
 

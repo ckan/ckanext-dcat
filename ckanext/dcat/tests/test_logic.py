@@ -1,6 +1,8 @@
 import nose
 import mock
 
+from six.moves import xrange
+
 from ckantoolkit import config
 
 from ckan.plugins import toolkit

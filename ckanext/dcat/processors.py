@@ -349,7 +349,7 @@ class RDFSerializer(RDFProcessor):
         source_uri = _get_from_extra('source_catalog_homepage')
         if not source_uri:
             return
-        
+
         g = self.g
         catalog_ref = URIRef(source_uri)
 
@@ -396,9 +396,9 @@ class RDFSerializer(RDFProcessor):
                     elif val is None:
                         continue
                     g.add((agent, predicate, _type(val)))
-        
+
         return catalog_ref
-        
+
 
 if __name__ == '__main__':
 
