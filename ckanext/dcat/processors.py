@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 import argparse
 import xml
@@ -349,7 +351,7 @@ class RDFSerializer(RDFProcessor):
         source_uri = _get_from_extra('source_catalog_homepage')
         if not source_uri:
             return
-        
+
         g = self.g
         catalog_ref = URIRef(source_uri)
 
@@ -396,9 +398,9 @@ class RDFSerializer(RDFProcessor):
                     elif val is None:
                         continue
                     g.add((agent, predicate, _type(val)))
-        
+
         return catalog_ref
-        
+
 
 if __name__ == '__main__':
 
@@ -443,7 +445,7 @@ Operation mode.
 
         dataset = json.loads(contents)
         out = serializer.serialize_dataset(dataset, _format=args.format)
-        print out
+        print(out)
     else:
         parser = RDFParser(profiles=args.profile,
                            compatibility_mode=args.compat_mode)
@@ -453,4 +455,4 @@ Operation mode.
         ckan_datasets = [d for d in parser.datasets()]
 
         indent = 4 if args.pretty else None
-        print json.dumps(ckan_datasets, indent=indent)
+        print(json.dumps(ckan_datasets, indent=indent))
