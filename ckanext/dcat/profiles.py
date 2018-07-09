@@ -15,6 +15,8 @@ from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
 
+
+from ckanext.dcat import helpers as h
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
@@ -28,6 +30,7 @@ LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
 OWL = Namespace('http://www.w3.org/2002/07/owl#')
 SPDX = Namespace('http://spdx.org/rdf/terms#')
+PROV = Namespace('http://www.w3.org/ns/prov#') # Anja
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -43,6 +46,7 @@ namespaces = {
     'locn': LOCN,
     'gsp': GSP,
     'owl': OWL,
+    'prov': PROV,
 }
 
 
@@ -745,7 +749,8 @@ class EuropeanDCATAPProfile(RDFProfile):
             if values:
                 dataset_dict['extras'].append({'key': key,
                                                'value': json.dumps(values)})
-
+        #print "******************dcat 1"
+        #print json.dumps(data_dict)
         # Contact details
         contact = self._contact_details(dataset_ref, DCAT.contactPoint)
         if not contact:
@@ -897,74 +902,166 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         items = [
-            ('title', DCT.title, None, Literal),
-            ('notes', DCT.description, None, Literal),
-            ('url', DCAT.landingPage, None, URIRef),
-            ('identifier', DCT.identifier, ['guid', 'id'], Literal),
-            ('version', OWL.versionInfo, ['dcat_version'], Literal),
-            ('version_notes', ADMS.versionNotes, None, Literal),
-            ('frequency', DCT.accrualPeriodicity, None, Literal),
-            ('access_rights', DCT.accessRights, None, Literal),
-            ('dcat_type', DCT.type, None, Literal),
-            ('provenance', DCT.provenance, None, Literal),
+            ('title', DCT.title, None, Literal),#ok
+            ('notes', DCT.description, None, Literal),#ok
+            ('url', DCAT.landingPage, None, URIRef),#nicht in beispiel, optional lt. GeoDcat
+            ('identifier', DCT.identifier, ['guid', 'id'], Literal),#ok - URI?
+            ('version', OWL.versionInfo, ['dcat_version'], Literal),# optional; not in bsp
+            ('version_notes', ADMS.versionNotes, None, Literal),#nicht in GeoDcat, nicht in bsp
+            ('frequency', DCT.accrualPeriodicity, None, URIRef),# ham wir
+            ('access_rights', DCT.accessRights, None, Literal),# laut geodcat pro resource - auf distribution!
+            ('dcat_type', DCT.type, None, Literal), #' for catalog or datset' - > hier immer http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset
+            ('provenance', DCT.provenance, None, Literal),#ok - lineage
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        # Tags
+        # Anja: Try - GEht :-)
+        g.add((dataset_ref, DCT.type, URIRef('http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset')))
+
+        # Controlled vocabularies and tags - Anja, 16.11
+        #print "Hi"
+        controlled_tags = dataset_dict.get('controlled_tags',[])
+        if controlled_tags:
+            voc_list = json.loads(controlled_tags) # demnchst raus :-)
+            for x in voc_list:
+                #print x
+                if x['taxonomy'] == "gemet":
+                    tag_details = URIRef(x['uri'])
+                    g.add( (tag_details, RDF.type, SKOS.Concept) )
+                    g.add( (tag_details, SKOS.prefLabel, Literal(x['taxonomy_term'])) )
+                    g.add((dataset_ref, DCAT.theme, tag_details))
+
+
+                if x['taxonomy'] == "cf conventions":
+
+                    skos_scheme = BNode()
+                    g.add((skos_scheme, RDF.type, SKOS.ConceptScheme ))
+                    g.add((skos_scheme, DCT.title, Literal(x['taxonomy']) ))
+                    g.add((skos_scheme, DCT.issued, Literal(x['taxonomy_date']) ))
+
+                    tag_details = BNode()
+                    g.add( (tag_details, RDF.type, SKOS.Concept) )
+                    g.add( (tag_details, SKOS.prefLabel, Literal(x['taxonomy_term'])) )
+                    g.add((tag_details, SKOS.inScheme, skos_scheme))
+                    g.add((dataset_ref, DCAT.theme, tag_details))
+
+
+        # Tags - Free // Anja: No longer allowed but cpoied from controlled_vocabulary
+        # If no keyword in datset:
         for tag in dataset_dict.get('tags', []):
+            #print tag
             g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
 
         # Dates
         items = [
             ('issued', DCT.issued, ['metadata_created'], Literal),
             ('modified', DCT.modified, ['metadata_modified'], Literal),
+            ('created', DCT.created,None, Literal),
         ]
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
+
         #  Lists
         items = [
-            ('language', DCT.language, None, Literal),
-            ('theme', DCAT.theme, None, URIRef),
-            ('conforms_to', DCT.conformsTo, None, Literal),
-            ('alternate_identifier', ADMS.identifier, None, Literal),
-            ('documentation', FOAF.page, None, Literal),
-            ('related_resource', DCT.relation, None, Literal),
-            ('has_version', DCT.hasVersion, None, Literal),
-            ('is_version_of', DCT.isVersionOf, None, Literal),
-            ('source', DCT.source, None, Literal),
-            ('sample', ADMS.sample, None, Literal),
+            ('language', DCT.language, None, Literal),#ok
+            ('theme', DCAT.theme, None, URIRef), # erstmal nicht - bzw : controlled vocabulary
+            ('conforms_to', DCT.conformsTo, None, Literal), # Anja:Catalog?! Bzw SpatialRefSystem?
+            ('alternate_identifier', ADMS.identifier, None, Literal),# Anja: erstmal nicht?
+            ('documentation', FOAF.page, None, Literal), # Anja: erstmal nicht?
+            ('related_resource', DCT.relation, None, Literal),#-> erstmal nich
+            ('has_version', DCT.hasVersion, None, Literal),#-> erstmal nich
+            ('is_version_of', DCT.isVersionOf, None, Literal),#-> erstmal nich
+            #('topic_category', DCT.subject, None, URIRef),#ok - see blow
+            ('spatial_resolution', RDFS.comment, None, Literal), #Ok
+            ('source', DCT.source, None, Literal), # Anja: Catalog?
+            ('sample', ADMS.sample, None, Literal),# Anja: Nicht in GeoDcat; nicht in example
         ]
+
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        # Contact details
+        # topic_category
+        # Get topic rdf from scheming
+        # Get schema from scheming
+        try:
+            groups=  dataset_dict.get('groups', [])
+            for gr in groups:
+                value = toolkit.get_action('group_show')({},{'id':gr['name'], 'include_users': False})
+                print value
+                if value['type_of_group']!= 'categories':
+                    continue
+                uri_ref = value['homepage']
+                g.add((dataset_ref, DCAT.subject, URIRef(uri_ref)))
+
+        except (ValueError):
+            print "dcat - something did not work:"
+            print ValueError
+
+
+        # Maintainer - Metadata Point of Contact
         if any([
-            self._get_dataset_value(dataset_dict, 'contact_uri'),
-            self._get_dataset_value(dataset_dict, 'contact_name'),
-            self._get_dataset_value(dataset_dict, 'contact_email'),
+            #self._get_dataset_value(dataset_dict, 'contact_uri'),
+            #self._get_dataset_value(dataset_dict, 'contact_name'),
+            #self._get_dataset_value(dataset_dict, 'contact_email'),
             self._get_dataset_value(dataset_dict, 'maintainer'),
             self._get_dataset_value(dataset_dict, 'maintainer_email'),
-            self._get_dataset_value(dataset_dict, 'author'),
-            self._get_dataset_value(dataset_dict, 'author_email'),
+            #self._get_dataset_value(dataset_dict, 'author'),
+            #self._get_dataset_value(dataset_dict, 'author_email'),
         ]):
 
             contact_uri = self._get_dataset_value(dataset_dict, 'contact_uri')
+
             if contact_uri:
                 contact_details = URIRef(contact_uri)
             else:
                 contact_details = BNode()
+                #contact_details = Literal("abc")
 
-            g.add((contact_details, RDF.type, VCARD.Organization))
-            g.add((dataset_ref, DCAT.contactPoint, contact_details))
+            g.add((contact_details, RDF.type, VCARD.Kind))
 
             items = [
-                ('contact_name', VCARD.fn, ['maintainer', 'author'], Literal),
-                ('contact_email', VCARD.hasEmail, ['maintainer_email',
-                                                   'author_email'], Literal),
+                ('contact_name', VCARD.fn, ['maintainer'], Literal),
+                ('contact_email', VCARD.hasEmail, ['maintainer_email'], Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, contact_details, items)
 
-        # Publisher
+            g.add((dataset_ref, DCAT.contactPoint, contact_details))
+
+            # qualified attribution separate - like in example geodcat xml
+
+            agent_details = BNode()
+            g.add((agent_details, RDF.type, VCARD.Kind))
+            self._add_triples_from_dict(dataset_dict, agent_details, items)
+
+            attribution_details = BNode()
+
+            g.add((attribution_details, RDF.type, PROV.Attribution))
+            g.add((attribution_details, DCT.type, URIRef('http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/pointOfContact')))
+            g.add((attribution_details, PROV.agent, agent_details))
+
+            g.add((dataset_ref, PROV.qualifiedAttribution, attribution_details))
+
+
+        #Author - Anja 28.11.17 - > Datset Creator - Organization VCARD
+        if any([
+            self._get_dataset_value(dataset_dict, 'author'),
+            self._get_dataset_value(dataset_dict, 'author_email'),
+        ]):
+
+            contact_details = BNode()
+            g.add((contact_details, RDF.type, VCARD.Individual))
+            g.add((dataset_ref, DCT.creator, contact_details))
+            #print "************Dcat"
+            #print g
+
+            items = [
+                ('author', VCARD.fn, None, Literal),
+                ('author_email', VCARD.hasEmail, None, Literal),
+            ]
+
+            self._add_triples_from_dict(dataset_dict, contact_details, items)
+
+        # Publisher - Anja: Is the organization
         if any([
             self._get_dataset_value(dataset_dict, 'publisher_uri'),
             self._get_dataset_value(dataset_dict, 'publisher_name'),
@@ -972,28 +1069,63 @@ class EuropeanDCATAPProfile(RDFProfile):
         ]):
 
             publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
+
             if publisher_uri:
                 publisher_details = URIRef(publisher_uri)
             else:
                 # No organization nor publisher_uri
                 publisher_details = BNode()
 
-            g.add((publisher_details, RDF.type, FOAF.Organization))
-            g.add((dataset_ref, DCT.publisher, publisher_details))
+            g.add((publisher_details, RDF.type, FOAF.Agent))
 
             publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if not publisher_name and dataset_dict.get('organization'):
                 publisher_name = dataset_dict['organization']['title']
 
             g.add((publisher_details, FOAF.name, Literal(publisher_name)))
+
+            #Get Org
+            org = {}
+            try:
+                org_id = dataset_dict.get('organization')
+                if org_id:
+                    org = h.dcat_get_org(org_id['id'])
+            except:
+                pass
+
+            #print org
+
+            # Get homepage
+            publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
+
+            if org and 'homepage' in org and not publisher_url:
+                publisher_url = org['homepage']
+
+            if publisher_url:
+                g.add((publisher_details, FOAF.homepage, URIRef(publisher_url)))
+
+            #Get publisher type
+            publisher_type = self._get_dataset_value(dataset_dict, 'publisher_type')
+
+            #
+            if org  and 'organization_type' in org and not publisher_type:
+                #print json.dumps(org, indent=3)
+                publisher_type = org['organization_type']
+
+            if publisher_type:
+                g.add((publisher_details, DCT.type,URIRef(publisher_type)))
+
+            g.add((dataset_ref, DCT.publisher, publisher_details))
+
+
             # TODO: It would make sense to fallback these to organization
             # fields but they are not in the default schema and the
             # `organization` object in the dataset_dict does not include
             # custom fields
             items = [
                 ('publisher_email', FOAF.mbox, None, Literal),
-                ('publisher_url', FOAF.homepage, None, URIRef),
-                ('publisher_type', DCT.type, None, Literal),
+                #('publisher_url', FOAF.homepage, None, URIRef),
+                #('publisher_type', DCT.type, None, Literal),
             ]
 
             self._add_triples_from_dict(dataset_dict, publisher_details, items)
@@ -1011,12 +1143,12 @@ class EuropeanDCATAPProfile(RDFProfile):
                 self._add_date_triple(temporal_extent, SCHEMA.endDate, end)
             g.add((dataset_ref, DCT.temporal, temporal_extent))
 
-        # Spatial
+        # spatial_name
         spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
-        spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
+        spatial_name = self._get_dataset_value(dataset_dict, 'spatial_name')
         spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
 
-        if spatial_uri or spatial_text or spatial_geom:
+        if spatial_uri or spatial_name or spatial_geom:
             if spatial_uri:
                 spatial_ref = URIRef(spatial_uri)
             else:
@@ -1025,8 +1157,8 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((spatial_ref, RDF.type, DCT.Location))
             g.add((dataset_ref, DCT.spatial, spatial_ref))
 
-            if spatial_text:
-                g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
+            if spatial_name:
+                g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_name)))
 
             if spatial_geom:
                 # GeoJSON
@@ -1043,6 +1175,11 @@ class EuropeanDCATAPProfile(RDFProfile):
                 except (TypeError, ValueError, InvalidGeoJSONException):
                     pass
 
+        # Store licenses for usage in resources
+        lici = self._get_dataset_value(dataset_dict, 'license_id')
+        licu = self._get_dataset_value(dataset_dict, 'license_url')
+        lict = self._get_dataset_value(dataset_dict, 'license_title')
+
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
 
@@ -1054,20 +1191,46 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             #  Simple values
             items = [
-                ('name', DCT.title, None, Literal),
-                ('description', DCT.description, None, Literal),
-                ('status', ADMS.status, None, Literal),
-                ('rights', DCT.rights, None, Literal),
-                ('license', DCT.license, None, Literal),
+                ('name', DCT.title, None, Literal), # ok
+                ('description', DCT.description, None, Literal), #ok
+                ('status', ADMS.status, None, Literal), #not in geodcat
+                ('rights', DCT.rights, None, Literal), # We have access_rights - accessRights - see geodcat
+            #    ('license', DCT.license, None, Literal), # Anja: This appears to be not the right way: load licenses from dataset anyway
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
 
+            # Licenses - Anja - first version - if Standard License
+            if licu:
+                g.add((distribution,DCT.license, URIRef(licu)))
+
+            # Licenses - Anja - second version - if a statement concerning usage is used - not for us
+            #eg:
+            #rdfs:label xml:lang="en">EEA standard re-use policy: unless otherwise indicated,
+            # re-use of content on the EEA website for commercial or non-commercial purposes
+            #is permitted free of charge, provided that the source is acknowledged (http://www.eea.europa.eu/legal/copyright).
+            # Copyright holder: Directorate-General for Environment (DG ENV), European Environment Agency (EEA).
+            #g.add((distribution,RDF.type, DCT.LicenseDocument))
+
+            #if licu:
+            #    license_details =  BNode()
+            #    g.add((license_details,RDF.type, DCT.LicenseDocument))
+            #    g.add ((license_details, RDFS.label, Literal(lict)))
+            #    g.add ((distribution, DCT.license,license_details))
+
+            # Access Rights - Anja, 28.11.2017
+            ac = self._get_dataset_value(resource_dict, 'access_rights')
+            if ac:
+                access_details = BNode()
+                g.add ((access_details,RDF.type, DCT.RightsStatement))
+                g.add ((access_details, RDFS.label, Literal(ac)))
+                g.add ((distribution, DCT.accessRights,access_details))
+
             #  Lists
             items = [
-                ('documentation', FOAF.page, None, Literal),
-                ('language', DCT.language, None, Literal),
-                ('conforms_to', DCT.conformsTo, None, Literal),
+                ('documentation', FOAF.page, None, Literal), # not in geodcat
+                ('language', DCT.language, None, Literal), # dataset*
+                ('conforms_to', DCT.conformsTo, None, Literal), # catalog / catalog record?
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
@@ -1094,8 +1257,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             # Dates
             items = [
-                ('issued', DCT.issued, None, Literal),
-                ('modified', DCT.modified, None, Literal),
+                ('issued', DCT.issued, 'created', Literal),
+                ('modified', DCT.modified, 'last_modified', Literal),
             ]
 
             self._add_date_triples_from_dict(resource_dict, distribution, items)
@@ -1134,11 +1297,15 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g.add((catalog_ref, RDF.type, DCAT.Catalog))
 
+        #print "dcat catalog************+"
+        #print catalog_dict
+
         # Basic fields
         items = [
             ('title', DCT.title, config.get('ckan.site_title'), Literal),
             ('description', DCT.description, config.get('ckan.site_description'), Literal),
             ('homepage', FOAF.homepage, config.get('ckan.site_url'), URIRef),
+            #('homepage', FOAF.homepage, 'http://data.ccca.ac.at', URIRef), # Anja: getestet: geht
             ('language', DCT.language, config.get('ckan.locale_default', 'en'), Literal),
         ]
         for item in items:
@@ -1152,252 +1319,52 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Dates
         modified = self._last_catalog_modification()
+        #print modified
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
 
+        # Anja: Issued
+        issued = "2016-12-01T10:00:00.000000"  # First time data online
+        #print issued
+        if issued:
+            self._add_date_triple(catalog_ref, DCT.issued, issued)
 
-class SchemaOrgProfile(RDFProfile):
-    '''
-    An RDF profile based on the schema.org Dataset
+        #Anja: ThemeTaxonomy - aud dcat.rdf: https://www.w3.org/ns/dcat.rdf
+        #'http://www.w3.org/ns/dcat#themeTaxonomy'
+        # 'http://www.w3.org/2002/07/owl#ObjectProperty'
+        # 'http://www.w3.org/TR/vocab-dcat/'
+        #'http://www.w3.org/2004/02/skos/core#ConceptScheme'
 
-    More information and specification:
+        tt_uri = 'http://www.w3.org/ns/dcat#themeTaxonomy'
 
-    http://schema.org/Dataset
+        tt_details = URIRef(tt_uri)
 
-    Mapping between schema.org Dataset and DCAT:
+        g.add((tt_details, RDF.type, SKOS.ConceptScheme))
+        g.add((tt_details, RDF.type, URIRef('http://www.w3.org/2002/07/owl#ObjectProperty')))
+        g.add((tt_details, RDFS.isDefinedBy,URIRef('http://www.w3.org/TR/vocab-dcat/') ))
+        g.add((tt_details, SKOS.prefLabel, Literal('theme taxonomy')))
+        g.add((tt_details, RDFS.comment, Literal('The knowledge organization system (KOS) used to classify catalogs datasets.')))
+        #g.add((tt_details, RDFS.range, URIRef('http://www.w3.org/2004/02/skos/core#ConceptScheme')))
 
-    https://www.w3.org/wiki/WebSchemas/Datasets
-    '''
-    def graph_from_dataset(self, dataset_dict, dataset_ref):
+        g.add((catalog_ref,DCAT.themeTaxonomy , tt_details))
 
-        g = self.g
+        # License of our catalog
+        g.add((catalog_ref,DCT.license, URIRef('https://creativecommons.org/licenses/by/4.0/')))
 
-        # Namespaces
-        self._bind_namespaces()
+        # Anja: publisher - Sind wir :-)
+        publisher_details = URIRef('http://ccca.ac.at')
 
-        g.add((dataset_ref, RDF.type, SCHEMA.Dataset))
+        g.add((publisher_details, RDF.type, FOAF.Agent))
 
-        # Basic fields
-        self._basic_fields_graph(dataset_ref, dataset_dict)
+        publisher_name = ' Climate Change Center Austria (CCCA)'
 
-        # Tags
-        self._tags_graph(dataset_ref, dataset_dict)
+        g.add((publisher_details, FOAF.name, Literal(publisher_name)))
 
-        #  Lists
-        self._list_fields_graph(dataset_ref, dataset_dict)
+        g.add((publisher_details, FOAF.homepage, URIRef('http://data.ccca.ac.at')))
 
-        # Publisher
-        self._publisher_graph(dataset_ref, dataset_dict)
+        publisher_type = 'Academic/Scientific'
 
-        # Temporal
-        self._temporal_graph(dataset_ref, dataset_dict)
+        if publisher_type:
+            g.add((publisher_details, DCT.type,URIRef(publisher_type)))
 
-        # Spatial
-        self._spatial_graph(dataset_ref, dataset_dict)
-
-        # Resources
-        self._resources_graph(dataset_ref, dataset_dict)
-
-    def _add_date_triple(self, subject, predicate, value, _type=Literal):
-        '''
-        Adds a new triple with a date object
-
-        Dates are parsed using dateutil, and if the date obtained is correct,
-        added to the graph as an SCHEMA.DateTime value.
-
-        If there are parsing errors, the literal string value is added.
-        '''
-        if not value:
-            return
-        try:
-            default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
-            _date = parse_date(value, default=default_datetime)
-
-            self.g.add((subject, predicate, _type(_date.isoformat())))
-        except ValueError:
-            self.g.add((subject, predicate, _type(value)))
-
-    def _bind_namespaces(self):
-        self.g.bind('schema', namespaces['schema'])
-
-    def _basic_fields_graph(self, dataset_ref, dataset_dict):
-        items = [
-            ('identifier', SCHEMA.identifier, None, Literal),
-            ('title', SCHEMA.name, None, Literal),
-            ('notes', SCHEMA.description, None, Literal),
-            ('version', SCHEMA.version, ['dcat_version'], Literal),
-            ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
-            ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
-        ]
-        self._add_triples_from_dict(dataset_dict, dataset_ref, items)
-
-        items = [
-            ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
-            ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
-        ]
-
-        self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
-
-    def _tags_graph(self, dataset_ref, dataset_dict):
-        for tag in dataset_dict.get('tags', []):
-            self.g.add((dataset_ref, SCHEMA.keywords, Literal(tag['name'])))
-
-    def _list_fields_graph(self, dataset_ref, dataset_dict):
-        items = [
-            ('language', SCHEMA.inLanguage, None, Literal),
-            ('theme', SCHEMA.about, None, URIRef),
-        ]
-        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
-
-    def _publisher_graph(self, dataset_ref, dataset_dict):
-        if any([
-            self._get_dataset_value(dataset_dict, 'publisher_uri'),
-            self._get_dataset_value(dataset_dict, 'publisher_name'),
-            dataset_dict.get('organization'),
-        ]):
-
-            publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
-            if publisher_uri:
-                publisher_details = URIRef(publisher_uri)
-            else:
-                # No organization nor publisher_uri
-                publisher_details = BNode()
-
-            self.g.add((publisher_details, RDF.type, SCHEMA.Organization))
-            self.g.add((dataset_ref, SCHEMA.publisher, publisher_details))
-
-
-            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
-            if not publisher_name and dataset_dict.get('organization'):
-                publisher_name = dataset_dict['organization']['title']
-            self.g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
-
-            contact_point = BNode()
-            self.g.add((contact_point, RDF.type, SCHEMA.ContactPoint))
-            self.g.add((publisher_details, SCHEMA.contactPoint, contact_point))
-
-            self.g.add((contact_point, SCHEMA.contactType, Literal('customer service')))
-
-            publisher_url = self._get_dataset_value(dataset_dict, 'publisher_url')
-            if not publisher_url and dataset_dict.get('organization'):
-                publisher_url = dataset_dict['organization'].get('url') or config.get('ckan.site_url')
-
-            self.g.add((contact_point, SCHEMA.url, Literal(publisher_url)))
-            items = [
-                ('publisher_email', SCHEMA.email, ['contact_email', 'maintainer_email', 'author_email'], Literal),
-                ('publisher_name', SCHEMA.name, ['contact_name', 'maintainer', 'author'], Literal),
-            ]
-
-            self._add_triples_from_dict(dataset_dict, contact_point, items)
-
-    def _temporal_graph(self, dataset_ref, dataset_dict):
-        start = self._get_dataset_value(dataset_dict, 'temporal_start')
-        end = self._get_dataset_value(dataset_dict, 'temporal_end')
-        if start or end:
-            if start and end:
-                self.g.add((dataset_ref, SCHEMA.temporalCoverage, Literal('%s/%s' % (start, end))))
-            elif start:
-                self._add_date_triple(dataset_ref, SCHEMA.temporalCoverage, start)
-            elif end:
-                self._add_date_triple(dataset_ref, SCHEMA.temporalCoverage, end)
-
-    def _spatial_graph(self, dataset_ref, dataset_dict):
-        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
-        spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
-        spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
-
-        if spatial_uri or spatial_text or spatial_geom:
-            if spatial_uri:
-                spatial_ref = URIRef(spatial_uri)
-            else:
-                spatial_ref = BNode()
-
-            self.g.add((spatial_ref, RDF.type, SCHEMA.Place))
-            self.g.add((dataset_ref, SCHEMA.spatialCoverage, spatial_ref))
-
-            if spatial_text:
-                self.g.add((spatial_ref, SCHEMA.description, Literal(spatial_text)))
-
-            if spatial_geom:
-                geo_shape = BNode()
-                self.g.add((geo_shape, RDF.type, SCHEMA.GeoShape))
-                self.g.add((spatial_ref, SCHEMA.geo, geo_shape))
-
-                # the spatial_geom typically contains GeoJSON
-                self.g.add((geo_shape,
-                       SCHEMA.polygon,
-                       Literal(spatial_geom)))
-
-    def _resources_graph(self, dataset_ref, dataset_dict):
-        g = self.g
-        for resource_dict in dataset_dict.get('resources', []):
-            distribution = URIRef(resource_uri(resource_dict))
-            g.add((dataset_ref, SCHEMA.distribution, distribution))
-            g.add((distribution, RDF.type, SCHEMA.DataDownload))
-
-            self._distribution_graph(distribution, resource_dict)
-
-    def _distribution_graph(self, distribution, resource_dict):
-        #  Simple values
-        self._distribution_basic_fields_graph(distribution, resource_dict)
-
-        # Lists
-        self._distribution_list_fields_graph(distribution, resource_dict)
-
-        # Format
-        self._distribution_format_graph(distribution, resource_dict)
-
-        # URL
-        self._distribution_url_graph(distribution, resource_dict)
-
-        # Numbers
-        self._distribution_numbers_graph(distribution, resource_dict)
-
-    def _distribution_basic_fields_graph(self, distribution, resource_dict):
-        items = [
-            ('name', SCHEMA.name, None, Literal),
-            ('description', SCHEMA.description, None, Literal),
-            ('license', SCHEMA.license, ['rights'], Literal),
-        ]
-
-        self._add_triples_from_dict(resource_dict, distribution, items)
-
-        items = [
-            ('issued', SCHEMA.datePublished, None, Literal),
-            ('modified', SCHEMA.dateModified, None, Literal),
-        ]
-
-        self._add_date_triples_from_dict(resource_dict, distribution, items)
-
-    def _distribution_list_fields_graph(self, distribution, resource_dict):
-        items = [
-            ('language', SCHEMA.inLanguage, None, Literal),
-        ]
-        self._add_list_triples_from_dict(resource_dict, distribution, items)
-
-    def _distribution_format_graph(self, distribution, resource_dict):
-        if '/' in resource_dict.get('format', ''):
-            self.g.add((distribution, SCHEMA.fileType,
-                   Literal(resource_dict['format'])))
-            self.g.add((distribution, SCHEMA.encodingFormat,
-                   Literal(resource_dict['format'])))
-        else:
-            if resource_dict.get('format'):
-                self.g.add((distribution, SCHEMA.encodingFormat,
-                       Literal(resource_dict['format'])))
-
-            if resource_dict.get('mimetype'):
-                self.g.add((distribution, SCHEMA.fileType,
-                       Literal(resource_dict['mimetype'])))
-
-    def _distribution_url_graph(self, distribution, resource_dict):
-        url = resource_dict.get('url')
-        download_url = resource_dict.get('download_url')
-        if download_url:
-            self.g.add((distribution, SCHEMA.contentUrl, Literal(download_url)))
-        if (url and not download_url) or (url and url != download_url):
-            self.g.add((distribution, SCHEMA.url, Literal(url)))
-
-    def _distribution_numbers_graph(self, distribution, resource_dict):
-        if resource_dict.get('size'):
-            self.g.add((distribution, SCHEMA.contentSize, Literal(resource_dict['size'])))
+        g.add((catalog_ref, DCT.publisher, publisher_details))

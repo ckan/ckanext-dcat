@@ -1,4 +1,5 @@
 from pylons import config
+from ckanext.dcat import helpers
 
 from ckan import plugins as p
 try:
@@ -17,6 +18,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
 from ckanext.dcat import utils
 
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
+TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 ENABLE_RDF_ENDPOINTS_CONFIG = 'ckanext.dcat.enable_rdf_endpoints'
 ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
@@ -31,6 +33,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
     p.implements(p.IPackageController, inherit=True)
+    p.implements(p.ITemplateHelpers)
     if p.toolkit.check_ckan_version(min_version='2.5.0'):
         p.implements(p.ITranslation, inherit=True)
 
@@ -103,30 +106,30 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             'dcat_catalog_show': dcat_auth,
             'dcat_catalog_search': dcat_auth,
         }
-
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'dcat_get_org': helpers.dcat_get_org,
+            }
     # IPackageController
     def after_show(self, context, data_dict):
+        if p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG)):
+            if context.get('for_view'):
+                field_labels = utils.field_labels()
 
-        # check if config is enabled to translate keys (default: True)
-        if not p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG, True)):
-            return data_dict
+                def set_titles(object_dict):
+                    for key, value in object_dict.iteritems():
+                        if key in field_labels:
+                            object_dict[field_labels[key]] = object_dict[key]
+                            del object_dict[key]
 
-        if context.get('for_view'):
-            field_labels = utils.field_labels()
+                for resource in data_dict.get('resources', []):
+                    set_titles(resource)
 
-            def set_titles(object_dict):
-                for key, value in object_dict.iteritems():
-                    if key in field_labels:
-                        object_dict[field_labels[key]] = object_dict[key]
-                        del object_dict[key]
-
-            for resource in data_dict.get('resources', []):
-                set_titles(resource)
-
-            for extra in data_dict.get('extras', []):
-                if extra['key'] in field_labels:
-                    extra['key'] = field_labels[extra['key']]
-
+                for extra in data_dict.get('extras', []):
+                    if extra['key'] in field_labels:
+                        extra['key'] = field_labels[extra['key']]
+                        
         return data_dict
 
 
