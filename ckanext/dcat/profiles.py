@@ -18,7 +18,7 @@ from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
 from ckan.lib.helpers import url_for
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
+from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS, get_langs
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -133,7 +133,7 @@ class RDFProfile(object):
             return _object
         return None
 
-    def _object_value(self, subject, predicate):
+    def _object_value(self, subject, predicate, multilang=False):
         '''
         Given a subject and a predicate, returns the value of the object
 
@@ -141,9 +141,39 @@ class RDFProfile(object):
 
         If found, the unicode representation is returned, else an empty string
         '''
+        default_lang = config.get('ckan.locale_default', 'en')
+        lang_dict = {}
         for o in self.g.objects(subject, predicate):
-            return unicode(o)
-        return ''
+            if multilang and o.language:
+                lang_dict[o.language] = unicode(o)
+            elif multilang:
+                lang_dict[default_lang] = unicode(o)
+            else:
+                return unicode(o)
+        if multilang:
+            # when translation does not exist, create an empty one
+            for lang in get_langs():
+                if lang not in lang_dict:
+                    lang_dict[lang] = ''
+        return lang_dict
+
+    def _add_multilang_value(self, subject, predicate, dataset_key, dataset_dict):  # noqa
+        multilang_values = dataset_dict.get(dataset_key)
+        if multilang_values:
+            try:
+                for key, values in multilang_values.iteritems():
+                    if values:
+                        # the values can be either a multilang-dict or they are
+                        # nested in another iterable (e.g. keywords)
+                        if not hasattr(values, '__iter__'):
+                            values = [values]
+                        for value in values:
+                            self.g.add((subject, predicate, Literal(value, lang=key)))  # noqa
+            # if multilang_values is not iterable, it is simply added as a non-
+            # translated Literal
+            except AttributeError:
+                self.g.add(
+                    (subject, predicate, Literal(multilang_values)))  # noqa
 
     def _object_value_int(self, subject, predicate):
         '''
