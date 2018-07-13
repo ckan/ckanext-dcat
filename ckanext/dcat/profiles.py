@@ -1376,19 +1376,12 @@ class SchemaOrgProfile(RDFProfile):
         self._add_list_triples_from_dict(resource_dict, distribution, items)
 
     def _distribution_format_graph(self, distribution, resource_dict):
-        if '/' in resource_dict.get('format', ''):
-            self.g.add((distribution, SCHEMA.fileType,
-                   Literal(resource_dict['format'])))
+        if resource_dict.get('format'):
             self.g.add((distribution, SCHEMA.encodingFormat,
                    Literal(resource_dict['format'])))
-        else:
-            if resource_dict.get('format'):
-                self.g.add((distribution, SCHEMA.encodingFormat,
-                       Literal(resource_dict['format'])))
-
-            if resource_dict.get('mimetype'):
-                self.g.add((distribution, SCHEMA.fileType,
-                       Literal(resource_dict['mimetype'])))
+        elif resource_dict.get('mimetype'):
+            self.g.add((distribution, SCHEMA.encodingFormat,
+                   Literal(resource_dict['mimetype'])))
 
     def _distribution_url_graph(self, distribution, resource_dict):
         url = resource_dict.get('url')
