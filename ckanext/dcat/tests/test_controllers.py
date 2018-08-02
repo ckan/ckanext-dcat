@@ -370,12 +370,6 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
     ckanext.dcat.enable_content_negotiation is enabled on test.ini
     '''
 
-    def setup(self):
-
-        from ckanext.harvest.model import setup as harvest_setup
-        harvest_setup()
-        super(TestAcceptHeader, self).setup()
-
     def test_dataset_basic(self):
 
         dataset = factories.Dataset()
