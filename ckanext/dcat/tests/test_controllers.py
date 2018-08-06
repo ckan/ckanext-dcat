@@ -370,11 +370,6 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
     ckanext.dcat.enable_content_negotiation is enabled on test.ini
     '''
 
-    @classmethod
-    def teardown_class(cls):
-        super(TestAcceptHeader, cls).teardown_class()
-        helpers.reset_db()
-
     def test_dataset_basic(self):
 
         dataset = factories.Dataset()
@@ -407,7 +402,7 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
 
         dataset = factories.Dataset()
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         headers = {'Accept': 'image/gif'}
 
@@ -421,7 +416,7 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
 
         dataset = factories.Dataset()
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         app = self._get_test_app()
 
