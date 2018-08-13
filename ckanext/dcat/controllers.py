@@ -8,7 +8,7 @@ if toolkit.check_ckan_version(min_version='2.1'):
 else:
     from ckan.lib.base import BaseController
 
-if toolkit.check_ckan_version(max_version='2.8'):
+if toolkit.check_ckan_version(max_version='2.8.99'):
     from ckan.controllers.package import PackageController
     from ckan.controllers.home import HomeController
     read_endpoint = PackageController().read
@@ -75,7 +75,7 @@ class DCATController(BaseController):
             _format = check_access_header()
 
         if not _format:
-            if toolkit.check_ckan_version(max_version='2.8'):
+            if toolkit.check_ckan_version(max_version='2.8.99'):
                 return read_endpoint(_id)
             else:
                 return read_endpoint(_get_package_type(_id), _id)
