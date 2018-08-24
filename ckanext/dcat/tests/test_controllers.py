@@ -7,8 +7,6 @@ from six.moves import xrange
 from ckan import plugins as p
 from ckan.lib.helpers import url_for
 
-from ckantoolkit import config
-
 from rdflib import Graph
 
 from ckantoolkit.tests import helpers, factories
@@ -17,11 +15,13 @@ from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
 
+from ckanext.dcat.tests import DCATFunctionalTestBase
+
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
 
 
-class TestEndpoints(helpers.FunctionalTestBase):
+class TestEndpoints(DCATFunctionalTestBase):
 
     def setup(self):
         super(TestEndpoints, self).setup()
@@ -365,7 +365,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
         assert url.startswith('dcat_catalog')
 
 
-class TestAcceptHeader(helpers.FunctionalTestBase):
+class TestAcceptHeader(DCATFunctionalTestBase):
     '''
     ckanext.dcat.enable_content_negotiation is enabled on test.ini
     '''
@@ -471,7 +471,7 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
         eq_(response.headers['Content-Type'], 'text/html; charset=utf-8')
 
 
-class TestTranslations(helpers.FunctionalTestBase):
+class TestTranslations(DCATFunctionalTestBase):
 
     @classmethod
     def setup_class(cls):
@@ -545,19 +545,7 @@ class TestTranslations(helpers.FunctionalTestBase):
         assert 'version_notes' in response.body
 
 
-class TestStructuredData(helpers.FunctionalTestBase):
-
-    def setup(cls):
-
-        super(TestStructuredData, cls).setup()
-        from ckanext.harvest.model import setup
-        setup()
-
-
-    @classmethod
-    def teardown_class(cls):
-        super(TestStructuredData, cls).teardown_class()
-        helpers.reset_db()
+class TestStructuredData(DCATFunctionalTestBase):
 
     def test_structured_data_generated(self):
 
@@ -573,7 +561,6 @@ class TestStructuredData(helpers.FunctionalTestBase):
 
         assert '<script type="application/ld+json">' in response.body
         assert '"schema:description": "test description"' in response.body
-
 
     def test_structured_data_not_generated(self):
         p.unload('structured_data')
