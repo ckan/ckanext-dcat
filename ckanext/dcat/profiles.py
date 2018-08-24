@@ -810,6 +810,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             for key, predicate in (
                     ('name', DCT.title),
                     ('description', DCT.description),
+                    ('access_url', DCAT.accessURL),
                     ('download_url', DCAT.downloadURL),
                     ('issued', DCT.issued),
                     ('modified', DCT.modified),
@@ -822,9 +823,9 @@ class EuropeanDCATAPProfile(RDFProfile):
                     resource_dict[key] = value
 
             resource_dict['url'] = (self._object_value(distribution,
-                                                       DCAT.accessURL) or
+                                                       DCAT.downloadURL) or
                                     self._object_value(distribution,
-                                                       DCAT.downloadURL))
+                                                       DCAT.accessURL))
             #  Lists
             for key, predicate in (
                     ('language', DCT.language),
@@ -1059,6 +1060,8 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('status', ADMS.status, None, Literal),
                 ('rights', DCT.rights, None, Literal),
                 ('license', DCT.license, None, Literal),
+                ('access_url', DCAT.accessURL, None, URIRef),
+                ('download_url', DCAT.downloadURL, None, URIRef),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
@@ -1084,13 +1087,14 @@ class EuropeanDCATAPProfile(RDFProfile):
                     g.add((distribution, DCAT.mediaType,
                            Literal(resource_dict['mimetype'])))
 
-            # URL
+            # URL fallback and old behavior
             url = resource_dict.get('url')
             download_url = resource_dict.get('download_url')
-            if download_url:
-                g.add((distribution, DCAT.downloadURL, URIRef(download_url)))
-            if (url and not download_url) or (url and url != download_url):
-                g.add((distribution, DCAT.accessURL, URIRef(url)))
+            access_url = resource_dict.get('access_url')
+            # Use url as fallback for access_url if access_url is not set and download_url is not equal
+            if url and not access_url:
+                if (not download_url) or (download_url and url != download_url):
+                  g.add((distribution, DCAT.accessURL, URIRef(url)))
 
             # Dates
             items = [

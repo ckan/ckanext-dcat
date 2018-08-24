@@ -589,7 +589,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.byteSize, resource['size'])
 
-    def test_distribution_access_url_only(self):
+    def test_distribution_url_only(self):
 
         resource = {
             'id': 'c041c635-054f-4431-b647-f9186926d021',
@@ -615,6 +615,34 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
         assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, None) is None
+    
+    def test_distribution_access_url_only(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'access_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
         assert self._triple(g, distribution, DCAT.downloadURL, None) is None
 
     def test_distribution_download_url_only(self):
@@ -673,9 +701,98 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['url']))
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
+    
+    def test_distribution_both_urls_different_with_access_url(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'access_url': 'http://example.com/data/file',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
+    
+    def test_distribution_prefer_access_url(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data',
+            'access_url': 'http://example.com/data/file',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, None) is None
+
+    def test_distribution_prefer_access_url_with_download(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data',
+            'access_url': 'http://example.com/data/file',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
 
     def test_distribution_both_urls_the_same(self):
 
+        # old behavior - only serialize url to accessURL if it is different from downloadURL
         resource = {
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
@@ -702,6 +819,36 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['url']))
         assert self._triple(g, distribution, DCAT.accessURL, None) is None
+    
+    def test_distribution_both_urls_the_same_with_access_url(self):
+
+        # when the access_url is present, it should be serialized regardless if it is the same as downloadURL.
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'access_url': 'http://example.com/data/file.csv',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
 
     def test_distribution_format(self):
 

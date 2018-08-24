@@ -233,6 +233,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         resource = datasets[0]['resources'][0]
 
         eq_(resource['url'], u'http://access.url.org')
+        eq_(resource['access_url'], u'http://access.url.org')
         assert 'download_url' not in resource
 
     def test_distribution_download_url(self):
@@ -256,6 +257,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         eq_(resource['url'], u'http://download.url.org')
         eq_(resource['download_url'], u'http://download.url.org')
+        assert 'access_url' not in resource
 
     def test_distribution_both_access_and_download_url(self):
         g = Graph()
@@ -277,8 +279,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        eq_(resource['url'], u'http://access.url.org')
+        eq_(resource['url'], u'http://download.url.org')
         eq_(resource['download_url'], u'http://download.url.org')
+        eq_(resource['access_url'], u'http://access.url.org')
 
     def test_distribution_format_imt_and_format(self):
         g = Graph()
