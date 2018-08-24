@@ -42,7 +42,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
 
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='rdf')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='rdf')
 
         app = self._get_test_app()
 
@@ -72,7 +72,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
 
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='xml')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='xml')
 
         app = self._get_test_app()
 
@@ -102,7 +102,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
 
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='ttl')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='ttl')
 
         app = self._get_test_app()
 
@@ -132,7 +132,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
 
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='n3')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='n3')
 
         app = self._get_test_app()
 
@@ -162,7 +162,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
 
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='jsonld')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='jsonld')
 
         app = self._get_test_app()
 
@@ -192,7 +192,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
 
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='jsonld', profiles='schemaorg')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='jsonld', profiles='schemaorg')
 
         app = self._get_test_app()
 
@@ -220,7 +220,7 @@ class TestEndpoints(helpers.FunctionalTestBase):
             notes='Test dataset'
         )
         # without the route, url_for returns the given parameters
-        url = url_for('dcat_dataset', _id=dataset['id'], _format='xml')
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='xml')
         assert not url.startswith('/')
         assert url.startswith('dcat_dataset')
 
@@ -374,7 +374,7 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
 
         dataset = factories.Dataset()
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         headers = {'Accept': 'application/ld+json'}
 
@@ -388,7 +388,7 @@ class TestAcceptHeader(helpers.FunctionalTestBase):
 
         dataset = factories.Dataset()
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         headers = {'Accept': 'text/csv; q=1.0, text/turtle; q=0.6, application/ld+json; q=0.3'}
 
@@ -491,7 +491,7 @@ class TestTranslations(helpers.FunctionalTestBase):
             {'key': 'version_notes', 'value': 'bla'}
         ])
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         app = self._get_test_app()
 
@@ -505,7 +505,7 @@ class TestTranslations(helpers.FunctionalTestBase):
             {'key': 'version_notes', 'value': 'bla'}
         ])
 
-        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+        url = url_for('dataset_read', id=dataset['name'], locale='ca')
 
         app = self._get_test_app()
 
@@ -519,7 +519,7 @@ class TestTranslations(helpers.FunctionalTestBase):
             {'key': 'version_notes', 'value': 'bla'}
         ])
 
-        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+        url = url_for('dataset_read', id=dataset['name'], locale='ca')
 
         app = self._get_test_app()
 
@@ -534,7 +534,7 @@ class TestTranslations(helpers.FunctionalTestBase):
             {'key': 'version_notes', 'value': 'bla'}
         ])
 
-        url = url_for('dataset_read', id=dataset['id'], locale='ca')
+        url = url_for('dataset_read', id=dataset['name'], locale='ca')
 
         app = self._get_test_app()
 
@@ -547,6 +547,13 @@ class TestTranslations(helpers.FunctionalTestBase):
 
 class TestStructuredData(helpers.FunctionalTestBase):
 
+    def setup(cls):
+
+        super(TestStructuredData, cls).setup()
+        from ckanext.harvest.model import setup
+        setup()
+
+
     @classmethod
     def teardown_class(cls):
         super(TestStructuredData, cls).teardown_class()
@@ -558,7 +565,7 @@ class TestStructuredData(helpers.FunctionalTestBase):
             notes='test description'
         )
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         app = self._get_test_app()
 
@@ -575,7 +582,7 @@ class TestStructuredData(helpers.FunctionalTestBase):
             notes='test description'
         )
 
-        url = url_for('dataset_read', id=dataset['id'])
+        url = url_for('dataset_read', id=dataset['name'])
 
         app = self._get_test_app()
 
