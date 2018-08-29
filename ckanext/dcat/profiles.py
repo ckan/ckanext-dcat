@@ -45,6 +45,8 @@ namespaces = {
     'owl': OWL,
 }
 
+PREFIX_MAILTO = u'mailto:'
+
 
 class RDFProfile(object):
     '''Base class with helper methods for implementing RDF parsing profiles
@@ -255,7 +257,9 @@ class RDFProfile(object):
 
             contact['name'] = self._object_value(agent, VCARD.fn)
 
-            contact['email'] = self._object_value(agent, VCARD.hasEmail)
+            contact['email'] = self._without_mailto(
+                self._object_value(agent, VCARD.hasEmail)
+            )
 
         return contact
 
@@ -578,6 +582,25 @@ class RDFProfile(object):
         if result and result.get('results'):
             return result['results'][0]['metadata_modified']
         return None
+
+    def _add_mailto(self, mail_addr):
+        '''
+        Ensures that the mail address has an URIRef-compatible mailto: prefix.
+        Can be used as modifier function for `_add_triple_from_dict`.
+        '''
+        if mail_addr:
+            return PREFIX_MAILTO + self._without_mailto(mail_addr)
+        else:
+            return mail_addr
+
+    def _without_mailto(self, mail_addr):
+        '''
+        Ensures that the mail address string has no mailto: prefix.
+        '''
+        if mail_addr:
+            return unicode(mail_addr).replace(PREFIX_MAILTO, u'')
+        else:
+            return mail_addr
 
     def _get_source_catalog(self, dataset_ref):
         '''
@@ -965,13 +988,17 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((contact_details, RDF.type, VCARD.Organization))
             g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
-            items = [
-                ('contact_name', VCARD.fn, ['maintainer', 'author'], Literal),
-                ('contact_email', VCARD.hasEmail, ['maintainer_email',
-                                                   'author_email'], Literal),
-            ]
-
-            self._add_triples_from_dict(dataset_dict, contact_details, items)
+            self._add_triple_from_dict(
+                dataset_dict, contact_details,
+                VCARD.fn, 'contact_name', ['maintainer', 'author']
+            )
+            # Add mail address as URIRef, and ensure it has a mailto: prefix
+            self._add_triple_from_dict(
+                dataset_dict, contact_details,
+                VCARD.hasEmail, 'contact_email', ['maintainer_email',
+                                                  'author_email'],
+                _type=URIRef, value_modifier=self._add_mailto
+            )
 
         # Publisher
         if any([
