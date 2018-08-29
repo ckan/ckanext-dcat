@@ -43,6 +43,7 @@ namespaces = {
     'locn': LOCN,
     'gsp': GSP,
     'owl': OWL,
+    'spdx': SPDX,
 }
 
 
@@ -1116,6 +1117,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             # Checksum
             if resource_dict.get('hash'):
                 checksum = BNode()
+                g.add((checksum, RDF.type, SPDX.Checksum))
                 g.add((checksum, SPDX.checksumValue,
                        Literal(resource_dict['hash'],
                                datatype=XSD.hexBinary)))
