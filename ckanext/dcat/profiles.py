@@ -471,15 +471,19 @@ class RDFProfile(object):
                               fallbacks=None,
                               list_value=False,
                               date_value=False,
+                              value_modifier=None,
                               _type=Literal):
         '''
         Adds a new triple to the graph with the provided parameters
 
         The subject and predicate of the triple are passed as the relevant
-        RDFLib objects (URIRef or BNode). The object is always a literal value,
-        which is extracted from the dict using the provided key (see
-        `_get_dict_value`). If the value for the key is not found, then
+        RDFLib objects (URIRef or BNode). As default, the object is a
+        literal value, which is extracted from the dict using the provided key
+        (see `_get_dict_value`). If the value for the key is not found, then
         additional fallback keys are checked.
+        Using `value_modifier`, a function taking the extracted value and
+        returning a modified value can be passed.
+        If a value was found, the modifier is applied before adding the value.
 
         If `list_value` or `date_value` are True, then the value is treated as
         a list or a date respectively (see `_add_list_triple` and
@@ -491,6 +495,10 @@ class RDFProfile(object):
                 value = self._get_dict_value(_dict, fallback)
                 if value:
                     break
+
+        # if a modifying function was given, apply it to the value
+        if value and callable(value_modifier):
+            value = value_modifier(value)
 
         if value and list_value:
             self._add_list_triple(subject, predicate, value, _type)
