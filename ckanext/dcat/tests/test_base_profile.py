@@ -3,7 +3,7 @@ import nose
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace
 
-from ckanext.dcat.profiles import RDFProfile
+from ckanext.dcat.profiles import RDFProfile, CleanedURIRef
 
 from ckanext.dcat.tests.test_base_parser import _default_graph
 
@@ -14,6 +14,32 @@ DCT = Namespace("http://purl.org/dc/terms/")
 TEST = Namespace("http://test.org/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
+
+
+class TestURIRefPreprocessing(object):
+
+    def test_with_valid_items(self):
+        testUriPart = "://www.w3.org/ns/dcat#"
+        
+        for prefix in ['http', 'https']:
+            eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + testUriPart))
+
+    def test_with_invalid_items(self):
+        testUriPart = "://www.w3.org/ns/!dcat #"
+        expectedUriPart = "://www.w3.org/ns/%21dcat%20#"
+        
+        for prefix in ['http', 'https']:
+            eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + expectedUriPart))
+            # applying on escaped data should have no effect
+            eq_(CleanedURIRef(prefix + expectedUriPart), URIRef(prefix + expectedUriPart))
+
+    def test_non_http_only_spaces(self):
+        testUri = "mailto:with space@example.com "
+        expectedUri = "mailto:withspace@example.com"
+
+        eq_(CleanedURIRef(testUri), URIRef(expectedUri))
+        # applying on escaped data should have no effect
+        eq_(CleanedURIRef(expectedUri), URIRef(expectedUri))
 
 
 class TestBaseRDFProfile(object):
