@@ -1,6 +1,8 @@
 import datetime
 import json
 
+from urllib import quote
+
 from dateutil.parser import parse as parse_date
 
 from ckantoolkit import config
@@ -44,6 +46,34 @@ namespaces = {
     'gsp': GSP,
     'owl': OWL,
 }
+
+class CleanedURIRef(object):
+    '''Performs either some basic URL encoding (for http[s]) or whitespace removal on value
+    before creating an URIRef object.
+
+    This is a factory for URIRef objects, which allows usage as type in graph.add()
+    without affecting the resulting node types. That is,
+    g.add(..., URIRef) and g.add(..., CleanedURIRef) will result in the exact same node type.
+    '''
+    @staticmethod
+    def _careful_quote(value):
+        # only encode this limited subset of characters to avoid more complex URL parsing
+        # (e.g. valid ? in query string vs. ? as value).
+        # can be applied multiple times, as encoded %xy is left untouched. Therefore, no
+        # unquote is necessary beforehand.
+        quotechars = ' !"$\'()*,;<>[]{|}'
+        for c in quotechars:
+            value = value.replace(c, quote(c))
+        return value
+
+    def __new__(cls, value):
+        if isinstance(value, basestring):
+            if value.startswith('http'):
+                value = CleanedURIRef._careful_quote(value)
+            else:
+                value = value.replace(' ', '')
+
+        return URIRef(value)
 
 
 class RDFProfile(object):
@@ -498,6 +528,9 @@ class RDFProfile(object):
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
             # Normal text value
+            # ensure URIRef items are preprocessed (space removal/url encoding)
+            if _type == URIRef:
+                _type = CleanedURIRef
             self.g.add((subject, predicate, _type(value)))
 
     def _add_list_triple(self, subject, predicate, value, _type=Literal):
@@ -527,6 +560,9 @@ class RDFProfile(object):
                     items = [value]
 
         for item in items:
+            # ensure URIRef items are preprocessed (space removal/url encoding)
+            if _type == URIRef:
+                _type = CleanedURIRef
             self.g.add((subject, predicate, _type(item)))
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
@@ -950,7 +986,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             contact_uri = self._get_dataset_value(dataset_dict, 'contact_uri')
             if contact_uri:
-                contact_details = URIRef(contact_uri)
+                contact_details = CleanedURIRef(contact_uri)
             else:
                 contact_details = BNode()
 
@@ -974,7 +1010,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
             if publisher_uri:
-                publisher_details = URIRef(publisher_uri)
+                publisher_details = CleanedURIRef(publisher_uri)
             else:
                 # No organization nor publisher_uri
                 publisher_details = BNode()
@@ -1019,7 +1055,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         if spatial_uri or spatial_text or spatial_geom:
             if spatial_uri:
-                spatial_ref = URIRef(spatial_uri)
+                spatial_ref = CleanedURIRef(spatial_uri)
             else:
                 spatial_ref = BNode()
 
@@ -1047,7 +1083,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
 
-            distribution = URIRef(resource_uri(resource_dict))
+            distribution = CleanedURIRef(resource_uri(resource_dict))
 
             g.add((dataset_ref, DCAT.distribution, distribution))
 
@@ -1094,7 +1130,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             # Use url as fallback for access_url if access_url is not set and download_url is not equal
             if url and not access_url:
                 if (not download_url) or (download_url and url != download_url):
-                  g.add((distribution, DCAT.accessURL, URIRef(url)))
+                  self._add_triple_from_dict(resource_dict, distribution, DCAT.accessURL, 'url', _type=URIRef)
 
             # Dates
             items = [
@@ -1123,7 +1159,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 if resource_dict.get('hash_algorithm'):
                     if resource_dict['hash_algorithm'].startswith('http'):
                         g.add((checksum, SPDX.algorithm,
-                               URIRef(resource_dict['hash_algorithm'])))
+                               CleanedURIRef(resource_dict['hash_algorithm'])))
                     else:
                         g.add((checksum, SPDX.algorithm,
                                Literal(resource_dict['hash_algorithm'])))
