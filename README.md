@@ -805,7 +805,40 @@ This makes it very easy to display the fields in the current language.
 To disable this behavior, you can set the following config value in your ini file (default: True):
 
     ckanext.dcat.translate_keys = False
+    
+## Multilingual RDF support
+To add multilingual values from RDF to ckan, the function `_object_value` can be called with optional parameter `multilang=true` (defaults to `false`)). 
+If `_object_value` is called with the `multilang=true`-parameter, but no language-attribute is found, the value will be added as Literal with the default language (en).
 
+Example RDF:
+```xml
+<dct:title xml:lang="en">Dataset Title (EN)</dct:title>
+<dct:title xml:lang="de">Dataset Title (DE)</dct:title>
+<dct:title xml:lang="fr">Dataset Title (FR)</dct:title>
+```
+```json
+{
+    "title":
+        {
+            "en": "Dataset Title (EN)",
+            "de": "Dataset Title (DE)",
+            "fr": "Dataset Title (FR)"
+        }
+}
+```
+
+Example with missing language in RDF:
+```xml
+<dct:title>Dataset Title</dct:title>
+```
+```json
+{
+    "title":
+        {
+            "en": "Dataset Title"
+        }
+}
+```
 
 ## Structured data and Google Dataset Search indexing
 
