@@ -113,6 +113,33 @@ class TestBaseRDFProfile(object):
 
         eq_(value, '')
 
+    def test_object_value_multilang(self):
+
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Dataset 1', lang='en')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title, multilang=True)
+
+        assert isinstance(value, dict)
+        eq_(value.get('de'), u'Test Datensatz 1')
+        eq_(value.get('en'), u'Test Dataset 1')
+
+    def test_object_value_multilang_missing_lang_param(self):
+
+        p = RDFProfile(_default_graph())
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title, multilang=True)
+
+        assert isinstance(value, dict)
+        eq_(value.get('en'), u'Test Dataset 1')
+
     def test_object_int(self):
 
         p = RDFProfile(_default_graph())
