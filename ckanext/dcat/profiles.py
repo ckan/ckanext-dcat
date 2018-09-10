@@ -155,7 +155,8 @@ class RDFProfile(object):
             for lang in get_langs():
                 if lang not in lang_dict:
                     lang_dict[lang] = ''
-        return lang_dict
+            return lang_dict
+        return ''
 
     def _add_multilang_value(self, subject, predicate, dataset_key, dataset_dict):  # noqa
         multilang_values = dataset_dict.get(dataset_key)
