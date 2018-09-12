@@ -1201,6 +1201,18 @@ class SchemaOrgProfile(RDFProfile):
 
         # Resources
         self._resources_graph(dataset_ref, dataset_dict)
+        
+        # Additional fields
+        self.additional_fields(dataset_ref, dataset_dict)
+
+    def additional_fields(self, dataset_ref, dataset_dict):
+        '''
+        Adds any additional fields.
+
+        For a custom schema you should extend this class and
+        implement this method.
+        '''
+        pass
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
         '''
