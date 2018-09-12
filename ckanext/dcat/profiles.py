@@ -1258,6 +1258,13 @@ class SchemaOrgProfile(RDFProfile):
 
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
+        # Dataset URL
+        dataset_url = url_for(controller='package',
+                              action='read',
+                              id=dataset_dict['name'],
+                              qualified=True)
+        self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
+
     def _groups_graph(self, dataset_ref, dataset_dict):
         for group in dataset_dict.get('groups', []):
             group_url = url_for(controller='group',
