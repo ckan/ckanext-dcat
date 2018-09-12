@@ -14,6 +14,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
+from ckan.lib.helpers import url_for
 
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
@@ -1184,6 +1185,9 @@ class SchemaOrgProfile(RDFProfile):
         # Basic fields
         self._basic_fields_graph(dataset_ref, dataset_dict)
 
+        # Groups
+        self._groups_graph(dataset_ref, dataset_dict)
+
         # Tags
         self._tags_graph(dataset_ref, dataset_dict)
 
@@ -1254,6 +1258,14 @@ class SchemaOrgProfile(RDFProfile):
 
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
+    def _groups_graph(self, dataset_ref, dataset_dict):
+        for group in dataset_dict.get('groups', []):
+            group_url = url_for(controller='group',
+                                action='read',
+                                id=group.get('id'),
+                                qualified=True)
+            self.g.add((dataset_ref, SCHEMA.genre, Literal(group_url)))
+
     def _tags_graph(self, dataset_ref, dataset_dict):
         for tag in dataset_dict.get('tags', []):
             self.g.add((dataset_ref, SCHEMA.keywords, Literal(tag['name'])))
@@ -1261,7 +1273,6 @@ class SchemaOrgProfile(RDFProfile):
     def _list_fields_graph(self, dataset_ref, dataset_dict):
         items = [
             ('language', SCHEMA.inLanguage, None, Literal),
-            ('theme', SCHEMA.about, None, URIRef),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
