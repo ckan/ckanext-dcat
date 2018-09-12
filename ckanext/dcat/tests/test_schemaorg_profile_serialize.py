@@ -68,9 +68,9 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, SCHEMA.description, dataset['notes'])
         assert self._triple(g, dataset_ref, SCHEMA.version, dataset['version'])
         assert self._triple(g, dataset_ref, SCHEMA.identifier, extras['identifier'])
-        url = self._triple(g, dataset_ref, SCHEMA.url, None)
+        url = self._triple(g, dataset_ref, SCHEMA.url, None)[2]
         assert url
-        eq_(url, 'http://test.ckan.net/dataset/%s' % dataset['name'])
+        eq_(url, Literal('http://test.ckan.net/dataset/%s' % dataset['name']))
 
         # Dates
         assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'])
