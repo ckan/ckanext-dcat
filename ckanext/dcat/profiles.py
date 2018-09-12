@@ -1185,6 +1185,9 @@ class SchemaOrgProfile(RDFProfile):
         # Basic fields
         self._basic_fields_graph(dataset_ref, dataset_dict)
 
+        # Catalog
+        self._catalog_graph(dataset_ref, dataset_dict)
+
         # Groups
         self._groups_graph(dataset_ref, dataset_dict)
 
@@ -1264,6 +1267,14 @@ class SchemaOrgProfile(RDFProfile):
                               id=dataset_dict['name'],
                               qualified=True)
         self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
+
+    def _catalog_graph(self, dataset_ref, dataset_dict):
+        data_catalog = BNode()
+        self.g.add((dataset_ref, SCHEMA.includedInDataCatalog, data_catalog))
+        self.g.add((data_catalog, RDF.type, SCHEMA.DataCatalog))
+        self.g.add((data_catalog, SCHEMA.name, Literal(config.get('ckan.site_title'))))
+        self.g.add((data_catalog, SCHEMA.description, Literal(config.get('ckan.site_description'))))
+        self.g.add((data_catalog, SCHEMA.url, Literal(config.get('ckan.site_url'))))
 
     def _groups_graph(self, dataset_ref, dataset_dict):
         for group in dataset_dict.get('groups', []):
