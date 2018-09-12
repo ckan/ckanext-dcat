@@ -1262,8 +1262,7 @@ class SchemaOrgProfile(RDFProfile):
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
         # Dataset URL
-        dataset_url = url_for(controller='package',
-                              action='read',
+        dataset_url = url_for('dataset_read',
                               id=dataset_dict['name'],
                               qualified=True)
         self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
