@@ -1251,6 +1251,7 @@ class SchemaOrgProfile(RDFProfile):
             ('version', SCHEMA.version, ['dcat_version'], Literal),
             ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
             ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
+            ('license', SCHEMA.license, ['license_url', 'license_title'], Literal),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
