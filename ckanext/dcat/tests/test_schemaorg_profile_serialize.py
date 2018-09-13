@@ -33,6 +33,8 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
             'version': '1.0b',
             'metadata_created': '2015-06-26T15:21:09.034694',
             'metadata_modified': '2015-06-26T15:21:09.075774',
+            'license_title': 'CC-BY 3.0',
+            'license_url': 'http://creativecommons.org/licenses/by/3.0/',
             'tags': [{'name': 'Tag 1'}, {'name': 'Tag 2'}],
             'extras': [
                 {'key': 'alternate_identifier', 'value': '[\"xyz\", \"abc\"]'},
@@ -67,6 +69,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, SCHEMA.name, dataset['title'])
         assert self._triple(g, dataset_ref, SCHEMA.description, dataset['notes'])
         assert self._triple(g, dataset_ref, SCHEMA.version, dataset['version'])
+        assert self._triple(g, dataset_ref, SCHEMA.license, dataset['license_url'])
         assert self._triple(g, dataset_ref, SCHEMA.identifier, extras['identifier'])
         url = self._triple(g, dataset_ref, SCHEMA.url, None)[2]
         assert url
