@@ -559,6 +559,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
 
@@ -936,6 +937,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
