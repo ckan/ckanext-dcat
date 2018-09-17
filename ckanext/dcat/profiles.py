@@ -475,8 +475,8 @@ class RDFProfile(object):
                               fallbacks=None,
                               list_value=False,
                               date_value=False,
-                              value_modifier=None,
-                              _type=Literal):
+                              _type=Literal,
+                              value_modifier=None):
         '''
         Adds a new triple to the graph with the provided parameters
 
