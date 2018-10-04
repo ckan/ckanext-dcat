@@ -45,7 +45,10 @@ namespaces = {
     'locn': LOCN,
     'gsp': GSP,
     'owl': OWL,
+    'spdx': SPDX,
 }
+
+PREFIX_MAILTO = u'mailto:'
 
 class CleanedURIRef(object):
     '''Performs either some basic URL encoding on value before creating an URIRef object.
@@ -280,7 +283,9 @@ class RDFProfile(object):
 
             contact['name'] = self._object_value(agent, VCARD.fn)
 
-            contact['email'] = self._object_value(agent, VCARD.hasEmail)
+            contact['email'] = self._without_mailto(
+                self._object_value(agent, VCARD.hasEmail)
+            )
 
         return contact
 
@@ -496,15 +501,19 @@ class RDFProfile(object):
                               fallbacks=None,
                               list_value=False,
                               date_value=False,
-                              _type=Literal):
+                              _type=Literal,
+                              value_modifier=None):
         '''
         Adds a new triple to the graph with the provided parameters
 
         The subject and predicate of the triple are passed as the relevant
-        RDFLib objects (URIRef or BNode). The object is always a literal value,
-        which is extracted from the dict using the provided key (see
-        `_get_dict_value`). If the value for the key is not found, then
+        RDFLib objects (URIRef or BNode). As default, the object is a
+        literal value, which is extracted from the dict using the provided key
+        (see `_get_dict_value`). If the value for the key is not found, then
         additional fallback keys are checked.
+        Using `value_modifier`, a function taking the extracted value and
+        returning a modified value can be passed.
+        If a value was found, the modifier is applied before adding the value.
 
         If `list_value` or `date_value` are True, then the value is treated as
         a list or a date respectively (see `_add_list_triple` and
@@ -516,6 +525,10 @@ class RDFProfile(object):
                 value = self._get_dict_value(_dict, fallback)
                 if value:
                     break
+
+        # if a modifying function was given, apply it to the value
+        if value and callable(value_modifier):
+            value = value_modifier(value)
 
         if value and list_value:
             self._add_list_triple(subject, predicate, value, _type)
@@ -601,6 +614,25 @@ class RDFProfile(object):
         if result and result.get('results'):
             return result['results'][0]['metadata_modified']
         return None
+
+    def _add_mailto(self, mail_addr):
+        '''
+        Ensures that the mail address has an URIRef-compatible mailto: prefix.
+        Can be used as modifier function for `_add_triple_from_dict`.
+        '''
+        if mail_addr:
+            return PREFIX_MAILTO + self._without_mailto(mail_addr)
+        else:
+            return mail_addr
+
+    def _without_mailto(self, mail_addr):
+        '''
+        Ensures that the mail address string has no mailto: prefix.
+        '''
+        if mail_addr:
+            return unicode(mail_addr).replace(PREFIX_MAILTO, u'')
+        else:
+            return mail_addr
 
     def _get_source_catalog(self, dataset_ref):
         '''
@@ -988,13 +1020,17 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((contact_details, RDF.type, VCARD.Organization))
             g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
-            items = [
-                ('contact_name', VCARD.fn, ['maintainer', 'author'], Literal),
-                ('contact_email', VCARD.hasEmail, ['maintainer_email',
-                                                   'author_email'], Literal),
-            ]
-
-            self._add_triples_from_dict(dataset_dict, contact_details, items)
+            self._add_triple_from_dict(
+                dataset_dict, contact_details,
+                VCARD.fn, 'contact_name', ['maintainer', 'author']
+            )
+            # Add mail address as URIRef, and ensure it has a mailto: prefix
+            self._add_triple_from_dict(
+                dataset_dict, contact_details,
+                VCARD.hasEmail, 'contact_email', ['maintainer_email',
+                                                  'author_email'],
+                _type=URIRef, value_modifier=self._add_mailto
+            )
 
         # Publisher
         if any([
@@ -1147,6 +1183,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             # Checksum
             if resource_dict.get('hash'):
                 checksum = BNode()
+                g.add((checksum, RDF.type, SPDX.Checksum))
                 g.add((checksum, SPDX.checksumValue,
                        Literal(resource_dict['hash'],
                                datatype=XSD.hexBinary)))

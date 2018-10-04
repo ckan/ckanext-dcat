@@ -219,7 +219,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert contact_details
         eq_(unicode(contact_details), extras['contact_uri'])
         assert self._triple(g, contact_details, VCARD.fn, extras['contact_name'])
-        assert self._triple(g, contact_details, VCARD.hasEmail, extras['contact_email'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + extras['contact_email']))
 
     def test_contact_details_maintainer(self):
         dataset = {
@@ -240,7 +240,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert contact_details
         assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['maintainer'])
-        assert self._triple(g, contact_details, VCARD.hasEmail, dataset['maintainer_email'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + dataset['maintainer_email']))
 
     def test_contact_details_author(self):
         dataset = {
@@ -259,7 +259,27 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert contact_details
         assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
-        assert self._triple(g, contact_details, VCARD.hasEmail, dataset['author_email'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + dataset['author_email']))
+
+    def test_contact_details_no_duplicate_mailto(self):
+        # tests that mailto: isn't added again if it is stored in the dataset
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'author': 'Example Author',
+            'author_email': 'mailto:ped@example.com',
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
+        assert contact_details
+        assert_true(isinstance(contact_details, BNode))
+        assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef(dataset['author_email']))
 
     def test_publisher_extras(self):
         dataset = {
@@ -559,6 +579,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
 
@@ -936,6 +957,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 

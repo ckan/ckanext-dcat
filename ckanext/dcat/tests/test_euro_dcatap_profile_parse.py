@@ -91,7 +91,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('publisher_url'), 'http://some.org')
         eq_(_get_extra_value('publisher_type'), 'http://purl.org/adms/publishertype/NonProfitOrganisation')
         eq_(_get_extra_value('contact_name'), 'Point of Contact')
-        eq_(_get_extra_value('contact_email'), 'mailto:contact@some.org')
+        # mailto gets removed for storage and is added again on output
+        eq_(_get_extra_value('contact_email'), 'contact@some.org')
         eq_(_get_extra_value('access_rights'), 'public')
         eq_(_get_extra_value('provenance'), 'Some statement about provenance')
         eq_(_get_extra_value('dcat_type'), 'test-type')
@@ -555,7 +556,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(dataset['title'], 'U.S. Widget Manufacturing Statistics')
 
         eq_(extras['contact_name'], 'Jane Doe')
-        eq_(extras['contact_email'], 'mailto:jane.doe@agency.gov')
+        # mailto gets removed for storage and is added again on output
+        eq_(extras['contact_email'], 'jane.doe@agency.gov')
         eq_(extras['publisher_name'], 'Widget Services')
         eq_(extras['publisher_email'], 'widget.services@agency.gov')
 
