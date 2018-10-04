@@ -48,8 +48,7 @@ namespaces = {
 }
 
 class CleanedURIRef(object):
-    '''Performs either some basic URL encoding (for http[s]) or whitespace removal on value
-    before creating an URIRef object.
+    '''Performs either some basic URL encoding on value before creating an URIRef object.
 
     This is a factory for URIRef objects, which allows usage as type in graph.add()
     without affecting the resulting node types. That is,
@@ -68,11 +67,7 @@ class CleanedURIRef(object):
 
     def __new__(cls, value):
         if isinstance(value, basestring):
-            if value.startswith('http'):
-                value = CleanedURIRef._careful_quote(value)
-            else:
-                value = value.replace(' ', '')
-
+            value = CleanedURIRef._careful_quote(value.strip())
         return URIRef(value)
 
 

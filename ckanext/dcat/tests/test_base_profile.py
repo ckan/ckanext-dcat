@@ -23,6 +23,13 @@ class TestURIRefPreprocessing(object):
         
         for prefix in ['http', 'https']:
             eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + testUriPart))
+            # leading and trailing whitespace should be removed
+            eq_(CleanedURIRef(' ' + prefix + testUriPart + ' '), URIRef(prefix + testUriPart))
+
+        testNonHttpUri = "mailto:someone@example.com"
+        eq_(CleanedURIRef(testNonHttpUri), URIRef(testNonHttpUri))
+        # leading and trailing whitespace should be removed again
+        eq_(CleanedURIRef(' ' + testNonHttpUri + ' '), URIRef(testNonHttpUri))
 
     def test_with_invalid_items(self):
         testUriPart = "://www.w3.org/ns/!dcat #"
@@ -33,13 +40,13 @@ class TestURIRefPreprocessing(object):
             # applying on escaped data should have no effect
             eq_(CleanedURIRef(prefix + expectedUriPart), URIRef(prefix + expectedUriPart))
 
-    def test_non_http_only_spaces(self):
-        testUri = "mailto:with space@example.com "
-        expectedUri = "mailto:withspace@example.com"
+        # leading and trailing space should not be escaped
+        testNonHttpUri = " mailto:with space!@example.com "
+        expectedNonHttpUri = "mailto:with%20space%21@example.com"
 
-        eq_(CleanedURIRef(testUri), URIRef(expectedUri))
+        eq_(CleanedURIRef(testNonHttpUri), URIRef(expectedNonHttpUri))
         # applying on escaped data should have no effect
-        eq_(CleanedURIRef(expectedUri), URIRef(expectedUri))
+        eq_(CleanedURIRef(expectedNonHttpUri), URIRef(expectedNonHttpUri))
 
 
 class TestBaseRDFProfile(object):
