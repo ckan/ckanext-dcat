@@ -606,10 +606,10 @@ class RDFProfile(object):
 
     def _get_source_catalog(self, dataset_ref):
         '''
-        Returns Catalog reference that is source for this dataset. 
+        Returns Catalog reference that is source for this dataset.
 
-        Catalog referenced in dct:hasPart is returned, 
-        if dataset is linked there, otherwise main catalog 
+        Catalog referenced in dct:hasPart is returned,
+        if dataset is linked there, otherwise main catalog
         will be returned.
 
         This will not be used if ckanext.dcat.expose_subcatalogs
@@ -627,7 +627,7 @@ class RDFProfile(object):
         if catalogs:
             return catalogs.pop()
         return root
-    
+
     def _get_root_catalog_ref(self):
         roots = list(self.g.subjects(DCT.hasPart))
         if not roots:
@@ -1245,7 +1245,7 @@ class SchemaOrgProfile(RDFProfile):
 
         # Resources
         self._resources_graph(dataset_ref, dataset_dict)
-        
+
         # Additional fields
         self.additional_fields(dataset_ref, dataset_dict)
 
@@ -1319,7 +1319,14 @@ class SchemaOrgProfile(RDFProfile):
                                 action='read',
                                 id=group.get('id'),
                                 qualified=True)
-            self.g.add((dataset_ref, SCHEMA.genre, Literal(group_url)))
+            about = BNode()
+
+            self.g.add((about, RDF.type, SCHEMA.Thing))
+
+            self.g.add((about, SCHEMA.name, Literal(group['name'])))
+            self.g.add((about, SCHEMA.url, Literal(group_url)))
+
+            self.g.add((dataset_ref, SCHEMA.about, about))
 
     def _tags_graph(self, dataset_ref, dataset_dict):
         for tag in dataset_dict.get('tags', []):

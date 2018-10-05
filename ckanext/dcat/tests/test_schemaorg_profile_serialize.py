@@ -177,9 +177,20 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        genres = self._triples(g, dataset_ref, SCHEMA.genre, None)
-        assert len(genres) == 2, 'There are not exactly 2 groups'
-        assert self._triple(g, dataset_ref, SCHEMA.genre, 'http://test.ckan.net/group/statistics')
+        about = self._triples(g, dataset_ref, SCHEMA.about, None)
+        assert len(about) == 2, 'There are not exactly 2 groups'
+
+        names = []
+        urls = []
+
+        for item in about:
+            names.append(str(g.value(item[2], SCHEMA.name)))
+            urls.append(str(g.value(item[2], SCHEMA.url)))
+
+        eq_(sorted(names), ['geography', 'statistics'])
+        eq_(sorted(urls), [
+            'http://test.ckan.net/group/geography',
+            'http://test.ckan.net/group/statistics'])
 
     @helpers.change_config('ckan.site_url', 'http://ckan.example.org')
     @helpers.change_config('ckan.site_description', 'CKAN Portal')
