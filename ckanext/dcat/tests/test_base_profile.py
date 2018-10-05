@@ -300,4 +300,5 @@ class TestBaseRDFProfile(object):
         contact = p._contact_details(URIRef('http://example.org'), ADMS.contactPoint)
 
         eq_(contact['name'], 'Point of Contact')
-        eq_(contact['email'], 'mailto:contact@some.org')
+        # mailto gets removed for storage and is added again on output
+        eq_(contact['email'], 'contact@some.org')
