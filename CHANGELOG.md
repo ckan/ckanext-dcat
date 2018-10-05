@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.8
+
+* Support for CKAN >= 2.8
+* Schema.org mapping improvements (#120, #139)
+* Fix handling of downloadURL and accessURL (#130)
+* Improve support for custom schemas when generating guids
+* Improvements and refactoring of data.json harvester (#116)
+* Add RDF.type to resource checksum (#132)
+* Improve email addresses handling (#134)
+* Escape and clean URL references (#138)
+
 ## v0.0.7
 
 * Support for embedding Schema.org structured data in dataset pages (#75)
