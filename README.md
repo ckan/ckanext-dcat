@@ -8,6 +8,9 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
 
 [http://www.w3.org/TR/vocab-dcat](http://www.w3.org/TR/vocab-dcat)
 
+It also offers other features related to Semantic Data like exposing the necessary markup to get your datasets indexed in [Google Dataset Search](https://toolbox.google.com/datasetsearch).
+
+
 ## Contents
 
 - [Overview](#overview)
@@ -30,7 +33,7 @@ This extension provides plugins that allow CKAN to expose and consume metadata f
     - [Compatibility mode](#compatibility-mode)
 - [XML DCAT harvester (deprecated)](#xml-dcat-harvester-deprecated)
 - [Translation of fields](#translation-of-fields)
-- [Structured Data](#structured-data)
+- [Structured Data and Google Dataset Search indexing](#structured-data-and-google-dataset-search-indexing)
 - [Running the Tests](#running-the-tests)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
@@ -804,7 +807,9 @@ To disable this behavior, you can set the following config value in your ini fil
     ckanext.dcat.translate_keys = False
 
 
-## Structured data
+## Structured data and Google Dataset Search indexing
+
+There are plugins available to add [structured data](https://developers.google.com/search/docs/guides/intro-structured-data) to dataset pages to provide richer metadata for search engines crawling your site. One of the most well known is [Google Dataset Search](https://toolbox.google.com/datasetsearch). The `structured_data` plugin will add the necessary markup in order to get your datasets indexed by Google Dataset Search. This markup is a JSON-LD snippet that uses the [schema.org](https://schema.org) vocabulary to describe the dataset.
 
 To add [structured data](https://developers.google.com/search/docs/guides/intro-structured-data) to dataset pages, activate the `structured_data` and `dcat` plugins in your ini file:
 
