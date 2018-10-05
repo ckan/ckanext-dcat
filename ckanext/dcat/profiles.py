@@ -14,6 +14,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
+from ckan.lib.helpers import url_for
 
 from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
@@ -1221,6 +1222,12 @@ class SchemaOrgProfile(RDFProfile):
         # Basic fields
         self._basic_fields_graph(dataset_ref, dataset_dict)
 
+        # Catalog
+        self._catalog_graph(dataset_ref, dataset_dict)
+
+        # Groups
+        self._groups_graph(dataset_ref, dataset_dict)
+
         # Tags
         self._tags_graph(dataset_ref, dataset_dict)
 
@@ -1238,6 +1245,18 @@ class SchemaOrgProfile(RDFProfile):
 
         # Resources
         self._resources_graph(dataset_ref, dataset_dict)
+        
+        # Additional fields
+        self.additional_fields(dataset_ref, dataset_dict)
+
+    def additional_fields(self, dataset_ref, dataset_dict):
+        '''
+        Adds any additional fields.
+
+        For a custom schema you should extend this class and
+        implement this method.
+        '''
+        pass
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
         '''
@@ -1269,6 +1288,7 @@ class SchemaOrgProfile(RDFProfile):
             ('version', SCHEMA.version, ['dcat_version'], Literal),
             ('issued', SCHEMA.datePublished, ['metadata_created'], Literal),
             ('modified', SCHEMA.dateModified, ['metadata_modified'], Literal),
+            ('license', SCHEMA.license, ['license_url', 'license_title'], Literal),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -1279,6 +1299,28 @@ class SchemaOrgProfile(RDFProfile):
 
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
+        # Dataset URL
+        dataset_url = url_for('dataset_read',
+                              id=dataset_dict['name'],
+                              qualified=True)
+        self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
+
+    def _catalog_graph(self, dataset_ref, dataset_dict):
+        data_catalog = BNode()
+        self.g.add((dataset_ref, SCHEMA.includedInDataCatalog, data_catalog))
+        self.g.add((data_catalog, RDF.type, SCHEMA.DataCatalog))
+        self.g.add((data_catalog, SCHEMA.name, Literal(config.get('ckan.site_title'))))
+        self.g.add((data_catalog, SCHEMA.description, Literal(config.get('ckan.site_description'))))
+        self.g.add((data_catalog, SCHEMA.url, Literal(config.get('ckan.site_url'))))
+
+    def _groups_graph(self, dataset_ref, dataset_dict):
+        for group in dataset_dict.get('groups', []):
+            group_url = url_for(controller='group',
+                                action='read',
+                                id=group.get('id'),
+                                qualified=True)
+            self.g.add((dataset_ref, SCHEMA.genre, Literal(group_url)))
+
     def _tags_graph(self, dataset_ref, dataset_dict):
         for tag in dataset_dict.get('tags', []):
             self.g.add((dataset_ref, SCHEMA.keywords, Literal(tag['name'])))
@@ -1286,7 +1328,6 @@ class SchemaOrgProfile(RDFProfile):
     def _list_fields_graph(self, dataset_ref, dataset_dict):
         items = [
             ('language', SCHEMA.inLanguage, None, Literal),
-            ('theme', SCHEMA.about, None, URIRef),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 

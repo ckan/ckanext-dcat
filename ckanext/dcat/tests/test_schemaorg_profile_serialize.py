@@ -33,6 +33,8 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
             'version': '1.0b',
             'metadata_created': '2015-06-26T15:21:09.034694',
             'metadata_modified': '2015-06-26T15:21:09.075774',
+            'license_title': 'CC-BY 3.0',
+            'license_url': 'http://creativecommons.org/licenses/by/3.0/',
             'tags': [{'name': 'Tag 1'}, {'name': 'Tag 2'}],
             'extras': [
                 {'key': 'alternate_identifier', 'value': '[\"xyz\", \"abc\"]'},
@@ -67,7 +69,11 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, SCHEMA.name, dataset['title'])
         assert self._triple(g, dataset_ref, SCHEMA.description, dataset['notes'])
         assert self._triple(g, dataset_ref, SCHEMA.version, dataset['version'])
+        assert self._triple(g, dataset_ref, SCHEMA.license, dataset['license_url'])
         assert self._triple(g, dataset_ref, SCHEMA.identifier, extras['identifier'])
+        url = self._triple(g, dataset_ref, SCHEMA.url, None)[2]
+        assert url
+        eq_(url, Literal('http://test.ckan.net/dataset/%s' % dataset['name']))
 
         # Dates
         assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'])
@@ -81,7 +87,6 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         # List
         for item in [
             ('language', SCHEMA.inLanguage, Literal),
-            ('theme', SCHEMA.about, URIRef),
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))
@@ -148,6 +153,52 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert self._triple(g, publisher, RDF.type, SCHEMA.Organization)
         assert self._triple(g, publisher, SCHEMA.name, dataset['organization']['title'])
+
+    def test_groups(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'groups': [
+                {
+                    'id': 'geography',
+                    'name': 'geography',
+                    'display_name': 'Geography',
+                },
+                {
+                    'id': 'statistics',
+                    'name': 'statistics',
+                    'display_name': 'Statistics',
+                },
+            ]
+        }
+
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        genres = self._triples(g, dataset_ref, SCHEMA.genre, None)
+        assert len(genres) == 2, 'There are not exactly 2 groups'
+        assert self._triple(g, dataset_ref, SCHEMA.genre, 'http://test.ckan.net/group/statistics')
+
+    @helpers.change_config('ckan.site_url', 'http://ckan.example.org')
+    @helpers.change_config('ckan.site_description', 'CKAN Portal')
+    @helpers.change_config('ckan.site_title', 'ckan.example.org')
+    def test_catalog(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+        }
+        s = RDFSerializer(profiles=['schemaorg'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        data_catalog = self._triple(g, dataset_ref, SCHEMA.includedInDataCatalog, None)[2]
+        assert data_catalog
+        assert self._triple(g, data_catalog, RDF.type, SCHEMA.DataCatalog)
+        assert self._triple(g, data_catalog, SCHEMA.url, 'http://ckan.example.org')
+        assert self._triple(g, data_catalog, SCHEMA.name, 'ckan.example.org')
+        assert self._triple(g, data_catalog, SCHEMA.description, 'CKAN Portal')
 
     def test_temporal_start_and_end(self):
         dataset = {
