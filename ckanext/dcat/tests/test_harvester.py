@@ -132,6 +132,28 @@ class TestRDFExceptionHarvester(TestRDFHarvester):
 
 class TestDCATHarvestUnit(object):
 
+    def test_get_guid_uri_root(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'uri': 'http://dataset/uri',
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'http://dataset/uri')
+
+    def test_get_guid_identifier_root(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'identifier': 'http://dataset/uri',
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'http://dataset/uri')
+
     def test_get_guid_uri(self):
 
         dataset = {

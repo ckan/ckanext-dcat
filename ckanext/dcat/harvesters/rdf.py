@@ -31,6 +31,26 @@ class DCATRDFHarvester(DCATHarvester):
             'description': 'Harvester for DCAT datasets from an RDF graph'
         }
 
+    def _get_dict_value(self, _dict, key, default=None):
+        '''
+        Returns the value for the given key on a CKAN dict
+
+        By default a key on the root level is checked. If not found, extras
+        are checked, both with the key provided and with `dcat_` prepended to
+        support legacy fields.
+
+        If not found, returns the default value, which defaults to None
+        '''
+
+        if key in _dict:
+            return _dict[key]
+
+        for extra in _dict.get('extras', []):
+            if extra['key'] == key or extra['key'] == 'dcat_' + key:
+                return extra['value']
+
+        return default
+
     def _get_guid(self, dataset_dict, source_url=None):
         '''
         Try to get a unique identifier for a harvested dataset
@@ -47,23 +67,18 @@ class DCATRDFHarvester(DCATHarvester):
          Returns None if no guid could be decided.
         '''
         guid = None
-        for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'uri' and extra['value']:
-                return extra['value']
 
-        for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'identifier' and extra['value']:
-                return extra['value']
-
-        for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'dcat_identifier' and extra['value']:
-                return extra['value']
+        guid = (
+            self._get_dict_value(dataset_dict, 'uri') or
+            self._get_dict_value(dataset_dict, 'identifier')
+        )
+        if guid:
+            return guid
 
         if dataset_dict.get('name'):
             guid = dataset_dict['name']
             if source_url:
                 guid = source_url.rstrip('/') + '/' + guid
-
         return guid
 
     def _mark_datasets_for_deletion(self, guids_in_source, harvest_job):
@@ -185,6 +200,9 @@ class DCATRDFHarvester(DCATHarvester):
                 return []
 
             try:
+
+                source_dataset = model.Package.get(harvest_job.source.id)
+
                 for dataset in parser.datasets():
                     if not dataset.get('name'):
                         dataset['name'] = self._gen_new_name(dataset['title'])
@@ -192,12 +210,11 @@ class DCATRDFHarvester(DCATHarvester):
                     # Unless already set by the parser, get the owner organization (if any)
                     # from the harvest source dataset
                     if not dataset.get('owner_org'):
-                        source_dataset = model.Package.get(harvest_job.source.id)
                         if source_dataset.owner_org:
                             dataset['owner_org'] = source_dataset.owner_org
 
                     # Try to get a unique identifier for the harvested dataset
-                    guid = self._get_guid(dataset)
+                    guid = self._get_guid(dataset, source_url=source_dataset.url)
 
                     if not guid:
                         self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
