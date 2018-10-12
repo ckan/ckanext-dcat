@@ -51,8 +51,23 @@ namespaces = {
 
 PREFIX_MAILTO = u'mailto:'
 
+class URIRefOrLiteral(object):
+    '''Helper which creates an URIRef if the value appears to be an http URL,
+    or a Literal otherwise. URIRefs are also cleaned using CleanedURIRef.
+
+    Like CleanedURIRef, this is a factory class.
+    '''
+    def __new__(cls, value):
+        stripped_value = value.strip()
+        if (isinstance(value, basestring) and (stripped_value.startswith("http://")
+                                               or stripped_value.startswith("https://"))):
+            return CleanedURIRef(value)
+        else:
+            return Literal(value)
+
+
 class CleanedURIRef(object):
-    '''Performs either some basic URL encoding on value before creating an URIRef object.
+    '''Performs some basic URL encoding on value before creating an URIRef object.
 
     This is a factory for URIRef objects, which allows usage as type in graph.add()
     without affecting the resulting node types. That is,
@@ -968,7 +983,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('identifier', DCT.identifier, ['guid', 'id'], Literal),
             ('version', OWL.versionInfo, ['dcat_version'], Literal),
             ('version_notes', ADMS.versionNotes, None, Literal),
-            ('frequency', DCT.accrualPeriodicity, None, Literal),
+            ('frequency', DCT.accrualPeriodicity, None, URIRefOrLiteral),
             ('access_rights', DCT.accessRights, None, Literal),
             ('dcat_type', DCT.type, None, Literal),
             ('provenance', DCT.provenance, None, Literal),
@@ -992,10 +1007,10 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('theme', DCAT.theme, None, URIRef),
             ('conforms_to', DCT.conformsTo, None, Literal),
             ('alternate_identifier', ADMS.identifier, None, Literal),
-            ('documentation', FOAF.page, None, Literal),
-            ('related_resource', DCT.relation, None, Literal),
-            ('has_version', DCT.hasVersion, None, Literal),
-            ('is_version_of', DCT.isVersionOf, None, Literal),
+            ('documentation', FOAF.page, None, URIRefOrLiteral),
+            ('related_resource', DCT.relation, None, URIRefOrLiteral),
+            ('has_version', DCT.hasVersion, None, URIRefOrLiteral),
+            ('is_version_of', DCT.isVersionOf, None, URIRefOrLiteral),
             ('source', DCT.source, None, Literal),
             ('sample', ADMS.sample, None, Literal),
         ]
@@ -1062,7 +1077,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             items = [
                 ('publisher_email', FOAF.mbox, None, Literal),
                 ('publisher_url', FOAF.homepage, None, URIRef),
-                ('publisher_type', DCT.type, None, Literal),
+                ('publisher_type', DCT.type, None, URIRefOrLiteral),
             ]
 
             self._add_triples_from_dict(dataset_dict, publisher_details, items)
@@ -1125,9 +1140,9 @@ class EuropeanDCATAPProfile(RDFProfile):
             items = [
                 ('name', DCT.title, None, Literal),
                 ('description', DCT.description, None, Literal),
-                ('status', ADMS.status, None, Literal),
-                ('rights', DCT.rights, None, Literal),
-                ('license', DCT.license, None, Literal),
+                ('status', ADMS.status, None, URIRefOrLiteral),
+                ('rights', DCT.rights, None, URIRefOrLiteral),
+                ('license', DCT.license, None, URIRefOrLiteral),
                 ('access_url', DCAT.accessURL, None, URIRef),
                 ('download_url', DCAT.downloadURL, None, URIRef),
             ]
@@ -1136,7 +1151,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             #  Lists
             items = [
-                ('documentation', FOAF.page, None, Literal),
+                ('documentation', FOAF.page, None, URIRefOrLiteral),
                 ('language', DCT.language, None, Literal),
                 ('conforms_to', DCT.conformsTo, None, Literal),
             ]
@@ -1145,7 +1160,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             # Format
             if '/' in resource_dict.get('format', ''):
                 g.add((distribution, DCAT.mediaType,
-                       Literal(resource_dict['format'])))
+                       URIRefOrLiteral(resource_dict['format'])))
             else:
                 if resource_dict.get('format'):
                     g.add((distribution, DCT['format'],
@@ -1190,12 +1205,9 @@ class EuropeanDCATAPProfile(RDFProfile):
                                datatype=XSD.hexBinary)))
 
                 if resource_dict.get('hash_algorithm'):
-                    if resource_dict['hash_algorithm'].startswith('http'):
-                        g.add((checksum, SPDX.algorithm,
-                               CleanedURIRef(resource_dict['hash_algorithm'])))
-                    else:
-                        g.add((checksum, SPDX.algorithm,
-                               Literal(resource_dict['hash_algorithm'])))
+                    g.add((checksum, SPDX.algorithm,
+                           URIRefOrLiteral(resource_dict['hash_algorithm'])))
+
                 g.add((distribution, SPDX.checksum, checksum))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
