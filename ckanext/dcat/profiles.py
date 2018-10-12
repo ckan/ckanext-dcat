@@ -136,9 +136,7 @@ class RDFProfile(object):
     def _object_value(self, subject, predicate, multilang=False):
         '''
         Given a subject and a predicate, returns the value of the object
-
         Both subject and predicate must be rdflib URIRef or BNode objects
-
         If found, the unicode representation is returned, else an empty string
         '''
         default_lang = config.get('ckan.locale_default', 'en')
@@ -157,24 +155,6 @@ class RDFProfile(object):
                     lang_dict[lang] = ''
             return lang_dict
         return ''
-
-    def _add_multilang_value(self, subject, predicate, dataset_key, dataset_dict):  # noqa
-        multilang_values = dataset_dict.get(dataset_key)
-        if multilang_values:
-            try:
-                for key, values in multilang_values.iteritems():
-                    if values:
-                        # the values can be either a multilang-dict or they are
-                        # nested in another iterable (e.g. keywords)
-                        if not hasattr(values, '__iter__'):
-                            values = [values]
-                        for value in values:
-                            self.g.add((subject, predicate, Literal(value, lang=key)))  # noqa
-            # if multilang_values is not iterable, it is simply added as a non-
-            # translated Literal
-            except AttributeError:
-                self.g.add(
-                    (subject, predicate, Literal(multilang_values)))  # noqa
 
     def _object_value_int(self, subject, predicate):
         '''
@@ -520,19 +500,22 @@ class RDFProfile(object):
 
     def _add_triples_from_dict(self, _dict, subject, items,
                                list_value=False,
-                               date_value=False):
+                               date_value=False,
+                               multilang=False):
         for item in items:
             key, predicate, fallbacks, _type = item
             self._add_triple_from_dict(_dict, subject, predicate, key,
                                        fallbacks=fallbacks,
                                        list_value=list_value,
                                        date_value=date_value,
+                                       multilang=multilang,
                                        _type=_type)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
                               list_value=False,
                               date_value=False,
+                              multilang=False,
                               _type=Literal,
                               value_modifier=None):
         '''
@@ -566,12 +549,24 @@ class RDFProfile(object):
             self._add_list_triple(subject, predicate, value, _type)
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
+        elif value and multilang:
+            self._add_multilang_triple(subject, predicate, value)
         elif value:
             # Normal text value
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
             self.g.add((subject, predicate, _type(value)))
+
+    def _add_multilang_triple(self, subject, predicate, multilang_values):  # noqa
+         for key, values in multilang_values.iteritems():
+            if values:
+                # the values can be either a multilang-dict or they are
+                # nested in another iterable (e.g. keywords)
+                if not hasattr(values, '__iter__'):
+                    values = [values]
+                for value in values:
+                    self.g.add((subject, predicate, Literal(value, lang=key)))  # noqa
 
     def _add_list_triple(self, subject, predicate, value, _type=Literal):
         '''
