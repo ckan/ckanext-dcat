@@ -6,7 +6,6 @@ import traceback
 
 import ckan.plugins as p
 import ckan.model as model
-import ckan.logic as logic
 
 import ckan.lib.plugins as lib_plugins
 
@@ -30,6 +29,8 @@ class DCATRDFHarvester(DCATHarvester):
             'title': 'Generic DCAT RDF Harvester',
             'description': 'Harvester for DCAT datasets from an RDF graph'
         }
+
+    _names_taken = []
 
     def _get_dict_value(self, _dict, key, default=None):
         '''
@@ -206,6 +207,10 @@ class DCATRDFHarvester(DCATHarvester):
                 for dataset in parser.datasets():
                     if not dataset.get('name'):
                         dataset['name'] = self._gen_new_name(dataset['title'])
+                        if dataset['name'] in self._names_taken:
+                            suffix = len([i for i in self._names_taken if i.startswith(dataset['name'] + '-')]) + 1
+                            dataset['name'] = '{}-{}'.format(dataset['name'], suffix)
+                        self._names_taken.append(dataset['name'])
 
                     # Unless already set by the parser, get the owner organization (if any)
                     # from the harvest source dataset
