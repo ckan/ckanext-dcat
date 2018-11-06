@@ -61,7 +61,15 @@ class URIRefOrLiteral(object):
         stripped_value = value.strip()
         if (isinstance(value, basestring) and (stripped_value.startswith("http://")
                                                or stripped_value.startswith("https://"))):
-            return CleanedURIRef(value)
+            uri_obj = CleanedURIRef(value)
+            # although all invalid chars checked by rdflib should have been quoted, try to serialize
+            # the object. If it breaks, use Literal instead.
+            try:
+                uri_obj.n3()
+            except Exception:
+                return Literal(value)
+            # URI is fine, return the object
+            return uri_obj
         else:
             return Literal(value)
 
@@ -79,7 +87,7 @@ class CleanedURIRef(object):
         # (e.g. valid ? in query string vs. ? as value).
         # can be applied multiple times, as encoded %xy is left untouched. Therefore, no
         # unquote is necessary beforehand.
-        quotechars = ' !"$\'()*,;<>[]{|}'
+        quotechars = ' !"$\'()*,;<>[]{|}\\^`'
         for c in quotechars:
             value = value.replace(c, quote(c))
         return value
