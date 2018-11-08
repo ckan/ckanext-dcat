@@ -40,7 +40,7 @@ cd -
 
 if [ $CKANVERSION == '2.7' ]
 then
-    pip install setuptools==36.1
+    pip install setuptools==39.0.1
 fi
 
 echo "Setting up Solr..."
