@@ -33,6 +33,12 @@ python setup.py develop
 # Pin this as newer versions installed by RDFLib give setuptools troubles
 pip install "html5lib==0.9999999"
 
+if [ $CKANVERSION == '2.7' ]
+then
+    echo "Installing setuptools"
+    pip install setuptools==39.0.1
+fi
+
 pip install -r requirements.txt
 pip install -r dev-requirements.txt
 cd -

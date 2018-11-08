@@ -383,6 +383,28 @@ class FunctionalHarvestTest(object):
         </rdf:RDF>
         '''
 
+        cls.rdf_mock_url_duplicates = 'http://some.dcat.file.duplicates.rdf'
+        cls.rdf_duplicate_titles = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/2">
+              <dct:title>Example dataset</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        </rdf:RDF>
+        '''
+
         cls.rdf_remote_file_small = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
@@ -969,6 +991,32 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         eq_(last_job_status['status'], 'Finished')
         assert ('Error when processsing dataset'
                 in last_job_status['gather_error_summary'][0][0])
+
+    def test_harvest_create_duplicate_titles(self):
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_duplicates,
+                               body=self.rdf_duplicate_titles,
+                               content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_duplicates,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url_duplicates)
+
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Check that two datasets were created
+        fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
+        results = h.call_action('package_search', {}, fq=fq)
+
+        eq_(results['count'], 2)
+        for result in results['results']:
+            assert result['name'] in ('example-dataset',
+                                      'example-dataset-1')
 
 
 class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
