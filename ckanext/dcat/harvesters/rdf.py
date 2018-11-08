@@ -157,6 +157,7 @@ class DCATRDFHarvester(DCATHarvester):
         guids_in_source = []
         object_ids = []
         last_content_hash = None
+        self._names_taken = []
 
         while next_page_url:
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
@@ -207,10 +208,10 @@ class DCATRDFHarvester(DCATHarvester):
                 for dataset in parser.datasets():
                     if not dataset.get('name'):
                         dataset['name'] = self._gen_new_name(dataset['title'])
-                        if dataset['name'] in self._names_taken:
-                            suffix = len([i for i in self._names_taken if i.startswith(dataset['name'] + '-')]) + 1
-                            dataset['name'] = '{}-{}'.format(dataset['name'], suffix)
-                        self._names_taken.append(dataset['name'])
+                    if dataset['name'] in self._names_taken:
+                        suffix = len([i for i in self._names_taken if i.startswith(dataset['name'] + '-')]) + 1
+                        dataset['name'] = '{}-{}'.format(dataset['name'], suffix)
+                    self._names_taken.append(dataset['name'])
 
                     # Unless already set by the parser, get the owner organization (if any)
                     # from the harvest source dataset

@@ -383,6 +383,7 @@ class FunctionalHarvestTest(object):
         </rdf:RDF>
         '''
 
+        cls.rdf_mock_url_duplicates = 'http://some.dcat.file.duplicates.rdf'
         cls.rdf_duplicate_titles = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
@@ -994,17 +995,17 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     def test_harvest_create_duplicate_titles(self):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url,
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_duplicates,
                                body=self.rdf_duplicate_titles,
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url,
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_duplicates,
                                status=405,
                                content_type=self.rdf_content_type)
 
-        harvest_source = self._create_harvest_source(self.rdf_mock_url)
+        harvest_source = self._create_harvest_source(self.rdf_mock_url_duplicates)
 
         self._run_full_job(harvest_source['id'], num_objects=2)
 
