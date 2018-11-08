@@ -113,10 +113,10 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('theme', DCAT.theme, URIRef),
             ('conforms_to', DCT.conformsTo, Literal),
             ('alternate_identifier', ADMS.identifier, Literal),
-            ('documentation', FOAF.page, Literal),
-            ('related_resource', DCT.relation, Literal),
-            ('has_version', DCT.hasVersion, Literal),
-            ('is_version_of', DCT.isVersionOf, Literal),
+            ('documentation', FOAF.page, URIRef),
+            ('related_resource', DCT.relation, URIRef),
+            ('has_version', DCT.hasVersion, URIRef),
+            ('is_version_of', DCT.isVersionOf, URIRef),
             ('source', DCT.source, Literal),
             ('sample', ADMS.sample, Literal),
         ]:
@@ -315,7 +315,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
-        assert self._triple(g, publisher, DCT.type, extras['publisher_type'])
+        assert self._triple(g, publisher, DCT.type, URIRef(extras['publisher_type']))
 
     def test_publisher_org(self):
         dataset = {
@@ -555,19 +555,19 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.title, resource['name'])
         assert self._triple(g, distribution, DCT.description, resource['description'])
         assert self._triple(g, distribution, DCT.rights, resource['rights'])
-        assert self._triple(g, distribution, DCT.license, resource['license'])
-        assert self._triple(g, distribution, ADMS.status, resource['status'])
+        assert self._triple(g, distribution, DCT.license, URIRef(resource['license']))
+        assert self._triple(g, distribution, ADMS.status, URIRef(resource['status']))
 
         # List
         for item in [
-            ('documentation', FOAF.page),
-            ('language', DCT.language),
-            ('conforms_to', DCT.conformsTo),
+            ('documentation', FOAF.page, URIRef),
+            ('language', DCT.language, Literal),
+            ('conforms_to', DCT.conformsTo, Literal),
         ]:
             values = json.loads(resource[item[0]])
             eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
             for value in values:
-                assert self._triple(g, distribution, item[1], value)
+                assert self._triple(g, distribution, item[1], item[2](value))
 
         # Dates
         assert self._triple(g, distribution, DCT.issued, resource['issued'], XSD.dateTime)
