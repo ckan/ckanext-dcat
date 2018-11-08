@@ -127,6 +127,20 @@ class TestBaseRDFProfile(object):
         assert isinstance(value, int)
         eq_(value, 23)
 
+    def test_object_int_decimal(self):
+
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 TEST.some_number,
+                 Literal('23.0')))
+
+        value = p._object_value_int(URIRef('http://example.org/datasets/1'),
+                                    TEST.some_number)
+
+        assert isinstance(value, int)
+        eq_(value, 23)
+
     def test_object_int_not_found(self):
 
         p = RDFProfile(_default_graph())

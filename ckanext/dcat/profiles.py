@@ -157,7 +157,7 @@ class RDFProfile(object):
         object_value = self._object_value(subject, predicate)
         if object_value:
             try:
-                return int(object_value)
+                return int(float(object_value))
             except ValueError:
                 pass
         return None
