@@ -3,11 +3,18 @@ import uuid
 import logging
 import hashlib
 import traceback
+import os
+
+from urlparse import urljoin
+
+from datapackage import Resource
 
 import ckan.plugins as p
 import ckan.model as model
 
 import ckan.lib.plugins as lib_plugins
+
+from ckan.common import config, c
 
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 
@@ -17,9 +24,97 @@ from ckanext.dcat.processors import RDFParserException, RDFParser
 
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 
+from ckanext.dcat.models import DCATPackageExtra
+
+import ckan.plugins.toolkit as toolkit
+
+from ckanext.dgua.plugin import (
+    UnicodePackage,
+    remove_datapackage_files,
+    get_datapackage_full_path,
+    NotFound,
+    DatapackageValidationError
+)
+
+import ckanext.dgua.helpers as helpers
+
 
 log = logging.getLogger(__name__)
 
+
+def datapackage_generate(pkg):
+    context = {
+        'model': model,
+        'session': model.Session,
+        # 'user': c.user,
+        # 'auth_user_obj': c.userobj,
+    }
+    pkg_descriptor = {
+        'profile': 'data-package',
+        'id': pkg.get('id'),
+        'name': pkg.get('name'),
+        'title': pkg.get('title'),
+        'description': pkg.get('notes'),
+        'contributors': [{
+            'title': pkg.get('author'),
+            'email': pkg.get('author_email'),
+            'role': 'author'
+        }, {
+            'title': pkg.get('maintainer'),
+            'email': pkg.get('maintainer_email'),
+            'role': 'maintainer'
+        }],
+        'homepage': urljoin(toolkit.config['ckan.site_url'],
+                            toolkit.url_for(controller='package', action='read', id=pkg.get('name'))),
+        'version': pkg.get('version'),
+        'created': pkg.get('metadata_created')
+    }
+    if pkg.get('num_tags') > 0:
+        pkg_descriptor.update({
+            'keywords': [i.get('name') for i in pkg.get('tags')],
+        })
+    if 'license_title' in pkg and 'license_id' in pkg:
+        license_dict = {
+            'name': pkg.get('license_id'),
+            'title': pkg.gte('license_title'),
+        }
+        if 'license_url' in pkg:
+            license_dict.update({'path': pkg.gtet('license_url')})
+        pkg_descriptor.update({'licenses': [license_dict]})
+    package = UnicodePackage(pkg_descriptor)
+    full_file_path = get_datapackage_full_path(pkg)
+    helpers.ensure_dir(full_file_path)
+    datastore_info = toolkit.get_action('datastore_info')
+    for res_dict in pkg.get('resources'):
+        descriptor = {
+            'name': res_dict.get('name'),
+            'mimetype': res_dict.get('mimetype'),
+            'format': res_dict.get('format'),
+            'url': res_dict.get('url'),
+        }
+        try:
+            info = datastore_info(context, {'id': res_dict.get('id')})
+        except NotFound:
+            pass
+        else:
+            fields = [{'name': f_name, 'type': f_type, 'format': 'default'} for f_name, f_type in
+                      info['schema'].items()]
+            descriptor.update({
+                'profile': 'tabular-data-resource',
+                'schema': {'fields': fields, 'missingValues': ['']},
+                'url': urljoin(toolkit.config['ckan.site_url'], '/datastore/dump/{}'.format(res_dict.get('id'))),
+                'format': 'CSV',
+                'mimetype': 'text/csv',
+            })
+        resource = Resource(descriptor)
+        package.add_resource(resource.descriptor)
+    try:
+        package.validate()
+    except DatapackageValidationError:
+        log.warning(package.errors)
+    package.save(full_file_path)
+    pkg['is_datapackage'] = True
+    toolkit.get_action('package_update')(context, pkg)
 
 class DCATRDFHarvester(DCATHarvester):
 
@@ -276,6 +371,19 @@ class DCATRDFHarvester(DCATHarvester):
 
         try:
             dataset = json.loads(harvest_object.content)
+
+            # Set default values
+            required_fields = DCATPackageExtra.get_extra_keys(harvest_object.harvest_source_id)
+            if not dataset.get('purpose_of_collecting_information'):
+                dataset['purpose_of_collecting_information'] = required_fields['purpose_of_collecting_information']
+            if not dataset.get('update_frequency'):
+                dataset['update_frequency'] = required_fields['update_frequency']
+            if not dataset.get('language'):
+                dataset['language'] = required_fields['language']
+            if not dataset.get('tag_string'):
+                dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
+            dataset['private'] = True
+
         except ValueError:
             self._save_object_error('Could not parse content for object {0}'.format(harvest_object.id),
                                     harvest_object, 'Import')
@@ -392,6 +500,8 @@ class DCATRDFHarvester(DCATHarvester):
                         self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')
                         return False
 
+                print dataset
+                datapackage_generate(dataset)
                 log.info('Created dataset %s' % dataset['name'])
 
         except Exception, e:
