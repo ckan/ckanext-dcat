@@ -374,6 +374,7 @@ class DCATRDFHarvester(DCATHarvester):
 
             # Set default values
             required_fields = DCATPackageExtra.get_extra_keys(harvest_object.harvest_source_id)
+            print 'TAAAAAAAAAAAAAAAAAAAG: {}'.format(required_fields['tag_string'])
             if not dataset.get('purpose_of_collecting_information'):
                 dataset['purpose_of_collecting_information'] = required_fields['purpose_of_collecting_information']
             if not dataset.get('update_frequency'):
@@ -381,7 +382,10 @@ class DCATRDFHarvester(DCATHarvester):
             if not dataset.get('language'):
                 dataset['language'] = required_fields['language']
             if not dataset.get('tag_string'):
-                dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
+                if dataset['tags']:
+                    dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
+                else:
+                    dataset['tag_string'] = required_fields['tag_string']
             dataset['private'] = True
 
         except ValueError:
