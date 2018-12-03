@@ -504,7 +504,6 @@ class DCATRDFHarvester(DCATHarvester):
                         self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')
                         return False
 
-                print dataset
                 datapackage_generate(dataset)
                 log.info('Created dataset %s' % dataset['name'])
 
