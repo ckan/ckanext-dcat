@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from sqlalchemy import  or_
+from sqlalchemy import or_
 
 from ckan import model
 
@@ -22,6 +22,7 @@ class DCATPackageExtra(model.PackageExtra):
             cls.key == 'language',
             cls.key == 'purpose_of_collecting_information',
             cls.key == 'update_frequency',
+            cls.key == 'tag_string',
         ))
 
         result = {}
@@ -30,5 +31,5 @@ class DCATPackageExtra(model.PackageExtra):
 
         return result
 
-
 model.meta.mapper(DCATPackageExtra, model.package_extra.package_extra_table)
+

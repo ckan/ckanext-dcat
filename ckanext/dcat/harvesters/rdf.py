@@ -94,7 +94,7 @@ def datapackage_generate(pkg):
         }
         try:
             info = datastore_info(context, {'id': res_dict.get('id')})
-        except NotFound:
+        except Exception:
             pass
         else:
             fields = [{'name': f_name, 'type': f_type, 'format': 'default'} for f_name, f_type in
@@ -381,7 +381,10 @@ class DCATRDFHarvester(DCATHarvester):
             if not dataset.get('language'):
                 dataset['language'] = required_fields['language']
             if not dataset.get('tag_string'):
-                dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
+                if dataset['tags']:
+                    dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
+                else:
+                    dataset['tag_string'] = required_fields.get('tag_string')
             dataset['private'] = True
 
         except ValueError:
@@ -500,7 +503,6 @@ class DCATRDFHarvester(DCATHarvester):
                         self._save_object_error('RDFHarvester plugin error: %s' % err, harvest_object, 'Import')
                         return False
 
-                print dataset
                 datapackage_generate(dataset)
                 log.info('Created dataset %s' % dataset['name'])
 
