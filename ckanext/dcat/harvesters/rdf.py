@@ -37,6 +37,7 @@ from ckanext.dgua.plugin import (
 )
 
 import ckanext.dgua.helpers as helpers
+import ckanext.dgua.models as dgua_model
 
 
 log = logging.getLogger(__name__)
@@ -53,15 +54,15 @@ def datapackage_generate(pkg):
         'profile': 'data-package',
         'id': pkg.get('id'),
         'name': pkg.get('name'),
-        'title': pkg.get('title'),
-        'description': pkg.get('notes'),
+        'title': pkg.get('title', ''),
+        'description': pkg.get('notes', ''),
         'contributors': [{
-            'title': pkg.get('author'),
-            'email': pkg.get('author_email'),
+            'title': pkg.get('author', ''),
+            'email': pkg.get('author_email', ''),
             'role': 'author'
         }, {
-            'title': pkg.get('maintainer'),
-            'email': pkg.get('maintainer_email'),
+            'title': pkg.get('maintainer', ''),
+            'email': pkg.get('maintainer_email', ''),
             'role': 'maintainer'
         }],
         'homepage': urljoin(toolkit.config['ckan.site_url'],
@@ -385,6 +386,7 @@ class DCATRDFHarvester(DCATHarvester):
                     dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
                 else:
                     dataset['tag_string'] = required_fields.get('tag_string')
+
             dataset['private'] = True
 
         except ValueError:
@@ -423,6 +425,17 @@ class DCATRDFHarvester(DCATHarvester):
                 # Don't change the dataset name even if the title has
                 dataset['name'] = existing_dataset['name']
                 dataset['id'] = existing_dataset['id']
+
+                # Set package as public if it exists and was be approved by moderator
+                premoderation_list = dgua_model.DGUAPremoderationLog.get_by_pkg_id(dataset['id'])
+
+                premoderation_pkg = None
+
+                if premoderation_list:
+                    premoderation_pkg = premoderation_list[0]
+
+                if premoderation_pkg and premoderation_pkg.action == 'approved':
+                    dataset['private'] = False
 
                 harvester_tmp_dict = {}
 
