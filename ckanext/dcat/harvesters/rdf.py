@@ -3,7 +3,7 @@ import uuid
 import logging
 import hashlib
 import traceback
-import os
+import re
 
 from urlparse import urljoin
 
@@ -381,6 +381,10 @@ class DCATRDFHarvester(DCATHarvester):
                 dataset['update_frequency'] = required_fields['update_frequency']
             if not dataset.get('language'):
                 dataset['language'] = required_fields['language']
+
+            tagname_match = re.compile('[\w \-.]*$', re.UNICODE)
+            dataset['tags'] = [tag for tag in dataset.get('tags') if tagname_match.match(tag.get('name'))]
+
             if not dataset.get('tag_string'):
                 if dataset['tags']:
                     dataset['tag_string'] = u', '.join([tag.get('name') for tag in dataset['tags']])
