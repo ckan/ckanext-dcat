@@ -381,6 +381,8 @@ class DCATRDFHarvester(DCATHarvester):
                 dataset['update_frequency'] = required_fields['update_frequency']
             if not dataset.get('language'):
                 dataset['language'] = required_fields['language']
+            if not dataset.get('notes'):
+                dataset['notes'] = dataset.get('title')
 
             tagname_match = re.compile('[\w \-.]*$', re.UNICODE)
             dataset['tags'] = [tag for tag in dataset.get('tags') if tagname_match.match(tag.get('name'))]
