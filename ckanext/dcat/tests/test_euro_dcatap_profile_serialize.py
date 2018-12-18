@@ -46,6 +46,51 @@ class BaseSerializeTest(object):
 
 
 class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
+    def _build_graph_and_check_format_mediatype(self, dataset_dict, expected_format, expected_mediatype):
+        """
+        Creates a graph based on the given dict and checks for dct:format and dct:mediaType in the
+        first resource element.
+
+        :param dataset_dict:
+            dataset dict, expected to contain one resource
+        :param expected_format:
+            expected list of dct:format items in the resource
+        :param expected_mediatype:
+            expected list of dcat:mediaType items in the resource
+        """
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        # graph should contain the expected nodes
+        resource_ref = list(g.objects(dataset_ref, DCAT.distribution))[0]
+        dct_format = list(g.objects(resource_ref, DCT['format']))
+        dcat_mediatype = list(g.objects(resource_ref, DCAT.mediaType))
+        eq_(expected_format, dct_format)
+        eq_(expected_mediatype, dcat_mediatype)
+
+    def _get_base_dataset_with_resource(self):
+        """
+        Creates a minimal test dataset with one resource. The dataset and resource are
+        both returned and can be extended in test cases.
+        """
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        return dataset, resource
 
     def test_graph_from_dataset(self):
 
@@ -871,63 +916,72 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
         assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
 
-    def test_distribution_format(self):
+    def test_distribution_format_iana_uri(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # when only format is available and it looks like an IANA media type, use DCAT.mediaType instead
+        # of DCT.format for output
+        fmt_uri = 'https://www.iana.org/assignments/media-types/application/json'
+        resource['format'] = fmt_uri
 
-        resource = {
-            'id': 'c041c635-054f-4431-b647-f9186926d021',
-            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-            'name': 'CSV file',
-            'url': 'http://example.com/data/file.csv',
-            'format': 'CSV',
-            'mimetype': 'text/csv',
-        }
+        # expect no dct:format node and the URI in dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [],
+            [URIRef(fmt_uri)]
+        )
 
-        dataset = {
-            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-            'name': 'test-dataset',
-            'title': 'Test DCAT dataset',
-            'resources': [
-                resource
-            ]
-        }
+    def test_distribution_format_other_uri(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # when only format is available and it does not look like an IANA media type, use dct:format
+        fmt_uri = 'https://example.com/my/format'
+        resource['format'] = fmt_uri
 
-        s = RDFSerializer()
-        g = s.g
+        # expect dct:format node with the URI and no dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [URIRef(fmt_uri)],
+            []
+        )
 
-        dataset_ref = s.graph_from_dataset(dataset)
+    def test_distribution_format_mediatype_text(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # if format value looks like an IANA media type, output dcat:mediaType instead of dct:format
+        fmt_text = 'application/json'
+        resource['format'] = fmt_text
 
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        # expect no dct:format node and the literal value in dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [],
+            [Literal(fmt_text)]
+        )
 
-        assert self._triple(g, distribution, DCT['format'], resource['format'])
-        assert self._triple(g, distribution, DCAT.mediaType, resource['mimetype'])
+    def test_distribution_format_mediatype_same(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # if format and mediaType are identical, output only dcat:mediaType
+        fmt_text = 'application/json'
+        resource['format'] = fmt_text
+        resource['mimetype'] = fmt_text
 
-    def test_distribution_format_with_backslash(self):
+        # expect no dct:format node and the literal value in dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [],
+            [Literal(fmt_text)]
+        )
 
-        resource = {
-            'id': 'c041c635-054f-4431-b647-f9186926d021',
-            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-            'name': 'CSV file',
-            'url': 'http://example.com/data/file.csv',
-            'format': 'text/csv',
-        }
+    def test_distribution_format_mediatype_different(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # if format and mediaType are different, output both
+        resource['format'] = 'myformat'
+        resource['mimetype'] = 'application/json'
 
-        dataset = {
-            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-            'name': 'test-dataset',
-            'title': 'Test DCAT dataset',
-            'resources': [
-                resource
-            ]
-        }
-
-        s = RDFSerializer()
-        g = s.g
-
-        dataset_ref = s.graph_from_dataset(dataset)
-
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-
-        assert self._triple(g, distribution, DCAT.mediaType, resource['format'])
+        # expect both nodes
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [Literal('myformat')],
+            [Literal('application/json')]
+        )
 
     def test_hash_algorithm_not_uri(self):
 

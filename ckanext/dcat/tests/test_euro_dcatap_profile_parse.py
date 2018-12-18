@@ -39,6 +39,43 @@ class BaseParseTest(object):
 
 class TestEuroDCATAPProfileParsing(BaseParseTest):
 
+    def _build_and_parse_format_mediatype_graph(self, format_item=None, mediatype_item=None):
+        """
+        Creates a minimal graph with a distribution having the specified dct:format and dcat:mediaType
+        nodes. At least one of those nodes has to be given.
+
+        After creating the graph, it is parsed using the euro_dcat_ap profile.
+
+        :param format_item:
+            Literal or URIRef object for dct:format. None if the node should be omitted.
+        :param mediatype_item:
+            Literal or URIRef object for dcat:mediaType. None if the node should be omitted.
+
+        :returns:
+            The parsed resource dict
+        """
+        g = Graph()
+
+        dataset = URIRef("http://example.org/datasets/1")
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        distribution = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((dataset, DCAT.distribution, distribution))
+        g.add((distribution, RDF.type, DCAT.Distribution))
+        if format_item:
+            g.add((distribution, DCT['format'], format_item))
+        if mediatype_item:
+            g.add((distribution, DCAT.mediaType, mediatype_item))
+        if format_item is None and mediatype_item is None:
+            raise AssertionError('At least one of format or mediaType is required!')
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        return dataset.get('resources')
+
     def test_dataset_all_fields(self):
 
         contents = self._get_file_contents('dataset.rdf')
@@ -496,6 +533,53 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         eq_(resource['format'], u'Turtle')
         eq_(resource['mimetype'], u'text/turtle')
+
+    def test_distribution_dct_format_iana_uri(self):
+        resources = self._build_and_parse_format_mediatype_graph(
+            format_item=URIRef("https://www.iana.org/assignments/media-types/application/json")
+        )
+        # IANA mediatype URI should be added to mimetype field as well
+        assert_true(u'json' in resources[0].get('format').lower())
+        eq_(u'https://www.iana.org/assignments/media-types/application/json',
+            resources[0].get('mimetype'))
+
+    def test_distribution_mediatype_iana_uri_without_format(self):
+        resources = self._build_and_parse_format_mediatype_graph(
+            mediatype_item=URIRef("https://www.iana.org/assignments/media-types/application/json")
+        )
+        # IANA mediatype URI should be added to mimetype field and to format as well
+        eq_(u'https://www.iana.org/assignments/media-types/application/json',
+            resources[0].get('mimetype'))
+        eq_(u'https://www.iana.org/assignments/media-types/application/json',
+            resources[0].get('format'))
+
+    def test_distribution_dct_format_other_uri(self):
+        resources = self._build_and_parse_format_mediatype_graph(
+            format_item=URIRef("https://example.com/my/format")
+        )
+        eq_(u'https://example.com/my/format',
+            resources[0].get('format'))
+        eq_(None, resources[0].get('mimetype'))
+
+    def test_distribution_dct_format_mediatype_text(self):
+        resources = self._build_and_parse_format_mediatype_graph(
+            format_item=Literal("application/json")
+        )
+        # IANA mediatype should be added to mimetype field as well
+        assert_true(u'json' in resources[0].get('format').lower())
+        eq_(u'application/json',
+            resources[0].get('mimetype'))
+
+    def test_distribution_format_and_dcat_mediatype(self):
+        # Even if dct:format is a valid IANA type, prefer dcat:mediaType if given
+        resources = self._build_and_parse_format_mediatype_graph(
+            format_item=Literal("application/json"),
+            mediatype_item=Literal("test-mediatype")
+        )
+        # both should be stored
+        assert_true(u'json' in resources[0].get('format').lower())
+        eq_(u'test-mediatype',
+            resources[0].get('mimetype'))
 
     def test_catalog_xml_rdf(self):
 
