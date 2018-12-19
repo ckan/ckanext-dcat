@@ -337,3 +337,8 @@ def parse_accept_header(accept_header=''):
                 return accepted_media_types_wildcard[_type]
 
     return None
+
+
+def get_langs():
+    language_priorities = config.get('ckan.locales_offered', '').split()
+    return language_priorities
