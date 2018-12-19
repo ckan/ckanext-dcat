@@ -156,7 +156,7 @@ class RDFProfile(object):
             return _object
         return None
 
-    def _object_value(self, subject, predicate, use_default_lang=False):
+    def _object_value(self, subject, predicate):
         '''
         Given a subject and a predicate, returns the value of the object
 
@@ -167,7 +167,7 @@ class RDFProfile(object):
         default_lang = config.get('ckan.locale_default', 'en')
         fallback = ''
         for o in self.g.objects(subject, predicate):
-            if use_default_lang and isinstance(o, Literal):
+            if isinstance(o, Literal):
                 if o.language and o.language == default_lang:
                     return unicode(o)
                 # Use first object as fallback if no object with the default language is available
@@ -287,7 +287,7 @@ class RDFProfile(object):
             publisher['uri'] = (unicode(agent) if isinstance(agent,
                                 rdflib.term.URIRef) else '')
 
-            publisher['name'] = self._object_value(agent, FOAF.name, use_default_lang=True)
+            publisher['name'] = self._object_value(agent, FOAF.name)
 
             publisher['email'] = self._object_value(agent, FOAF.mbox)
 
@@ -314,7 +314,7 @@ class RDFProfile(object):
             contact['uri'] = (unicode(agent) if isinstance(agent,
                               rdflib.term.URIRef) else '')
 
-            contact['name'] = self._object_value(agent, VCARD.fn, use_default_lang=True)
+            contact['name'] = self._object_value(agent, VCARD.fn)
 
             contact['email'] = self._without_mailto(
                 self._object_value(agent, VCARD.hasEmail)
@@ -778,19 +778,12 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         for key, predicate in (
+                ('title', DCT.title),
+                ('notes', DCT.description),
                 ('url', DCAT.landingPage),
                 ('version', OWL.versionInfo),
                 ):
             value = self._object_value(dataset_ref, predicate)
-            if value:
-                dataset_dict[key] = value
-
-        # Multilingual basic fields
-        for key, predicate in (
-                ('title', DCT.title),
-                ('notes', DCT.description),
-                ):
-            value = self._object_value(dataset_ref, predicate, use_default_lang=True)
             if value:
                 dataset_dict[key] = value
 
@@ -911,6 +904,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             #  Simple values
             for key, predicate in (
+                    ('name', DCT.title),
+                    ('description', DCT.description),
                     ('access_url', DCAT.accessURL),
                     ('download_url', DCAT.downloadURL),
                     ('issued', DCT.issued),
@@ -927,15 +922,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                        DCAT.downloadURL) or
                                     self._object_value(distribution,
                                                        DCAT.accessURL))
-            # Multilingual simple values
-            for key, predicate in (
-                    ('name', DCT.title),
-                    ('description', DCT.description),
-                    ):
-                value = self._object_value(distribution, predicate, use_default_lang=True)
-                if value:
-                    resource_dict[key] = value
-
             #  Lists
             for key, predicate in (
                     ('language', DCT.language),

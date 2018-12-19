@@ -125,7 +125,7 @@ class TestBaseRDFProfile(object):
                  DCT.title, Literal('Test Dataset 1 (EN)', lang='en')))
 
         value = p._object_value(URIRef('http://example.org/datasets/1'),
-                                DCT.title, use_default_lang=True)
+                                DCT.title)
 
         assert isinstance(value, unicode)
         eq_(value, 'Test Datensatz 1')
@@ -139,7 +139,7 @@ class TestBaseRDFProfile(object):
                  DCT.title, Literal('Test Dataset 1 (EN)', lang='en')))
 
         value = p._object_value(URIRef('http://example.org/datasets/1'),
-                                DCT.title, use_default_lang=True)
+                                DCT.title)
 
         assert isinstance(value, unicode)
         eq_(value, 'Test Dataset 1 (EN)')
@@ -148,7 +148,7 @@ class TestBaseRDFProfile(object):
         p = RDFProfile(_default_graph())
 
         value = p._object_value(URIRef('http://example.org/datasets/1'),
-                                DCT.title, use_default_lang=True)
+                                DCT.title)
 
         assert isinstance(value, unicode)
         eq_(value, 'Test Dataset 1')
