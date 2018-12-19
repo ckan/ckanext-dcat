@@ -14,7 +14,7 @@ from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
-                                   GEOJSON_IMT, FOAF, VCARD)
+                                   GEOJSON_IMT)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 eq_ = nose.tools.eq_
@@ -351,86 +351,6 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             eq_(resource['mimetype'], u'text/csv')
         else:
             eq_(resource['format'], u'text/csv')
-
-    @staticmethod
-    def _prepare_default_lang_graph():
-        def _add_node_de_en(g, item_ref, predicate, literal_base_value):
-            g.add((item_ref, predicate, Literal(literal_base_value + '(DE)', lang='de')))
-            g.add((item_ref, predicate, Literal(literal_base_value + '(EN)', lang='en')))
-
-        g = Graph()
-
-        dataset1 = URIRef("http://example.org/datasets/1")
-        g.add((dataset1, RDF.type, DCAT.Dataset))
-        _add_node_de_en(g, dataset1, DCT.title, 'Test dataset')
-        _add_node_de_en(g, dataset1, DCT.description, 'some description')
-
-        publisher_node = BNode()
-        g.add((publisher_node, RDF.type, FOAF.Organization))
-        _add_node_de_en(g, publisher_node, FOAF.name, 'a publisher')
-        g.add((dataset1, DCT.publisher, publisher_node))
-
-        contact_node = BNode()
-        g.add((contact_node, RDF.type, VCARD.Organization))
-        _add_node_de_en(g, contact_node, VCARD.fn, 'a contact')
-        g.add((dataset1, DCAT.contactPoint, contact_node))
-
-        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
-        _add_node_de_en(g, distribution1_1, DCT.title, 'Test resource')
-        _add_node_de_en(g, distribution1_1, DCT.description, 'some res description')
-
-        g.add((dataset1, DCAT.distribution, distribution1_1))
-
-        return g
-
-    def _assert_lang_graph(self, dataset, expected_lang):
-        extras = self._extras(dataset)
-        resource = dataset['resources'][0]
-        eq_(dataset['title'], u'Test dataset' + expected_lang)
-        eq_(dataset['notes'], u'some description' + expected_lang)
-        eq_(extras['publisher_name'], u'a publisher' + expected_lang)
-        eq_(extras['contact_name'], u'a contact' + expected_lang)
-        eq_(resource['name'], u'Test resource' + expected_lang)
-        eq_(resource['description'], u'some res description' + expected_lang)
-
-    @helpers.change_config('ckan.locale_default', 'en')
-    def test_default_lang_en(self):
-        g = self._prepare_default_lang_graph()
-
-        p = RDFParser(profiles=['euro_dcat_ap'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        self._assert_lang_graph(dataset, '(EN)')
-
-    @helpers.change_config('ckan.locale_default', 'de')
-    def test_default_lang_de(self):
-        g = self._prepare_default_lang_graph()
-
-        p = RDFParser(profiles=['euro_dcat_ap'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        self._assert_lang_graph(dataset, '(DE)')
-
-    @helpers.change_config('ckan.locale_default', 'fr')
-    def test_default_lang_not_in_graph(self):
-        g = self._prepare_default_lang_graph()
-
-        p = RDFParser(profiles=['euro_dcat_ap'])
-        p.g = g
-
-        dataset = [d for d in p.datasets()][0]
-        extras = self._extras(dataset)
-        resource = dataset['resources'][0]
-
-        # default lang is not present in graph, so only check for correct base values
-        assert_true(u'Test dataset' in dataset['title'])
-        assert_true(u'some description' in dataset['notes'])
-        assert_true(u'a publisher' in extras['publisher_name'])
-        assert_true(u'a contact' in extras['contact_name'])
-        assert_true(u'Test resource' in resource['name'])
-        assert_true(u'some res description' in resource['description'])
 
     @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
     def test_distribution_format_imt_only_normalize_false(self):
