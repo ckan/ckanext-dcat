@@ -164,9 +164,18 @@ class RDFProfile(object):
 
         If found, the unicode representation is returned, else an empty string
         '''
+        default_lang = config.get('ckan.locale_default', 'en')
+        fallback = ''
         for o in self.g.objects(subject, predicate):
-            return unicode(o)
-        return ''
+            if isinstance(o, Literal):
+                if o.language and o.language == default_lang:
+                    return unicode(o)
+                # Use first object as fallback if no object with the default language is available
+                elif fallback == '':
+                    fallback = unicode(o)
+            else:
+                return unicode(o)
+        return fallback
 
     def _object_value_int(self, subject, predicate):
         '''

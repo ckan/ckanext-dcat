@@ -3,6 +3,8 @@ import nose
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace
 
+from ckantoolkit.tests import helpers
+
 from ckanext.dcat.profiles import RDFProfile, CleanedURIRef
 
 from ckanext.dcat.tests.test_base_parser import _default_graph
@@ -112,6 +114,60 @@ class TestBaseRDFProfile(object):
                                 DCT.unknown_property)
 
         eq_(value, '')
+
+    @helpers.change_config('ckan.locale_default', 'de')
+    def test_object_value_default_lang(self):
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Dataset 1 (EN)', lang='en')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        eq_(value, 'Test Datensatz 1')
+
+    @helpers.change_config('ckan.locale_default', 'fr')
+    def test_object_value_default_lang_not_in_graph(self):
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        # FR is not in graph, so either node may be used
+        assert value.startswith('Test D')
+        assert value.endswith(' 1')
+
+    def test_object_value_default_lang_fallback(self):
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Dataset 1 (EN)', lang='en')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        # without config parameter, EN is used as default
+        eq_(value, 'Test Dataset 1 (EN)')
+
+    def test_object_value_default_lang_missing_lang_param(self):
+        p = RDFProfile(_default_graph())
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        eq_(value, 'Test Dataset 1')
 
     def test_object_int(self):
 
