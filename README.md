@@ -50,7 +50,7 @@ In terms of CKAN features, this extension offers:
 
 * An [RDF Harvester](#rdf-dcat-harvester) that allows importing RDF serializations from other catalogs to create CKAN datasets (`dcat_rdf_harvester` plugin).
 
-* An [JSON DCAT Harvester](#json-dcat-harvester) that allows importing JSON objects that are based on DCAT terms but are not defined as JSON-LD, using the serialization described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site (`dcat_json_harvester` plugin)..
+* An [JSON DCAT Harvester](#json-dcat-harvester) that allows importing JSON objects that are based on DCAT terms but are not defined as JSON-LD, using the serialization described in the [spec.dataportals.org](http://spec.dataportals.org/#datasets-serialization-format) site (`dcat_json_harvester` plugin)..
 
 
 These are implemented internally using:
@@ -281,7 +281,7 @@ To know more about these methods, please check the source of [`ckanext-dcat/ckan
 ## JSON DCAT harvester
 
 The DCAT JSON harvester supports importing JSON objects that are based on DCAT terms but are not defined as JSON-LD. The exact format for these JSON files
-is the one described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site. There are [example files](https://github.com/ckan/ckanext-dcat/blob/master/examples/dataset.json) in the `examples` folder.
+is the one described in the [spec.dataportals.org](http://spec.dataportals.org/#datasets-serialization-format) site. There are [example files](https://github.com/ckan/ckanext-dcat/blob/master/examples/dataset.json) in the `examples` folder.
 
 To enable the JSON harvester, add the `dcat_json_harvester` plugin to your CKAN configuration file:
 
