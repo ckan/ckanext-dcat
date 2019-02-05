@@ -92,6 +92,8 @@ class DCATController(BaseController):
                 'format': _format, 'profiles': _profiles})
         except toolkit.ObjectNotFound:
             toolkit.abort(404)
+        except toolkit.NotAuthorized:
+            toolkit.abort(404)
 
         return result
 
