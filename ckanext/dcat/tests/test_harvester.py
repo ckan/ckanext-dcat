@@ -6,16 +6,15 @@ import nose
 import httpretty
 from mock import patch
 
+from six.moves import xrange
+
 import ckan.plugins as p
-try:
-    import ckan.new_tests.helpers as h
-except ImportError:
-    import ckan.tests.helpers as h
+import ckantoolkit.tests.helpers as h
 
 import ckanext.harvest.model as harvest_model
 from ckanext.harvest import queue
 
-from ckanext.dcat.harvesters import DCATRDFHarvester
+from ckanext.dcat.harvesters import DCATRDFHarvester, DCATJSONHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
@@ -29,20 +28,33 @@ eq_ = nose.tools.eq_
 
 # Start monkey-patch
 
-original_get_content_and_type = DCATRDFHarvester._get_content_and_type
+original_rdf_get_content_and_type = DCATRDFHarvester._get_content_and_type
 
-
-def _patched_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+def _patched_rdf_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
 
     httpretty.enable()
 
-    value1, value2 = original_get_content_and_type(self, url, harvest_job, page, content_type)
+    value1, value2 = original_rdf_get_content_and_type(self, url, harvest_job, page, content_type)
 
     httpretty.disable()
 
     return value1, value2
 
-DCATRDFHarvester._get_content_and_type = _patched_get_content_and_type
+DCATRDFHarvester._get_content_and_type = _patched_rdf_get_content_and_type
+
+original_json_get_content_and_type = DCATJSONHarvester._get_content_and_type
+
+def _patched_json_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
+
+    httpretty.enable()
+
+    value1, value2 = original_json_get_content_and_type(self, url, harvest_job, page, content_type)
+
+    httpretty.disable()
+
+    return value1, value2
+
+DCATJSONHarvester._get_content_and_type = _patched_json_get_content_and_type
 
 # End monkey-patch
 
@@ -119,6 +131,28 @@ class TestRDFExceptionHarvester(TestRDFHarvester):
 
 
 class TestDCATHarvestUnit(object):
+
+    def test_get_guid_uri_root(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'uri': 'http://dataset/uri',
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'http://dataset/uri')
+
+    def test_get_guid_identifier_root(self):
+
+        dataset = {
+            'name': 'test-dataset',
+            'identifier': 'http://dataset/uri',
+        }
+
+        guid = DCATRDFHarvester()._get_guid(dataset)
+
+        eq_(guid, 'http://dataset/uri')
 
     def test_get_guid_uri(self):
 
@@ -349,6 +383,28 @@ class FunctionalHarvestTest(object):
         </rdf:RDF>
         '''
 
+        cls.rdf_mock_url_duplicates = 'http://some.dcat.file.duplicates.rdf'
+        cls.rdf_duplicate_titles = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <dcat:Catalog rdf:about="https://data.some.org/catalog">
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/1">
+              <dct:title>Example dataset</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+          <dcat:dataset>
+            <dcat:Dataset rdf:about="https://data.some.org/catalog/datasets/2">
+              <dct:title>Example dataset</dct:title>
+            </dcat:Dataset>
+          </dcat:dataset>
+        </dcat:Catalog>
+        </rdf:RDF>
+        '''
+
         cls.rdf_remote_file_small = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
@@ -500,8 +556,6 @@ class FunctionalHarvestTest(object):
 
         harvest_source = h.call_action('harvest_source_create',
                                        {}, **source_dict)
-
-        eq_(harvest_source['source_type'], 'dcat_rdf')
 
         return harvest_source
 
@@ -794,7 +848,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         results = h.call_action('package_search', {}, fq=fq)
         eq_(results['count'], 1)
 
-	existing_dataset = results['results'][0]
+        existing_dataset = results['results'][0]
         existing_resource = existing_dataset.get('resources')[0]
 
         # Mock an update in the remote file
@@ -810,8 +864,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         new_results = h.call_action('package_search', {}, fq=fq)
         eq_(new_results['count'], 1)
 
-	new_dataset = new_results['results'][0]
-	new_resource = new_dataset.get('resources')[0]
+        new_dataset = new_results['results'][0]
+        new_resource = new_dataset.get('resources')[0]
 
         eq_(existing_resource['name'], 'Example resource 1')
         eq_(len(new_dataset.get('resources')), 1)
@@ -937,6 +991,32 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         eq_(last_job_status['status'], 'Finished')
         assert ('Error when processsing dataset'
                 in last_job_status['gather_error_summary'][0][0])
+
+    def test_harvest_create_duplicate_titles(self):
+
+        # Mock the GET request to get the file
+        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_duplicates,
+                               body=self.rdf_duplicate_titles,
+                               content_type=self.rdf_content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_duplicates,
+                               status=405,
+                               content_type=self.rdf_content_type)
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url_duplicates)
+
+        self._run_full_job(harvest_source['id'], num_objects=2)
+
+        # Check that two datasets were created
+        fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
+        results = h.call_action('package_search', {}, fq=fq)
+
+        eq_(results['count'], 2)
+        for result in results['results']:
+            assert result['name'] in ('example-dataset',
+                                      'example-dataset-1')
 
 
 class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):

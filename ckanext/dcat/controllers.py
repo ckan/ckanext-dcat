@@ -1,15 +1,34 @@
 import json
 
+from ckan import model
 from ckan.plugins import toolkit
 
 if toolkit.check_ckan_version(min_version='2.1'):
     BaseController = toolkit.BaseController
 else:
     from ckan.lib.base import BaseController
-from ckan.controllers.package import PackageController
-from ckan.controllers.home import HomeController
+
+if toolkit.check_ckan_version(max_version='2.8.99'):
+    from ckan.controllers.package import PackageController
+    from ckan.controllers.home import HomeController
+    read_endpoint = PackageController().read
+    index_endpoint = HomeController().index
+else:
+    from ckan.views.home import index as index_endpoint
+    from ckan.views.dataset import read as read_endpoint
 
 from ckanext.dcat.utils import CONTENT_TYPES, parse_accept_header
+
+
+def _get_package_type(id):
+    """
+    Given the id of a package this method will return the type of the
+    package, or 'dataset' if no type is currently set
+    """
+    pkg = model.Package.get(id)
+    if pkg:
+        return pkg.type or u'dataset'
+    return None
 
 
 def check_access_header():
@@ -30,12 +49,17 @@ class DCATController(BaseController):
             _format = check_access_header()
 
         if not _format:
-            return HomeController().index()
+            return index_endpoint()
+
+        _profiles = toolkit.request.params.get('profiles')
+        if _profiles:
+            _profiles = _profiles.split(',')
 
         data_dict = {
             'page': toolkit.request.params.get('page'),
             'modified_since': toolkit.request.params.get('modified_since'),
             'format': _format,
+            'profiles': _profiles,
         }
 
         toolkit.response.headers.update(
@@ -51,14 +75,21 @@ class DCATController(BaseController):
             _format = check_access_header()
 
         if not _format:
-            return PackageController().read(_id)
+            if toolkit.check_ckan_version(max_version='2.8.99'):
+                return read_endpoint(_id)
+            else:
+                return read_endpoint(_get_package_type(_id), _id)
+
+        _profiles = toolkit.request.params.get('profiles')
+        if _profiles:
+            _profiles = _profiles.split(',')
 
         toolkit.response.headers.update(
             {'Content-type': CONTENT_TYPES[_format]})
 
         try:
             result = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
-                'format': _format})
+                'format': _format, 'profiles': _profiles})
         except toolkit.ObjectNotFound:
             toolkit.abort(404)
 

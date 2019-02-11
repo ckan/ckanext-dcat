@@ -2,7 +2,7 @@ import json
 
 import nose
 
-from pylons import config
+from ckantoolkit import config
 
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
@@ -10,10 +10,7 @@ from rdflib.namespace import RDF
 
 from geomet import wkt
 
-try:
-    from ckan.tests import helpers, factories
-except ImportError:
-    from ckan.new_tests import helpers, factories
+from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
@@ -49,6 +46,51 @@ class BaseSerializeTest(object):
 
 
 class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
+    def _build_graph_and_check_format_mediatype(self, dataset_dict, expected_format, expected_mediatype):
+        """
+        Creates a graph based on the given dict and checks for dct:format and dct:mediaType in the
+        first resource element.
+
+        :param dataset_dict:
+            dataset dict, expected to contain one resource
+        :param expected_format:
+            expected list of dct:format items in the resource
+        :param expected_mediatype:
+            expected list of dcat:mediaType items in the resource
+        """
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        # graph should contain the expected nodes
+        resource_ref = list(g.objects(dataset_ref, DCAT.distribution))[0]
+        dct_format = list(g.objects(resource_ref, DCT['format']))
+        dcat_mediatype = list(g.objects(resource_ref, DCAT.mediaType))
+        eq_(expected_format, dct_format)
+        eq_(expected_mediatype, dcat_mediatype)
+
+    def _get_base_dataset_with_resource(self):
+        """
+        Creates a minimal test dataset with one resource. The dataset and resource are
+        both returned and can be extended in test cases.
+        """
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        return dataset, resource
 
     def test_graph_from_dataset(self):
 
@@ -116,10 +158,10 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('theme', DCAT.theme, URIRef),
             ('conforms_to', DCT.conformsTo, Literal),
             ('alternate_identifier', ADMS.identifier, Literal),
-            ('documentation', FOAF.page, Literal),
-            ('related_resource', DCT.relation, Literal),
-            ('has_version', DCT.hasVersion, Literal),
-            ('is_version_of', DCT.isVersionOf, Literal),
+            ('documentation', FOAF.page, URIRef),
+            ('related_resource', DCT.relation, URIRef),
+            ('has_version', DCT.hasVersion, URIRef),
+            ('is_version_of', DCT.isVersionOf, URIRef),
             ('source', DCT.source, Literal),
             ('sample', ADMS.sample, Literal),
         ]:
@@ -222,7 +264,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert contact_details
         eq_(unicode(contact_details), extras['contact_uri'])
         assert self._triple(g, contact_details, VCARD.fn, extras['contact_name'])
-        assert self._triple(g, contact_details, VCARD.hasEmail, extras['contact_email'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + extras['contact_email']))
 
     def test_contact_details_maintainer(self):
         dataset = {
@@ -243,7 +285,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert contact_details
         assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['maintainer'])
-        assert self._triple(g, contact_details, VCARD.hasEmail, dataset['maintainer_email'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + dataset['maintainer_email']))
 
     def test_contact_details_author(self):
         dataset = {
@@ -262,7 +304,27 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert contact_details
         assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
-        assert self._triple(g, contact_details, VCARD.hasEmail, dataset['author_email'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + dataset['author_email']))
+
+    def test_contact_details_no_duplicate_mailto(self):
+        # tests that mailto: isn't added again if it is stored in the dataset
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'author': 'Example Author',
+            'author_email': 'mailto:ped@example.com',
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
+        assert contact_details
+        assert_true(isinstance(contact_details, BNode))
+        assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
+        assert self._triple(g, contact_details, VCARD.hasEmail, URIRef(dataset['author_email']))
 
     def test_publisher_extras(self):
         dataset = {
@@ -298,7 +360,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
-        assert self._triple(g, publisher, DCT.type, extras['publisher_type'])
+        assert self._triple(g, publisher, DCT.type, URIRef(extras['publisher_type']))
 
     def test_publisher_org(self):
         dataset = {
@@ -538,19 +600,19 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.title, resource['name'])
         assert self._triple(g, distribution, DCT.description, resource['description'])
         assert self._triple(g, distribution, DCT.rights, resource['rights'])
-        assert self._triple(g, distribution, DCT.license, resource['license'])
-        assert self._triple(g, distribution, ADMS.status, resource['status'])
+        assert self._triple(g, distribution, DCT.license, URIRef(resource['license']))
+        assert self._triple(g, distribution, ADMS.status, URIRef(resource['status']))
 
         # List
         for item in [
-            ('documentation', FOAF.page),
-            ('language', DCT.language),
-            ('conforms_to', DCT.conformsTo),
+            ('documentation', FOAF.page, URIRef),
+            ('language', DCT.language, Literal),
+            ('conforms_to', DCT.conformsTo, Literal),
         ]:
             values = json.loads(resource[item[0]])
             eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
             for value in values:
-                assert self._triple(g, distribution, item[1], value)
+                assert self._triple(g, distribution, item[1], item[2](value))
 
         # Dates
         assert self._triple(g, distribution, DCT.issued, resource['issued'], XSD.dateTime)
@@ -562,6 +624,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
 
@@ -592,7 +655,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.byteSize, resource['size'])
 
-    def test_distribution_access_url_only(self):
+    def test_distribution_url_only(self):
 
         resource = {
             'id': 'c041c635-054f-4431-b647-f9186926d021',
@@ -618,6 +681,34 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
         assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, None) is None
+    
+    def test_distribution_access_url_only(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'access_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
         assert self._triple(g, distribution, DCAT.downloadURL, None) is None
 
     def test_distribution_download_url_only(self):
@@ -676,9 +767,98 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['url']))
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
+    
+    def test_distribution_both_urls_different_with_access_url(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'access_url': 'http://example.com/data/file',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
+    
+    def test_distribution_prefer_access_url(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data',
+            'access_url': 'http://example.com/data/file',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, None) is None
+
+    def test_distribution_prefer_access_url_with_download(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'CSV file',
+            'url': 'http://example.com/data',
+            'access_url': 'http://example.com/data/file',
+            'download_url': 'http://example.com/data/file.csv',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
 
     def test_distribution_both_urls_the_same(self):
 
+        # old behavior - only serialize url to accessURL if it is different from downloadURL
         resource = {
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
@@ -705,16 +885,16 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['url']))
         assert self._triple(g, distribution, DCAT.accessURL, None) is None
+    
+    def test_distribution_both_urls_the_same_with_access_url(self):
 
-    def test_distribution_format(self):
-
+        # when the access_url is present, it should be serialized regardless if it is the same as downloadURL.
         resource = {
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'CSV file',
-            'url': 'http://example.com/data/file.csv',
-            'format': 'CSV',
-            'mimetype': 'text/csv',
+            'access_url': 'http://example.com/data/file.csv',
+            'download_url': 'http://example.com/data/file.csv',
         }
 
         dataset = {
@@ -733,36 +913,75 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCT['format'], resource['format'])
-        assert self._triple(g, distribution, DCAT.mediaType, resource['mimetype'])
+        assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
 
-    def test_distribution_format_with_backslash(self):
+    def test_distribution_format_iana_uri(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # when only format is available and it looks like an IANA media type, use DCAT.mediaType instead
+        # of DCT.format for output
+        fmt_uri = 'https://www.iana.org/assignments/media-types/application/json'
+        resource['format'] = fmt_uri
 
-        resource = {
-            'id': 'c041c635-054f-4431-b647-f9186926d021',
-            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-            'name': 'CSV file',
-            'url': 'http://example.com/data/file.csv',
-            'format': 'text/csv',
-        }
+        # expect no dct:format node and the URI in dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [],
+            [URIRef(fmt_uri)]
+        )
 
-        dataset = {
-            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
-            'name': 'test-dataset',
-            'title': 'Test DCAT dataset',
-            'resources': [
-                resource
-            ]
-        }
+    def test_distribution_format_other_uri(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # when only format is available and it does not look like an IANA media type, use dct:format
+        fmt_uri = 'https://example.com/my/format'
+        resource['format'] = fmt_uri
 
-        s = RDFSerializer()
-        g = s.g
+        # expect dct:format node with the URI and no dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [URIRef(fmt_uri)],
+            []
+        )
 
-        dataset_ref = s.graph_from_dataset(dataset)
+    def test_distribution_format_mediatype_text(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # if format value looks like an IANA media type, output dcat:mediaType instead of dct:format
+        fmt_text = 'application/json'
+        resource['format'] = fmt_text
 
-        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        # expect no dct:format node and the literal value in dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [],
+            [Literal(fmt_text)]
+        )
 
-        assert self._triple(g, distribution, DCAT.mediaType, resource['format'])
+    def test_distribution_format_mediatype_same(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # if format and mediaType are identical, output only dcat:mediaType
+        fmt_text = 'application/json'
+        resource['format'] = fmt_text
+        resource['mimetype'] = fmt_text
+
+        # expect no dct:format node and the literal value in dcat:mediaType
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [],
+            [Literal(fmt_text)]
+        )
+
+    def test_distribution_format_mediatype_different(self):
+        dataset_dict, resource = self._get_base_dataset_with_resource()
+        # if format and mediaType are different, output both
+        resource['format'] = 'myformat'
+        resource['mimetype'] = 'application/json'
+
+        # expect both nodes
+        self._build_graph_and_check_format_mediatype(
+            dataset_dict,
+            [Literal('myformat')],
+            [Literal('application/json')]
+        )
 
     def test_hash_algorithm_not_uri(self):
 
@@ -792,6 +1011,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
@@ -853,6 +1073,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         assert self._triple(g, catalog, DCT.modified, dataset['metadata_modified'], XSD.dateTime)
 
+    @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
     def test_subcatalog(self):
         publisher = {'name': 'Publisher',
                      'email': 'email@test.com',
@@ -878,7 +1099,6 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
             'language': 'de',
         }
 
-        config[DCAT_EXPOSE_SUBCATALOGS] = 'true'
         s = RDFSerializer()
         g = s.g
 
@@ -906,4 +1126,3 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         dataset_title = list(g.objects(dataset_ref, DCT.title))
         assert_true(len(dataset_title) == 1)
         assert_true(unicode(dataset_title[0]) == dataset['title'])
-        config[DCAT_EXPOSE_SUBCATALOGS] = 'false'

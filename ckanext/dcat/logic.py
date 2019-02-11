@@ -23,7 +23,7 @@ def dcat_dataset_show(context, data_dict):
 
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
 
-    serializer = RDFSerializer()
+    serializer = RDFSerializer(profiles=data_dict.get('profiles'))
 
     output = serializer.serialize_dataset(dataset_dict,
                                           _format=data_dict.get('format'))
@@ -40,7 +40,7 @@ def dcat_catalog_show(context, data_dict):
     dataset_dicts = query['results']
     pagination_info = _pagination_info(query, data_dict)
 
-    serializer = RDFSerializer()
+    serializer = RDFSerializer(profiles=data_dict.get('profiles'))
 
     output = serializer.serialize_catalog({}, dataset_dicts,
                                           _format=data_dict.get('format'),
@@ -59,7 +59,7 @@ def dcat_catalog_search(context, data_dict):
     dataset_dicts = query['results']
     pagination_info = _pagination_info(query, data_dict)
 
-    serializer = RDFSerializer()
+    serializer = RDFSerializer(profiles=data_dict.get('profiles'))
 
     output = serializer.serialize_catalog({}, dataset_dicts,
                                           _format=data_dict.get('format'),

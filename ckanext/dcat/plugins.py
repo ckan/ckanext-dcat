@@ -18,12 +18,15 @@ from ckanext.dcat import utils
 
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
+ENABLE_RDF_ENDPOINTS_CONFIG = 'ckanext.dcat.enable_rdf_endpoints'
 ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
+TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
 
 
 class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     p.implements(p.IConfigurer, inherit=True)
+    p.implements(p.ITemplateHelpers, inherit=True)
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
@@ -50,20 +53,28 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                     '"{0}" should contain {{_format}}'.format(
                         CUSTOM_ENDPOINT_CONFIG))
 
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'helper_available': utils.helper_available,
+        }
+
     # IRoutes
     def before_map(self, _map):
 
         controller = 'ckanext.dcat.controllers:DCATController'
 
-        _map.connect('dcat_catalog',
-                     config.get('ckanext.dcat.catalog_endpoint',
-                                DEFAULT_CATALOG_ENDPOINT),
-                     controller=controller, action='read_catalog',
-                     requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+        if p.toolkit.asbool(config.get(ENABLE_RDF_ENDPOINTS_CONFIG, True)):
 
-        _map.connect('dcat_dataset', '/dataset/{_id}.{_format}',
-                     controller=controller, action='read_dataset',
-                     requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+            _map.connect('dcat_catalog',
+                         config.get('ckanext.dcat.catalog_endpoint',
+                                    DEFAULT_CATALOG_ENDPOINT),
+                         controller=controller, action='read_catalog',
+                         requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
+
+            _map.connect('dcat_dataset', '/dataset/{_id}.{_format}',
+                         controller=controller, action='read_dataset',
+                         requirements={'_format': 'xml|rdf|n3|ttl|jsonld'})
 
         if p.toolkit.asbool(config.get(ENABLE_CONTENT_NEGOTIATION_CONFIG)):
 
@@ -95,6 +106,10 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     # IPackageController
     def after_show(self, context, data_dict):
+
+        # check if config is enabled to translate keys (default: True)
+        if not p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG, True)):
+            return data_dict
 
         if context.get('for_view'):
             field_labels = utils.field_labels()
@@ -141,3 +156,14 @@ class DCATJSONInterface(p.SingletonPlugin):
         return {
             'dcat_datasets_list': dcat_auth,
         }
+
+
+class StructuredDataPlugin(p.SingletonPlugin):
+    p.implements(p.ITemplateHelpers, inherit=True)
+
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'structured_data': utils.structured_data,
+        }
+

@@ -3,7 +3,9 @@ import nose
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace
 
-from ckanext.dcat.profiles import RDFProfile
+from ckantoolkit.tests import helpers
+
+from ckanext.dcat.profiles import RDFProfile, CleanedURIRef
 
 from ckanext.dcat.tests.test_base_parser import _default_graph
 
@@ -14,6 +16,39 @@ DCT = Namespace("http://purl.org/dc/terms/")
 TEST = Namespace("http://test.org/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
+
+
+class TestURIRefPreprocessing(object):
+
+    def test_with_valid_items(self):
+        testUriPart = "://www.w3.org/ns/dcat#"
+        
+        for prefix in ['http', 'https']:
+            eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + testUriPart))
+            # leading and trailing whitespace should be removed
+            eq_(CleanedURIRef(' ' + prefix + testUriPart + ' '), URIRef(prefix + testUriPart))
+
+        testNonHttpUri = "mailto:someone@example.com"
+        eq_(CleanedURIRef(testNonHttpUri), URIRef(testNonHttpUri))
+        # leading and trailing whitespace should be removed again
+        eq_(CleanedURIRef(' ' + testNonHttpUri + ' '), URIRef(testNonHttpUri))
+
+    def test_with_invalid_items(self):
+        testUriPart = "://www.w3.org/ns/!dcat #"
+        expectedUriPart = "://www.w3.org/ns/%21dcat%20#"
+        
+        for prefix in ['http', 'https']:
+            eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + expectedUriPart))
+            # applying on escaped data should have no effect
+            eq_(CleanedURIRef(prefix + expectedUriPart), URIRef(prefix + expectedUriPart))
+
+        # leading and trailing space should not be escaped
+        testNonHttpUri = " mailto:with space!@example.com "
+        expectedNonHttpUri = "mailto:with%20space%21@example.com"
+
+        eq_(CleanedURIRef(testNonHttpUri), URIRef(expectedNonHttpUri))
+        # applying on escaped data should have no effect
+        eq_(CleanedURIRef(expectedNonHttpUri), URIRef(expectedNonHttpUri))
 
 
 class TestBaseRDFProfile(object):
@@ -80,6 +115,60 @@ class TestBaseRDFProfile(object):
 
         eq_(value, '')
 
+    @helpers.change_config('ckan.locale_default', 'de')
+    def test_object_value_default_lang(self):
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Dataset 1 (EN)', lang='en')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        eq_(value, 'Test Datensatz 1')
+
+    @helpers.change_config('ckan.locale_default', 'fr')
+    def test_object_value_default_lang_not_in_graph(self):
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        # FR is not in graph, so either node may be used
+        assert value.startswith('Test D')
+        assert value.endswith(' 1')
+
+    def test_object_value_default_lang_fallback(self):
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Datensatz 1', lang='de')))
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 DCT.title, Literal('Test Dataset 1 (EN)', lang='en')))
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        # without config parameter, EN is used as default
+        eq_(value, 'Test Dataset 1 (EN)')
+
+    def test_object_value_default_lang_missing_lang_param(self):
+        p = RDFProfile(_default_graph())
+
+        value = p._object_value(URIRef('http://example.org/datasets/1'),
+                                DCT.title)
+
+        assert isinstance(value, unicode)
+        eq_(value, 'Test Dataset 1')
+
     def test_object_int(self):
 
         p = RDFProfile(_default_graph())
@@ -87,6 +176,20 @@ class TestBaseRDFProfile(object):
         p.g.add((URIRef('http://example.org/datasets/1'),
                  TEST.some_number,
                  Literal('23')))
+
+        value = p._object_value_int(URIRef('http://example.org/datasets/1'),
+                                    TEST.some_number)
+
+        assert isinstance(value, int)
+        eq_(value, 23)
+
+    def test_object_int_decimal(self):
+
+        p = RDFProfile(_default_graph())
+
+        p.g.add((URIRef('http://example.org/datasets/1'),
+                 TEST.some_number,
+                 Literal('23.0')))
 
         value = p._object_value_int(URIRef('http://example.org/datasets/1'),
                                     TEST.some_number)
@@ -300,4 +403,5 @@ class TestBaseRDFProfile(object):
         contact = p._contact_details(URIRef('http://example.org'), ADMS.contactPoint)
 
         eq_(contact['name'], 'Point of Contact')
-        eq_(contact['email'], 'mailto:contact@some.org')
+        # mailto gets removed for storage and is added again on output
+        eq_(contact['email'], 'contact@some.org')
