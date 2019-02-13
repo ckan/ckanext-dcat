@@ -151,7 +151,7 @@ def _pagination_info(query, data_dict):
             base_url, toolkit.request.path)
 
         params = [p for p in toolkit.request.params.iteritems()
-                  if p[0] != 'page']
+                  if p[0] != 'page' and p[0] in ('modified_since', 'profiles')]
         if params:
             qs = '&'.join(['{0}={1}'.format(p[0], p[1]) for p in params])
             return '{0}?{1}&page={2}'.format(
