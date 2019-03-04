@@ -205,6 +205,20 @@ class TestEndpoints(DCATFunctionalTestBase):
         assert '"@type": "schema:Dataset"' in content
         assert '"schema:description": "%s"' % dataset['notes'] in content
 
+    def test_dataset_profiles_not_found(self):
+
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        url = url_for('dcat_dataset', _id=dataset['name'], _format='jsonld', profiles='nope')
+
+        app = self._get_test_app()
+
+        response = app.get(url, status=409)
+
+        assert 'Unknown RDF profiles: nope' in response.body
+
     def test_dataset_not_found(self):
         import uuid
 
@@ -354,6 +368,42 @@ class TestEndpoints(DCATFunctionalTestBase):
 
         eq_(self._object_value(g, pagination, HYDRA.lastPage),
             url_for('dcat_catalog', _format='rdf', page=2, host='test.ckan.net'))
+
+    @helpers.change_config('ckanext.dcat.datasets_per_page', 10)
+    def test_catalog_pagination_parameters(self):
+
+        for i in xrange(12):
+            factories.Dataset()
+
+        app = self._get_test_app()
+
+        url = url_for('dcat_catalog', _format='rdf', modified_since='2018-03-22', extra_param='test')
+
+        response = app.get(url)
+
+        content = response.body
+
+        g = Graph()
+        g.parse(data=content, format='xml')
+
+
+        pagination = [o for o in g.subjects(RDF.type, HYDRA.PagedCollection)][0]
+
+        eq_(self._object_value(g, pagination, HYDRA.itemsPerPage), '10')
+
+        eq_(self._object_value(g, pagination, HYDRA.firstPage),
+            url_for('dcat_catalog', _format='rdf', page=1, host='test.ckan.net', modified_since='2018-03-22'))
+
+    def test_catalog_profiles_not_found(self):
+
+        url = url_for('dcat_catalog', _format='jsonld', profiles='nope')
+
+        app = self._get_test_app()
+
+        response = app.get(url, status=409)
+
+        assert 'Unknown RDF profiles: nope' in response.body
+
 
     @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
     def test_catalog_endpoint_disabled(self):
