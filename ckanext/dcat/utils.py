@@ -3,6 +3,9 @@ import uuid
 import urllib
 import json
 
+import re
+import operator
+
 from ckantoolkit import config, h
 
 try:

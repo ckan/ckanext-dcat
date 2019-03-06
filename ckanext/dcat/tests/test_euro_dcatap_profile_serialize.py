@@ -115,7 +115,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'documentation', 'value': '[\"http://dataset.info.org/doc1\", \"http://dataset.info.org/doc2\"]'},
                 {'key': 'provenance', 'value': 'Some statement about provenance'},
                 {'key': 'dcat_type', 'value': 'test-type'},
-                {'key': 'related_resource', 'value': '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
+                {'key': 'related_resource', 'value':
+                 '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
                 {'key': 'has_version', 'value':
                  '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", '
                  '\"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
@@ -123,7 +124,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'source', 'value':
                  '[\"https://data.some.org/catalog/datasets/source-dataset-1\", '
                  '\"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
-                {'key': 'sample', 'value': '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
+                {'key': 'sample', 'value':
+                 '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
             ]
         }
         extras = self._extras(dataset)
@@ -441,7 +443,9 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
                 {'key': 'spatial_text', 'value': 'Tarragona'},
                 {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": '
-                 '[[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
+                 '[[[1.1870606,41.0786393],[1.1870606,41.1655218],'
+                 '[1.3752339,41.1655218],[1.3752339,41.0786393],'
+                 '[1.1870606,41.0786393]]]}'},
 
             ]
         }
@@ -572,7 +576,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'issued': '2015-06-26T15:21:09.034694',
             'modified': '2015-06-26T15:21:09.075774',
             'size': 1234,
-            'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
+            'documentation':
+                '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
             'language': '[\"en\", \"es\", \"ca\"]',
             'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
             'hash': '4304cf2e751e6053c90b1804c89c0ebb758f395a',
@@ -630,8 +635,10 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
         assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
-        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
-        assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'],
+                            data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.algorithm,
+                            URIRef(resource['hash_algorithm']))
 
     def test_distribution_size_not_number(self):
 
@@ -1017,7 +1024,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
         assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
-        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'],
+                            data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
 
