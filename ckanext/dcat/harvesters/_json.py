@@ -66,7 +66,7 @@ class DCATJSONHarvester(DCATHarvester):
         # Get the previous guids for this source
         query = \
             model.Session.query(HarvestObject.guid, HarvestObject.package_id) \
-            .filter(HarvestObject.current == True) \
+            .filter(HarvestObject.current is True) \
             .filter(HarvestObject.harvest_source_id == harvest_job.source.id)
         guid_to_package_id = {}
 
@@ -86,7 +86,7 @@ class DCATJSONHarvester(DCATHarvester):
             try:
                 content, content_type = \
                     self._get_content_and_type(url, harvest_job, page)
-            except requests.exceptions.HTTPError, error:
+            except requests.exceptions.HTTPError, error:  # noqa
                 if error.response.status_code == 404:
                     if page > 1:
                         # Server returned a 404 after the first page, no more
@@ -207,7 +207,7 @@ class DCATJSONHarvester(DCATHarvester):
         # Get the last harvested object (if any)
         previous_object = model.Session.query(HarvestObject) \
             .filter(HarvestObject.guid == harvest_object.guid) \
-            .filter(HarvestObject.current == True) \
+            .filter(HarvestObject.current is True) \
             .first()
 
         # Flag previous object as not current anymore
@@ -285,6 +285,7 @@ class DCATJSONHarvester(DCATHarvester):
         model.Session.commit()
 
         return True
+
 
 def copy_across_resource_ids(existing_dataset, harvested_dataset):
     '''Compare the resources in a dataset existing in the CKAN database with

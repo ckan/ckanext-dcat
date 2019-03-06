@@ -20,7 +20,7 @@ from ckanext.dcat.profiles import DCAT, DCT, FOAF
 
 
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
-DCAT = Namespace("http://www.w3.org/ns/dcat#")
+DCAT = Namespace("http://www.w3.org/ns/dcat#")  # noqa
 
 RDF_PROFILES_ENTRY_POINT_GROUP = 'ckan.rdf.profiles'
 RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
@@ -125,7 +125,6 @@ class RDFParser(RDFProcessor):
             for o in self.g.objects(pagination_node, HYDRA.nextPage):
                 return unicode(o)
         return None
-
 
     def parse(self, data, _format=None):
         '''
@@ -378,14 +377,14 @@ class RDFSerializer(RDFProcessor):
             publisher_sources = (
                                  ('name', Literal, FOAF.name, True,),
                                  ('email', Literal, FOAF.mbox, False,),
-                                 ('url', URIRef, FOAF.homepage,False,),
+                                 ('url', URIRef, FOAF.homepage, False,),
                                  ('type', Literal, DCT.type, False,))
 
             _pub = _get_from_extra('source_catalog_publisher')
             if _pub:
                 pub = json.loads(_pub)
 
-                #pub_uri = URIRef(pub.get('uri'))
+                # pub_uri = URIRef(pub.get('uri'))
 
                 agent = BNode()
                 g.add((agent, RDF.type, FOAF.Agent))

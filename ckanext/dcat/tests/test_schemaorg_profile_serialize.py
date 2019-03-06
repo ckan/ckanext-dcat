@@ -2,13 +2,11 @@ import json
 
 import nose
 
-from ckantoolkit import config
-
 from dateutil.parser import parse as parse_date
-from rdflib import URIRef, BNode, Literal
+from rdflib import URIRef, Literal
 from rdflib.namespace import RDF
 
-from ckantoolkit.tests import helpers, factories
+from ckantoolkit.tests import helpers
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
@@ -49,9 +47,11 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'provenance', 'value': 'Some statement about provenance'},
                 {'key': 'dcat_type', 'value': 'test-type'},
                 {'key': 'related_resource', 'value': '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
-                {'key': 'has_version', 'value': '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", \"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
+                {'key': 'has_version', 'value': '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", '
+                                                '\"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
                 {'key': 'is_version_of', 'value': '[\"https://data.some.org/catalog/datasets/original-dataset\"]'},
-                {'key': 'source', 'value': '[\"https://data.some.org/catalog/datasets/source-dataset-1\", \"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
+                {'key': 'source', 'value': '[\"https://data.some.org/catalog/datasets/source-dataset-1\", '
+                                           '\"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
                 {'key': 'sample', 'value': '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
             ]
         }
@@ -220,7 +220,6 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'temporal_end', 'value': '2015-07-14'},
             ]
         }
-        extras = self._extras(dataset)
 
         s = RDFSerializer(profiles=['schemaorg'])
         g = s.g
@@ -253,8 +252,8 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
             'extras': [
                 {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
                 {'key': 'spatial_text', 'value': 'Tarragona'},
-                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": [[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
-
+                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": '
+                 '[[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
             ]
         }
         extras = self._extras(dataset)
@@ -572,4 +571,3 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
 
         assert self._triple(g, distribution, SCHEMA.encodingFormat, resource['format'])
-

@@ -51,6 +51,7 @@ namespaces = {
 
 PREFIX_MAILTO = u'mailto:'
 
+
 class URIRefOrLiteral(object):
     '''Helper which creates an URIRef if the value appears to be an http URL,
     or a Literal otherwise. URIRefs are also cleaned using CleanedURIRef.
@@ -473,7 +474,6 @@ class RDFProfile(object):
 
         if ((imt or label) and normalize_ckan_format and
                 toolkit.check_ckan_version(min_version='2.3')):
-            import ckan.config
             from ckan.lib import helpers
 
             format_registry = helpers.resource_formats()
@@ -696,7 +696,7 @@ class RDFProfile(object):
             catalogs.remove(root)
         except KeyError:
             pass
-        assert len(catalogs) in (0, 1,), "len %s" %catalogs
+        assert len(catalogs) in (0, 1,), "len %s" % catalogs
         if catalogs:
             return catalogs.pop()
         return root
@@ -1209,7 +1209,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 g.add((distribution, DCT['format'],
                        URIRefOrLiteral(fmt)))
 
-
             # URL fallback and old behavior
             url = resource_dict.get('url')
             download_url = resource_dict.get('download_url')
@@ -1217,7 +1216,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             # Use url as fallback for access_url if access_url is not set and download_url is not equal
             if url and not access_url:
                 if (not download_url) or (download_url and url != download_url):
-                  self._add_triple_from_dict(resource_dict, distribution, DCAT.accessURL, 'url', _type=URIRef)
+                    self._add_triple_from_dict(resource_dict, distribution, DCAT.accessURL, 'url', _type=URIRef)
 
             # Dates
             items = [
@@ -1438,7 +1437,6 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((publisher_details, RDF.type, SCHEMA.Organization))
             self.g.add((dataset_ref, SCHEMA.publisher, publisher_details))
 
-
             publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if not publisher_name and dataset_dict.get('organization'):
                 publisher_name = dataset_dict['organization']['title']
@@ -1497,8 +1495,8 @@ class SchemaOrgProfile(RDFProfile):
 
                 # the spatial_geom typically contains GeoJSON
                 self.g.add((geo_shape,
-                       SCHEMA.polygon,
-                       Literal(spatial_geom)))
+                            SCHEMA.polygon,
+                            Literal(spatial_geom)))
 
     def _resources_graph(self, dataset_ref, dataset_dict):
         g = self.g
@@ -1550,10 +1548,10 @@ class SchemaOrgProfile(RDFProfile):
     def _distribution_format_graph(self, distribution, resource_dict):
         if resource_dict.get('format'):
             self.g.add((distribution, SCHEMA.encodingFormat,
-                   Literal(resource_dict['format'])))
+                       Literal(resource_dict['format'])))
         elif resource_dict.get('mimetype'):
             self.g.add((distribution, SCHEMA.encodingFormat,
-                   Literal(resource_dict['mimetype'])))
+                       Literal(resource_dict['mimetype'])))
 
     def _distribution_url_graph(self, distribution, resource_dict):
         url = resource_dict.get('url')

@@ -38,7 +38,7 @@ class IDCATRDFHarvester(Interface):
 
         It returns a valid `requests` session object.
 
-        This extension point can be useful to add special parameters to the 
+        This extension point can be useful to add special parameters to the
         request (e.g. add client certificates).
 
         :param session: The requests session object
@@ -83,7 +83,7 @@ class IDCATRDFHarvester(Interface):
         Called just before the ``package_update`` action.
         It may be used to preprocess the dataset dict.
 
-        If the content of the dataset dict is emptied (i.e. set to ``None``), 
+        If the content of the dataset dict is emptied (i.e. set to ``None``),
         the dataset will not be updated in CKAN, but simply ignored.
 
         Implementations may store some temp values in temp_dict, that will be
@@ -112,7 +112,7 @@ class IDCATRDFHarvester(Interface):
                              the DB.
         :type dataset_dict: dict
         :param temp_dict: A dictionary, shared among all plugins, for storing
-                          temp data. 
+                          temp data.
         :type temp_dict: dict
 
         :returns: A string containing an error message, or None. If the error
@@ -128,7 +128,7 @@ class IDCATRDFHarvester(Interface):
         Called just before the ``package_create`` action.
         It may be used to preprocess the dataset dict.
 
-        If the content of the dataset dict is emptied (i.e. set to ``None``), 
+        If the content of the dataset dict is emptied (i.e. set to ``None``),
         the dataset will not be created in CKAN, but simply ignored.
 
         Implementations may store some temp values in temp_dict, that will be

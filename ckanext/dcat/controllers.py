@@ -3,6 +3,9 @@ import json
 from ckan import model
 from ckan.plugins import toolkit
 
+from ckanext.dcat.utils import CONTENT_TYPES, parse_accept_header
+from ckanext.dcat.processors import RDFProfileException
+
 if toolkit.check_ckan_version(min_version='2.1'):
     BaseController = toolkit.BaseController
 else:
@@ -16,9 +19,6 @@ if toolkit.check_ckan_version(max_version='2.8.99'):
 else:
     from ckan.views.home import index as index_endpoint
     from ckan.views.dataset import read as read_endpoint
-
-from ckanext.dcat.utils import CONTENT_TYPES, parse_accept_header
-from ckanext.dcat.processors import RDFProfileException
 
 
 def _get_package_type(id):
@@ -89,8 +89,9 @@ class DCATController(BaseController):
             {'Content-type': CONTENT_TYPES[_format]})
 
         try:
-            result = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
-                'format': _format, 'profiles': _profiles})
+            result = toolkit.get_action('dcat_dataset_show')({},
+                                                             {'id': _id,
+                                                              'format': _format, 'profiles': _profiles})
         except toolkit.ObjectNotFound:
             toolkit.abort(404)
         except (toolkit.ValidationError, RDFProfileException) as e:
@@ -117,6 +118,3 @@ class DCATController(BaseController):
         toolkit.response.headers['Content-Length'] = len(content)
 
         return content
-
-
-
