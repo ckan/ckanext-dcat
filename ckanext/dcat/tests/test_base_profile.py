@@ -22,7 +22,7 @@ class TestURIRefPreprocessing(object):
 
     def test_with_valid_items(self):
         testUriPart = "://www.w3.org/ns/dcat#"
-        
+
         for prefix in ['http', 'https']:
             eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + testUriPart))
             # leading and trailing whitespace should be removed
@@ -36,7 +36,7 @@ class TestURIRefPreprocessing(object):
     def test_with_invalid_items(self):
         testUriPart = "://www.w3.org/ns/!dcat #"
         expectedUriPart = "://www.w3.org/ns/%21dcat%20#"
-        
+
         for prefix in ['http', 'https']:
             eq_(CleanedURIRef(prefix + testUriPart), URIRef(prefix + expectedUriPart))
             # applying on escaped data should have no effect

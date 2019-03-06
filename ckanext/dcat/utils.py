@@ -74,6 +74,7 @@ def field_labels():
         'created': _('Created'),
     }
 
+
 def helper_available(helper_name):
     '''
     Checks if a given helper name is available on `h`
@@ -83,6 +84,7 @@ def helper_available(helper_name):
     except (AttributeError, HelperError):
         return False
     return True
+
 
 def structured_data(dataset_id, profiles=None, _format='jsonld'):
     '''
@@ -98,9 +100,9 @@ def structured_data(dataset_id, profiles=None, _format='jsonld'):
     data = toolkit.get_action('dcat_dataset_show')(
         {},
         {
-            'id': dataset_id, 
-            'profiles': profiles, 
-            'format': _format, 
+            'id': dataset_id,
+            'profiles': profiles,
+            'format': _format,
         }
     )
     # parse result again to prevent UnicodeDecodeError and add formatting
@@ -111,6 +113,7 @@ def structured_data(dataset_id, profiles=None, _format='jsonld'):
     except ValueError:
         # result was not JSON, return anyway
         return data
+
 
 def catalog_uri():
     '''

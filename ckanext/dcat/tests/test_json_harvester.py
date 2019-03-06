@@ -8,6 +8,7 @@ from test_harvester import FunctionalHarvestTest
 
 eq_ = nose.tools.eq_
 
+
 class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
     @classmethod
@@ -109,9 +110,6 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
     def test_harvest_update_new_resources(self):
 
         content = self.json_content_with_distribution
-        content_modified = content.replace(
-            '"accessURL":"http://example.com/datasets/example1"',
-            '"accessURL":"http://example.com/datasets/new"')
         existing_resources, new_resources = \
             self._test_harvest_twice(content, content)
 

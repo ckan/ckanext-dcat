@@ -100,8 +100,8 @@ class DCATRDFHarvester(DCATHarvester):
 
         # Get all previous current guids and dataset ids for this source
         query = model.Session.query(HarvestObject.guid, HarvestObject.package_id) \
-                             .filter(HarvestObject.current==True) \
-                             .filter(HarvestObject.harvest_source_id==harvest_job.source.id)
+                             .filter(HarvestObject.current is True) \
+                             .filter(HarvestObject.harvest_source_id == harvest_job.source.id)
 
         guid_to_package_id = {}
         for guid, package_id in query:
@@ -283,8 +283,8 @@ class DCATRDFHarvester(DCATHarvester):
 
         # Get the last harvested object (if any)
         previous_object = model.Session.query(HarvestObject) \
-                                       .filter(HarvestObject.guid==harvest_object.guid) \
-                                       .filter(HarvestObject.current==True) \
+                                       .filter(HarvestObject.guid == harvest_object.guid) \
+                                       .filter(HarvestObject.current is True) \
                                        .first()
 
         # Flag previous object as not current anymore
@@ -316,7 +316,7 @@ class DCATRDFHarvester(DCATHarvester):
                 harvester_tmp_dict = {}
 
                 # check if resources already exist based on their URI
-                existing_resources =  existing_dataset.get('resources')
+                existing_resources = existing_dataset.get('resources')
                 resource_mapping = {r.get('uri'): r.get('id') for r in existing_resources if r.get('uri')}
                 for resource in dataset.get('resources'):
                     res_uri = resource.get('uri')
@@ -395,7 +395,10 @@ class DCATRDFHarvester(DCATHarvester):
                 log.info('Created dataset %s' % dataset['name'])
 
         except Exception, e:
-            self._save_object_error('Error importing dataset %s: %r / %s' % (dataset.get('name', ''), e, traceback.format_exc()), harvest_object, 'Import')
+            self._save_object_error('Error importing dataset %s: %r / %s' %
+                                    (dataset.get('name', ''), e, traceback.format_exc()),
+                                    harvest_object,
+                                    'Import')
             return False
 
         finally:

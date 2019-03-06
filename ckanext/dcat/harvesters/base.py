@@ -1,17 +1,17 @@
 import os
-import uuid
+import uuid  # noqa
 import logging
 
 import requests
 import rdflib
 
 from ckan import plugins as p
-from ckan import logic
+from ckan import logic  # noqa
 from ckan import model
 
 
 from ckanext.harvest.harvesters import HarvesterBase
-from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
+from ckanext.harvest.model import HarvestObject, HarvestObjectExtra  # noqa
 
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 

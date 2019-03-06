@@ -301,7 +301,6 @@ class TestEndpoints(DCATFunctionalTestBase):
 
     def test_catalog_modified_date(self):
 
-        dataset1 = factories.Dataset(title='First dataset')
         time.sleep(1)
         dataset2 = factories.Dataset(title='Second dataset')
 
@@ -386,7 +385,6 @@ class TestEndpoints(DCATFunctionalTestBase):
         g = Graph()
         g.parse(data=content, format='xml')
 
-
         pagination = [o for o in g.subjects(RDF.type, HYDRA.PagedCollection)][0]
 
         eq_(self._object_value(g, pagination, HYDRA.itemsPerPage), '10')
@@ -403,7 +401,6 @@ class TestEndpoints(DCATFunctionalTestBase):
         response = app.get(url, status=409)
 
         assert 'Unknown RDF profiles: nope' in response.body
-
 
     @helpers.change_config('ckanext.dcat.enable_rdf_endpoints', False)
     def test_catalog_endpoint_disabled(self):
@@ -576,7 +573,7 @@ class TestTranslations(DCATFunctionalTestBase):
         response = app.get(url)
 
         assert 'Notes de la versió' in response.body
-        assert not 'Version notes' in response.body
+        assert 'Version notes' not in response.body
 
     @helpers.change_config('ckanext.dcat.translate_keys', False)
     def test_labels_disable_by_config(self):
@@ -590,8 +587,8 @@ class TestTranslations(DCATFunctionalTestBase):
 
         response = app.get(url)
 
-        assert not 'Notes de la versió' in response.body
-        assert not 'Version notes' in response.body
+        assert 'Notes de la versió' not in response.body
+        assert 'Version notes' not in response.body
         assert 'version_notes' in response.body
 
 
@@ -624,4 +621,4 @@ class TestStructuredData(DCATFunctionalTestBase):
         app = self._get_test_app()
 
         response = app.get(url)
-        assert not '<script type="application/ld+json">' in response.body
+        assert '<script type="application/ld+json">' not in response.body
