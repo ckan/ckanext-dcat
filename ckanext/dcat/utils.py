@@ -2,6 +2,9 @@ import logging
 import uuid
 import json
 
+import re
+import operator
+
 from ckantoolkit import config, h
 
 try:
@@ -286,8 +289,7 @@ def rdflib_to_url_format(_format):
 
     return _format
 
-import re
-import operator
+
 # For parsing {name};q=x and {name} style fields from the accept header
 accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
