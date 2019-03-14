@@ -24,3 +24,22 @@ before_install:
     - pip install codecov
 after_success:
     - codecov
+
+stages:
+  - Flake8
+  - test
+
+jobs:
+  include:
+    - stage: Flake8
+      env: Flake8=True
+      install:
+        - bash bin/travis-build.bash
+        - pip install flake8==3.5.0
+        - pip install pycodestyle==2.3.0
+      script:
+        - flake8 --version
+        # stop the build if there are Python syntax errors or undefined names
+        - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude ckan,ckanext-harvest
+        # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
+        - flake8 . --count --max-line-length=127 --statistics --exclude ckan,ckanext-harvest

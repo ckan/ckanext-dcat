@@ -3,14 +3,12 @@ import json
 
 import nose
 
-from ckantoolkit import config
-
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF
 
 from ckan.plugins import toolkit
 
-from ckantoolkit.tests import helpers, factories
+from ckantoolkit.tests import helpers
 
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
@@ -151,7 +149,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(sorted(_get_extra_value_as_list('is_version_of')), [u'https://data.some.org/catalog/datasets/original-dataset'])
         eq_(sorted(_get_extra_value_as_list('source')), [u'https://data.some.org/catalog/datasets/source-dataset-1',
                                                          u'https://data.some.org/catalog/datasets/source-dataset-2'])
-        eq_(sorted(_get_extra_value_as_list('sample')), [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
+        eq_(sorted(_get_extra_value_as_list('sample')),
+            [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
 
         # Dataset URI
         eq_(_get_extra_value('uri'), u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98')
@@ -675,7 +674,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(_get_extra_value('dcat_publisher_name'), 'Publishing Organization for dataset 1')
         eq_(_get_extra_value('dcat_publisher_email'), 'contact@some.org')
         eq_(_get_extra_value('language'), 'ca,en,es')
-    
+
     @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
     def test_parse_subcatalog(self):
         publisher = {'name': 'Publisher',
@@ -694,7 +693,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                 {'key': 'source_catalog_modified', 'value': '2000-01-01'},
                 {'key': 'source_catalog_publisher', 'value': json.dumps(publisher)}
             ]
-        }        
+        }
         catalog_dict = {
             'title': 'My Catalog',
             'description': 'An Open Data Catalog',
@@ -719,9 +718,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         for subcatalog in subcatalogs:
             datasets = p.g.objects(subcatalog, DCAT.dataset)
             for dataset in datasets:
-                subdatasets.append((dataset,subcatalog,))
+                subdatasets.append((dataset, subcatalog,))
         assert_true(subdatasets)
-        
+
         datasets = dict([(d['title'], d) for d in p.datasets()])
 
         for subdataset, subcatalog in subdatasets:
@@ -826,7 +825,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         assert_true('spatial_uri' not in extras)
         eq_(extras['spatial_text'], 'Newark')
         eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
-
 
     def test_spatial_rdfs_label(self):
         g = Graph()
@@ -979,7 +977,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         p.g = g
 
         datasets = [d for d in p.datasets()]
-        
+
         eq_(len(datasets[0]['tags']), 3)
 
     INVALID_TAG = "Som`E-in.valid tag!;"
@@ -1001,7 +999,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         assert_true(self.VALID_TAG in datasets[0]['tags'])
         assert_true(self.INVALID_TAG not in datasets[0]['tags'])
 
-
     @helpers.change_config(DCAT_CLEAN_TAGS, 'false')
     def test_tags_with_commas_clean_tags_off(self):
         g = Graph()
@@ -1014,7 +1011,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         p.g = g
 
         # when config flag is set to false, bad tags can happen
-        
+
         datasets = [d for d in p.datasets()]
         assert_true(self.VALID_TAG not in datasets[0]['tags'])
         assert_true({'name': self.INVALID_TAG} in datasets[0]['tags'])

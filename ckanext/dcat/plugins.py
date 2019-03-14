@@ -166,4 +166,3 @@ class StructuredDataPlugin(p.SingletonPlugin):
         return {
             'structured_data': utils.structured_data,
         }
-

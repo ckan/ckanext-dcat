@@ -1,7 +1,6 @@
 import json
 import logging
 
-from pylons import config
 from ckan import plugins as p
 
 
