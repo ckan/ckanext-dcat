@@ -1,5 +1,5 @@
 import httpretty
-from mock import patch
+from mock import call, patch
 
 import nose
 
@@ -318,8 +318,7 @@ class TestImportStage:
         mock_harvest_object = self.MockHarvestObject()
         harvester.import_stage(mock_harvest_object)
 
-        mock_save_object_error.assert_called_once_with(
-            'Validation Error: {\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}',
-            mock_harvest_object,
-            'Import'
-        )
+        args, _ = mock_save_object_error.call_args_list[0]
+
+        assert 'Validation Error:' in args[0]
+        assert '{\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]
