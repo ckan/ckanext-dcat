@@ -18,8 +18,6 @@ except ImportError:
 
 from ckan import model
 import ckan.plugins.toolkit as toolkit
-import re
-import operator
 
 # For parsing {name};q=x and {name} style fields from the accept header
 accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
