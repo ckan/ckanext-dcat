@@ -272,15 +272,19 @@ class DCATJSONHarvester(DCATHarvester):
                 'SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
             model.Session.flush()
 
-            package_id = \
-                p.toolkit.get_action('package_create')(context, package_dict)
-            log.info('Created dataset with id %s', package_id)
-
         elif status == 'change':
             package_dict['id'] = harvest_object.package_id
-            package_id = \
-                p.toolkit.get_action('package_update')(context, package_dict)
-            log.info('Updated dataset with id %s', package_id)
+
+        if status in ['new', 'change']:
+            try:
+                action = 'package_create' if status == 'new' else 'package_update'
+                message_status = 'Created' if status == 'new' else 'Updated'
+
+                package_id = p.toolkit.get_action(action)(context, package_dict)
+                log.info('%s dataset with id %s', message_status, package_id)
+            except p.toolkit.ValidationError, e:
+                self._save_object_error('Validation Error: %s' % str(e), harvest_object, 'Import')
+                return False
 
         model.Session.commit()
 
