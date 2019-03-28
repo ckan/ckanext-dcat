@@ -323,26 +323,3 @@ class TestImportStage:
 
         assert 'Error importing dataset Invalid tags: ValidationError(None,)' in args[0]
         assert '{\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]
-
-    @patch('ckanext.dcat.harvesters._json.model.Package.get')
-    @patch('ckanext.dcat.harvesters._json.DCATJSONHarvester._save_object_error')
-    @patch('ckan.logic.schema.default_create_package_schema')
-    def test_import_invalid_tags_raise_generic_exception(
-        self, mock_default_create_package_schema, mock_save_object_error, mock_model_package_get
-    ):
-        mock_default_create_package_schema.side_effect = Exception('Internal Server Error')
-        user = factories.User()
-        owner_org = factories.Organization(
-            users=[{'name': user['id'], 'capacity': 'admin'}]
-        )
-
-        mock_model_package_get.return_value = self.MockSourceDataset(owner_org)
-
-        harvester = DCATJSONHarvester()
-
-        mock_harvest_object = self.MockHarvestObject()
-        harvester.import_stage(mock_harvest_object)
-
-        args, _ = mock_save_object_error.call_args_list[0]
-
-        assert "Error importing dataset Invalid tags: Exception('Internal Server Error',)" in args[0]
