@@ -1,14 +1,33 @@
 import httpretty
+from mock import call, patch, Mock
+
 import nose
 
+from ckan.logic import ValidationError
 import ckantoolkit.tests.helpers as h
 
-from ckanext.dcat.harvesters._json import copy_across_resource_ids
+import ckan.tests.factories as factories
+
+from ckanext.dcat.harvesters._json import copy_across_resource_ids, DCATJSONHarvester
 from test_harvester import FunctionalHarvestTest
 
 eq_ = nose.tools.eq_
 
 class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
+
+    # invalid tags dataset
+    json_content_invalid_tags = '''
+        {
+        "@type": "dcat:Dataset",
+        "name": "Invalid tags",
+        "identifier": "http://example.com/datasets/invalid_example",
+        "title": "Example dataset with invalid tags",
+        "description": "Invalid keywords",
+        "publisher": {"name":"Example Department of Wildlife"},
+        "license": "https://example.com/license",
+        "keyword": ["example", "test's", "invalid & wrong"]
+        }
+    '''
 
     @classmethod
     def setup_class(cls):
@@ -61,14 +80,21 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 }
         '''
 
+        # invalid_tags dataset
+        cls.json_content_invalid_tags_dataset = '{"dataset":[%s]}' % cls.json_content_invalid_tags
+
     def test_harvest_create(self):
 
         self._test_harvest_create(self.json_mock_url,
                                   self.json_content,
-                                  self.json_content_type)
+                                  self.json_content_type,
+                                  exp_titles=['Example dataset 1', 'Example dataset 2'])
 
-    def _test_harvest_create(self, url, content, content_type, num_datasets=2,
-                             **kwargs):
+    def _test_harvest_create(
+        self, url, content, content_type, num_datasets=2,
+        exp_num_datasets=2, exp_titles=[],
+        **kwargs
+    ):
 
         # Mock the GET request to get the file
         httpretty.register_uri(httpretty.GET, url,
@@ -87,16 +113,15 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
         results = h.call_action('package_search', {}, fq=fq)
 
-        eq_(results['count'], num_datasets)
-        for result in results['results']:
-            assert result['title'] in ('Example dataset 1',
-                                       'Example dataset 2')
+        eq_(results['count'], exp_num_datasets)
+
+        if exp_titles:
+            for result in results['results']:
+                assert result['title'] in exp_titles
 
     def test_harvest_update_existing_resources(self):
 
         content = self.json_content_with_distribution
-        # content_modified = content.replace('Example dataset 1',
-        #                                    'Example dataset 1 (updated)')
         existing_resources, new_resources = \
             self._test_harvest_twice(content, content)
 
@@ -178,6 +203,14 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
         return (existing_resources, new_resources)
 
+    def test_harvest_does_not_create_with_invalid_tags(self):
+        self._test_harvest_create(
+            'http://some.dcat.file.invalid.json',
+            self.json_content_invalid_tags_dataset,
+            self.json_content_type,
+            num_datasets=1,
+            exp_num_datasets=0)
+
 
 class TestCopyAcrossResourceIds:
     def test_copied_because_same_uri(self):
@@ -238,3 +271,55 @@ class TestCopyAcrossResourceIds:
             harvested_dataset,
         )
         eq_(harvested_dataset['resources'][0].get('id'), None)
+
+
+class TestImportStage:
+
+    @classmethod
+    def setup_class(cls):
+        h.reset_db()
+
+    class MockHarvestObject:
+        guid = 'test_guid'
+        content = TestDCATJSONHarvestFunctional.json_content_invalid_tags
+
+        class MockStatus:
+            key = 'status'
+            value = 'new'
+
+        extras = [MockStatus()]
+        package = None
+
+        class MockSource:
+            id = 'test_id'
+
+        source = MockSource()
+
+        def add(self):
+            pass
+
+    class MockSourceDataset:
+        def __init__(self, owner_org=None):
+            self.owner_org = owner_org['id']
+
+    @patch('ckanext.dcat.harvesters._json.model.Package.get')
+    @patch('ckanext.dcat.harvesters._json.DCATJSONHarvester._save_object_error')
+    def test_import_invalid_tags(
+        self, mock_save_object_error, mock_model_package_get
+    ):
+        user = factories.User()
+        owner_org = factories.Organization(
+            users=[{'name': user['id'], 'capacity': 'admin'}]
+        )
+
+        mock_model_package_get.return_value = self.MockSourceDataset(owner_org)
+
+        harvester = DCATJSONHarvester()
+
+        mock_harvest_object = self.MockHarvestObject()
+        harvester.import_stage(mock_harvest_object)
+
+        args, _ = mock_save_object_error.call_args_list[0]
+
+        assert 'Error importing dataset Invalid tags: ValidationError(None,)' in args[0]
+        assert '{\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]
