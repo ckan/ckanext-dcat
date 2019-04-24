@@ -187,7 +187,7 @@ It's possible to specify the profile(s) to use for the serialization using the `
 
 http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
 
-To filter the output, the catalog endpoint supports the `q` and `fq` parameters to specify a search query or filter query:
+To filter the output, the catalog endpoint supports the `q` and `fq` parameters to specify a [search query](https://lucene.apache.org/solr/guide/6_6/the-dismax-query-parser.html) or [filter query](https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-Thefq_FilterQuery_Parameter):
 
 http://demo.ckan.org/catalog.xml?q=budget
 http://demo.ckan.org/catalog.xml?fq=tags:economy
