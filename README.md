@@ -138,7 +138,7 @@ You can specify the profile by using the `profiles=<profile1>,<profile2>` query 
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]&[q={query}]&[fq={filter query}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -186,6 +186,11 @@ http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
 It's possible to specify the profile(s) to use for the serialization using the `profiles` parameter:
 
 http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
+
+To filter the output, the catalog endpoint supports the `q` and `fq` parameters to specify a [search query](https://lucene.apache.org/solr/guide/6_6/the-dismax-query-parser.html#TheDisMaxQueryParser-TheqParameter) or [filter query](https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-Thefq_FilterQuery_Parameter):
+
+http://demo.ckan.org/catalog.xml?q=budget
+http://demo.ckan.org/catalog.xml?fq=tags:economy
 
 
 
