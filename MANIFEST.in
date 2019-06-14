@@ -1,1 +1,2 @@
 recursive-include ckanext/dcat/i18n *
+recursive-include ckanext/dcat/templates *
