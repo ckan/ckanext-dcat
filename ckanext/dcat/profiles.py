@@ -647,8 +647,7 @@ class RDFProfile(object):
         found.
         '''
         context = {
-            'user': toolkit.get_action('get_site_user')(
-                {'ignore_auth': True})['name']
+            'ignore_auth': True
         }
         result = toolkit.get_action('package_search')(context, {
             'sort': 'metadata_modified desc',
