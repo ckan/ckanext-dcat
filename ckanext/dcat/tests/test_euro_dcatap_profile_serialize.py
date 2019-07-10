@@ -108,7 +108,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'alternate_identifier', 'value': '[\"xyz\", \"abc\"]'},
                 {'key': 'version_notes', 'value': 'This is a beta version'},
                 {'key': 'frequency', 'value': 'monthly'},
-                {'key': 'language', 'value': '[\"en\"]'},
+                {'key': 'language', 'value': '[\"en\", \"http://publications.europa.eu/resource/authority/language/ITA\"]'},
                 {'key': 'theme', 'value': '[\"http://eurovoc.europa.eu/100142\", \"http://eurovoc.europa.eu/100152\"]'},
                 {'key': 'conforms_to', 'value': '[\"Standard 1\", \"Standard 2\"]'},
                 {'key': 'access_rights', 'value': 'public'},
@@ -154,7 +154,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         # List
         for item in [
-            ('language', DCT.language, Literal),
+            ('language', DCT.language, [Literal, URIRef]),
             ('theme', DCAT.theme, URIRef),
             ('conforms_to', DCT.conformsTo, Literal),
             ('alternate_identifier', ADMS.identifier, Literal),
@@ -167,8 +167,12 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         ]:
             values = json.loads(extras[item[0]])
             eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))
-            for value in values:
-                assert self._triple(g, dataset_ref, item[1], item[2](value))
+            for num, value in enumerate(values):
+                _type = item[2]
+                if isinstance(item[2], list):
+                    eq_(len(item[2]), len(values))
+                    _type = item[2][num]
+                assert self._triple(g, dataset_ref, item[1], _type(value))
 
     def test_identifier_extra(self):
         dataset = {
@@ -568,7 +572,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'modified': '2015-06-26T15:21:09.075774',
             'size': 1234,
             'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
-            'language': '[\"en\", \"es\", \"ca\"]',
+            'language': '[\"en\", \"es\", \"http://publications.europa.eu/resource/authority/language/ITA\"]',
             'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
             'hash': '4304cf2e751e6053c90b1804c89c0ebb758f395a',
             'hash_algorithm': 'http://spdx.org/rdf/terms#checksumAlgorithm_sha1',
@@ -606,13 +610,17 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         # List
         for item in [
             ('documentation', FOAF.page, URIRef),
-            ('language', DCT.language, Literal),
+            ('language', DCT.language, [Literal, Literal, URIRef]),
             ('conforms_to', DCT.conformsTo, Literal),
         ]:
             values = json.loads(resource[item[0]])
             eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
-            for value in values:
-                assert self._triple(g, distribution, item[1], item[2](value))
+            for num, value in enumerate(values):
+                _type = item[2]
+                if isinstance(item[2], list):
+                    eq_(len(item[2]), len(values))
+                    _type = item[2][num]
+                assert self._triple(g, distribution, item[1], _type(value))
 
         # Dates
         assert self._triple(g, distribution, DCT.issued, resource['issued'], XSD.dateTime)
@@ -1059,6 +1067,25 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         assert self._triple(g, catalog, DCT.description, catalog_dict['description'])
         assert self._triple(g, catalog, FOAF.homepage, URIRef(catalog_dict['homepage']))
         assert self._triple(g, catalog, DCT.language, catalog_dict['language'])
+
+    def test_graph_from_catalog_dict_language_uri_ref(self):
+
+        catalog_dict = {
+            'title': 'My Catalog',
+            'description': 'An Open Data Catalog',
+            'homepage': 'http://example.com',
+            'language': 'http://publications.europa.eu/resource/authority/language/ITA',
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        catalog = s.graph_from_catalog(catalog_dict)
+
+        eq_(unicode(catalog), utils.catalog_uri())
+
+        # language field
+        assert self._triple(g, catalog, DCT.language, URIRef(catalog_dict['language']))
 
     def test_graph_from_catalog_modified_date(self):
 
