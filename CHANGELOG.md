@@ -7,6 +7,7 @@
 * Pass `q` and `fq` parameters in catalog endpoint (#152)
 * Include templates in package (#154)
 * Ignore auth in internal search call (#156)
+* Support URIRef for dct:language (#158)
 
 ## [v0.0.9](https://github.com/ckan/ckanext-dcat/compare/v0.0.8...v0.0.9) - 2019-01-10
 
