@@ -9,6 +9,7 @@
 * Ignore auth in internal search call (#156)
 * Support URIRef for dct:language (#158)
 * Support JSON-LD catalogs with @graph (#159)
+* Make read keywords re-usable (#160)
 
 ## [v0.0.9](https://github.com/ckan/ckanext-dcat/compare/v0.0.8...v0.0.9) - 2019-01-10
 
