@@ -917,7 +917,7 @@ To run the tests, do:
 
 To create a new release, follow these steps:
 
-* Determine new release number based on the rules of `semantic versioning <http://semver.org>`_
+* Determine new release number based on the rules of [semantic versioning](http://semver.org)
 * Update the CHANGELOG, especially the link for the "Unreleased" section
 * Update the version number in `setup.py`
 * Create a new release on GitHub and add the CHANGELOG of this release as release notes
