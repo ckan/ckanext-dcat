@@ -144,6 +144,18 @@ class RDFProfile(object):
         for distribution in self.g.objects(dataset, DCAT.distribution):
             yield distribution
 
+    def _keywords(self, dataset_ref):
+        '''
+        Returns all DCAT keywords on a particular dataset
+        '''
+        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
+        # Split keywords with commas
+        keywords_with_commas = [k for k in keywords if ',' in k]
+        for keyword in keywords_with_commas:
+            keywords.remove(keyword)
+            keywords.extend([k.strip() for k in keyword.split(',')])
+        return keywords
+
     def _object(self, subject, predicate):
         '''
         Helper for returning the first object for this subject and predicate
@@ -647,8 +659,7 @@ class RDFProfile(object):
         found.
         '''
         context = {
-            'user': toolkit.get_action('get_site_user')(
-                {'ignore_auth': True})['name']
+            'ignore_auth': True
         }
         result = toolkit.get_action('package_search')(context, {
             'sort': 'metadata_modified desc',
@@ -804,16 +815,9 @@ class EuropeanDCATAPProfile(RDFProfile):
                 dataset_dict['version'] = value
 
         # Tags
-        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
-        # Split keywords with commas
-        keywords_with_commas = [k for k in keywords if ',' in k]
-        for keyword in keywords_with_commas:
-            keywords.remove(keyword)
-            keywords.extend([k.strip() for k in keyword.split(',')])
-
         # replace munge_tag to noop if there's no need to clean tags
         do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
-        tags_val = [munge_tag(tag) if do_clean else tag for tag in keywords]
+        tags_val = [munge_tag(tag) if do_clean else tag for tag in self._keywords(dataset_ref)]
         tags = [{'name': tag} for tag in tags_val]
         dataset_dict['tags'] = tags
 
@@ -1030,7 +1034,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         #  Lists
         items = [
-            ('language', DCT.language, None, Literal),
+            ('language', DCT.language, None, URIRefOrLiteral),
             ('theme', DCAT.theme, None, URIRef),
             ('conforms_to', DCT.conformsTo, None, Literal),
             ('alternate_identifier', ADMS.identifier, None, Literal),
@@ -1179,7 +1183,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             #  Lists
             items = [
                 ('documentation', FOAF.page, None, URIRefOrLiteral),
-                ('language', DCT.language, None, Literal),
+                ('language', DCT.language, None, URIRefOrLiteral),
                 ('conforms_to', DCT.conformsTo, None, Literal),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
@@ -1264,7 +1268,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('title', DCT.title, config.get('ckan.site_title'), Literal),
             ('description', DCT.description, config.get('ckan.site_description'), Literal),
             ('homepage', FOAF.homepage, config.get('ckan.site_url'), URIRef),
-            ('language', DCT.language, config.get('ckan.locale_default', 'en'), Literal),
+            ('language', DCT.language, config.get('ckan.locale_default', 'en'), URIRefOrLiteral),
         ]
         for item in items:
             key, predicate, fallback, _type = item

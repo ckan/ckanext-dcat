@@ -149,11 +149,9 @@ class DCATHarvester(HarvesterBase):
             return obj.source.url
         return None
 
-    def _get_existing_dataset(self, guid):
+    def _read_datasets_from_db(self, guid):
         '''
-        Checks if a dataset with a certain guid extra already exists
-
-        Returns a dict as the ones returned by package_show
+        Returns a database result of datasets matching the given guid.
         '''
 
         datasets = model.Session.query(model.Package.id) \
@@ -162,6 +160,16 @@ class DCATHarvester(HarvesterBase):
                                 .filter(model.PackageExtra.value == guid) \
                                 .filter(model.Package.state == 'active') \
                                 .all()
+        return datasets
+
+    def _get_existing_dataset(self, guid):
+        '''
+        Checks if a dataset with a certain guid extra already exists
+
+        Returns a dict as the ones returned by package_show
+        '''
+
+        datasets = self._read_datasets_from_db(guid)
 
         if not datasets:
             return None
