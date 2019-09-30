@@ -652,6 +652,35 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(resource['url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
         eq_(resource['download_url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
 
+    def test_dataset_json_ld_with_at_graph(self):
+
+        contents = self._get_file_contents('catalog_with_at_graph.jsonld')
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.parse(contents, _format='json-ld')
+
+        datasets = [d for d in p.datasets()]
+
+        eq_(len(datasets), 1)
+
+        dataset = datasets[0]
+        extras = dict((e['key'], e['value']) for e in dataset['extras'])
+
+        eq_(dataset['title'], 'Title dataset')
+
+        eq_(extras['contact_name'], 'Jane Doe')
+        # mailto gets removed for storage and is added again on output
+        eq_(extras['contact_email'], 'jane.doe@agency.gov')
+
+        eq_(len(dataset['resources']), 1)
+
+        resource = dataset['resources'][0]
+        eq_(resource['name'], u'download.zip')
+        eq_(resource['url'], u'http://example2.org/files/download.zip')
+        eq_(resource['access_url'], u'https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47')
+        eq_(resource['download_url'], u'http://example2.org/files/download.zip')
+
     def test_dataset_compatibility_mode(self):
 
         contents = self._get_file_contents('dataset.rdf')

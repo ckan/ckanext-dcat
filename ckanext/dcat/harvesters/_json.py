@@ -1,6 +1,7 @@
 import json
 import logging
 from hashlib import sha1
+import traceback
 import uuid
 
 from ckan import model
@@ -252,37 +253,45 @@ class DCATJSONHarvester(DCATHarvester):
             'ignore_auth': True,
         }
 
-        if status == 'new':
+        try:
+            if status == 'new':
+                package_schema = logic.schema.default_create_package_schema()
+                context['schema'] = package_schema
 
-            package_schema = logic.schema.default_create_package_schema()
-            context['schema'] = package_schema
+                # We need to explicitly provide a package ID
+                package_dict['id'] = unicode(uuid.uuid4())
+                package_schema['id'] = [unicode]
 
-            # We need to explicitly provide a package ID
-            package_dict['id'] = unicode(uuid.uuid4())
-            package_schema['id'] = [unicode]
+                # Save reference to the package on the object
+                harvest_object.package_id = package_dict['id']
+                harvest_object.add()
 
-            # Save reference to the package on the object
-            harvest_object.package_id = package_dict['id']
-            harvest_object.add()
+                # Defer constraints and flush so the dataset can be indexed with
+                # the harvest object id (on the after_show hook from the harvester
+                # plugin)
+                model.Session.execute(
+                    'SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
+                model.Session.flush()
 
-            # Defer constraints and flush so the dataset can be indexed with
-            # the harvest object id (on the after_show hook from the harvester
-            # plugin)
-            model.Session.execute(
-                'SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
-            model.Session.flush()
+            elif status == 'change':
+                package_dict['id'] = harvest_object.package_id
 
-            package_id = \
-                p.toolkit.get_action('package_create')(context, package_dict)
-            log.info('Created dataset with id %s', package_id)
+            if status in ['new', 'change']:
+                action = 'package_create' if status == 'new' else 'package_update'
+                message_status = 'Created' if status == 'new' else 'Updated'
 
-        elif status == 'change':
-            package_dict['id'] = harvest_object.package_id
-            package_id = \
-                p.toolkit.get_action('package_update')(context, package_dict)
-            log.info('Updated dataset with id %s', package_id)
+                package_id = p.toolkit.get_action(action)(context, package_dict)
+                log.info('%s dataset with id %s', message_status, package_id)
 
-        model.Session.commit()
+        except Exception, e:
+            dataset = json.loads(harvest_object.content)
+            dataset_name = dataset.get('name', '')
+
+            self._save_object_error('Error importing dataset %s: %r / %s' % (dataset_name, e, traceback.format_exc()), harvest_object, 'Import')
+            return False
+
+        finally:
+            model.Session.commit()
 
         return True
 

@@ -67,7 +67,7 @@ class RDFProcessor(object):
                 config.get(COMPAT_MODE_CONFIG_OPTION, False))
         self.compatibility_mode = compatibility_mode
 
-        self.g = rdflib.Graph()
+        self.g = rdflib.ConjunctiveGraph()
 
     def _load_profiles(self, profile_names):
         '''

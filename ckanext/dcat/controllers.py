@@ -18,6 +18,7 @@ else:
     from ckan.views.dataset import read as read_endpoint
 
 from ckanext.dcat.utils import CONTENT_TYPES, parse_accept_header
+from ckanext.dcat.processors import RDFProfileException
 
 
 def _get_package_type(id):
@@ -58,6 +59,8 @@ class DCATController(BaseController):
         data_dict = {
             'page': toolkit.request.params.get('page'),
             'modified_since': toolkit.request.params.get('modified_since'),
+            'q': toolkit.request.params.get('q'),
+            'fq': toolkit.request.params.get('fq'),
             'format': _format,
             'profiles': _profiles,
         }
@@ -66,7 +69,7 @@ class DCATController(BaseController):
             {'Content-type': CONTENT_TYPES[_format]})
         try:
             return toolkit.get_action('dcat_catalog_show')({}, data_dict)
-        except toolkit.ValidationError, e:
+        except (toolkit.ValidationError, RDFProfileException) as e:
             toolkit.abort(409, str(e))
 
     def read_dataset(self, _id, _format=None):
@@ -92,6 +95,8 @@ class DCATController(BaseController):
                 'format': _format, 'profiles': _profiles})
         except toolkit.ObjectNotFound:
             toolkit.abort(404)
+        except (toolkit.ValidationError, RDFProfileException) as e:
+            toolkit.abort(409, str(e))
         except toolkit.NotAuthorized:
             toolkit.abort(404)
 

@@ -35,6 +35,7 @@ It also offers other features related to Semantic Data like exposing the necessa
 - [Translation of fields](#translation-of-fields)
 - [Structured Data and Google Dataset Search indexing](#structured-data-and-google-dataset-search-indexing)
 - [Running the Tests](#running-the-tests)
+- [Releases](#releases)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
 
@@ -50,7 +51,7 @@ In terms of CKAN features, this extension offers:
 
 * An [RDF Harvester](#rdf-dcat-harvester) that allows importing RDF serializations from other catalogs to create CKAN datasets (`dcat_rdf_harvester` plugin).
 
-* An [JSON DCAT Harvester](#json-dcat-harvester) that allows importing JSON objects that are based on DCAT terms but are not defined as JSON-LD, using the serialization described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site (`dcat_json_harvester` plugin)..
+* An [JSON DCAT Harvester](#json-dcat-harvester) that allows importing JSON objects that are based on DCAT terms but are not defined as JSON-LD, using the serialization described in the [spec.dataportals.org](http://spec.dataportals.org/#datasets-serialization-format) site (`dcat_json_harvester` plugin)..
 
 
 These are implemented internally using:
@@ -138,7 +139,7 @@ You can specify the profile by using the `profiles=<profile1>,<profile2>` query 
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]&[q={query}]&[fq={filter query}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -186,6 +187,11 @@ http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
 It's possible to specify the profile(s) to use for the serialization using the `profiles` parameter:
 
 http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
+
+To filter the output, the catalog endpoint supports the `q` and `fq` parameters to specify a [search query](https://lucene.apache.org/solr/guide/6_6/the-dismax-query-parser.html#TheDisMaxQueryParser-TheqParameter) or [filter query](https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-Thefq_FilterQuery_Parameter):
+
+http://demo.ckan.org/catalog.xml?q=budget
+http://demo.ckan.org/catalog.xml?fq=tags:economy
 
 
 
@@ -281,7 +287,7 @@ To know more about these methods, please check the source of [`ckanext-dcat/ckan
 ## JSON DCAT harvester
 
 The DCAT JSON harvester supports importing JSON objects that are based on DCAT terms but are not defined as JSON-LD. The exact format for these JSON files
-is the one described in the [spec.datacatalogs.org](http://spec.datacatalogs.org/#datasets_serialization_format) site. There are [example files](https://github.com/ckan/ckanext-dcat/blob/master/examples/dataset.json) in the `examples` folder.
+is the one described in the [spec.dataportals.org](http://spec.dataportals.org/#datasets-serialization-format) site. There are [example files](https://github.com/ckan/ckanext-dcat/blob/master/examples/dataset.json) in the `examples` folder.
 
 To enable the JSON harvester, add the `dcat_json_harvester` plugin to your CKAN configuration file:
 
@@ -906,6 +912,15 @@ Example output of structured data in JSON-LD:
 To run the tests, do:
 
     nosetests --nologcapture --ckan --with-pylons=test.ini ckanext
+    
+## Releases
+
+To create a new release, follow these steps:
+
+* Determine new release number based on the rules of [semantic versioning](http://semver.org)
+* Update the CHANGELOG, especially the link for the "Unreleased" section
+* Update the version number in `setup.py`
+* Create a new release on GitHub and add the CHANGELOG of this release as release notes
 
 ## Acknowledgements
 
