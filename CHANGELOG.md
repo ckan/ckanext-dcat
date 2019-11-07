@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...HEAD)
+
+* TBD
+
+## [v1.0.0](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...v1.0.0)
 
 * Updating the URLs to dataportals.org (#145)
 * Handle import stage errors (#149)
