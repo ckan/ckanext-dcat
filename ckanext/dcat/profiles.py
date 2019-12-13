@@ -144,6 +144,18 @@ class RDFProfile(object):
         for distribution in self.g.objects(dataset, DCAT.distribution):
             yield distribution
 
+    def _keywords(self, dataset_ref):
+        '''
+        Returns all DCAT keywords on a particular dataset
+        '''
+        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
+        # Split keywords with commas
+        keywords_with_commas = [k for k in keywords if ',' in k]
+        for keyword in keywords_with_commas:
+            keywords.remove(keyword)
+            keywords.extend([k.strip() for k in keyword.split(',')])
+        return keywords
+
     def _object(self, subject, predicate):
         '''
         Helper for returning the first object for this subject and predicate
@@ -803,16 +815,9 @@ class EuropeanDCATAPProfile(RDFProfile):
                 dataset_dict['version'] = value
 
         # Tags
-        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
-        # Split keywords with commas
-        keywords_with_commas = [k for k in keywords if ',' in k]
-        for keyword in keywords_with_commas:
-            keywords.remove(keyword)
-            keywords.extend([k.strip() for k in keyword.split(',')])
-
         # replace munge_tag to noop if there's no need to clean tags
         do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
-        tags_val = [munge_tag(tag) if do_clean else tag for tag in keywords]
+        tags_val = [munge_tag(tag) if do_clean else tag for tag in self._keywords(dataset_ref)]
         tags = [{'name': tag} for tag in tags_val]
         dataset_dict['tags'] = tags
 

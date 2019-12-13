@@ -39,7 +39,12 @@ then
     pip install setuptools==39.0.1
 fi
 
-pip install -r requirements.txt
+if [ -f requirements-py2.txt ]
+then
+    pip install -r requirements-py2.txt
+else
+    pip install -r requirements.txt
+fi
 pip install -r dev-requirements.txt
 cd -
 

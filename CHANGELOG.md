@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...HEAD)
+
+* TBD
+
+## [v1.0.0](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...v1.0.0)
 
 * Updating the URLs to dataportals.org (#145)
 * Handle import stage errors (#149)
@@ -9,6 +13,8 @@
 * Ignore auth in internal search call (#156)
 * Support URIRef for dct:language (#158)
 * Support JSON-LD catalogs with @graph (#159)
+* Make read keywords re-usable (#160)
+* Extract read datasets from db to make it re-usable (#161)
 
 ## [v0.0.9](https://github.com/ckan/ckanext-dcat/compare/v0.0.8...v0.0.9) - 2019-01-10
 

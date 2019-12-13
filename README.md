@@ -35,6 +35,7 @@ It also offers other features related to Semantic Data like exposing the necessa
 - [Translation of fields](#translation-of-fields)
 - [Structured Data and Google Dataset Search indexing](#structured-data-and-google-dataset-search-indexing)
 - [Running the Tests](#running-the-tests)
+- [Releases](#releases)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
 
@@ -912,6 +913,15 @@ Example output of structured data in JSON-LD:
 To run the tests, do:
 
     nosetests --nologcapture --ckan --with-pylons=test.ini ckanext
+    
+## Releases
+
+To create a new release, follow these steps:
+
+* Determine new release number based on the rules of [semantic versioning](http://semver.org)
+* Update the CHANGELOG, especially the link for the "Unreleased" section
+* Update the version number in `setup.py`
+* Create a new release on GitHub and add the CHANGELOG of this release as release notes
 
 ## Acknowledgements
 
