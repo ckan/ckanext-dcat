@@ -105,12 +105,13 @@ The extension will determine the RDF serialization format returned. The currentl
 
 The fallback `rdf` format defaults to RDF/XML.
 
-Here's an example of the different formats available (links might not be live as they link to a demo site):
+Here's an example of the different formats:
 
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.rdf
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.ttl
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.n3
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.rdf
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.xml
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.ttl
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.n3
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.jsonld
 
 RDF representations will be advertised using `<link rel="alternate">` tags on the `<head>` sectionon the dataset page source code, eg:
 
@@ -128,8 +129,8 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 You can specify the profile by using the `profiles=<profile1>,<profile2>` query parameter on the dataset endpoint (as a comma-separated list):
 
-* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml?profiles=euro_dcat_ap,sweden_dcat_ap`
-* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.jsonld?profiles=schemaorg`
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.xml?profiles=euro_dcat_ap
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.jsonld?profiles=schemaorg
 
 *Note*: When using this plugin, the above endpoints will replace the old deprecated ones that were part of CKAN core.
 
