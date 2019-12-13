@@ -40,7 +40,7 @@ It also offers other features related to Semantic Data like exposing the necessa
 
 ## Overview
 
-With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [http://publicdata.eu](http://publicdata.eu) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
+With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [the EU Open Data Portal](https://data.europa.eu/euodp/en/data/) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
 
 There is growing consensus around [DCAT](http://www.w3.org/TR/vocab-dcat) being the right way forward, but actual implementations are needed. This extension aims to provide tools and guidance to allow publishers to publish and share DCAT based metadata easily.
 
