@@ -299,7 +299,7 @@ class DCATJSONHarvester(DCATHarvester):
 def copy_across_resource_ids(existing_dataset, harvested_dataset):
     '''Compare the resources in a dataset existing in the CKAN database with
     the resources in a freshly harvested copy, and for any resources that are
-    the same, copy the resource ID and groups into the harvested_dataset dict.
+    the same, copy the resource ID into the harvested_dataset dict.
     '''
     # take a copy of the existing_resources so we can remove them when they are
     # matched - we don't want to match them more than once.
