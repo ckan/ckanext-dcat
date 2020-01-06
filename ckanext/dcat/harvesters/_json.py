@@ -1,3 +1,4 @@
+from builtins import str
 import json
 import logging
 from hashlib import sha1
@@ -74,7 +75,7 @@ class DCATJSONHarvester(DCATHarvester):
         for guid, package_id in query:
             guid_to_package_id[guid] = package_id
 
-        guids_in_db = guid_to_package_id.keys()
+        guids_in_db = list(guid_to_package_id.keys())
         guids_in_source = []
 
         # Get file contents
@@ -259,8 +260,8 @@ class DCATJSONHarvester(DCATHarvester):
                 context['schema'] = package_schema
 
                 # We need to explicitly provide a package ID
-                package_dict['id'] = unicode(uuid.uuid4())
-                package_schema['id'] = [unicode]
+                package_dict['id'] = str(uuid.uuid4())
+                package_schema['id'] = [str]
 
                 # Save reference to the package on the object
                 harvest_object.package_id = package_dict['id']

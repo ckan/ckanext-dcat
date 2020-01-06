@@ -1,3 +1,4 @@
+from builtins import object
 import nose
 
 from ckanext.dcat.utils import parse_accept_header

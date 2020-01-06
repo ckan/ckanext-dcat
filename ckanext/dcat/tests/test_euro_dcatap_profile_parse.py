@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import os
 import json
 
@@ -754,7 +756,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         datasets = dict([(d['title'], d) for d in p.datasets()])
 
         for subdataset, subcatalog in subdatasets:
-            title = unicode(list(p.g.objects(subdataset, DCT.title))[0])
+            title = str(list(p.g.objects(subdataset, DCT.title))[0])
             dataset = datasets[title]
             has_subcat = False
             for ex in dataset['extras']:
@@ -762,7 +764,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                 exkey = ex['key']
                 if exkey == 'source_catalog_homepage':
                     has_subcat = True
-                    eq_(exval, unicode(subcatalog))
+                    eq_(exval, str(subcatalog))
             # check if we had subcatalog in extras
             assert_true(has_subcat)
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from builtins import object
 import os
 
 from pylons import config
@@ -8,7 +9,7 @@ from ckan import plugins as p
 try:
     from ckan.lib.plugins import DefaultTranslation
 except ImportError:
-    class DefaultTranslation():
+    class DefaultTranslation(object):
         pass
 
 
@@ -109,7 +110,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
             field_labels = utils.field_labels()
 
             def set_titles(object_dict):
-                for key, value in object_dict.iteritems():
+                for key, value in object_dict.items():
                     if key in field_labels:
                         object_dict[field_labels[key]] = object_dict[key]
                         del object_dict[key]

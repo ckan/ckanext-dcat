@@ -1,3 +1,4 @@
+from builtins import str
 import json
 
 import nose
@@ -62,7 +63,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        eq_(unicode(dataset_ref), utils.dataset_uri(dataset))
+        eq_(str(dataset_ref), utils.dataset_uri(dataset))
 
         # Basic fields
         assert self._triple(g, dataset_ref, RDF.type, SCHEMA.Dataset)
@@ -121,7 +122,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         publisher = self._triple(g, dataset_ref, SCHEMA.publisher, None)[2]
         assert publisher
-        eq_(unicode(publisher), extras['publisher_uri'])
+        eq_(str(publisher), extras['publisher_uri'])
         assert self._triple(g, publisher, RDF.type, SCHEMA.Organization)
         assert self._triple(g, publisher, SCHEMA.name, extras['publisher_name'])
 
@@ -266,7 +267,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         spatial = self._triple(g, dataset_ref, SCHEMA.spatialCoverage, None)[2]
         assert spatial
-        eq_(unicode(spatial), extras['spatial_uri'])
+        eq_(str(spatial), extras['spatial_uri'])
         assert self._triple(g, spatial, RDF.type, SCHEMA.Place)
         assert self._triple(g, spatial, SCHEMA.description, extras['spatial_text'])
         geo = self._triple(g, spatial, SCHEMA.geo, None)[2]
@@ -349,7 +350,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         # URI
         distribution = self._triple(g, dataset_ref, SCHEMA.distribution, None)[2]
-        eq_(unicode(distribution), utils.resource_uri(resource))
+        eq_(str(distribution), utils.resource_uri(resource))
 
         # Basic fields
         assert self._triple(g, distribution, RDF.type, SCHEMA.DataDownload)

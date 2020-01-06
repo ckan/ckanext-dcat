@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from builtins import str
+from builtins import object
 import sys
 import argparse
 import xml
@@ -116,7 +118,7 @@ class RDFParser(RDFProcessor):
         '''
         for pagination_node in self.g.subjects(RDF.type, HYDRA.PagedCollection):
             for o in self.g.objects(pagination_node, HYDRA.nextPage):
-                return unicode(o)
+                return str(o)
         return None
 
 

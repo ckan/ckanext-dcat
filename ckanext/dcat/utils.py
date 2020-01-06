@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from builtins import str
 import logging
 import uuid
 import json
@@ -333,10 +334,10 @@ def parse_accept_header(accept_header=''):
 
     accepted_media_types = dict((value, key)
                                 for key, value
-                                in CONTENT_TYPES.iteritems())
+                                in CONTENT_TYPES.items())
 
     accepted_media_types_wildcard = {}
-    for media_type, _format in accepted_media_types.iteritems():
+    for media_type, _format in accepted_media_types.items():
         _type = media_type.split('/')[0]
         if _type not in accepted_media_types_wildcard:
             accepted_media_types_wildcard[_type] = _format
@@ -349,7 +350,7 @@ def parse_accept_header(accept_header=''):
             qscore = m.groups(0)[2] or 1.0
             acceptable[key] = float(qscore)
 
-    for media_type in sorted(acceptable.iteritems(),
+    for media_type in sorted(iter(acceptable.items()),
                              key=operator.itemgetter(1),
                              reverse=True):
 

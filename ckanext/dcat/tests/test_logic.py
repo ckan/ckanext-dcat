@@ -1,3 +1,5 @@
+from builtins import range
+from builtins import object
 import nose
 import mock
 
@@ -32,7 +34,7 @@ class TestPagination(object):
         # No page defined (defaults to 1)
         query = {
             'count': 12,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': None
@@ -52,7 +54,7 @@ class TestPagination(object):
         # Page 1
         query = {
             'count': 12,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': 1
@@ -72,7 +74,7 @@ class TestPagination(object):
         # Page 2
         query = {
             'count': 12,
-            'results': [x for x in xrange(2)],
+            'results': [x for x in range(2)],
         }
         data_dict = {
             'page': 2
@@ -92,7 +94,7 @@ class TestPagination(object):
         # Page 3
         query = {
             'count': 12,
-            'results': [x for x in xrange(2)],
+            'results': [x for x in range(2)],
         }
         data_dict = {
             'page': 3
@@ -121,7 +123,7 @@ class TestPagination(object):
         # No page defined (defaults to 1)
         query = {
             'count': 12,
-            'results': [x for x in xrange(12)],
+            'results': [x for x in range(12)],
         }
         data_dict = {
             'page': None
@@ -150,7 +152,7 @@ class TestPagination(object):
         # No page defined (defaults to 1)
         query = {
             'count': 10,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': None
@@ -179,7 +181,7 @@ class TestPagination(object):
         # No page defined (defaults to 1)
         query = {
             'count': 12,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': None
@@ -208,7 +210,7 @@ class TestPagination(object):
         # No page defined (defaults to 1)
         query = {
             'count': 12,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': None
@@ -241,7 +243,7 @@ class TestPagination(object):
     def test_pagination_wrong_page(self):
         query = {
             'count': 10,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': 'a'
@@ -253,7 +255,7 @@ class TestPagination(object):
     def test_pagination_wrong_page_number(self):
         query = {
             'count': 10,
-            'results': [x for x in xrange(10)],
+            'results': [x for x in range(10)],
         }
         data_dict = {
             'page': '-1'

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import object
 import httpretty
 from mock import call, patch, Mock
 
@@ -213,7 +214,7 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
             exp_num_datasets=0)
 
 
-class TestCopyAcrossResourceIds:
+class TestCopyAcrossResourceIds(object):
     def test_copied_because_same_uri(self):
         harvested_dataset = {'resources': [
             {'uri': 'http://abc', 'url': 'http://abc'}]}
@@ -274,24 +275,24 @@ class TestCopyAcrossResourceIds:
         eq_(harvested_dataset['resources'][0].get('id'), None)
 
 
-class TestImportStage:
+class TestImportStage(object):
 
     @classmethod
     def setup_class(cls):
         h.reset_db()
 
-    class MockHarvestObject:
+    class MockHarvestObject(object):
         guid = 'test_guid'
         content = TestDCATJSONHarvestFunctional.json_content_invalid_tags
 
-        class MockStatus:
+        class MockStatus(object):
             key = 'status'
             value = 'new'
 
         extras = [MockStatus()]
         package = None
 
-        class MockSource:
+        class MockSource(object):
             id = 'test_id'
 
         source = MockSource()
@@ -299,7 +300,7 @@ class TestImportStage:
         def add(self):
             pass
 
-    class MockSourceDataset:
+    class MockSourceDataset(object):
         def __init__(self, owner_org=None):
             self.owner_org = owner_org['id']
 

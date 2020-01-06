@@ -1,3 +1,5 @@
+from builtins import str
+from past.builtins import basestring
 import json
 import uuid
 import logging
@@ -107,7 +109,7 @@ class DCATRDFHarvester(DCATHarvester):
         for guid, package_id in query:
             guid_to_package_id[guid] = package_id
 
-        guids_in_db = guid_to_package_id.keys()
+        guids_in_db = list(guid_to_package_id.keys())
 
         # Get objects/datasets to delete (ie in the DB but not in the source)
         guids_to_delete = set(guids_in_db) - set(guids_in_source)
@@ -356,8 +358,8 @@ class DCATRDFHarvester(DCATHarvester):
                 context['schema'] = package_schema
 
                 # We need to explicitly provide a package ID
-                dataset['id'] = unicode(uuid.uuid4())
-                package_schema['id'] = [unicode]
+                dataset['id'] = str(uuid.uuid4())
+                package_schema['id'] = [str]
 
                 harvester_tmp_dict = {}
 
