@@ -410,7 +410,7 @@ def dcat_json_page():
      try:
          datasets = toolkit.get_action('dcat_datasets_list')({},
                                                              data_dict)
-     except toolkit.ValidationError, e:
+     except toolkit.ValidationError as e:
          return toolkit.abort(409, str(e))
 
      return datasets

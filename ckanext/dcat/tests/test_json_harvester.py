@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import httpretty
 from mock import call, patch, Mock
 
@@ -9,7 +10,7 @@ import ckantoolkit.tests.helpers as h
 import ckan.tests.factories as factories
 
 from ckanext.dcat.harvesters._json import copy_across_resource_ids, DCATJSONHarvester
-from test_harvester import FunctionalHarvestTest
+from .test_harvester import FunctionalHarvestTest
 
 eq_ = nose.tools.eq_
 

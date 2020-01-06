@@ -97,7 +97,7 @@ class DCATHarvester(HarvesterBase):
 
             return content, content_type
 
-        except requests.exceptions.HTTPError, error:
+        except requests.exceptions.HTTPError as error:
             if page > 1 and error.response.status_code == 404:
                 # We want to catch these ones later on
                 raise
@@ -106,12 +106,12 @@ class DCATHarvester(HarvesterBase):
                 % (url, error.response.status_code, error.response.reason)
             self._save_gather_error(msg, harvest_job)
             return None, None
-        except requests.exceptions.ConnectionError, error:
+        except requests.exceptions.ConnectionError as error:
             msg = '''Could not get content from %s because a
                                 connection error occurred. %s''' % (url, error)
             self._save_gather_error(msg, harvest_job)
             return None, None
-        except requests.exceptions.Timeout, error:
+        except requests.exceptions.Timeout as error:
             msg = 'Could not get content from %s because the connection timed'\
                 ' out.' % url
             self._save_gather_error(msg, harvest_job)
