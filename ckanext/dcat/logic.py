@@ -1,7 +1,7 @@
 from __future__ import division
 import math
 
-from pylons import config
+from ckantoolkit import config
 from dateutil.parser import parse as dateutil_parse
 
 from ckan.plugins import toolkit

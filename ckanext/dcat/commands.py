@@ -1,8 +1,9 @@
-import json
-import logging
+# -*- coding: utf-8 -*-
 
-from pylons import config
+import logging
 from ckan import plugins as p
+
+import ckanext.dcat.utils as utils
 
 
 class GenerateStaticDCATCommand(p.toolkit.CkanCommand):
@@ -42,25 +43,5 @@ class GenerateStaticDCATCommand(p.toolkit.CkanCommand):
         Keep reading and converting datasets until we get an empty list back
         from dcat_datasets_list
         """
-        data_dict = {'page': 0}
-
         with open(output, 'w') as f:
-            f.write(u"[")
-
-            while True:
-                try:
-                    data_dict['page'] = data_dict['page'] + 1
-                    datasets = \
-                        p.toolkit.get_action('dcat_datasets_list')({},
-                                                                   data_dict)
-                except p.toolkit.ValidationError, e:
-                    self.log.exception(e)
-                    break
-
-                if not datasets:
-                    break
-
-                for dataset in datasets:
-                    f.write(json.dumps(dataset))
-
-            f.write(u"]")
+            utils.generate_static_json(f)
