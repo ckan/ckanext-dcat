@@ -3,7 +3,7 @@
 from builtins import object
 import os
 
-from pylons import config
+from ckantoolkit import config
 
 from ckan import plugins as p
 try:
