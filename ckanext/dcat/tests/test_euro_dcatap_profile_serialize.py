@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import json
 
 import nose
@@ -129,7 +131,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        eq_(unicode(dataset_ref), utils.dataset_uri(dataset))
+        eq_(str(dataset_ref), utils.dataset_uri(dataset))
 
         # Basic fields
         assert self._triple(g, dataset_ref, RDF.type, DCAT.Dataset)
@@ -266,7 +268,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
-        eq_(unicode(contact_details), extras['contact_uri'])
+        eq_(str(contact_details), extras['contact_uri'])
         assert self._triple(g, contact_details, VCARD.fn, extras['contact_name'])
         assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + extras['contact_email']))
 
@@ -358,7 +360,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
         assert publisher
-        eq_(unicode(publisher), extras['publisher_uri'])
+        eq_(str(publisher), extras['publisher_uri'])
 
         assert self._triple(g, publisher, RDF.type, FOAF.Organization)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
@@ -453,7 +455,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
-        eq_(unicode(spatial), extras['spatial_uri'])
+        eq_(str(spatial), extras['spatial_uri'])
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
@@ -597,7 +599,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         # URI
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        eq_(unicode(distribution), utils.resource_uri(resource))
+        eq_(str(distribution), utils.resource_uri(resource))
 
         # Basic fields
         assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
@@ -1037,7 +1039,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog()
 
-        eq_(unicode(catalog), utils.catalog_uri())
+        eq_(str(catalog), utils.catalog_uri())
 
         # Basic fields
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
@@ -1059,7 +1061,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog(catalog_dict)
 
-        eq_(unicode(catalog), utils.catalog_uri())
+        eq_(str(catalog), utils.catalog_uri())
 
         # Basic fields
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
@@ -1082,7 +1084,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog(catalog_dict)
 
-        eq_(unicode(catalog), utils.catalog_uri())
+        eq_(str(catalog), utils.catalog_uri())
 
         # language field
         assert self._triple(g, catalog, DCT.language, URIRef(catalog_dict['language']))
@@ -1096,7 +1098,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog()
 
-        eq_(unicode(catalog), utils.catalog_uri())
+        eq_(str(catalog), utils.catalog_uri())
 
         assert self._triple(g, catalog, DCT.modified, dataset['metadata_modified'], XSD.dateTime)
 
@@ -1152,4 +1154,4 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         dataset_ref = dataset_ref[0]
         dataset_title = list(g.objects(dataset_ref, DCT.title))
         assert_true(len(dataset_title) == 1)
-        assert_true(unicode(dataset_title[0]) == dataset['title'])
+        assert_true(str(dataset_title[0]) == dataset['title'])

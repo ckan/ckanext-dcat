@@ -1,12 +1,14 @@
 from __future__ import print_function
 
+from builtins import str
+from builtins import object
 import sys
 import argparse
 import xml
 import json
 from pkg_resources import iter_entry_points
 
-from pylons import config
+from ckantoolkit import config
 
 import rdflib
 import rdflib.parser
@@ -17,7 +19,7 @@ import ckan.plugins as p
 
 from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.profiles import DCAT, DCT, FOAF
-
+from ckanext.dcat.exceptions import RDFProfileException, RDFParserException
 
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -28,13 +30,6 @@ COMPAT_MODE_CONFIG_OPTION = 'ckanext.dcat.compatibility_mode'
 
 DEFAULT_RDF_PROFILES = ['euro_dcat_ap']
 
-
-class RDFParserException(Exception):
-    pass
-
-
-class RDFProfileException(Exception):
-    pass
 
 
 class RDFProcessor(object):
@@ -123,7 +118,7 @@ class RDFParser(RDFProcessor):
         '''
         for pagination_node in self.g.subjects(RDF.type, HYDRA.PagedCollection):
             for o in self.g.objects(pagination_node, HYDRA.nextPage):
-                return unicode(o)
+                return str(o)
         return None
 
 
@@ -154,7 +149,7 @@ class RDFParser(RDFProcessor):
         # exceptions are not cached, add them here.
         # PluginException indicates that an unknown format was passed.
         except (SyntaxError, xml.sax.SAXParseException,
-                rdflib.plugin.PluginException, TypeError), e:
+                rdflib.plugin.PluginException, TypeError) as e:
 
             raise RDFParserException(e)
 

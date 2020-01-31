@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from builtins import str
+from builtins import range
+from builtins import object
 from collections import defaultdict
 
 import nose
@@ -570,13 +573,13 @@ class FunctionalHarvestTest(object):
         try:
             h.call_action('harvest_jobs_run',
                           {}, source_id=harvest_source_id)
-        except Exception, e:
+        except Exception as e:
             if (str(e) == 'There are no new harvesting jobs'):
                 pass
 
     def _gather_queue(self, num_jobs=1):
 
-        for job in xrange(num_jobs):
+        for job in range(num_jobs):
             # Pop one item off the queue (the job id) and run the callback
             reply = self.gather_consumer.basic_get(
                 queue='ckan.harvest.gather.test')
@@ -590,7 +593,7 @@ class FunctionalHarvestTest(object):
 
     def _fetch_queue(self, num_objects=1):
 
-        for _object in xrange(num_objects):
+        for _object in range(num_objects):
             # Pop item from the fetch queues (object ids) and run the callback,
             # one for each object created
             reply = self.fetch_consumer.basic_get(

@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 import nose
 
 from rdflib import Graph, URIRef, Literal
@@ -103,7 +105,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, unicode)
+        assert isinstance(value, str)
         eq_(value, 'Test Dataset 1')
 
     def test_object_value_not_found(self):
@@ -127,7 +129,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, unicode)
+        assert isinstance(value, str)
         eq_(value, 'Test Datensatz 1')
 
     @helpers.change_config('ckan.locale_default', 'fr')
@@ -140,7 +142,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, unicode)
+        assert isinstance(value, str)
         # FR is not in graph, so either node may be used
         assert value.startswith('Test D')
         assert value.endswith(' 1')
@@ -156,7 +158,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, unicode)
+        assert isinstance(value, str)
         # without config parameter, EN is used as default
         eq_(value, 'Test Dataset 1 (EN)')
 
@@ -166,7 +168,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, unicode)
+        assert isinstance(value, str)
         eq_(value, 'Test Dataset 1')
 
     def test_object_int(self):
@@ -234,7 +236,7 @@ class TestBaseRDFProfile(object):
                                      DCAT.keyword)
 
         assert isinstance(value, list)
-        assert isinstance(value[0], unicode)
+        assert isinstance(value[0], str)
         eq_(len(value), 2)
         eq_(sorted(value), ['moon', 'space'])
 
