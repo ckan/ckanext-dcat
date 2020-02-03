@@ -10,7 +10,7 @@ class TestConverters(object):
 
     def _get_file_as_dict(self, file_name):
         path = os.path.join(os.path.dirname(__file__),
-                            '..', '..', '..', 'examples',
+                            '..', '..', '..', '..', 'examples',
                             file_name)
         with open(path, 'r') as f:
             return json.load(f)

@@ -1029,30 +1029,30 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         super(TestDCATHarvestFunctionalExtensionPoints, self).setup_class()
 
-        p.load('test_rdf_harvester')
+        p.load('test_nose_rdf_harvester')
 
     @classmethod
     def teardown_class(self):
 
-        p.unload('test_rdf_harvester')
+        p.unload('test_nose_rdf_harvester')
 
     def setup(self):
 
         super(TestDCATHarvestFunctionalExtensionPoints, self).setup()
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
         plugin.calls = defaultdict(int)
 
     def teardown(self):
 
         super(TestDCATHarvestFunctionalExtensionPoints, self).teardown()
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
         plugin.calls = defaultdict(int)
 
     def test_harvest_before_download_extension_point_gets_called(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
@@ -1063,7 +1063,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_before_download_null_url_stops_gather_stage(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         source_url = 'http://return.none'
 
@@ -1103,7 +1103,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_before_download_errors_get_stored(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         source_url = 'http://return.errors'
 
@@ -1142,7 +1142,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_update_session_extension_point_gets_called(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
@@ -1153,7 +1153,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_update_session_add_header(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
@@ -1171,7 +1171,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_after_download_extension_point_gets_called(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         # Mock the GET request to get the file
         httpretty.register_uri(httpretty.GET, self.rdf_mock_url)
@@ -1190,7 +1190,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_after_download_empty_content_stops_gather_stage(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         source_url = 'http://return.empty.content'
 
@@ -1231,7 +1231,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_after_download_errors_get_stored(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         source_url = 'http://return.content.errors'
 
@@ -1271,7 +1271,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     def test_harvest_import_extensions_point_gets_called(self):
 
-        plugin = p.get_plugin('test_rdf_harvester')
+        plugin = p.get_plugin('test_nose_rdf_harvester')
 
         url = self.rdf_mock_url
         content =  self.rdf_content
@@ -1325,26 +1325,26 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
     @classmethod
     def setup_class(self):
         super(TestDCATHarvestFunctionalSetNull, self).setup_class()
-        p.load('test_rdf_null_harvester')
+        p.load('test_nose_rdf_null_harvester')
 
     @classmethod
     def teardown_class(self):
-        p.unload('test_rdf_null_harvester')
+        p.unload('test_nose_rdf_null_harvester')
 
     def setup(self):
         super(TestDCATHarvestFunctionalSetNull, self).setup()
 
-        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin = p.get_plugin('test_nose_rdf_null_harvester')
         plugin.calls = defaultdict(int)
 
     def teardown(self):
         super(TestDCATHarvestFunctionalSetNull, self).teardown()
 
-        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin = p.get_plugin('test_nose_rdf_null_harvester')
         plugin.calls = defaultdict(int)
 
     def test_harvest_with_before_create_null(self):
-        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin = p.get_plugin('test_nose_rdf_null_harvester')
 
         url = self.rdf_mock_url
         content =  self.rdf_content
@@ -1394,26 +1394,26 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
     @classmethod
     def setup_class(self):
         super(TestDCATHarvestFunctionalRaiseExcpetion, self).setup_class()
-        p.load('test_rdf_exception_harvester')
+        p.load('test_nose_rdf_exception_harvester')
 
     @classmethod
     def teardown_class(self):
-        p.unload('test_rdf_exception_harvester')
+        p.unload('test_nose_rdf_exception_harvester')
 
     def setup(self):
         super(TestDCATHarvestFunctionalRaiseExcpetion, self).setup()
 
-        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin = p.get_plugin('test_nose_rdf_exception_harvester')
         plugin.calls = defaultdict(int)
 
     def teardown(self):
         super(TestDCATHarvestFunctionalRaiseExcpetion, self).teardown()
 
-        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin = p.get_plugin('test_nose_rdf_exception_harvester')
         plugin.calls = defaultdict(int)
 
     def test_harvest_with_before_create_raising_exception(self):
-        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin = p.get_plugin('test_nose_rdf_exception_harvester')
 
         url = self.rdf_mock_url
         content =  self.rdf_content
