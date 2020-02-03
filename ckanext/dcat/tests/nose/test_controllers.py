@@ -17,7 +17,7 @@ from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
 
-from ckanext.dcat.tests import DCATFunctionalTestBase
+from ckanext.dcat.tests.nose import DCATFunctionalTestBase
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true

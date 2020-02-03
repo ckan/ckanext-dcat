@@ -3,20 +3,24 @@ from builtins import object
 import os
 import json
 
-import pytest
+import nose
+
+from ckantoolkit import config
 
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF
 
 from ckan.plugins import toolkit
 
-from ckantoolkit import config
 from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
+
+eq_ = nose.tools.eq_
+assert_true = nose.tools.assert_true
 
 
 class BaseParseTest(object):
@@ -84,27 +88,23 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert len(datasets) == 1
+        eq_(len(datasets), 1)
 
         dataset = datasets[0]
 
         # Basic fields
 
-        assert dataset['title'] == u'Zimbabwe Regional Geochemical Survey.'
-        assert dataset['notes'] == u'During the period 1982-86 a team of geologists from the British Geological Survey ...'
-        assert dataset['url'] == 'http://dataset.info.org'
-        assert dataset['version'] == '2.3'
-        assert dataset['license_id'] == 'cc-nc'
+        eq_(dataset['title'], u'Zimbabwe Regional Geochemical Survey.')
+        eq_(dataset['notes'], u'During the period 1982-86 a team of geologists from the British Geological Survey ...')
+        eq_(dataset['url'], 'http://dataset.info.org')
+        eq_(dataset['version'], '2.3')
+        eq_(dataset['license_id'], 'cc-nc')
 
         # Tags
 
-        assert (sorted(dataset['tags'], key=lambda k: k['name']) ==
-            [
-                {'name': u'exploration'},
-                {'name': u'geochemistry'},
-                {'name': u'geology'}
-            ])
-
+        eq_(sorted(dataset['tags'], key=lambda k: k['name']), [{'name': u'exploration'},
+                                                               {'name': u'geochemistry'},
+                                                               {'name': u'geology'}])
         # Extras
 
         def _get_extra_value(key):
@@ -116,69 +116,64 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             return json.loads(value) if value else []
 
         #  Simple values
-        assert _get_extra_value('issued') == u'2012-05-10'
-        assert _get_extra_value('modified') == u'2012-05-10T21:04:00'
-        assert _get_extra_value('identifier') == u'9df8df51-63db-37a8-e044-0003ba9b0d98'
-        assert _get_extra_value('version_notes') == u'New schema added'
-        assert _get_extra_value('temporal_start') == '1905-03-01'
-        assert _get_extra_value('temporal_end') == '2013-01-05'
-        assert _get_extra_value('frequency') == 'http://purl.org/cld/freq/daily'
-        assert _get_extra_value('spatial_uri') == 'http://publications.europa.eu/mdr/authority/country/ZWE'
-        assert _get_extra_value('publisher_uri') == 'http://orgs.vocab.org/some-org'
-        assert _get_extra_value('publisher_name') == 'Publishing Organization for dataset 1'
-        assert _get_extra_value('publisher_email') == 'contact@some.org'
-        assert _get_extra_value('publisher_url') == 'http://some.org'
-        assert _get_extra_value('publisher_type') == 'http://purl.org/adms/publishertype/NonProfitOrganisation'
-        assert _get_extra_value('contact_name') == 'Point of Contact'
+        eq_(_get_extra_value('issued'), u'2012-05-10')
+        eq_(_get_extra_value('modified'), u'2012-05-10T21:04:00')
+        eq_(_get_extra_value('identifier'), u'9df8df51-63db-37a8-e044-0003ba9b0d98')
+        eq_(_get_extra_value('version_notes'), u'New schema added')
+        eq_(_get_extra_value('temporal_start'), '1905-03-01')
+        eq_(_get_extra_value('temporal_end'), '2013-01-05')
+        eq_(_get_extra_value('frequency'), 'http://purl.org/cld/freq/daily')
+        eq_(_get_extra_value('spatial_uri'), 'http://publications.europa.eu/mdr/authority/country/ZWE')
+        eq_(_get_extra_value('publisher_uri'), 'http://orgs.vocab.org/some-org')
+        eq_(_get_extra_value('publisher_name'), 'Publishing Organization for dataset 1')
+        eq_(_get_extra_value('publisher_email'), 'contact@some.org')
+        eq_(_get_extra_value('publisher_url'), 'http://some.org')
+        eq_(_get_extra_value('publisher_type'), 'http://purl.org/adms/publishertype/NonProfitOrganisation')
+        eq_(_get_extra_value('contact_name'), 'Point of Contact')
         # mailto gets removed for storage and is added again on output
-        assert _get_extra_value('contact_email') == 'contact@some.org'
-        assert _get_extra_value('access_rights') == 'public'
-        assert _get_extra_value('provenance') == 'Some statement about provenance'
-        assert _get_extra_value('dcat_type') == 'test-type'
+        eq_(_get_extra_value('contact_email'), 'contact@some.org')
+        eq_(_get_extra_value('access_rights'), 'public')
+        eq_(_get_extra_value('provenance'), 'Some statement about provenance')
+        eq_(_get_extra_value('dcat_type'), 'test-type')
 
         #  Lists
-        assert sorted(_get_extra_value_as_list('language')), [u'ca', u'en' == u'es']
-        assert (sorted(_get_extra_value_as_list('theme')) ==
-                [u'Earth Sciences',
-                 u'http://eurovoc.europa.eu/100142',
-                 u'http://eurovoc.europa.eu/209065'])
-        assert sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1' == u'Standard 2']
+        eq_(sorted(_get_extra_value_as_list('language')), [u'ca', u'en', u'es'])
+        eq_(sorted(_get_extra_value_as_list('theme')), [u'Earth Sciences',
+                                                        u'http://eurovoc.europa.eu/100142',
+                                                        u'http://eurovoc.europa.eu/209065'])
+        eq_(sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1', u'Standard 2'])
 
-        assert sorted(_get_extra_value_as_list('alternate_identifier')), [u'alternate-identifier-1' == u'alternate-identifier-2']
-        assert (sorted(_get_extra_value_as_list('documentation')) ==
-                [u'http://dataset.info.org/doc1',
-                 u'http://dataset.info.org/doc2'])
-        assert (sorted(_get_extra_value_as_list('related_resource')) ==
-                [u'http://dataset.info.org/related1',
-                 u'http://dataset.info.org/related2'])
-        assert (sorted(_get_extra_value_as_list('has_version')) ==
-                [u'https://data.some.org/catalog/datasets/derived-dataset-1',
-                 u'https://data.some.org/catalog/datasets/derived-dataset-2'])
-        assert sorted(_get_extra_value_as_list('is_version_of')) == [u'https://data.some.org/catalog/datasets/original-dataset']
-        assert (sorted(_get_extra_value_as_list('source')) ==
-                [u'https://data.some.org/catalog/datasets/source-dataset-1',
-                 u'https://data.some.org/catalog/datasets/source-dataset-2'])
-        assert sorted(_get_extra_value_as_list('sample')) == [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample']
+        eq_(sorted(_get_extra_value_as_list('alternate_identifier')), [u'alternate-identifier-1', u'alternate-identifier-2'])
+        eq_(sorted(_get_extra_value_as_list('documentation')), [u'http://dataset.info.org/doc1',
+                                                                u'http://dataset.info.org/doc2'])
+        eq_(sorted(_get_extra_value_as_list('related_resource')), [u'http://dataset.info.org/related1',
+                                                                   u'http://dataset.info.org/related2'])
+        eq_(sorted(_get_extra_value_as_list('has_version')), [u'https://data.some.org/catalog/datasets/derived-dataset-1',
+                                                              u'https://data.some.org/catalog/datasets/derived-dataset-2'])
+        eq_(sorted(_get_extra_value_as_list('is_version_of')), [u'https://data.some.org/catalog/datasets/original-dataset'])
+        eq_(sorted(_get_extra_value_as_list('source')), [u'https://data.some.org/catalog/datasets/source-dataset-1',
+                                                         u'https://data.some.org/catalog/datasets/source-dataset-2'])
+        eq_(sorted(_get_extra_value_as_list('sample')), [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
 
         # Dataset URI
-        assert _get_extra_value('uri') == u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98'
+        eq_(_get_extra_value('uri'), u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98')
 
         # Resources
-        assert len(dataset['resources']) == 1
+        eq_(len(dataset['resources']), 1)
 
         resource = dataset['resources'][0]
 
         #  Simple values
-        assert resource['name'] == u'Some website'
-        assert resource['description'] == u'A longer description'
-        assert resource['format'] == u'HTML'
-        assert resource['mimetype'] == u'text/html'
-        assert resource['issued'] == u'2012-05-11'
-        assert resource['modified'] == u'2012-05-01T00:04:06'
-        assert resource['status'] == u'http://purl.org/adms/status/Completed'
+        eq_(resource['name'], u'Some website')
+        eq_(resource['description'], u'A longer description')
+        eq_(resource['format'], u'HTML')
+        eq_(resource['mimetype'], u'text/html')
+        eq_(resource['issued'], u'2012-05-11')
+        eq_(resource['modified'], u'2012-05-01T00:04:06')
+        eq_(resource['status'], u'http://purl.org/adms/status/Completed')
 
-        assert resource['hash'] == u'4304cf2e751e6053c90b1804c89c0ebb758f395a'
-        assert resource['hash_algorithm'] == u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1'
+        eq_(resource['hash'], u'4304cf2e751e6053c90b1804c89c0ebb758f395a')
+        eq_(resource['hash_algorithm'], u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1')
 
         # Lists
         for item in [
@@ -186,19 +181,19 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             ('language', [u'ca', u'en', u'es']),
             ('conforms_to', [u'Standard 1', u'Standard 2']),
         ]:
-            assert sorted(json.loads(resource[item[0]])) == item[1]
+            eq_(sorted(json.loads(resource[item[0]])), item[1])
 
         # These two are likely to need clarification
-        assert resource['license'] == u'http://creativecommons.org/licenses/by-nc/2.0/'
-        assert resource['rights'] == u'Some statement about rights'
+        eq_(resource['license'], u'http://creativecommons.org/licenses/by-nc/2.0/')
+        eq_(resource['rights'], u'Some statement about rights')
 
-        assert resource['url'] == u'http://www.bgs.ac.uk/gbase/geochemcd/home.html'
+        eq_(resource['url'], u'http://www.bgs.ac.uk/gbase/geochemcd/home.html')
         assert 'download_url' not in resource
 
-        assert resource['size'] == 12323
+        eq_(resource['size'], 12323)
 
         # Distribution URI
-        assert resource['uri'] == u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1'
+        eq_(resource['uri'], u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1')
 
     # owl:versionInfo is tested on the test above
     def test_dataset_version_adms(self):
@@ -215,7 +210,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
 
-        assert dataset['version'] == u'2.3a'
+        eq_(dataset['version'], u'2.3a')
 
     def test_dataset_license_from_distribution_by_uri(self):
         # license_id retrieved from the URI of dcat:license object
@@ -235,7 +230,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
-        assert dataset['license_id'] == 'cc-by'
+        eq_(dataset['license_id'], 'cc-by')
 
     def test_dataset_license_from_distribution_by_title(self):
         # license_id retrieved from dct:title of dcat:license object
@@ -256,7 +251,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         p.g = g
 
         dataset = [d for d in p.datasets()][0]
-        assert dataset['license_id'] == 'cc-by'
+        eq_(dataset['license_id'], 'cc-by')
 
     def test_distribution_access_url(self):
         g = Graph()
@@ -277,8 +272,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['url'] == u'http://access.url.org'
-        assert resource['access_url'] == u'http://access.url.org'
+        eq_(resource['url'], u'http://access.url.org')
+        eq_(resource['access_url'], u'http://access.url.org')
         assert 'download_url' not in resource
 
     def test_distribution_download_url(self):
@@ -300,8 +295,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['url'] == u'http://download.url.org'
-        assert resource['download_url'] == u'http://download.url.org'
+        eq_(resource['url'], u'http://download.url.org')
+        eq_(resource['download_url'], u'http://download.url.org')
         assert 'access_url' not in resource
 
     def test_distribution_both_access_and_download_url(self):
@@ -324,9 +319,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['url'] == u'http://download.url.org'
-        assert resource['download_url'] == u'http://download.url.org'
-        assert resource['access_url'] == u'http://access.url.org'
+        eq_(resource['url'], u'http://download.url.org')
+        eq_(resource['download_url'], u'http://download.url.org')
+        eq_(resource['access_url'], u'http://access.url.org')
 
     def test_distribution_format_imt_and_format(self):
         g = Graph()
@@ -348,8 +343,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'CSV'
-        assert resource['mimetype'] == u'text/csv'
+        eq_(resource['format'], u'CSV')
+        eq_(resource['mimetype'], u'text/csv')
 
     def test_distribution_format_format_only(self):
         g = Graph()
@@ -370,7 +365,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'CSV'
+        eq_(resource['format'], u'CSV')
 
     def test_distribution_format_imt_only(self):
         g = Graph()
@@ -391,12 +386,12 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
         if toolkit.check_ckan_version(min_version='2.3'):
-            assert resource['format'] == u'CSV'
-            assert resource['mimetype'] == u'text/csv'
+            eq_(resource['format'], u'CSV')
+            eq_(resource['mimetype'], u'text/csv')
         else:
-            assert resource['format'] == u'text/csv'
+            eq_(resource['format'], u'text/csv')
 
-    @pytest.mark.ckan_config('ckanext.dcat.normalize_ckan_format', False)
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
     def test_distribution_format_imt_only_normalize_false(self):
         g = Graph()
 
@@ -416,10 +411,10 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'text/csv'
-        assert resource['mimetype'] == u'text/csv'
+        eq_(resource['format'], u'text/csv')
+        eq_(resource['mimetype'], u'text/csv')
 
-    @pytest.mark.ckan_config('ckanext.dcat.normalize_ckan_format', False)
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
     def test_distribution_format_format_only_normalize_false(self):
         g = Graph()
 
@@ -439,7 +434,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'CSV'
+        eq_(resource['format'], u'CSV')
         assert 'mimetype' not in resource
 
     def test_distribution_format_unknown_imt(self):
@@ -461,8 +456,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'text/unknown-imt'
-        assert resource['mimetype'] == u'text/unknown-imt'
+        eq_(resource['format'], u'text/unknown-imt')
+        eq_(resource['mimetype'], u'text/unknown-imt')
 
     def test_distribution_format_imt_normalized(self):
         g = Graph()
@@ -483,8 +478,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'text/unknown-imt'
-        assert resource['mimetype'] == u'text/unknown-imt'
+        eq_(resource['format'], u'text/unknown-imt')
+        eq_(resource['mimetype'], u'text/unknown-imt')
 
     def test_distribution_format_format_normalized(self):
         g = Graph()
@@ -507,10 +502,10 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         resource = datasets[0]['resources'][0]
 
         if toolkit.check_ckan_version(min_version='2.3'):
-            assert resource['format'] == u'CSV'
-            assert resource['mimetype'] == u'text/csv'
+            eq_(resource['format'], u'CSV')
+            eq_(resource['mimetype'], u'text/csv')
         else:
-            assert resource['format'] == u'Comma Separated Values'
+            eq_(resource['format'], u'Comma Separated Values')
 
     def test_distribution_format_IMT_field(self):
         g = Graph()
@@ -538,16 +533,16 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'Turtle'
-        assert resource['mimetype'] == u'text/turtle'
+        eq_(resource['format'], u'Turtle')
+        eq_(resource['mimetype'], u'text/turtle')
 
     def test_distribution_dct_format_iana_uri(self):
         resources = self._build_and_parse_format_mediatype_graph(
             format_item=URIRef("https://www.iana.org/assignments/media-types/application/json")
         )
         # IANA mediatype URI should be added to mimetype field as well
-        assert u'json' in resources[0].get('format').lower()
-        assert (u'https://www.iana.org/assignments/media-types/application/json' ==
+        assert_true(u'json' in resources[0].get('format').lower())
+        eq_(u'https://www.iana.org/assignments/media-types/application/json',
             resources[0].get('mimetype'))
 
     def test_distribution_mediatype_iana_uri_without_format(self):
@@ -555,26 +550,26 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             mediatype_item=URIRef("https://www.iana.org/assignments/media-types/application/json")
         )
         # IANA mediatype URI should be added to mimetype field and to format as well
-        assert (u'https://www.iana.org/assignments/media-types/application/json' ==
+        eq_(u'https://www.iana.org/assignments/media-types/application/json',
             resources[0].get('mimetype'))
-        assert (u'https://www.iana.org/assignments/media-types/application/json' ==
+        eq_(u'https://www.iana.org/assignments/media-types/application/json',
             resources[0].get('format'))
 
     def test_distribution_dct_format_other_uri(self):
         resources = self._build_and_parse_format_mediatype_graph(
             format_item=URIRef("https://example.com/my/format")
         )
-        assert (u'https://example.com/my/format' ==
+        eq_(u'https://example.com/my/format',
             resources[0].get('format'))
-        assert None == resources[0].get('mimetype')
+        eq_(None, resources[0].get('mimetype'))
 
     def test_distribution_dct_format_mediatype_text(self):
         resources = self._build_and_parse_format_mediatype_graph(
             format_item=Literal("application/json")
         )
         # IANA mediatype should be added to mimetype field as well
-        assert u'json' in resources[0].get('format').lower()
-        assert (u'application/json' ==
+        assert_true(u'json' in resources[0].get('format').lower())
+        eq_(u'application/json',
             resources[0].get('mimetype'))
 
     def test_distribution_format_and_dcat_mediatype(self):
@@ -584,8 +579,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             mediatype_item=Literal("test-mediatype")
         )
         # both should be stored
-        assert u'json' in resources[0].get('format').lower()
-        assert (u'test-mediatype' ==
+        assert_true(u'json' in resources[0].get('format').lower())
+        eq_(u'test-mediatype',
             resources[0].get('mimetype'))
 
     def test_catalog_xml_rdf(self):
@@ -598,14 +593,14 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert len(datasets) == 2
+        eq_(len(datasets), 2)
 
         dataset = (datasets[0] if datasets[0]['title'] == 'Example dataset 1'
                    else datasets[1])
 
-        assert dataset['title'] == 'Example dataset 1'
-        assert len(dataset['resources']) == 3
-        assert len(dataset['tags']) == 2
+        eq_(dataset['title'], 'Example dataset 1')
+        eq_(len(dataset['resources']), 3)
+        eq_(len(dataset['tags']), 2)
 
     def test_dataset_turtle_1(self):
 
@@ -617,17 +612,17 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert len(datasets) == 1
+        eq_(len(datasets), 1)
 
         dataset = datasets[0]
 
-        assert dataset['title'] == 'Abandoned Vehicles'
-        assert len(dataset['resources']) == 1
+        eq_(dataset['title'], 'Abandoned Vehicles')
+        eq_(len(dataset['resources']), 1)
 
         resource = dataset['resources'][0]
-        assert resource['name'] == u'CSV distribution of: Abandoned Vehicles'
-        assert resource['url'] == u'http://data.london.gov.uk/datafiles/environment/abandoned-vehicles-borough.csv'
-        assert resource['uri'] == u'http://data.london.gov.uk/dataset/Abandoned_Vehicles/csv'
+        eq_(resource['name'], u'CSV distribution of: Abandoned Vehicles')
+        eq_(resource['url'], u'http://data.london.gov.uk/datafiles/environment/abandoned-vehicles-borough.csv')
+        eq_(resource['uri'], u'http://data.london.gov.uk/dataset/Abandoned_Vehicles/csv')
 
     def test_dataset_json_ld_1(self):
 
@@ -639,25 +634,25 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert len(datasets) == 1
+        eq_(len(datasets), 1)
 
         dataset = datasets[0]
         extras = dict((e['key'], e['value']) for e in dataset['extras'])
 
-        assert dataset['title'] == 'U.S. Widget Manufacturing Statistics'
+        eq_(dataset['title'], 'U.S. Widget Manufacturing Statistics')
 
-        assert extras['contact_name'] == 'Jane Doe'
+        eq_(extras['contact_name'], 'Jane Doe')
         # mailto gets removed for storage and is added again on output
-        assert extras['contact_email'] == 'jane.doe@agency.gov'
-        assert extras['publisher_name'] == 'Widget Services'
-        assert extras['publisher_email'] == 'widget.services@agency.gov'
+        eq_(extras['contact_email'], 'jane.doe@agency.gov')
+        eq_(extras['publisher_name'], 'Widget Services')
+        eq_(extras['publisher_email'], 'widget.services@agency.gov')
 
-        assert len(dataset['resources']) == 4
+        eq_(len(dataset['resources']), 4)
 
         resource = [r for r in dataset['resources'] if r['name'] == 'widgets.csv'][0]
-        assert resource['name'] == u'widgets.csv'
-        assert resource['url'] == u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv'
-        assert resource['download_url'] == u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv'
+        eq_(resource['name'], u'widgets.csv')
+        eq_(resource['url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
+        eq_(resource['download_url'], u'https://data.agency.gov/datasets/widgets-statistics/widgets.csv')
 
     def test_dataset_json_ld_with_at_graph(self):
 
@@ -669,24 +664,24 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert len(datasets) == 1
+        eq_(len(datasets), 1)
 
         dataset = datasets[0]
         extras = dict((e['key'], e['value']) for e in dataset['extras'])
 
-        assert dataset['title'] == 'Title dataset'
+        eq_(dataset['title'], 'Title dataset')
 
-        assert extras['contact_name'] == 'Jane Doe'
+        eq_(extras['contact_name'], 'Jane Doe')
         # mailto gets removed for storage and is added again on output
-        assert extras['contact_email'] == 'jane.doe@agency.gov'
+        eq_(extras['contact_email'], 'jane.doe@agency.gov')
 
-        assert len(dataset['resources']) == 1
+        eq_(len(dataset['resources']), 1)
 
         resource = dataset['resources'][0]
-        assert resource['name'] == u'download.zip'
-        assert resource['url'] == u'http://example2.org/files/download.zip'
-        assert resource['access_url'] == u'https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47'
-        assert resource['download_url'] == u'http://example2.org/files/download.zip'
+        eq_(resource['name'], u'download.zip')
+        eq_(resource['url'], u'http://example2.org/files/download.zip')
+        eq_(resource['access_url'], u'https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47')
+        eq_(resource['download_url'], u'http://example2.org/files/download.zip')
 
     def test_dataset_compatibility_mode(self):
 
@@ -698,7 +693,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert len(datasets) == 1
+        eq_(len(datasets), 1)
 
         dataset = datasets[0]
 
@@ -706,13 +701,13 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             v = [extra['value'] for extra in dataset['extras'] if extra['key'] == key]
             return v[0] if v else None
 
-        assert _get_extra_value('dcat_issued') == u'2012-05-10'
-        assert _get_extra_value('dcat_modified') == u'2012-05-10T21:04:00'
-        assert _get_extra_value('dcat_publisher_name') == 'Publishing Organization for dataset 1'
-        assert _get_extra_value('dcat_publisher_email') == 'contact@some.org'
-        assert _get_extra_value('language') == 'ca,en,es'
-
-    @pytest.mark.ckan_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
+        eq_(_get_extra_value('dcat_issued'), u'2012-05-10')
+        eq_(_get_extra_value('dcat_modified'), u'2012-05-10T21:04:00')
+        eq_(_get_extra_value('dcat_publisher_name'), 'Publishing Organization for dataset 1')
+        eq_(_get_extra_value('dcat_publisher_email'), 'contact@some.org')
+        eq_(_get_extra_value('language'), 'ca,en,es')
+    
+    @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
     def test_parse_subcatalog(self):
         publisher = {'name': 'Publisher',
                      'email': 'email@test.com',
@@ -730,7 +725,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                 {'key': 'source_catalog_modified', 'value': '2000-01-01'},
                 {'key': 'source_catalog_publisher', 'value': json.dumps(publisher)}
             ]
-        }
+        }        
         catalog_dict = {
             'title': 'My Catalog',
             'description': 'An Open Data Catalog',
@@ -748,7 +743,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         # at least one subcatalog with hasPart
         subcatalogs = list(p.g.objects(None, DCT.hasPart))
-        assert subcatalogs
+        assert_true(subcatalogs)
 
         # at least one dataset in subcatalogs
         subdatasets = []
@@ -756,8 +751,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             datasets = p.g.objects(subcatalog, DCAT.dataset)
             for dataset in datasets:
                 subdatasets.append((dataset,subcatalog,))
-        assert subdatasets
-
+        assert_true(subdatasets)
+        
         datasets = dict([(d['title'], d) for d in p.datasets()])
 
         for subdataset, subcatalog in subdatasets:
@@ -769,9 +764,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                 exkey = ex['key']
                 if exkey == 'source_catalog_homepage':
                     has_subcat = True
-                    assert exval == str(subcatalog)
+                    eq_(exval, str(subcatalog))
             # check if we had subcatalog in extras
-            assert has_subcat
+            assert_true(has_subcat)
 
 
 class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
@@ -805,9 +800,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial_uri'] == 'http://geonames/Newark'
-        assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        eq_(extras['spatial_uri'], 'http://geonames/Newark')
+        eq_(extras['spatial_text'], 'Newark')
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
 
     def test_spatial_one_dct_spatial_instance(self):
         g = Graph()
@@ -832,9 +827,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial_uri'] == 'http://geonames/Newark'
-        assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        eq_(extras['spatial_uri'], 'http://geonames/Newark')
+        eq_(extras['spatial_text'], 'Newark')
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
 
     def test_spatial_one_dct_spatial_instance_no_uri(self):
         g = Graph()
@@ -859,9 +854,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert 'spatial_uri' not in extras
-        assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert_true('spatial_uri' not in extras)
+        eq_(extras['spatial_text'], 'Newark')
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
 
 
     def test_spatial_rdfs_label(self):
@@ -884,7 +879,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial_text'] == 'Newark'
+        eq_(extras['spatial_text'], 'Newark')
 
     def test_spatial_both_geojson_and_wkt(self):
         g = Graph()
@@ -911,7 +906,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
 
     def test_spatial_wkt_only(self):
         g = Graph()
@@ -935,7 +930,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
         # NOTE: geomet returns floats for coordinates on WKT -> GeoJSON
-        assert extras['spatial'], '{"type": "Point", "coordinates": [67.0 == 89.0]}'
+        eq_(extras['spatial'], '{"type": "Point", "coordinates": [67.0, 89.0]}')
 
     def test_spatial_wrong_geometries(self):
         g = Graph()
@@ -962,7 +957,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert 'spatial' not in extras
+        assert_true('spatial' not in extras)
 
     def test_spatial_literal_only(self):
         g = Graph()
@@ -980,9 +975,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial_text'] == 'Newark'
-        assert 'spatial_uri' not in extras
-        assert 'spatial' not in extras
+        eq_(extras['spatial_text'], 'Newark')
+        assert_true('spatial_uri' not in extras)
+        assert_true('spatial' not in extras)
 
     def test_spatial_uri_only(self):
         g = Graph()
@@ -1000,9 +995,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial_uri'] == 'http://geonames/Newark'
-        assert 'spatial_text' not in extras
-        assert 'spatial' not in extras
+        eq_(extras['spatial_uri'], 'http://geonames/Newark')
+        assert_true('spatial_text' not in extras)
+        assert_true('spatial' not in extras)
 
     def test_tags_with_commas(self):
         g = Graph()
@@ -1015,13 +1010,13 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         p.g = g
 
         datasets = [d for d in p.datasets()]
-
-        assert len(datasets[0]['tags']) == 3
+        
+        eq_(len(datasets[0]['tags']), 3)
 
     INVALID_TAG = "Som`E-in.valid tag!;"
     VALID_TAG = {'name': 'some-invalid-tag'}
 
-    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'true')
+    @helpers.change_config(DCAT_CLEAN_TAGS, 'true')
     def test_tags_with_commas_clean_tags_on(self):
         g = Graph()
 
@@ -1034,11 +1029,11 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         datasets = [d for d in p.datasets()]
 
-        assert self.VALID_TAG in datasets[0]['tags']
-        assert self.INVALID_TAG not in datasets[0]['tags']
+        assert_true(self.VALID_TAG in datasets[0]['tags'])
+        assert_true(self.INVALID_TAG not in datasets[0]['tags'])
 
 
-    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
+    @helpers.change_config(DCAT_CLEAN_TAGS, 'false')
     def test_tags_with_commas_clean_tags_off(self):
         g = Graph()
 
@@ -1050,7 +1045,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         p.g = g
 
         # when config flag is set to false, bad tags can happen
-
+        
         datasets = [d for d in p.datasets()]
-        assert self.VALID_TAG not in datasets[0]['tags']
-        assert {'name': self.INVALID_TAG} in datasets[0]['tags']
+        assert_true(self.VALID_TAG not in datasets[0]['tags'])
+        assert_true({'name': self.INVALID_TAG} in datasets[0]['tags'])

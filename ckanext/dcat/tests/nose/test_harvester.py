@@ -5,12 +5,14 @@ from builtins import range
 from builtins import object
 from collections import defaultdict
 
-import pytest
+import nose
 import httpretty
 from mock import patch
 
+from six.moves import xrange
+
 import ckan.plugins as p
-from ckantoolkit.tests import helpers
+import ckantoolkit.tests.helpers as h
 
 import ckanext.harvest.model as harvest_model
 from ckanext.harvest import queue
@@ -19,23 +21,8 @@ from ckanext.dcat.harvesters import DCATRDFHarvester, DCATJSONHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
-# TODO move to ckanext-harvest
-@pytest.fixture
-def harvest_setup():
-    harvest_model.setup()
 
-
-@pytest.fixture
-def clean_queues():
-    queue.purge_queues()
-
-
-@pytest.fixture
-def reset_calls_counter():
-    def wrapper(plugin_name):
-        plugin = p.get_plugin(plugin_name)
-        plugin.calls = defaultdict(int)
-    return wrapper
+eq_ = nose.tools.eq_
 
 
 # This horrible monkey patch is needed because httpretty does not play well
@@ -157,7 +144,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'http://dataset/uri'
+        eq_(guid, 'http://dataset/uri')
 
     def test_get_guid_identifier_root(self):
 
@@ -168,7 +155,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'http://dataset/uri'
+        eq_(guid, 'http://dataset/uri')
 
     def test_get_guid_uri(self):
 
@@ -182,7 +169,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'http://dataset/uri'
+        eq_(guid, 'http://dataset/uri')
 
     def test_get_guid_identifier(self):
 
@@ -195,7 +182,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'dataset_dcat_id'
+        eq_(guid, 'dataset_dcat_id')
 
     def test_get_guid_dcat_identifier(self):
 
@@ -208,7 +195,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'dataset_dcat_id'
+        eq_(guid, 'dataset_dcat_id')
 
     def test_get_guid_uri_none(self):
 
@@ -222,7 +209,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'dataset_dcat_id'
+        eq_(guid, 'dataset_dcat_id')
 
     def test_get_guid_dcat_identifier_none(self):
 
@@ -235,7 +222,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'test-dataset'
+        eq_(guid, 'test-dataset')
 
     def test_get_guid_source_url_name(self):
 
@@ -247,11 +234,11 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset, 'http://source_url')
 
-        assert guid == 'http://source_url/test-dataset'
+        eq_(guid, 'http://source_url/test-dataset')
 
         guid = DCATRDFHarvester()._get_guid(dataset, 'http://source_url/')
 
-        assert guid == 'http://source_url/test-dataset'
+        eq_(guid, 'http://source_url/test-dataset')
 
     def test_get_guid_name(self):
 
@@ -263,7 +250,7 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == 'test-dataset'
+        eq_(guid, 'test-dataset')
 
     def test_get_guid_none(self):
 
@@ -274,13 +261,15 @@ class TestDCATHarvestUnit(object):
 
         guid = DCATRDFHarvester()._get_guid(dataset)
 
-        assert guid == None
+        eq_(guid, None)
 
 
 class FunctionalHarvestTest(object):
 
     @classmethod
     def setup_class(cls):
+
+        h.reset_db()
 
         cls.gather_consumer = queue.get_gather_consumer()
         cls.fetch_consumer = queue.get_fetch_consumer()
@@ -548,6 +537,14 @@ class FunctionalHarvestTest(object):
           dc:title "Example dataset 1" .
           '''
 
+    def setup(self):
+
+        harvest_model.setup()
+
+        queue.purge_queues()
+
+    def teardown(cls):
+        h.reset_db()
 
     def _create_harvest_source(self, mock_url, **kwargs):
 
@@ -560,21 +557,21 @@ class FunctionalHarvestTest(object):
 
         source_dict.update(**kwargs)
 
-        harvest_source = helpers.call_action('harvest_source_create',
+        harvest_source = h.call_action('harvest_source_create',
                                        {}, **source_dict)
 
         return harvest_source
 
     def _create_harvest_job(self, harvest_source_id):
 
-        harvest_job = helpers.call_action('harvest_job_create',
+        harvest_job = h.call_action('harvest_job_create',
                                     {}, source_id=harvest_source_id)
 
         return harvest_job
 
     def _run_jobs(self, harvest_source_id=None):
         try:
-            helpers.call_action('harvest_jobs_run',
+            h.call_action('harvest_jobs_run',
                           {}, source_id=harvest_source_id)
         except Exception as e:
             if (str(e) == 'There are no new harvesting jobs'):
@@ -624,8 +621,6 @@ class FunctionalHarvestTest(object):
         self._fetch_queue(num_objects)
 
 
-@pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index', 'harvest_setup', 'clean_queues')
-@pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester')
 class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
     def test_harvest_create_rdf(self):
@@ -676,9 +671,9 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Check that two datasets were created
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
+        results = h.call_action('package_search', {}, fq=fq)
 
-        assert results['count'] == 2
+        eq_(results['count'], 2)
         for result in results['results']:
             assert result['title'] in ('Example dataset 1',
                                        'Example dataset 2')
@@ -711,10 +706,10 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Check that four datasets were created
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
+        results = h.call_action('package_search', {}, fq=fq)
 
-        assert results['count'] == 4
-        assert (sorted([d['title'] for d in results['results']]) ==
+        eq_(results['count'], 4)
+        eq_(sorted([d['title'] for d in results['results']]),
             ['Example dataset 1', 'Example dataset 2',
              'Example dataset 3', 'Example dataset 4'])
 
@@ -747,10 +742,10 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Check that two datasets were created
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
+        results = h.call_action('package_search', {}, fq=fq)
 
-        assert results['count'] == 2
-        assert (sorted([d['title'] for d in results['results']]) ==
+        eq_(results['count'], 2)
+        eq_(sorted([d['title'] for d in results['results']]),
             ['Example dataset 1', 'Example dataset 2'])
 
     def test_harvest_update_rdf(self):
@@ -806,9 +801,9 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Check that we still have two datasets
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
+        results = h.call_action('package_search', {}, fq=fq)
 
-        assert results['count'] == 2
+        eq_(results['count'], 2)
 
         # Check that the dataset was updated
         for result in results['results']:
@@ -820,18 +815,18 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         existing, new = self._test_harvest_update_resources(self.rdf_mock_url,
                                   self.rdf_content_with_distribution_uri,
                                   self.rdf_content_type)
-        assert new['uri'] == 'https://data.some.org/catalog/datasets/1/resource/1'
-        assert new['uri'] == existing['uri']
-        assert new['id'] == existing['id']
+        eq_(new['uri'], 'https://data.some.org/catalog/datasets/1/resource/1')
+        eq_(new['uri'], existing['uri'])
+        eq_(new['id'], existing['id'])
 
     def test_harvest_update_new_resources(self):
 
         existing, new = self._test_harvest_update_resources(self.rdf_mock_url,
                                   self.rdf_content_with_distribution,
                                   self.rdf_content_type)
-        assert existing['uri'] == ''
-        assert new['uri'] == ''
-        assert new['id'] != existing['id']
+        eq_(existing['uri'], '')
+        eq_(new['uri'], '')
+        nose.tools.assert_is_not(new['id'], existing['id'])
 
     def _test_harvest_update_resources(self, url, content, content_type):
         # Mock the GET request to get the file
@@ -853,8 +848,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # get the created dataset
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
-        assert results['count'] == 1
+        results = h.call_action('package_search', {}, fq=fq)
+        eq_(results['count'], 1)
 
         existing_dataset = results['results'][0]
         existing_resource = existing_dataset.get('resources')[0]
@@ -869,15 +864,15 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         self._run_full_job(harvest_source['id'])
 
         # get the updated dataset
-        new_results = helpers.call_action('package_search', {}, fq=fq)
-        assert new_results['count'] == 1
+        new_results = h.call_action('package_search', {}, fq=fq)
+        eq_(new_results['count'], 1)
 
         new_dataset = new_results['results'][0]
         new_resource = new_dataset.get('resources')[0]
 
-        assert existing_resource['name'] == 'Example resource 1'
-        assert len(new_dataset.get('resources')) == 1
-        assert new_resource['name'] == 'Example resource 1 (updated)'
+        eq_(existing_resource['name'], 'Example resource 1')
+        eq_(len(new_dataset.get('resources')), 1)
+        eq_(new_resource['name'], 'Example resource 1 (updated)')
         return (existing_resource, new_resource)
 
     def test_harvest_delete_rdf(self):
@@ -922,11 +917,11 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Check that we only have one dataset
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
+        results = h.call_action('package_search', {}, fq=fq)
 
-        assert results['count'] == 1
+        eq_(results['count'], 1)
 
-        assert results['results'][0]['title'] == 'Example dataset 1'
+        eq_(results['results'][0]['title'], 'Example dataset 1')
 
     def test_harvest_bad_format_rdf(self):
 
@@ -960,12 +955,12 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         self._run_jobs()
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
         assert ('Error parsing the RDF file'
                 in last_job_status['gather_error_summary'][0][0])
 
@@ -991,12 +986,12 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         self._run_jobs()
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
         assert ('Error when processsing dataset'
                 in last_job_status['gather_error_summary'][0][0])
 
@@ -1019,26 +1014,44 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Check that two datasets were created
         fq = "+type:dataset harvest_source_id:{0}".format(harvest_source['id'])
-        results = helpers.call_action('package_search', {}, fq=fq)
+        results = h.call_action('package_search', {}, fq=fq)
 
-        assert results['count'] == 2
+        eq_(results['count'], 2)
         for result in results['results']:
             assert result['name'] in ('example-dataset',
                                       'example-dataset-1')
 
 
-@pytest.mark.usefixtures(
-    'with_plugins',
-    'clean_db',
-    'clean_index',
-    'harvest_setup',
-    'clean_queues',
-)
-@pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_harvester')
 class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
-    def test_harvest_before_download_extension_point_gets_called(self, reset_calls_counter):
-        reset_calls_counter('test_rdf_harvester')
+    @classmethod
+    def setup_class(self):
+
+        super(TestDCATHarvestFunctionalExtensionPoints, self).setup_class()
+
+        p.load('test_rdf_harvester')
+
+    @classmethod
+    def teardown_class(self):
+
+        p.unload('test_rdf_harvester')
+
+    def setup(self):
+
+        super(TestDCATHarvestFunctionalExtensionPoints, self).setup()
+
+        plugin = p.get_plugin('test_rdf_harvester')
+        plugin.calls = defaultdict(int)
+
+    def teardown(self):
+
+        super(TestDCATHarvestFunctionalExtensionPoints, self).teardown()
+
+        plugin = p.get_plugin('test_rdf_harvester')
+        plugin.calls = defaultdict(int)
+
+    def test_harvest_before_download_extension_point_gets_called(self):
+
         plugin = p.get_plugin('test_rdf_harvester')
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
@@ -1046,11 +1059,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['before_download'] == 1
+        eq_(plugin.calls['before_download'], 1)
 
-    def test_harvest_before_download_null_url_stops_gather_stage(self, reset_calls_counter):
+    def test_harvest_before_download_null_url_stops_gather_stage(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         source_url = 'http://return.none'
@@ -1071,7 +1083,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['before_download'] == 1
+        eq_(plugin.calls['before_download'], 1)
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
@@ -1080,18 +1092,17 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         assert 'return.none' not in httpretty.last_request().headers['host']
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
 
-        assert last_job_status['stats']['added'] == 0
+        eq_(last_job_status['stats']['added'], 0)
 
-    def test_harvest_before_download_errors_get_stored(self, reset_calls_counter):
+    def test_harvest_before_download_errors_get_stored(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         source_url = 'http://return.errors'
@@ -1112,7 +1123,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['before_download'] == 1
+        eq_(plugin.calls['before_download'], 1)
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
@@ -1121,17 +1132,16 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         assert 'return.errors' not in httpretty.last_request().headers['host']
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
-        assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+        eq_('Error 1', last_job_status['gather_error_summary'][0][0])
+        eq_('Error 2', last_job_status['gather_error_summary'][1][0])
 
-    def test_harvest_update_session_extension_point_gets_called(self, reset_calls_counter):
+    def test_harvest_update_session_extension_point_gets_called(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
@@ -1139,11 +1149,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['update_session'] == 1
+        eq_(plugin.calls['update_session'], 1)
 
-    def test_harvest_update_session_add_header(self, reset_calls_counter):
+    def test_harvest_update_session_add_header(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
@@ -1151,7 +1160,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['update_session'] == 1
+        eq_(plugin.calls['update_session'], 1)
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
@@ -1160,9 +1169,8 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         assert ('true'
                 in httpretty.last_request().headers['x-test'])
 
-    def test_harvest_after_download_extension_point_gets_called(self, reset_calls_counter):
+    def test_harvest_after_download_extension_point_gets_called(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         # Mock the GET request to get the file
@@ -1178,11 +1186,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['after_download'] == 1
+        eq_(plugin.calls['after_download'], 1)
 
-    def test_harvest_after_download_empty_content_stops_gather_stage(self, reset_calls_counter):
+    def test_harvest_after_download_empty_content_stops_gather_stage(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         source_url = 'http://return.empty.content'
@@ -1203,7 +1210,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['after_download'] == 1
+        eq_(plugin.calls['after_download'], 1)
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
@@ -1213,18 +1220,17 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
                 in httpretty.last_request().headers['host'])
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
 
-        assert last_job_status['stats']['added'] == 0
+        eq_(last_job_status['stats']['added'], 0)
 
-    def test_harvest_after_download_errors_get_stored(self, reset_calls_counter):
+    def test_harvest_after_download_errors_get_stored(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         source_url = 'http://return.content.errors'
@@ -1245,7 +1251,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs(harvest_source['id'])
         self._gather_queue(1)
 
-        assert plugin.calls['after_download'] == 1
+        eq_(plugin.calls['after_download'], 1)
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
@@ -1255,17 +1261,16 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
                 in httpretty.last_request().headers['host'])
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
-        assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+        eq_('Error 1', last_job_status['gather_error_summary'][0][0])
+        eq_('Error 2', last_job_status['gather_error_summary'][1][0])
 
-    def test_harvest_import_extensions_point_gets_called(self, reset_calls_counter):
+    def test_harvest_import_extensions_point_gets_called(self):
 
-        reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         url = self.rdf_mock_url
@@ -1290,15 +1295,15 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs()
 
         # Get the harvest source with the udpated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
         last_job_status = harvest_source['status']['last_job']
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
 
-        assert plugin.calls['before_create'] == 2
-        assert plugin.calls['after_create'] == 2
-        assert plugin.calls['before_update'] == 0
-        assert plugin.calls['after_update'] == 0
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 2)
+        eq_(plugin.calls['before_update'], 0)
+        eq_(plugin.calls['after_update'], 0)
 
         # Mock an update in the remote file
         new_file = content.replace('Example dataset 1',
@@ -1309,25 +1314,36 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
 
-        assert plugin.calls['before_create'] == 2
-        assert plugin.calls['after_create'] == 2
-        assert plugin.calls['before_update'] == 2
-        assert plugin.calls['after_update'] == 2
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 2)
+        eq_(plugin.calls['before_update'], 2)
+        eq_(plugin.calls['after_update'], 2)
 
 
-@pytest.mark.usefixtures(
-    'with_plugins',
-    'clean_db',
-    'clean_index',
-    'harvest_setup',
-    'clean_queues',
-)
-@pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_null_harvester')
 class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
 
-    def test_harvest_with_before_create_null(self, reset_calls_counter):
+    @classmethod
+    def setup_class(self):
+        super(TestDCATHarvestFunctionalSetNull, self).setup_class()
+        p.load('test_rdf_null_harvester')
 
-        reset_calls_counter('test_rdf_null_harvester')
+    @classmethod
+    def teardown_class(self):
+        p.unload('test_rdf_null_harvester')
+
+    def setup(self):
+        super(TestDCATHarvestFunctionalSetNull, self).setup()
+
+        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin.calls = defaultdict(int)
+
+    def teardown(self):
+        super(TestDCATHarvestFunctionalSetNull, self).teardown()
+
+        plugin = p.get_plugin('test_rdf_null_harvester')
+        plugin.calls = defaultdict(int)
+
+    def test_harvest_with_before_create_null(self):
         plugin = p.get_plugin('test_rdf_null_harvester')
 
         url = self.rdf_mock_url
@@ -1351,12 +1367,13 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
         self._run_jobs()
 
         # Get the harvest source with the updated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
         last_job_status = harvest_source['status']['last_job']
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
 
-        assert (last_job_status['stats'] ==
+        nose.tools.assert_dict_equal(
+            last_job_status['stats'],
             {
                 'deleted': 0,
                 'added': 0,
@@ -1366,24 +1383,36 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
             }
         )
 
-        assert plugin.calls['before_create'] == 2
-        assert plugin.calls['after_create'] == 0
-        assert plugin.calls['before_update'] == 0
-        assert plugin.calls['after_update'] == 0
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 0)
+        eq_(plugin.calls['before_update'], 0)
+        eq_(plugin.calls['after_update'], 0)
 
 
-@pytest.mark.usefixtures(
-    'with_plugins',
-    'clean_db',
-    'clean_index',
-    'harvest_setup',
-    'clean_queues',
-)
-@pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_exception_harvester')
 class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
 
-    def test_harvest_with_before_create_raising_exception(self, reset_calls_counter):
-        reset_calls_counter('test_rdf_exception_harvester')
+    @classmethod
+    def setup_class(self):
+        super(TestDCATHarvestFunctionalRaiseExcpetion, self).setup_class()
+        p.load('test_rdf_exception_harvester')
+
+    @classmethod
+    def teardown_class(self):
+        p.unload('test_rdf_exception_harvester')
+
+    def setup(self):
+        super(TestDCATHarvestFunctionalRaiseExcpetion, self).setup()
+
+        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin.calls = defaultdict(int)
+
+    def teardown(self):
+        super(TestDCATHarvestFunctionalRaiseExcpetion, self).teardown()
+
+        plugin = p.get_plugin('test_rdf_exception_harvester')
+        plugin.calls = defaultdict(int)
+
+    def test_harvest_with_before_create_raising_exception(self):
         plugin = p.get_plugin('test_rdf_exception_harvester')
 
         url = self.rdf_mock_url
@@ -1407,16 +1436,16 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
         self._run_jobs()
 
         # Get the harvest source with the updated status
-        harvest_source = helpers.call_action('harvest_source_show',
+        harvest_source = h.call_action('harvest_source_show',
                                        id=harvest_source['id'])
         last_job_status = harvest_source['status']['last_job']
-        assert last_job_status['status'] == 'Finished'
+        eq_(last_job_status['status'], 'Finished')
 
         assert ('Error importing dataset'
                 in last_job_status['object_error_summary'][0][0])
 
-        assert (
-            last_job_status['stats'] ==
+        nose.tools.assert_dict_equal(
+            last_job_status['stats'],
             {
                 'deleted': 0,
                 'added': 1,
@@ -1426,10 +1455,10 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
             }
         )
 
-        assert plugin.calls['before_create'] == 2
-        assert plugin.calls['after_create'] == 1
-        assert plugin.calls['before_update'] == 0
-        assert plugin.calls['after_update'] == 0
+        eq_(plugin.calls['before_create'], 2)
+        eq_(plugin.calls['after_create'], 1)
+        eq_(plugin.calls['before_update'], 0)
+        eq_(plugin.calls['after_update'], 0)
 
 
 class TestDCATRDFHarvester(object):
@@ -1438,7 +1467,7 @@ class TestDCATRDFHarvester(object):
         harvester = DCATRDFHarvester()
 
         for config in ['{}', '{"rdf_format":"text/turtle"}']:
-            assert config == harvester.validate_config(config)
+            eq_(config, harvester.validate_config(config))
 
     def test_does_not_validate_incorrect_config(self):
         harvester = DCATRDFHarvester()
@@ -1461,8 +1490,8 @@ class TestIDCATRDFHarvester(object):
 
         values = i.before_download(url, {})
 
-        assert values[0] == url
-        assert values[1] == []
+        eq_(values[0], url)
+        eq_(values[1], [])
 
     def test_after_download(self):
 
@@ -1472,5 +1501,5 @@ class TestIDCATRDFHarvester(object):
 
         values = i.after_download(content, {})
 
-        assert values[0] == content
-        assert values[1] == []
+        eq_(values[0], content)
+        eq_(values[1], [])
