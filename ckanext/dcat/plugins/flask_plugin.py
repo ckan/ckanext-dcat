@@ -3,7 +3,7 @@
 import ckan.plugins as p
 
 import ckanext.dcat.cli as cli
-import ckanext.dcat.views as views
+import ckanext.dcat.blueprints as blueprints
 
 
 class MixinDCATPlugin(p.SingletonPlugin):
@@ -18,7 +18,7 @@ class MixinDCATPlugin(p.SingletonPlugin):
     # IBlueprint
 
     def get_blueprint(self):
-        return [views.dcat]
+        return [blueprints.dcat]
 
 
 class MixinDCATJSONInterface(p.SingletonPlugin):
@@ -27,4 +27,4 @@ class MixinDCATJSONInterface(p.SingletonPlugin):
     # IBlueprint
 
     def get_blueprint(self):
-        return [views.dcat_json_interface]
+        return [blueprints.dcat_json_interface]
