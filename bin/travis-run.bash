@@ -1,7 +1,13 @@
 #!/bin/bash
 set -e
 
-echo "CKAN Minor Version: $CKAN_MINOR_VERSION"
+if [ $CKANVERSION == 'master' ]
+then
+    export CKAN_MINOR_VERSION=100
+else
+    export CKAN_MINOR_VERSION=${CKANVERSION##*.}
+fi
+
 if [ $CKAN_MINOR_VERSION >= 9 ]
 then
     pytest --ckan-ini=subdir/test.ini --cov=ckanext.dcat ckanext/dcat/tests
