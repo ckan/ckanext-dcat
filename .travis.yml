@@ -4,15 +4,23 @@ group: deprecated-2017Q4
 
 language: python
 sudo: required
-python:
-    - "2.7"
-env:
-    - CKANVERSION=master
-    - CKANVERSION=2.4
-    - CKANVERSION=2.5
-    - CKANVERSION=2.6
-    - CKANVERSION=2.7
-    - CKANVERSION=2.8
+
+jobs:
+  include:
+    - python: "2.7"
+      env: CKANVERSION=master
+    - python: "3.6"
+      env: CKANVERSION=master
+    - python: "2.7"
+      env: CKANVERSION=2.8
+    - python: "2.7"
+      env: CKANVERSION=2.7
+    - python: "2.7"
+      env: CKANVERSION=2.6
+    - python: "2.7"
+      env: CKANVERSION=2.5
+    - python: "2.7"
+      env: CKANVERSION=2.4
 
 install:
     - bash bin/travis-build.bash
