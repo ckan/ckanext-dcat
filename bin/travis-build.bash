@@ -85,9 +85,9 @@ cd ckanext-harvest
 python setup.py develop
 pip install -r pip-requirements.txt
 
-if (( $CKAN_MINOR_VERSION >= 9 ))
+if (( $PYTHON_MAJOR_VERSION == 3 ))
 then
-    ckan -c /ckan/test-core.ini harvester initdb
+    ckan -c ../ckan/test-core.ini harvester initdb
 else
     paster harvester initdb -c ../ckan/test-core.ini
 fi
