@@ -49,7 +49,7 @@ then
     pip install setuptools==39.0.1
 fi
 
-if [ $CKAN_MINOR_VERSION >= 9 ] && [ $PYTHON_MAJOR_VERSION == 2 ]
+if (( $CKAN_MINOR_VERSION >= 9 )) && (( $PYTHON_MAJOR_VERSION == 2 ))
 then
     pip install -r requirements-py2.txt
 else
@@ -69,7 +69,9 @@ sudo -u postgres psql -c 'CREATE DATABASE ckan_test WITH OWNER ckan_default;'
 
 echo "Initialising the database..."
 cd ckan
-if [ $CKAN_MINOR_VERSION >= 9 ]
+
+
+if (( $CKAN_MINOR_VERSION >= 9 ))
 then
     ckan -c test-core.ini db init
 else
@@ -82,7 +84,8 @@ git clone https://github.com/ckan/ckanext-harvest
 cd ckanext-harvest
 python setup.py develop
 pip install -r pip-requirements.txt
-if [ $CKAN_MINOR_VERSION >= 9 ]
+
+if (( $CKAN_MINOR_VERSION >= 9 ))
 then
     ckan -c /ckan/test-core.ini harvester initdb
 else

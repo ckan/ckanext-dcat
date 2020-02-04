@@ -8,7 +8,8 @@ else
     export CKAN_MINOR_VERSION=${CKANVERSION##*.}
 fi
 
-if [ $CKAN_MINOR_VERSION >= 9 ]
+
+if (( $CKAN_MINOR_VERSION >= 9 ))
 then
     pytest --ckan-ini=subdir/test.ini --cov=ckanext.dcat ckanext/dcat/tests
 else
