@@ -2,6 +2,10 @@
 set -e
 
 echo "This is travis-build.bash..."
+echo "Targetting CKAN $CKANVERSION on Python $TRAVIS_PYTHON_VERSION"
+export CKAN_MINOR_VERSION=${CKANVERSION##*.}
+export PYTHON_MAJOR_VERSION=${TRAVIS_PYTHON_VERSION%.*}
+
 
 echo "Installing the packages that CKAN requires..."
 sudo apt-get update -qq
@@ -39,7 +43,7 @@ then
     pip install setuptools==39.0.1
 fi
 
-if [ -f requirements-py2.txt ]
+if [ $CKAN_MINOR_VERSION >= 9 ] && [ $PYTHON_MAJOR_VERSION == 2]
 then
     pip install -r requirements-py2.txt
 else
