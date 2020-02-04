@@ -27,7 +27,7 @@ install:
 services:
     - redis-server
     - postgresql
-script: sh bin/travis-run.sh
+script: bash bin/travis-run.bash
 before_install:
     - pip install codecov
 after_success:
