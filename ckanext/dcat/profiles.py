@@ -421,6 +421,20 @@ class RDFProfile(object):
                     return license_id
         return ''
 
+    def _access_rights(self, subject, predicate):
+        '''
+        Returns the rights statement or an empty string if no one is found.
+        '''
+
+        result = ''
+        obj = self._object(subject, predicate)
+        if obj:
+            if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
+                result = self._object_value(obj, RDFS.label)
+            elif isinstance(obj, Literal):
+                result = unicode(obj)
+        return result
+
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
         Returns the Internet Media Type and format label for a distribution
@@ -830,7 +844,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('identifier', DCT.identifier),
                 ('version_notes', ADMS.versionNotes),
                 ('frequency', DCT.accrualPeriodicity),
-                ('access_rights', DCT.accessRights),
                 ('provenance', DCT.provenance),
                 ('dcat_type', DCT.type),
                 ):
@@ -900,6 +913,11 @@ class EuropeanDCATAPProfile(RDFProfile):
                        else '')
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
 
+        # access_rights
+        access_rights = self._access_rights(dataset_ref, DCT.accessRights)
+        if access_rights:
+            dataset_dict['extras'].append({'key': 'access_rights', 'value': access_rights})
+
         # License
         if 'license_id' not in dataset_dict:
             dataset_dict['license_id'] = self._license(dataset_ref)
@@ -925,7 +943,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                     ('issued', DCT.issued),
                     ('modified', DCT.modified),
                     ('status', ADMS.status),
-                    ('rights', DCT.rights),
                     ('license', DCT.license),
                     ):
                 value = self._object_value(distribution, predicate)
@@ -945,6 +962,11 @@ class EuropeanDCATAPProfile(RDFProfile):
                 values = self._object_value_list(distribution, predicate)
                 if values:
                     resource_dict[key] = json.dumps(values)
+
+            # rights
+            rights = self._access_rights(distribution, DCT.rights)
+            if rights:
+                resource_dict['rights'] = rights
 
             # Format and media type
             normalize_ckan_format = config.get(
