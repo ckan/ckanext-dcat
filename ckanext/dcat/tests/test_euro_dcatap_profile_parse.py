@@ -251,6 +251,37 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         dataset = [d for d in p.datasets()][0]
         eq_(dataset['license_id'], 'cc-by')
 
+    def test_dataset_access_rights_and_distribution_rights_rights_statement(self):
+        # license_id retrieved from the URI of dcat:license object
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        # access_rights
+        access_rights = BNode()
+        g.add((access_rights, RDF.type, DCT.RightsStatement))
+        g.add((access_rights, RDFS.label, Literal('public dataset')))
+        g.add((dataset_ref, DCT.accessRights, access_rights))
+        # rights
+        rights = BNode()
+        g.add((rights, RDF.type, DCT.RightsStatement))
+        g.add((rights, RDFS.label, Literal('public distribution')))
+        distribution = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((dataset_ref, DCAT.distribution, distribution))
+        g.add((distribution, RDF.type, DCAT.Distribution))
+        g.add((distribution, DCT.rights, rights))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['access_rights'], 'public dataset')
+        resource = dataset['resources'][0]
+        eq_(resource['rights'], 'public distribution')
+
     def test_distribution_access_url(self):
         g = Graph()
 
