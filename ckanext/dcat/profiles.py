@@ -217,6 +217,31 @@ class RDFProfile(object):
         '''
         return [unicode(o) for o in self.g.objects(subject, predicate)]
 
+    def _get_vcard_property_value(self, subject, predicate, predicate_string_property=None):
+        '''
+        Given a subject, a predicate and a predicate for the simple string property (optional),
+        returns the value of the object. Trying to read the value in the following order
+            * predicate_string_property
+            * predicate
+
+        All subject, predicate and predicate_string_property must be rdflib URIRef or BNode  objects
+
+        If no value is found, returns an empty string
+        '''
+
+        result = ''
+        if predicate_string_property:
+            result = self._object_value(subject, predicate_string_property)
+
+        if not result:
+            obj = self._object(subject, predicate)
+            if isinstance(obj, BNode):
+                result = self._object_value(obj, VCARD.hasValue)
+            else:
+                result = self._object_value(subject, predicate)
+
+        return result
+
     def _time_interval(self, subject, predicate):
         '''
         Returns the start and end date for a time interval object
@@ -326,11 +351,9 @@ class RDFProfile(object):
             contact['uri'] = (unicode(agent) if isinstance(agent,
                               rdflib.term.URIRef) else '')
 
-            contact['name'] = self._object_value(agent, VCARD.fn)
+            contact['name'] = self._get_vcard_property_value(agent, VCARD.hasFN, VCARD.fn)
 
-            contact['email'] = self._without_mailto(
-                self._object_value(agent, VCARD.hasEmail)
-            )
+            contact['email'] = self._without_mailto(self._get_vcard_property_value(agent, VCARD.hasEmail))
 
         return contact
 
