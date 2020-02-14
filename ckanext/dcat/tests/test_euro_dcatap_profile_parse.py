@@ -14,7 +14,7 @@ from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
-                                   GEOJSON_IMT)
+                                   GEOJSON_IMT, VCARD)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 eq_ = nose.tools.eq_
@@ -250,6 +250,69 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         eq_(dataset['license_id'], 'cc-by')
+
+    def test_dataset_contact_point_vcard_hasVN_literal(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        contact_point = BNode()
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        g.add((contact_point, VCARD.hasFN, Literal('Point of Contact')))
+        g.add((dataset_ref, DCAT.contactPoint, contact_point))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['contact_name'], 'Point of Contact')
+
+    def test_dataset_contact_point_vcard_hasVN_hasValue(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        contact_point = BNode()
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        hasVN = BNode()
+        g.add((hasVN, VCARD.hasValue, Literal('Point of Contact')))
+        g.add((contact_point, VCARD.hasFN, hasVN))
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        g.add((dataset_ref, DCAT.contactPoint, contact_point))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['contact_name'], 'Point of Contact')
+
+    def test_dataset_contact_point_vcard_hasEmail_hasValue(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        contact_point = BNode()
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        hasEmail = BNode()
+        g.add((hasEmail, VCARD.hasValue, Literal('mailto:contact@some.org')))
+        g.add((contact_point, VCARD.hasEmail, hasEmail))
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        g.add((dataset_ref, DCAT.contactPoint, contact_point))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['contact_email'], 'contact@some.org')
 
     def test_dataset_access_rights_and_distribution_rights_rights_statement(self):
         # license_id retrieved from the URI of dcat:license object
