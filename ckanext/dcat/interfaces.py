@@ -166,3 +166,27 @@ class IDCATRDFHarvester(Interface):
         :rtype: string
         '''
         return None
+
+    def update_package_schema_for_create(self, package_schema):
+        '''
+        Called just before the ``package_create`` action.
+
+        :param package_schema: The default create package schema dict.
+        :type package_schema_dict: dict
+
+        :returns: The updated package_schema object
+        :rtype: object
+        '''
+        return package_schema
+
+    def update_package_schema_for_update(self, package_schema):
+        '''
+        Called just before the ``package_update`` action.
+
+        :param package_schema: The default update package schema dict.
+        :type package_schema_dict: dict
+
+        :returns: The updated package_schema object
+        :rtype: object
+        '''
+        return package_schema
