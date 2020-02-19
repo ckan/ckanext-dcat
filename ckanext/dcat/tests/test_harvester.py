@@ -1518,3 +1518,23 @@ class TestIDCATRDFHarvester(object):
 
         eq_(values[0], content)
         eq_(values[1], [])
+
+    def test_update_package_schema_for_create(self):
+
+        i = IDCATRDFHarvester()
+
+        package_schema = dict(some_validator='some.content')
+
+        value = i.update_package_schema_for_create(package_schema)
+
+        eq_(value, package_schema)
+
+    def test_update_package_schema_for_update(self):
+
+        i = IDCATRDFHarvester()
+
+        package_schema = dict(some_validator='some.content')
+
+        value = i.update_package_schema_for_update(package_schema)
+
+        eq_(value, package_schema)
