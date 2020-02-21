@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from builtins import object
-import httpretty
+import responses
 from mock import call, patch, Mock
 
 import nose
@@ -92,6 +92,7 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
                                   self.json_content_type,
                                   exp_titles=['Example dataset 1', 'Example dataset 2'])
 
+    @responses.activate
     def _test_harvest_create(
         self, url, content, content_type, num_datasets=2,
         exp_num_datasets=2, exp_titles=[],
@@ -99,12 +100,12 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
     ):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         kwargs['source_type'] = 'dcat_json'
@@ -149,19 +150,20 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         nose.tools.assert_is_not(new_resources[0]['id'],
                                  existing_resources[0]['id'])
 
+    @responses.activate
     def _test_harvest_twice(self, content_first_harvest,
                             content_second_harvest):
         '''Based on _test_harvest_update_resources'''
         url = self.json_mock_url
         content_type = self.json_content_type
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content_first_harvest,
                                content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         kwargs = {'source_type': 'dcat_json'}
@@ -186,7 +188,7 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         content_second_harvest = \
             content_second_harvest.replace('Example dataset 1',
                                            'Example dataset 1 (updated)')
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content_second_harvest,
                                content_type=content_type)
 

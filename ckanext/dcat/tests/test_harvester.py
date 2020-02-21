@@ -6,7 +6,7 @@ from builtins import object
 from collections import defaultdict
 
 import pytest
-import httpretty
+import responses
 from mock import patch
 
 import ckan.plugins as p
@@ -15,9 +15,12 @@ from ckantoolkit.tests import helpers
 import ckanext.harvest.model as harvest_model
 from ckanext.harvest import queue
 
-from ckanext.dcat.harvesters import DCATRDFHarvester, DCATJSONHarvester
+from ckanext.dcat.harvesters import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
+
+responses.add_passthru('http://127.0.0.1:8983/solr')
+
 
 # TODO move to ckanext-harvest
 @pytest.fixture
@@ -36,43 +39,6 @@ def reset_calls_counter():
         plugin = p.get_plugin(plugin_name)
         plugin.calls = defaultdict(int)
     return wrapper
-
-
-# This horrible monkey patch is needed because httpretty does not play well
-# with redis, so we need to disable it straight after the mocked call is used.
-# See https://github.com/gabrielfalcao/HTTPretty/issues/113
-
-# Start monkey-patch
-
-original_rdf_get_content_and_type = DCATRDFHarvester._get_content_and_type
-
-def _patched_rdf_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
-
-    httpretty.enable()
-
-    value1, value2 = original_rdf_get_content_and_type(self, url, harvest_job, page, content_type)
-
-    httpretty.disable()
-
-    return value1, value2
-
-DCATRDFHarvester._get_content_and_type = _patched_rdf_get_content_and_type
-
-original_json_get_content_and_type = DCATJSONHarvester._get_content_and_type
-
-def _patched_json_get_content_and_type(self, url, harvest_job, page=1, content_type=None):
-
-    httpretty.enable()
-
-    value1, value2 = original_json_get_content_and_type(self, url, harvest_job, page, content_type)
-
-    httpretty.disable()
-
-    return value1, value2
-
-DCATJSONHarvester._get_content_and_type = _patched_json_get_content_and_type
-
-# End monkey-patch
 
 
 class TestRDFHarvester(p.SingletonPlugin):
@@ -310,8 +276,6 @@ class FunctionalHarvestTest(object):
         '''
 
         # Minimal remote RDF file with pagination (1)
-        # Use slashes for paginated URLs because HTTPretty won't distinguish
-        # query strings
         cls.rdf_mock_url_pagination_1 = 'http://some.dcat.file.pagination.rdf'
         cls.rdf_content_pagination_1 = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
@@ -659,15 +623,16 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
                                   self.ttl_commas_in_keywords,
                                   self.ttl_content_type)
 
+    @responses.activate
     def _test_harvest_create(self, url, content, content_type, **kwargs):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url, **kwargs)
@@ -683,24 +648,25 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
             assert result['title'] in ('Example dataset 1',
                                        'Example dataset 2')
 
+    @responses.activate
     def test_harvest_create_rdf_pagination(self):
 
         # Mock the GET requests needed to get the file
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_1,
+        responses.add(responses.GET, self.rdf_mock_url_pagination_1,
                                body=self.rdf_content_pagination_1,
                                content_type=self.rdf_content_type)
 
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_2,
+        responses.add(responses.GET, self.rdf_mock_url_pagination_2,
                                body=self.rdf_content_pagination_2,
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # them as well
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_1,
+        responses.add(responses.HEAD, self.rdf_mock_url_pagination_1,
                                status=405,
                                content_type=self.rdf_content_type)
 
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_2,
+        responses.add(responses.HEAD, self.rdf_mock_url_pagination_2,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -718,25 +684,26 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
             ['Example dataset 1', 'Example dataset 2',
              'Example dataset 3', 'Example dataset 4'])
 
+    @responses.activate
     def test_harvest_create_rdf_pagination_same_content(self):
 
         # Mock the GET requests needed to get the file. Two different URLs but
         # same content to mock a misconfigured server
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_1,
+        responses.add(responses.GET, self.rdf_mock_url_pagination_1,
                                body=self.rdf_content_pagination_1,
                                content_type=self.rdf_content_type)
 
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_pagination_2,
+        responses.add(responses.GET, self.rdf_mock_url_pagination_2,
                                body=self.rdf_content_pagination_1,
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # them as well
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_1,
+        responses.add(responses.HEAD, self.rdf_mock_url_pagination_1,
                                status=405,
                                content_type=self.rdf_content_type)
 
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_pagination_2,
+        responses.add(responses.HEAD, self.rdf_mock_url_pagination_2,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -777,14 +744,22 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
                                   self.ttl_commas_in_keywords,
                                   self.ttl_content_type)
 
+    @responses.activate
     def _test_harvest_update(self, url, content, content_type):
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
+
+        # Mock an update in the remote file
+        new_file = content.replace('Example dataset 1',
+                                   'Example dataset 1 (updated)')
+
+        responses.add(responses.GET, url,
+                               body=new_file, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
@@ -794,12 +769,6 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
-
-        # Mock an update in the remote file
-        new_file = content.replace('Example dataset 1',
-                                   'Example dataset 1 (updated)')
-        httpretty.register_uri(httpretty.GET, url,
-                               body=new_file, content_type=content_type)
 
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
@@ -833,14 +802,21 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         assert new['uri'] == ''
         assert new['id'] != existing['id']
 
+    @responses.activate
     def _test_harvest_update_resources(self, url, content, content_type):
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
+
+        # Mock an update in the remote file
+        new_file = content.replace('Example resource 1',
+                                   'Example resource 1 (updated)')
+        responses.add(responses.GET, url,
+                               body=new_file, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
@@ -858,12 +834,6 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         existing_dataset = results['results'][0]
         existing_resource = existing_dataset.get('resources')[0]
-
-        # Mock an update in the remote file
-        new_file = content.replace('Example resource 1',
-                                   'Example resource 1 (updated)')
-        httpretty.register_uri(httpretty.GET, url,
-                               body=new_file, content_type=content_type)
 
         # Run a second job
         self._run_full_job(harvest_source['id'])
@@ -894,15 +864,19 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
                                   self.ttl_remote_file_small,
                                   self.ttl_content_type)
 
+    @responses.activate
     def _test_harvest_delete(self, url, content, content_small, content_type):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
+        # Mock a deletion in the remote file
+        responses.add(responses.GET, url,
+                               body=content_small, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
@@ -912,10 +886,6 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         # Run the jobs to mark the previous one as Finished
         self._run_jobs()
-
-        # Mock a deletion in the remote file
-        httpretty.register_uri(httpretty.GET, url,
-                               body=content_small, content_type=content_type)
 
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
@@ -940,15 +910,16 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
                                       self.ttl_remote_file_invalid,
                                       self.ttl_content_type)
 
+    @responses.activate
     def _test_harvest_bad_format(self, url, bad_content, content_type):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=bad_content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
@@ -969,17 +940,18 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         assert ('Error parsing the RDF file'
                 in last_job_status['gather_error_summary'][0][0])
 
+    @responses.activate
     @patch.object(ckanext.dcat.harvesters.rdf.RDFParser, 'datasets')
     def test_harvest_exception_in_profile(self, mock_datasets):
         mock_datasets.side_effect = Exception
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url,
+        responses.add(responses.GET, self.rdf_mock_url,
                                body=self.rdf_content, content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url,
+        responses.add(responses.HEAD, self.rdf_mock_url,
                                status=405, content_type=self.rdf_content_type)
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
@@ -1000,16 +972,17 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         assert ('Error when processsing dataset'
                 in last_job_status['gather_error_summary'][0][0])
 
+    @responses.activate
     def test_harvest_create_duplicate_titles(self):
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url_duplicates,
+        responses.add(responses.GET, self.rdf_mock_url_duplicates,
                                body=self.rdf_duplicate_titles,
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url_duplicates,
+        responses.add(responses.HEAD, self.rdf_mock_url_duplicates,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -1048,6 +1021,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         assert plugin.calls['before_download'] == 1
 
+    @responses.activate
     def test_harvest_before_download_null_url_stops_gather_stage(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
@@ -1056,13 +1030,13 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         source_url = 'http://return.none'
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, source_url,
+        responses.add(responses.GET, source_url,
                                body=self.rdf_content,
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, source_url,
+        responses.add(responses.HEAD, source_url,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -1077,7 +1051,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs()
 
         # Check that the file was not requested
-        assert 'return.none' not in httpretty.last_request().headers['host']
+        assert len(responses.calls) == 0
 
         # Get the harvest source with the udpated status
         harvest_source = helpers.call_action('harvest_source_show',
@@ -1089,6 +1063,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         assert last_job_status['stats']['added'] == 0
 
+    @responses.activate
     def test_harvest_before_download_errors_get_stored(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
@@ -1097,13 +1072,13 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         source_url = 'http://return.errors'
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, source_url,
+        responses.add(responses.GET, source_url,
                                body=self.rdf_content,
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, source_url,
+        responses.add(responses.HEAD, source_url,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -1118,7 +1093,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         self._run_jobs()
 
         # Check that the file was not requested
-        assert 'return.errors' not in httpretty.last_request().headers['host']
+        assert len(responses.calls) == 0
 
         # Get the harvest source with the udpated status
         harvest_source = helpers.call_action('harvest_source_show',
@@ -1134,6 +1109,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
+
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
         self._run_jobs(harvest_source['id'])
@@ -1141,10 +1117,14 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         assert plugin.calls['update_session'] == 1
 
+    @responses.activate
     def test_harvest_update_session_add_header(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
+
+        responses.add(responses.GET, self.rdf_mock_url)
+        responses.add(responses.HEAD, self.rdf_mock_url)
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
@@ -1158,19 +1138,20 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Check that the header was actually set
         assert ('true'
-                in httpretty.last_request().headers['x-test'])
+                in responses.calls[-1].request.headers['x-test'])
 
+    @responses.activate
     def test_harvest_after_download_extension_point_gets_called(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, self.rdf_mock_url)
+        responses.add(responses.GET, self.rdf_mock_url)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, self.rdf_mock_url,
+        responses.add(responses.HEAD, self.rdf_mock_url,
                                status=405)
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
@@ -1180,6 +1161,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         assert plugin.calls['after_download'] == 1
 
+    @responses.activate
     def test_harvest_after_download_empty_content_stops_gather_stage(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
@@ -1188,13 +1170,13 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         source_url = 'http://return.empty.content'
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, source_url,
+        responses.add(responses.GET, source_url,
                                body='return.empty.content',
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, source_url,
+        responses.add(responses.HEAD, source_url,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -1210,7 +1192,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Check that the file was requested
         assert ('return.empty.content'
-                in httpretty.last_request().headers['host'])
+                in responses.calls[-1].request.url)
 
         # Get the harvest source with the udpated status
         harvest_source = helpers.call_action('harvest_source_show',
@@ -1222,6 +1204,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         assert last_job_status['stats']['added'] == 0
 
+    @responses.activate
     def test_harvest_after_download_errors_get_stored(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
@@ -1230,13 +1213,13 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         source_url = 'http://return.content.errors'
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, source_url,
+        responses.add(responses.GET, source_url,
                                body='return.errors',
                                content_type=self.rdf_content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, source_url,
+        responses.add(responses.HEAD, source_url,
                                status=405,
                                content_type=self.rdf_content_type)
 
@@ -1252,7 +1235,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         # Check that the file was requested
         assert ('return.content.errors'
-                in httpretty.last_request().headers['host'])
+                in responses.calls[-1].request.url)
 
         # Get the harvest source with the udpated status
         harvest_source = helpers.call_action('harvest_source_show',
@@ -1263,6 +1246,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
         assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
 
+    @responses.activate
     def test_harvest_import_extensions_point_gets_called(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
@@ -1273,12 +1257,12 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         content_type = self.rdf_content_type
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
@@ -1303,7 +1287,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         # Mock an update in the remote file
         new_file = content.replace('Example dataset 1',
                                    'Example dataset 1 (updated)')
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=new_file, content_type=content_type)
 
         # Run a second job
@@ -1325,6 +1309,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 @pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_null_harvester')
 class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
 
+    @responses.activate
     def test_harvest_with_before_create_null(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_null_harvester')
@@ -1335,12 +1320,12 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
         content_type = self.rdf_content_type
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
@@ -1382,6 +1367,7 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
 @pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_exception_harvester')
 class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
 
+    @responses.activate
     def test_harvest_with_before_create_raising_exception(self, reset_calls_counter):
         reset_calls_counter('test_rdf_exception_harvester')
         plugin = p.get_plugin('test_rdf_exception_harvester')
@@ -1391,12 +1377,12 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
         content_type = self.rdf_content_type
 
         # Mock the GET request to get the file
-        httpretty.register_uri(httpretty.GET, url,
+        responses.add(responses.GET, url,
                                body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        httpretty.register_uri(httpretty.HEAD, url,
+        responses.add(responses.HEAD, url,
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
