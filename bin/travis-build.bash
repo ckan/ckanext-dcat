@@ -87,9 +87,9 @@ pip install -r pip-requirements.txt
 
 if (( $CKAN_MINOR_VERSION >= 9 ))
 then
-    ckan -c ../ckan/test-core.ini harvester initdb
+    ckan -c test.ini harvester initdb
 else
-    paster harvester initdb -c ../ckan/test-core.ini
+    paster harvester initdb -c test.ini
 fi
 cd -
 
