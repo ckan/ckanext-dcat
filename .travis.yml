@@ -3,11 +3,35 @@ dist: trusty
 group: deprecated-2017Q4
 
 language: python
-sudo: required
+
+install:
+    - bash bin/travis-build.bash
+services:
+    - redis
+    - postgresql
+
+script: bash bin/travis-run.bash
+before_install:
+    - pip install codecov
+after_success:
+    - codecov
 
 jobs:
   include:
-    - python: "2.7"
+    - stage: Flake8
+      python: 2.7
+      env: FLAKE8=True
+      install:
+        - pip install flake8==3.5.0
+        - pip install pycodestyle==2.3.0
+      script:
+        - flake8 --version
+        # stop the build if there are Python syntax errors or undefined names
+        - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude ckan
+        # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
+        - flake8 . --count --max-line-length=127 --statistics --exclude ckan --exit-zero
+    - stage: Tests
+      python: "2.7"
       env: CKANVERSION=master
     - python: "3.6"
       env: CKANVERSION=master
@@ -22,17 +46,6 @@ jobs:
     - python: "2.7"
       env: CKANVERSION=2.4
 
-install:
-    - bash bin/travis-build.bash
-services:
-    - redis-server
-    - postgresql
-script: bash bin/travis-run.bash
-before_install:
-    - pip install codecov
-after_success:
-    - codecov
-
 cache:
   directories:
-    - $HOME/.cache/pip      
+    - $HOME/.cache/pip
