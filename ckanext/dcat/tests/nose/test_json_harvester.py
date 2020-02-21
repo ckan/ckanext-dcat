@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 from builtins import object
 import responses
-from mock import call, patch, Mock
+from mock import patch
 
 import nose
 
-from ckan.logic import ValidationError
 import ckantoolkit.tests.helpers as h
 
 import ckan.tests.factories as factories
@@ -14,6 +13,7 @@ from ckanext.dcat.harvesters._json import copy_across_resource_ids, DCATJSONHarv
 from .test_harvester import FunctionalHarvestTest
 
 eq_ = nose.tools.eq_
+
 
 class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
@@ -160,6 +160,15 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         responses.add(responses.GET, url,
                                body=content_first_harvest,
                                content_type=content_type)
+        # Mock an update in the remote dataset.
+        # Change title just to be sure we harvest ok
+        content_second_harvest = \
+            content_second_harvest.replace('Example dataset 1',
+                                           'Example dataset 1 (updated)')
+        responses.add(responses.GET, url,
+                               body=content_second_harvest,
+                               content_type=content_type)
+
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
@@ -182,15 +191,6 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
         existing_dataset = results['results'][0]
         existing_resources = existing_dataset.get('resources')
-
-        # Mock an update in the remote dataset.
-        # Change title just to be sure we harvest ok
-        content_second_harvest = \
-            content_second_harvest.replace('Example dataset 1',
-                                           'Example dataset 1 (updated)')
-        responses.add(responses.GET, url,
-                               body=content_second_harvest,
-                               content_type=content_type)
 
         # Run a second job
         self._run_full_job(harvest_source['id'])
