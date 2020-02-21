@@ -2,7 +2,9 @@
 from builtins import str
 from builtins import range
 import time
-import nose
+
+from collections import OrderedDict
+from six.moves.urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 import pytest
 
@@ -11,11 +13,22 @@ from ckan.lib.helpers import url_for
 
 from rdflib import Graph
 
-from ckantoolkit.tests import helpers, factories
+from ckantoolkit.tests import factories
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
+
+
+def _sort_query_params(url):
+    parts = urlparse(url)
+    qs = parse_qs(parts.query)
+    ordered_qs = OrderedDict(sorted(qs.items()))
+
+    return urlunparse(
+        (parts.scheme, parts.netloc, parts.path, parts.params,
+         urlencode(ordered_qs), parts.fragment)
+    )
 
 
 @pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index')
@@ -363,14 +376,14 @@ class TestEndpoints():
 
         assert self._object_value(g, pagination, HYDRA.itemsPerPage) == '10'
 
-        assert (self._object_value(g, pagination, HYDRA.firstPage) ==
-            url_for('dcat.read_catalog', _format='rdf', page=1, _external=True))
+        assert (_sort_query_params(self._object_value(g, pagination, HYDRA.firstPage)) ==
+            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=1, _external=True)))
 
-        assert (self._object_value(g, pagination, HYDRA.nextPage) ==
-            url_for('dcat.read_catalog', _format='rdf', page=2, _external=True))
+        assert (_sort_query_params(self._object_value(g, pagination, HYDRA.nextPage)) ==
+            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=2, _external=True)))
 
-        assert (self._object_value(g, pagination, HYDRA.lastPage) ==
-            url_for('dcat.read_catalog', _format='rdf', page=2, _external=True))
+        assert (_sort_query_params(self._object_value(g, pagination, HYDRA.lastPage)) ==
+            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=2, _external=True)))
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 10)
     def test_catalog_pagination_parameters(self, app):
@@ -392,8 +405,10 @@ class TestEndpoints():
 
         assert self._object_value(g, pagination, HYDRA.itemsPerPage) == '10'
 
-        assert (self._object_value(g, pagination, HYDRA.firstPage) ==
-            url_for('dcat.read_catalog', _format='rdf', page=1, _external=True, modified_since='2018-03-22'))
+        assert (
+            _sort_query_params(self._object_value(g, pagination, HYDRA.firstPage)) ==
+            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=1, _external=True, modified_since='2018-03-22'))
+        )
 
     def test_catalog_profiles_not_found(self, app):
 
