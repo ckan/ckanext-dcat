@@ -4,6 +4,9 @@ from builtins import str
 import logging
 import uuid
 import json
+import re
+import operator
+
 
 from ckantoolkit import config, h
 
@@ -312,8 +315,7 @@ def rdflib_to_url_format(_format):
 
     return _format
 
-import re
-import operator
+
 # For parsing {name};q=x and {name} style fields from the accept header
 accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
@@ -332,9 +334,13 @@ def parse_accept_header(accept_header=''):
     if accept_header is None:
         accept_header = ''
 
+    # For compatibility, use 'rdf' for application/rdf+xml
+    content_types = CONTENT_TYPES.copy()
+    content_types.pop('xml')
+
     accepted_media_types = dict((value, key)
                                 for key, value
-                                in CONTENT_TYPES.items())
+                                in content_types.items())
 
     accepted_media_types_wildcard = {}
     for media_type, _format in accepted_media_types.items():
