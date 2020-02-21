@@ -1,17 +1,16 @@
 import os
-import uuid
 import logging
 
+import six
 import requests
 import rdflib
 
 from ckan import plugins as p
-from ckan import logic
 from ckan import model
 
 
 from ckanext.harvest.harvesters import HarvesterBase
-from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
+from ckanext.harvest.model import HarvestObject
 
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 
@@ -51,6 +50,7 @@ class DCATHarvester(HarvesterBase):
                 return None, None
 
         try:
+
             if page > 1:
                 url = url + '&' if '?' in url else url + '?'
                 url = url + 'page={0}'.format(page)
@@ -65,6 +65,7 @@ class DCATHarvester(HarvesterBase):
             # first we try a HEAD request which may not be supported
             did_get = False
             r = session.head(url)
+
             if r.status_code == 405 or r.status_code == 400:
                 r = session.get(url, stream=True)
                 did_get = True
@@ -84,7 +85,11 @@ class DCATHarvester(HarvesterBase):
             length = 0
             content = ''
             for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
-                content = content + chunk
+                if six.PY2:
+                    content = content + chunk
+                else:
+                    content = content + chunk.decode('utf8')
+
                 length += len(chunk)
 
                 if length >= self.MAX_FILE_SIZE:

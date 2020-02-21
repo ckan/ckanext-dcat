@@ -6,6 +6,8 @@ import logging
 import hashlib
 import traceback
 
+import six
+
 import ckan.plugins as p
 import ckan.model as model
 
@@ -175,7 +177,10 @@ class DCATRDFHarvester(DCATHarvester):
 
             content_hash = hashlib.md5()
             if content:
-                content_hash.update(content)
+                if six.PY2:
+                    content_hash.update(content)
+                else:
+                    content_hash.update(content.encode('utf8'))
 
             if last_content_hash:
                 if content_hash.digest() == last_content_hash.digest():
