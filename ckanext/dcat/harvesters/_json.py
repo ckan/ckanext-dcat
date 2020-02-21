@@ -5,6 +5,8 @@ from hashlib import sha1
 import traceback
 import uuid
 
+import requests
+
 from ckan import model
 from ckan import logic
 from ckan import plugins as p
