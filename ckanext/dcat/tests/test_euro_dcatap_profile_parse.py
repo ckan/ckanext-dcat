@@ -458,6 +458,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         resource = datasets[0]['resources'][0]
 
         eq_(resource['format'], u'CSV')
+        assert 'mimetype' not in resource
 
     def test_distribution_format_imt_only(self):
         g = Graph()
@@ -483,7 +484,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         else:
             eq_(resource['format'], u'text/csv')
 
-    @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', 'False')
     def test_distribution_format_imt_only_normalize_false(self):
         g = Graph()
 
@@ -506,8 +507,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(resource['format'], u'text/csv')
         eq_(resource['mimetype'], u'text/csv')
 
-    @helpers.change_config('ckanext.dcat.normalize_ckan_format', False)
-    def test_distribution_format_format_only_normalize_false(self):
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', 'False')
+    def test_distribution_format_format_only_without_slash_normalize_false(self):
         g = Graph()
 
         dataset1 = URIRef("http://example.org/datasets/1")
@@ -515,7 +516,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
         g.add((distribution1_1, RDF.type, DCAT.Distribution))
-        g.add((distribution1_1, DCT['format'], Literal('CSV')))
+        g.add((distribution1_1, DCT['format'], Literal('Comma Separated Values')))
         g.add((dataset1, DCAT.distribution, distribution1_1))
 
         p = RDFParser(profiles=['euro_dcat_ap'])
@@ -526,8 +527,31 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        eq_(resource['format'], u'CSV')
+        eq_(resource['format'], u'Comma Separated Values')
         assert 'mimetype' not in resource
+
+    @helpers.change_config('ckanext.dcat.normalize_ckan_format', 'False')
+    def test_distribution_format_format_only_with_slash_normalize_false(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCT['format'], Literal('text/csv')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        eq_(resource['format'], u'text/csv')
+        eq_(resource['mimetype'], u'text/csv')
 
     def test_distribution_format_unknown_imt(self):
         g = Graph()

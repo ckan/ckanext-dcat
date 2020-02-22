@@ -992,8 +992,8 @@ class EuropeanDCATAPProfile(RDFProfile):
                 resource_dict['rights'] = rights
 
             # Format and media type
-            normalize_ckan_format = config.get(
-                'ckanext.dcat.normalize_ckan_format', True)
+            normalize_ckan_format = toolkit.asbool(config.get(
+                'ckanext.dcat.normalize_ckan_format', True))
             imt, label = self._distribution_format(distribution,
                                                    normalize_ckan_format)
 
