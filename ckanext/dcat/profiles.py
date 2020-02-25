@@ -1,11 +1,13 @@
 from future import standard_library
 standard_library.install_aliases()
+
 from builtins import str
 from past.builtins import basestring
 from builtins import object
 import datetime
 import json
 
+import six
 from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
@@ -179,7 +181,7 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        If found, the unicode representation is returned, else an empty string
+        If found, the string representation is returned, else an empty string
         '''
         default_lang = config.get('ckan.locale_default', 'en')
         fallback = ''
@@ -460,7 +462,10 @@ class RDFProfile(object):
             if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
                 result = self._object_value(obj, RDFS.label)
             elif isinstance(obj, Literal):
-                result = unicode(obj)
+                if six.PY2:
+                    result = unicode(obj)
+                else:
+                    result = str(obj)
         return result
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
