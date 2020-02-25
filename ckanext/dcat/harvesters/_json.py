@@ -1,8 +1,11 @@
+from builtins import str
 import json
 import logging
 from hashlib import sha1
 import traceback
 import uuid
+
+import requests
 
 from ckan import model
 from ckan import logic
@@ -74,7 +77,7 @@ class DCATJSONHarvester(DCATHarvester):
         for guid, package_id in query:
             guid_to_package_id[guid] = package_id
 
-        guids_in_db = guid_to_package_id.keys()
+        guids_in_db = list(guid_to_package_id.keys())
         guids_in_source = []
 
         # Get file contents
@@ -87,7 +90,7 @@ class DCATJSONHarvester(DCATHarvester):
             try:
                 content, content_type = \
                     self._get_content_and_type(url, harvest_job, page)
-            except requests.exceptions.HTTPError, error:
+            except requests.exceptions.HTTPError as error:
                 if error.response.status_code == 404:
                     if page > 1:
                         # Server returned a 404 after the first page, no more
@@ -144,7 +147,7 @@ class DCATJSONHarvester(DCATHarvester):
                     # Empty document, no more ids
                     break
 
-            except ValueError, e:
+            except ValueError as e:
                 msg = 'Error parsing file: {0}'.format(str(e))
                 self._save_gather_error(msg, harvest_job)
                 return None
@@ -259,8 +262,8 @@ class DCATJSONHarvester(DCATHarvester):
                 context['schema'] = package_schema
 
                 # We need to explicitly provide a package ID
-                package_dict['id'] = unicode(uuid.uuid4())
-                package_schema['id'] = [unicode]
+                package_dict['id'] = str(uuid.uuid4())
+                package_schema['id'] = [str]
 
                 # Save reference to the package on the object
                 harvest_object.package_id = package_dict['id']
@@ -283,7 +286,7 @@ class DCATJSONHarvester(DCATHarvester):
                 package_id = p.toolkit.get_action(action)(context, package_dict)
                 log.info('%s dataset with id %s', message_status, package_id)
 
-        except Exception, e:
+        except Exception as e:
             dataset = json.loads(harvest_object.content)
             dataset_name = dataset.get('name', '')
 

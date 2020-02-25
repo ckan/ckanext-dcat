@@ -1,128 +1,122 @@
-import nose
-
 from ckanext.dcat.utils import parse_accept_header
 
-eq_ = nose.tools.eq_
 
+def test_accept_header_empty():
 
-class TestAcceptHeaders(object):
+    header = ''
 
-    def test_empty(self):
+    _format = parse_accept_header(header)
 
-        header = ''
+    assert _format is None
 
-        _format = parse_accept_header(header)
+def test_accept_header_basic_found():
 
-        eq_(_format, None)
+    header = 'application/rdf+xml'
 
-    def test_basic_found(self):
+    _format = parse_accept_header(header)
 
-        header = 'application/rdf+xml'
+    assert _format == 'rdf'
 
-        _format = parse_accept_header(header)
+def test_accept_header_basic_not_found():
 
-        eq_(_format, 'rdf')
+    header = 'image/gif'
 
-    def test_basic_not_found(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif'
+    assert _format is None
 
-        _format = parse_accept_header(header)
+def test_accept_header_multiple():
 
-        eq_(_format, None)
+    header = 'application/rdf+xml, application/ld+json'
 
-    def test_multiple(self):
+    _format = parse_accept_header(header)
 
-        header = 'application/rdf+xml, application/ld+json'
+    assert _format == 'rdf'
 
-        _format = parse_accept_header(header)
+def test_accept_header_multiple_not_found():
 
-        eq_(_format, 'rdf')
+    header = 'image/gif, text/unknown'
 
-    def test_multiple_not_found(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif, text/unknown'
+    assert _format is None
 
-        _format = parse_accept_header(header)
+def test_accept_header_multiple_first_not_found():
 
-        eq_(_format, None)
+    header = 'image/gif, application/ld+json, text/turtle'
 
-    def test_multiple_first_not_found(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif, application/ld+json, text/turtle'
+    assert _format == 'jsonld'
 
-        _format = parse_accept_header(header)
+def test_accept_header_q_param():
 
-        eq_(_format, 'jsonld')
+    header = 'text/turtle; q=0.8'
 
-    def test_q_param(self):
+    _format = parse_accept_header(header)
 
-        header = 'text/turtle; q=0.8'
+    assert _format == 'ttl'
 
-        _format = parse_accept_header(header)
+def test_accept_header_q_param_multiple():
 
-        eq_(_format, 'ttl')
+    header = 'text/turtle; q=0.8, text/n3; q=0.6'
 
-    def test_q_param_multiple(self):
+    _format = parse_accept_header(header)
 
-        header = 'text/turtle; q=0.8, text/n3; q=0.6'
+    assert _format == 'ttl'
 
-        _format = parse_accept_header(header)
+def test_accept_header_q_param_multiple_first_not_found():
 
-        eq_(_format, 'ttl')
+    header = 'image/gif; q=1.0, text/turtle; q=0.8, text/n3; q=0.6'
 
-    def test_q_param_multiple_first_not_found(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif; q=1.0, text/turtle; q=0.8, text/n3; q=0.6'
+    assert _format == 'ttl'
 
-        _format = parse_accept_header(header)
+def test_accept_header_wildcard():
 
-        eq_(_format, 'ttl')
+    header = 'text/*'
 
-    def test_wildcard(self):
+    _format = parse_accept_header(header)
 
-        header = 'text/*'
+    assert _format in ('ttl', 'n3')
 
-        _format = parse_accept_header(header)
+def test_accept_header_wildcard_multiple():
 
-        assert _format in ('ttl', 'n3')
+    header = 'image/gif; q=1.0, text/*; q=0.5'
 
-    def test_wildcard_multiple(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif; q=1.0, text/*; q=0.5'
+    assert _format in ('ttl', 'n3')
 
-        _format = parse_accept_header(header)
+def test_accept_header_double_wildcard():
 
-        assert _format in ('ttl', 'n3')
+    header = '*/*'
 
-    def test_double_wildcard(self):
+    _format = parse_accept_header(header)
 
-        header = '*/*'
+    assert _format is None
 
-        _format = parse_accept_header(header)
+def test_accept_header_double_wildcard_multiple():
 
-        eq_(_format, None)
+    header = 'image/gif; q=1.0, text/csv; q=0.8, */*; q=0.1'
 
-    def test_double_wildcard_multiple(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif; q=1.0, text/csv; q=0.8, */*; q=0.1'
+    assert _format is None
 
-        _format = parse_accept_header(header)
+def test_accept_header_html():
 
-        eq_(_format, None)
+    header = 'text/html'
 
-    def test_html(self):
+    _format = parse_accept_header(header)
 
-        header = 'text/html'
+    assert _format is None
 
-        _format = parse_accept_header(header)
+def test_accept_header_html_multiple():
 
-        eq_(_format, None)
+    header = 'image/gif; q=1.0, text/html; q=0.8, text/turtle; q=0.6'
 
-    def test_html_multiple(self):
+    _format = parse_accept_header(header)
 
-        header = 'image/gif; q=1.0, text/html; q=0.8, text/turtle; q=0.6'
-
-        _format = parse_accept_header(header)
-
-        eq_(_format, None)
+    assert _format is None

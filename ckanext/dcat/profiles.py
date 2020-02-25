@@ -1,7 +1,14 @@
+from future import standard_library
+standard_library.install_aliases()
+
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 import datetime
 import json
 
-from urllib import quote
+import six
+from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 
@@ -174,19 +181,19 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        If found, the unicode representation is returned, else an empty string
+        If found, the string representation is returned, else an empty string
         '''
         default_lang = config.get('ckan.locale_default', 'en')
         fallback = ''
         for o in self.g.objects(subject, predicate):
             if isinstance(o, Literal):
                 if o.language and o.language == default_lang:
-                    return unicode(o)
+                    return str(o)
                 # Use first object as fallback if no object with the default language is available
                 elif fallback == '':
-                    fallback = unicode(o)
+                    fallback = str(o)
             else:
-                return unicode(o)
+                return str(o)
         return fallback
 
     def _object_value_int(self, subject, predicate):
@@ -215,7 +222,7 @@ class RDFProfile(object):
 
         If no values found, returns an empty string
         '''
-        return [unicode(o) for o in self.g.objects(subject, predicate)]
+        return [str(o) for o in self.g.objects(subject, predicate)]
 
     def _get_vcard_property_value(self, subject, predicate, predicate_string_property=None):
         '''
@@ -321,7 +328,7 @@ class RDFProfile(object):
 
         for agent in self.g.objects(subject, predicate):
 
-            publisher['uri'] = (unicode(agent) if isinstance(agent,
+            publisher['uri'] = (str(agent) if isinstance(agent,
                                 rdflib.term.URIRef) else '')
 
             publisher['name'] = self._object_value(agent, FOAF.name)
@@ -348,7 +355,7 @@ class RDFProfile(object):
 
         for agent in self.g.objects(subject, predicate):
 
-            contact['uri'] = (unicode(agent) if isinstance(agent,
+            contact['uri'] = (str(agent) if isinstance(agent,
                               rdflib.term.URIRef) else '')
 
             contact['name'] = self._get_vcard_property_value(agent, VCARD.hasFN, VCARD.fn)
@@ -381,29 +388,29 @@ class RDFProfile(object):
         for spatial in self.g.objects(subject, predicate):
 
             if isinstance(spatial, URIRef):
-                uri = unicode(spatial)
+                uri = str(spatial)
 
             if isinstance(spatial, Literal):
-                text = unicode(spatial)
+                text = str(spatial)
 
             if (spatial, RDF.type, DCT.Location) in self.g:
                 for geometry in self.g.objects(spatial, LOCN.geometry):
                     if (geometry.datatype == URIRef(GEOJSON_IMT) or
                             not geometry.datatype):
                         try:
-                            json.loads(unicode(geometry))
-                            geom = unicode(geometry)
+                            json.loads(str(geometry))
+                            geom = str(geometry)
                         except (ValueError, TypeError):
                             pass
                     if not geom and geometry.datatype == GSP.wktLiteral:
                         try:
-                            geom = json.dumps(wkt.loads(unicode(geometry)))
+                            geom = json.dumps(wkt.loads(str(geometry)))
                         except (ValueError, TypeError):
                             pass
                 for label in self.g.objects(spatial, SKOS.prefLabel):
-                    text = unicode(label)
+                    text = str(label)
                 for label in self.g.objects(spatial, RDFS.label):
-                    text = unicode(label)
+                    text = str(label)
 
         return {
             'uri': uri,
@@ -426,7 +433,7 @@ class RDFProfile(object):
         else:
             license_uri2id = {}
             license_title2id = {}
-            for license_id, license in LicenseRegister().items():
+            for license_id, license in list(LicenseRegister().items()):
                 license_uri2id[license.url] = license_id
                 license_title2id[license.title] = license_id
             self._licenceregister_cache = license_uri2id, license_title2id
@@ -455,7 +462,10 @@ class RDFProfile(object):
             if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
                 result = self._object_value(obj, RDFS.label)
             elif isinstance(obj, Literal):
-                result = unicode(obj)
+                if six.PY2:
+                    result = unicode(obj)
+                else:
+                    result = str(obj)
         return result
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
@@ -503,18 +513,18 @@ class RDFProfile(object):
         _format = self._object(distribution, DCT['format'])
         if isinstance(_format, Literal):
             if not imt and '/' in _format:
-                imt = unicode(_format)
+                imt = str(_format)
             else:
-                label = unicode(_format)
+                label = str(_format)
         elif isinstance(_format, (BNode, URIRef)):
             if self._object(_format, RDF.type) == DCT.IMT:
                 if not imt:
-                    imt = unicode(self.g.value(_format, default=None))
-                label = unicode(self.g.label(_format, default=None))
+                    imt = str(self.g.value(_format, default=None))
+                label = str(self.g.label(_format, default=None))
             elif isinstance(_format, URIRef):
                 # If the URIRef does not reference a BNode, it could reference an IANA type.
                 # Otherwise, use it as label.
-                format_uri = unicode(_format)
+                format_uri = str(_format)
                 if 'iana.org/assignments/media-types' in format_uri and not imt:
                     imt = format_uri
                 else:
@@ -649,7 +659,7 @@ class RDFProfile(object):
             try:
                 # JSON list
                 items = json.loads(value)
-                if isinstance(items, ((int, long, float, complex))):
+                if isinstance(items, ((int, int, float, complex))):
                     items = [items]
             except ValueError:
                 if ',' in value:
@@ -721,7 +731,7 @@ class RDFProfile(object):
         Ensures that the mail address string has no mailto: prefix.
         '''
         if mail_addr:
-            return unicode(mail_addr).replace(PREFIX_MAILTO, u'')
+            return str(mail_addr).replace(PREFIX_MAILTO, u'')
         else:
             return mail_addr
 
@@ -931,7 +941,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                      'value': spatial.get(key)})
 
         # Dataset URI (explicitly show the missing ones)
-        dataset_uri = (unicode(dataset_ref)
+        dataset_uri = (str(dataset_ref)
                        if isinstance(dataset_ref, rdflib.term.URIRef)
                        else '')
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
@@ -1020,7 +1030,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                     resource_dict['hash'] = checksum_value
 
             # Distribution URI (explicitly show the missing ones)
-            resource_dict['uri'] = (unicode(distribution)
+            resource_dict['uri'] = (str(distribution)
                                     if isinstance(distribution,
                                                   rdflib.term.URIRef)
                                     else '')
@@ -1046,7 +1056,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g = self.g
 
-        for prefix, namespace in namespaces.iteritems():
+        for prefix, namespace in namespaces.items():
             g.bind(prefix, namespace)
 
         g.add((dataset_ref, RDF.type, DCAT.Dataset))
@@ -1303,7 +1313,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g = self.g
 
-        for prefix, namespace in namespaces.iteritems():
+        for prefix, namespace in namespaces.items():
             g.bind(prefix, namespace)
 
         g.add((catalog_ref, RDF.type, DCAT.Catalog))
