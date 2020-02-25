@@ -275,7 +275,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
-        eq_(extras['contact_name'], 'Point of Contact')
+        assert extras['contact_name'] == 'Point of Contact'
 
     def test_dataset_contact_point_vcard_hasVN_hasValue(self):
         g = Graph()
@@ -297,7 +297,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
-        eq_(extras['contact_name'], 'Point of Contact')
+        assert extras['contact_name'] == 'Point of Contact'
 
     def test_dataset_contact_point_vcard_hasEmail_hasValue(self):
         g = Graph()
@@ -319,7 +319,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
-        eq_(extras['contact_email'], 'contact@some.org')
+        assert extras['contact_email'] == 'contact@some.org'
 
     def test_dataset_access_rights_and_distribution_rights_rights_statement(self):
         # license_id retrieved from the URI of dcat:license object
@@ -348,9 +348,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         dataset = [d for d in p.datasets()][0]
         extras = self._extras(dataset)
-        eq_(extras['access_rights'], 'public dataset')
+        assert extras['access_rights'] == 'public dataset'
         resource = dataset['resources'][0]
-        eq_(resource['rights'], 'public distribution')
+        assert resource['rights'] == 'public distribution'
 
     def test_distribution_access_url(self):
         g = Graph()
