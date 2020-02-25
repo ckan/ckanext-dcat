@@ -222,6 +222,31 @@ class RDFProfile(object):
         '''
         return [str(o) for o in self.g.objects(subject, predicate)]
 
+    def _get_vcard_property_value(self, subject, predicate, predicate_string_property=None):
+        '''
+        Given a subject, a predicate and a predicate for the simple string property (optional),
+        returns the value of the object. Trying to read the value in the following order
+            * predicate_string_property
+            * predicate
+
+        All subject, predicate and predicate_string_property must be rdflib URIRef or BNode  objects
+
+        If no value is found, returns an empty string
+        '''
+
+        result = ''
+        if predicate_string_property:
+            result = self._object_value(subject, predicate_string_property)
+
+        if not result:
+            obj = self._object(subject, predicate)
+            if isinstance(obj, BNode):
+                result = self._object_value(obj, VCARD.hasValue)
+            else:
+                result = self._object_value(subject, predicate)
+
+        return result
+
     def _time_interval(self, subject, predicate):
         '''
         Returns the start and end date for a time interval object
@@ -331,11 +356,9 @@ class RDFProfile(object):
             contact['uri'] = (str(agent) if isinstance(agent,
                               rdflib.term.URIRef) else '')
 
-            contact['name'] = self._object_value(agent, VCARD.fn)
+            contact['name'] = self._get_vcard_property_value(agent, VCARD.hasFN, VCARD.fn)
 
-            contact['email'] = self._without_mailto(
-                self._object_value(agent, VCARD.hasEmail)
-            )
+            contact['email'] = self._without_mailto(self._get_vcard_property_value(agent, VCARD.hasEmail))
 
         return contact
 
@@ -425,6 +448,20 @@ class RDFProfile(object):
                 if license_id:
                     return license_id
         return ''
+
+    def _access_rights(self, subject, predicate):
+        '''
+        Returns the rights statement or an empty string if no one is found.
+        '''
+
+        result = ''
+        obj = self._object(subject, predicate)
+        if obj:
+            if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
+                result = self._object_value(obj, RDFS.label)
+            elif isinstance(obj, Literal):
+                result = unicode(obj)
+        return result
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
         '''
@@ -835,7 +872,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('identifier', DCT.identifier),
                 ('version_notes', ADMS.versionNotes),
                 ('frequency', DCT.accrualPeriodicity),
-                ('access_rights', DCT.accessRights),
                 ('provenance', DCT.provenance),
                 ('dcat_type', DCT.type),
                 ):
@@ -905,6 +941,11 @@ class EuropeanDCATAPProfile(RDFProfile):
                        else '')
         dataset_dict['extras'].append({'key': 'uri', 'value': dataset_uri})
 
+        # access_rights
+        access_rights = self._access_rights(dataset_ref, DCT.accessRights)
+        if access_rights:
+            dataset_dict['extras'].append({'key': 'access_rights', 'value': access_rights})
+
         # License
         if 'license_id' not in dataset_dict:
             dataset_dict['license_id'] = self._license(dataset_ref)
@@ -930,7 +971,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                     ('issued', DCT.issued),
                     ('modified', DCT.modified),
                     ('status', ADMS.status),
-                    ('rights', DCT.rights),
                     ('license', DCT.license),
                     ):
                 value = self._object_value(distribution, predicate)
@@ -951,9 +991,14 @@ class EuropeanDCATAPProfile(RDFProfile):
                 if values:
                     resource_dict[key] = json.dumps(values)
 
+            # rights
+            rights = self._access_rights(distribution, DCT.rights)
+            if rights:
+                resource_dict['rights'] = rights
+
             # Format and media type
-            normalize_ckan_format = config.get(
-                'ckanext.dcat.normalize_ckan_format', True)
+            normalize_ckan_format = toolkit.asbool(config.get(
+                'ckanext.dcat.normalize_ckan_format', True))
             imt, label = self._distribution_format(distribution,
                                                    normalize_ckan_format)
 

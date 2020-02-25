@@ -88,6 +88,16 @@ class TestRDFHarvester(p.SingletonPlugin):
         self.calls['after_create'] += 1
         return None
 
+    def update_package_schema_for_create(self, package_schema):
+        self.calls['update_package_schema_for_create'] += 1
+        package_schema['new_key'] = 'test'
+        return package_schema
+
+    def update_package_schema_for_update(self, package_schema):
+        self.calls['update_package_schema_for_update'] += 1
+        package_schema['new_key'] = 'test'
+        return package_schema
+
 
 class TestRDFNullHarvester(TestRDFHarvester):
     p.implements(IDCATRDFHarvester)
@@ -1279,8 +1289,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         last_job_status = harvest_source['status']['last_job']
         assert last_job_status['status'] == 'Finished'
 
+        assert plugin.calls['update_package_schema_for_create'] == 2
         assert plugin.calls['before_create'] == 2
         assert plugin.calls['after_create'] == 2
+        assert plugin.calls['update_package_schema_for_update'] == 0
         assert plugin.calls['before_update'] == 0
         assert plugin.calls['after_update'] == 0
 
@@ -1293,8 +1305,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
 
+        assert plugin.calls['update_package_schema_for_create'] == 2
         assert plugin.calls['before_create'] == 2
         assert plugin.calls['after_create'] == 2
+        assert plugin.calls['update_package_schema_for_update'] == 2
         assert plugin.calls['before_update'] == 2
         assert plugin.calls['after_update'] == 2
 
@@ -1351,8 +1365,10 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
             }
         )
 
+        assert plugin.calls['update_package_schema_for_create'] == 2
         assert plugin.calls['before_create'] == 2
         assert plugin.calls['after_create'] == 0
+        assert plugin.calls['update_package_schema_for_update'] == 0
         assert plugin.calls['before_update'] == 0
         assert plugin.calls['after_update'] == 0
 
@@ -1411,9 +1427,10 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
                 'errored': 1
             }
         )
-
+        assert plugin.calls['update_package_schema_for_create'] == 2
         assert plugin.calls['before_create'] == 2
         assert plugin.calls['after_create'] == 1
+        assert plugin.calls['update_package_schema_for_update'] == 0
         assert plugin.calls['before_update'] == 0
         assert plugin.calls['after_update'] == 0
 
@@ -1460,3 +1477,23 @@ class TestIDCATRDFHarvester(object):
 
         assert values[0] == content
         assert values[1] == []
+
+    def test_update_package_schema_for_create(self):
+
+        i = IDCATRDFHarvester()
+
+        package_schema = dict(some_validator='some.content')
+
+        value = i.update_package_schema_for_create(package_schema)
+
+        assert value == package_schema
+
+    def test_update_package_schema_for_update(self):
+
+        i = IDCATRDFHarvester()
+
+        package_schema = dict(some_validator='some.content')
+
+        value = i.update_package_schema_for_update(package_schema)
+
+        assert value == package_schema

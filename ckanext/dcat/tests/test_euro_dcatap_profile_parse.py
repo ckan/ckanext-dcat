@@ -15,7 +15,7 @@ from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
-                                   GEOJSON_IMT)
+                                   GEOJSON_IMT, VCARD)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 
@@ -258,6 +258,100 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         dataset = [d for d in p.datasets()][0]
         assert dataset['license_id'] == 'cc-by'
 
+    def test_dataset_contact_point_vcard_hasVN_literal(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        contact_point = BNode()
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        g.add((contact_point, VCARD.hasFN, Literal('Point of Contact')))
+        g.add((dataset_ref, DCAT.contactPoint, contact_point))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['contact_name'], 'Point of Contact')
+
+    def test_dataset_contact_point_vcard_hasVN_hasValue(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        contact_point = BNode()
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        hasVN = BNode()
+        g.add((hasVN, VCARD.hasValue, Literal('Point of Contact')))
+        g.add((contact_point, VCARD.hasFN, hasVN))
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        g.add((dataset_ref, DCAT.contactPoint, contact_point))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['contact_name'], 'Point of Contact')
+
+    def test_dataset_contact_point_vcard_hasEmail_hasValue(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        contact_point = BNode()
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        hasEmail = BNode()
+        g.add((hasEmail, VCARD.hasValue, Literal('mailto:contact@some.org')))
+        g.add((contact_point, VCARD.hasEmail, hasEmail))
+        g.add((contact_point, RDF.type, VCARD.Organization))
+        g.add((dataset_ref, DCAT.contactPoint, contact_point))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['contact_email'], 'contact@some.org')
+
+    def test_dataset_access_rights_and_distribution_rights_rights_statement(self):
+        # license_id retrieved from the URI of dcat:license object
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        # access_rights
+        access_rights = BNode()
+        g.add((access_rights, RDF.type, DCT.RightsStatement))
+        g.add((access_rights, RDFS.label, Literal('public dataset')))
+        g.add((dataset_ref, DCT.accessRights, access_rights))
+        # rights
+        rights = BNode()
+        g.add((rights, RDF.type, DCT.RightsStatement))
+        g.add((rights, RDFS.label, Literal('public distribution')))
+        distribution = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((dataset_ref, DCAT.distribution, distribution))
+        g.add((distribution, RDF.type, DCAT.Distribution))
+        g.add((distribution, DCT.rights, rights))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        eq_(extras['access_rights'], 'public dataset')
+        resource = dataset['resources'][0]
+        eq_(resource['rights'], 'public distribution')
+
     def test_distribution_access_url(self):
         g = Graph()
 
@@ -371,6 +465,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         resource = datasets[0]['resources'][0]
 
         assert resource['format'] == u'CSV'
+        assert 'mimetype' not in resource
 
     def test_distribution_format_imt_only(self):
         g = Graph()
@@ -420,7 +515,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert resource['mimetype'] == u'text/csv'
 
     @pytest.mark.ckan_config('ckanext.dcat.normalize_ckan_format', False)
-    def test_distribution_format_format_only_normalize_false(self):
+    def test_distribution_format_format_only_without_slash_normalize_false(self):
         g = Graph()
 
         dataset1 = URIRef("http://example.org/datasets/1")
@@ -428,7 +523,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
         g.add((distribution1_1, RDF.type, DCAT.Distribution))
-        g.add((distribution1_1, DCT['format'], Literal('CSV')))
+        g.add((distribution1_1, DCT['format'], Literal('Comma Separated Values')))
         g.add((dataset1, DCAT.distribution, distribution1_1))
 
         p = RDFParser(profiles=['euro_dcat_ap'])
@@ -439,8 +534,31 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        assert resource['format'] == u'CSV'
+        assert resource['format'] == u'Comma Separated Values'
         assert 'mimetype' not in resource
+
+    @pytest.mark.ckan_config('ckanext.dcat.normalize_ckan_format', False)
+    def test_distribution_format_format_only_with_slash_normalize_false(self):
+        g = Graph()
+
+        dataset1 = URIRef("http://example.org/datasets/1")
+        g.add((dataset1, RDF.type, DCAT.Dataset))
+
+        distribution1_1 = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((distribution1_1, RDF.type, DCAT.Distribution))
+        g.add((distribution1_1, DCT['format'], Literal('text/csv')))
+        g.add((dataset1, DCAT.distribution, distribution1_1))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]['resources'][0]
+
+        assert resource['format'] == u'text/csv'
+        assert resource['mimetype'] == u'text/csv'
 
     def test_distribution_format_unknown_imt(self):
         g = Graph()

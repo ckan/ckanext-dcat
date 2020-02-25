@@ -73,6 +73,16 @@ class TestRDFHarvester(p.SingletonPlugin):
         self.calls['after_create'] += 1
         return None
 
+    def update_package_schema_for_create(self, package_schema):
+        self.calls['update_package_schema_for_create'] += 1
+        package_schema['new_key'] = 'test'
+        return package_schema
+
+    def update_package_schema_for_update(self, package_schema):
+        self.calls['update_package_schema_for_update'] += 1
+        package_schema['new_key'] = 'test'
+        return package_schema
+
 
 class TestRDFNullHarvester(TestRDFHarvester):
     p.implements(IDCATRDFHarvester)
@@ -1282,8 +1292,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         last_job_status = harvest_source['status']['last_job']
         eq_(last_job_status['status'], 'Finished')
 
+        eq_(plugin.calls['update_package_schema_for_create'], 2)
         eq_(plugin.calls['before_create'], 2)
         eq_(plugin.calls['after_create'], 2)
+        eq_(plugin.calls['update_package_schema_for_update'], 0)
         eq_(plugin.calls['before_update'], 0)
         eq_(plugin.calls['after_update'], 0)
 
@@ -1296,8 +1308,10 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         # Run a second job
         self._run_full_job(harvest_source['id'], num_objects=2)
 
+        eq_(plugin.calls['update_package_schema_for_create'], 2)
         eq_(plugin.calls['before_create'], 2)
         eq_(plugin.calls['after_create'], 2)
+        eq_(plugin.calls['update_package_schema_for_update'], 2)
         eq_(plugin.calls['before_update'], 2)
         eq_(plugin.calls['after_update'], 2)
 
@@ -1366,8 +1380,10 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
             }
         )
 
+        eq_(plugin.calls['update_package_schema_for_create'], 2)
         eq_(plugin.calls['before_create'], 2)
         eq_(plugin.calls['after_create'], 0)
+        eq_(plugin.calls['update_package_schema_for_update'], 0)
         eq_(plugin.calls['before_update'], 0)
         eq_(plugin.calls['after_update'], 0)
 
@@ -1439,8 +1455,10 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
             }
         )
 
+        eq_(plugin.calls['update_package_schema_for_create'], 2)
         eq_(plugin.calls['before_create'], 2)
         eq_(plugin.calls['after_create'], 1)
+        eq_(plugin.calls['update_package_schema_for_update'], 0)
         eq_(plugin.calls['before_update'], 0)
         eq_(plugin.calls['after_update'], 0)
 
@@ -1487,3 +1505,23 @@ class TestIDCATRDFHarvester(object):
 
         eq_(values[0], content)
         eq_(values[1], [])
+
+    def test_update_package_schema_for_create(self):
+
+        i = IDCATRDFHarvester()
+
+        package_schema = dict(some_validator='some.content')
+
+        value = i.update_package_schema_for_create(package_schema)
+
+        eq_(value, package_schema)
+
+    def test_update_package_schema_for_update(self):
+
+        i = IDCATRDFHarvester()
+
+        package_schema = dict(some_validator='some.content')
+
+        value = i.update_package_schema_for_update(package_schema)
+
+        eq_(value, package_schema)
