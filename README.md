@@ -938,7 +938,7 @@ Work on ckanext-dcat has been made possible by:
 If you can fund new developments or contribute please get in touch.
 
 
-## Copying and License
+## Copying and License 
 
 This material is copyright (c) Open Knowledge.
 
