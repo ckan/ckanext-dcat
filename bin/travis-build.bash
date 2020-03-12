@@ -53,7 +53,7 @@ if (( $CKAN_MINOR_VERSION >= 9 )) && (( $PYTHON_MAJOR_VERSION == 2 ))
 then
     pip install -r requirements-py2.txt
 else
-    if (( $CKAN_MINOR_VERSION >= 7 ))
+    if (( $CKAN_MINOR_VERSION <= 7 ))
     then
         sed -i -r 's/psycopg2==.*//g' requirements.txt
     fi
@@ -61,7 +61,7 @@ else
 fi
 
 # Override psycopg version to avoid problems with Travis and Postgres 10
-if (( $CKAN_MINOR_VERSION >= 7 ))
+if (( $CKAN_MINOR_VERSION <= 7 ))
 then
     pip install --upgrade psycopg2==2.7.7
 fi
