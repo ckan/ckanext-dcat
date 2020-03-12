@@ -1,10 +1,19 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...HEAD)
 
 * TBD
 
-## [v1.0.0](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...v1.0.0)
+## [v1.1.0](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...v1.1.0) - 2020-03-12
+
+* Python 3 support and new pytest based test suite (#174)
+* Fix `after_show - set_titles` in plugins.py (#172)
+* Add support for DCT.rightsStatement in DCT.accessRights and DCT.rights (#177)
+* Add support for additional vcard representations (#178)
+* Fix format normalization configuration (#175)
+* Introduce the possibility to modify package update/create schema (#176)
+
+## [v1.0.0](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...v1.0.0) - 2019-11-07
 
 * Updating the URLs to dataportals.org (#145)
 * Handle import stage errors (#149)
