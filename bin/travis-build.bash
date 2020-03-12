@@ -55,6 +55,12 @@ then
 else
     pip install -r requirements.txt
 fi
+# Override psycopg version to avoid problems with Travis and Postgres 10
+if (( $CKAN_MINOR_VERSION >= 7 ))
+then
+    pip install --upgrade psycopg2==2.7.7
+fi
+
 pip install -r dev-requirements.txt
 cd -
 
