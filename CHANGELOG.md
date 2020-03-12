@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...HEAD)
+
+* TBD
+
 ## [v1.1.0](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...v1.1.0) - 2020-03-12
 
 * Python 3 support and new pytest based test suite (#174)
