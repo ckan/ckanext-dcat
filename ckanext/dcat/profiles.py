@@ -1,6 +1,3 @@
-from future import standard_library
-standard_library.install_aliases()
-
 from builtins import str
 from past.builtins import basestring
 from builtins import object
@@ -8,7 +5,7 @@ import datetime
 import json
 
 import six
-from urllib.parse import quote
+from six.moves.urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 
