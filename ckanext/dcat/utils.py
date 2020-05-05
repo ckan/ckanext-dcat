@@ -4,7 +4,7 @@ from builtins import str
 import logging
 import uuid
 try:
-    from urllib import quote # Python 2.x
+    from urllib import quote  # Python 2.x
 except ImportError:
     from urllib.parse import quote
 import json
@@ -316,6 +316,7 @@ def url_quote(url):
     if url:
         return quote(url, safe="%/:=&?~#+!$,;'@()[]")
     return url
+
 
 def rdflib_to_url_format(_format):
     '''
