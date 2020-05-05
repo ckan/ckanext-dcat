@@ -100,13 +100,11 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
     ):
 
         # Mock the GET request to get the file
-        responses.add(responses.GET, url,
-                               body=content, content_type=content_type)
+        responses.add(responses.GET, url, body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
-        responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+        responses.add(responses.HEAD, url, status=405, content_type=content_type)
 
         kwargs['source_type'] = 'dcat_json'
         harvest_source = self._create_harvest_source(url, **kwargs)
@@ -137,7 +135,7 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
     def test_harvest_update_new_resources(self):
 
         content = self.json_content_with_distribution
-        content_modified = content.replace(
+        content.replace(
             '"accessURL":"http://example.com/datasets/example1"',
             '"accessURL":"http://example.com/datasets/new"')
         existing_resources, new_resources = \
@@ -158,22 +156,21 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         content_type = self.json_content_type
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
-                               body=content_first_harvest,
-                               content_type=content_type)
+                      body=content_first_harvest,
+                      content_type=content_type)
         # Mock an update in the remote dataset.
         # Change title just to be sure we harvest ok
         content_second_harvest = \
             content_second_harvest.replace('Example dataset 1',
                                            'Example dataset 1 (updated)')
         responses.add(responses.GET, url,
-                               body=content_second_harvest,
-                               content_type=content_type)
-
+                      body=content_second_harvest,
+                      content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+                      status=405, content_type=content_type)
 
         kwargs = {'source_type': 'dcat_json'}
         harvest_source = self._create_harvest_source(url, **kwargs)
@@ -326,4 +323,5 @@ class TestImportStage(object):
         args, _ = mock_save_object_error.call_args_list[0]
 
         assert 'Error importing dataset Invalid tags: ValidationError(None,)' in args[0]
-        assert '{\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]
+        assert '{\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: ' \
+               '-_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]

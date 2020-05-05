@@ -1,4 +1,3 @@
-from builtins import object
 import os
 import json
 import difflib
@@ -13,6 +12,7 @@ def _get_file_as_dict(file_name):
     with open(path, 'r') as f:
         return json.load(f)
 
+
 def _poor_mans_dict_diff(d1, d2):
     def _get_lines(d):
         return sorted([l.strip().rstrip(',')
@@ -25,18 +25,20 @@ def _poor_mans_dict_diff(d1, d2):
     return '\n' + '\n'.join([l for l in difflib.ndiff(d1_lines, d2_lines)
                              if l.startswith(('-', '+'))])
 
+
 def test_ckan_to_dcat():
-    ckan_dict =_get_file_as_dict('full_ckan_dataset.json')
-    expected_dcat_dict =_get_file_as_dict('dataset.json')
+    ckan_dict = _get_file_as_dict('full_ckan_dataset.json')
+    expected_dcat_dict = _get_file_as_dict('dataset.json')
 
     dcat_dict = converters.ckan_to_dcat(ckan_dict)
 
-    assert dcat_dict == expected_dcat_dict,_poor_mans_dict_diff(
+    assert dcat_dict == expected_dcat_dict, _poor_mans_dict_diff(
         expected_dcat_dict, dcat_dict)
 
+
 def test_dcat_to_ckan():
-    dcat_dict =_get_file_as_dict('dataset.json')
-    expected_ckan_dict =_get_file_as_dict('ckan_dataset.json')
+    dcat_dict = _get_file_as_dict('dataset.json')
+    expected_ckan_dict = _get_file_as_dict('ckan_dataset.json')
 
     # Pop CKAN specific fields
     expected_ckan_dict.pop('id', None)
@@ -45,5 +47,5 @@ def test_dcat_to_ckan():
 
     ckan_dict = converters.dcat_to_ckan(dcat_dict)
 
-    assert ckan_dict == expected_ckan_dict,_poor_mans_dict_diff(
+    assert ckan_dict == expected_ckan_dict, _poor_mans_dict_diff(
         expected_ckan_dict, ckan_dict)

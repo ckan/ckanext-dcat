@@ -9,6 +9,7 @@ def test_accept_header_empty():
 
     assert _format is None
 
+
 def test_accept_header_basic_found():
 
     header = 'application/rdf+xml'
@@ -16,6 +17,7 @@ def test_accept_header_basic_found():
     _format = parse_accept_header(header)
 
     assert _format == 'rdf'
+
 
 def test_accept_header_basic_not_found():
 
@@ -25,6 +27,7 @@ def test_accept_header_basic_not_found():
 
     assert _format is None
 
+
 def test_accept_header_multiple():
 
     header = 'application/rdf+xml, application/ld+json'
@@ -32,6 +35,7 @@ def test_accept_header_multiple():
     _format = parse_accept_header(header)
 
     assert _format == 'rdf'
+
 
 def test_accept_header_multiple_not_found():
 
@@ -41,6 +45,7 @@ def test_accept_header_multiple_not_found():
 
     assert _format is None
 
+
 def test_accept_header_multiple_first_not_found():
 
     header = 'image/gif, application/ld+json, text/turtle'
@@ -48,6 +53,7 @@ def test_accept_header_multiple_first_not_found():
     _format = parse_accept_header(header)
 
     assert _format == 'jsonld'
+
 
 def test_accept_header_q_param():
 
@@ -57,6 +63,7 @@ def test_accept_header_q_param():
 
     assert _format == 'ttl'
 
+
 def test_accept_header_q_param_multiple():
 
     header = 'text/turtle; q=0.8, text/n3; q=0.6'
@@ -64,6 +71,7 @@ def test_accept_header_q_param_multiple():
     _format = parse_accept_header(header)
 
     assert _format == 'ttl'
+
 
 def test_accept_header_q_param_multiple_first_not_found():
 
@@ -73,6 +81,7 @@ def test_accept_header_q_param_multiple_first_not_found():
 
     assert _format == 'ttl'
 
+
 def test_accept_header_wildcard():
 
     header = 'text/*'
@@ -80,6 +89,7 @@ def test_accept_header_wildcard():
     _format = parse_accept_header(header)
 
     assert _format in ('ttl', 'n3')
+
 
 def test_accept_header_wildcard_multiple():
 
@@ -89,6 +99,7 @@ def test_accept_header_wildcard_multiple():
 
     assert _format in ('ttl', 'n3')
 
+
 def test_accept_header_double_wildcard():
 
     header = '*/*'
@@ -96,6 +107,7 @@ def test_accept_header_double_wildcard():
     _format = parse_accept_header(header)
 
     assert _format is None
+
 
 def test_accept_header_double_wildcard_multiple():
 
@@ -105,6 +117,7 @@ def test_accept_header_double_wildcard_multiple():
 
     assert _format is None
 
+
 def test_accept_header_html():
 
     header = 'text/html'
@@ -112,6 +125,7 @@ def test_accept_header_html():
     _format = parse_accept_header(header)
 
     assert _format is None
+
 
 def test_accept_header_html_multiple():
 

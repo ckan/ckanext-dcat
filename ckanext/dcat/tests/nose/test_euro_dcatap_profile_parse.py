@@ -151,7 +151,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         eq_(sorted(_get_extra_value_as_list('is_version_of')), [u'https://data.some.org/catalog/datasets/original-dataset'])
         eq_(sorted(_get_extra_value_as_list('source')), [u'https://data.some.org/catalog/datasets/source-dataset-1',
                                                          u'https://data.some.org/catalog/datasets/source-dataset-2'])
-        eq_(sorted(_get_extra_value_as_list('sample')), [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
+        eq_(sorted(_get_extra_value_as_list('sample')),
+            [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample'])
 
         # Dataset URI
         eq_(_get_extra_value('uri'), u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98')
@@ -702,7 +703,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         resource = dataset['resources'][0]
         eq_(resource['name'], u'download.zip')
         eq_(resource['url'], u'http://example2.org/files/download.zip')
-        eq_(resource['access_url'], u'https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47')
+        eq_(resource['access_url'], u'https://ckan.example.org/dataset/'
+                                    u'd4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47')
         eq_(resource['download_url'], u'http://example2.org/files/download.zip')
 
     def test_dataset_compatibility_mode(self):
@@ -772,7 +774,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         for subcatalog in subcatalogs:
             datasets = p.g.objects(subcatalog, DCAT.dataset)
             for dataset in datasets:
-                subdatasets.append((dataset,subcatalog,))
+                subdatasets.append((dataset, subcatalog,))
         assert_true(subdatasets)
 
         datasets = dict([(d['title'], d) for d in p.datasets()])
@@ -879,7 +881,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         assert_true('spatial_uri' not in extras)
         eq_(extras['spatial_text'], 'Newark')
         eq_(extras['spatial'], '{"type": "Point", "coordinates": [23, 45]}')
-
 
     def test_spatial_rdfs_label(self):
         g = Graph()
@@ -1053,7 +1054,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert_true(self.VALID_TAG in datasets[0]['tags'])
         assert_true(self.INVALID_TAG not in datasets[0]['tags'])
-
 
     @helpers.change_config(DCAT_CLEAN_TAGS, 'false')
     def test_tags_with_commas_clean_tags_off(self):

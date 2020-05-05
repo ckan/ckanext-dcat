@@ -408,7 +408,8 @@ class DCATRDFHarvester(DCATHarvester):
                 log.info('Created dataset %s' % dataset['name'])
 
         except Exception as e:
-            self._save_object_error('Error importing dataset %s: %r / %s' % (dataset.get('name', ''), e, traceback.format_exc()), harvest_object, 'Import')
+            self._save_object_error('Error importing dataset %s: %r / %s' %
+                                    (dataset.get('name', ''), e, traceback.format_exc()), harvest_object, 'Import')
             return False
 
         finally:

@@ -5,6 +5,7 @@ import ckan.plugins as p
 
 import ckanext.dcat.utils as utils
 
+
 class MixinDCATPlugin(p.SingletonPlugin):
     p.implements(p.IRoutes, inherit=True)
 
@@ -37,6 +38,7 @@ class MixinDCATPlugin(p.SingletonPlugin):
                          ckan_icon='sitemap')
 
         return _map
+
 
 class MixinDCATJSONInterface(p.SingletonPlugin):
     p.implements(p.IRoutes, inherit=True)

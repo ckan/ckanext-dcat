@@ -272,7 +272,7 @@ class TestEndpoints():
 
     def test_catalog_modified_date(self, app):
 
-        dataset1 = factories.Dataset(title='First dataset')
+        factories.Dataset(title='First dataset')
         time.sleep(1)
         dataset2 = factories.Dataset(title='Second dataset')
 
@@ -305,12 +305,11 @@ class TestEndpoints():
     def test_catalog_q_search(self, app):
 
         dataset1 = factories.Dataset(title='First dataset')
-        dataset2 = factories.Dataset(title='Second dataset')
+        factories.Dataset(title='Second dataset')
 
         url = url_for('dcat.read_catalog',
                       _format='ttl',
                       q='First')
-
 
         response = app.get(url)
         content = response.body
@@ -333,7 +332,7 @@ class TestEndpoints():
             title='Second dataset',
             tags=[{'name': 'economy'}]
         )
-        dataset3 = factories.Dataset(
+        factories.Dataset(
             title='Third dataset',
             tags=[{'name': 'statistics'}]
         )
@@ -341,7 +340,6 @@ class TestEndpoints():
         url = url_for('dcat.read_catalog',
                       _format='ttl',
                       fq='tags:economy')
-
 
         response = app.get(url)
         content = response.body
@@ -377,13 +375,13 @@ class TestEndpoints():
         assert self._object_value(g, pagination, HYDRA.itemsPerPage) == '10'
 
         assert (_sort_query_params(self._object_value(g, pagination, HYDRA.firstPage)) ==
-            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=1, _external=True)))
+                _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=1, _external=True)))
 
         assert (_sort_query_params(self._object_value(g, pagination, HYDRA.nextPage)) ==
-            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=2, _external=True)))
+                _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=2, _external=True)))
 
         assert (_sort_query_params(self._object_value(g, pagination, HYDRA.lastPage)) ==
-            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=2, _external=True)))
+                _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=2, _external=True)))
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 10)
     def test_catalog_pagination_parameters(self, app):
@@ -400,14 +398,14 @@ class TestEndpoints():
         g = Graph()
         g.parse(data=content, format='xml')
 
-
         pagination = [o for o in g.subjects(RDF.type, HYDRA.PagedCollection)][0]
 
         assert self._object_value(g, pagination, HYDRA.itemsPerPage) == '10'
 
         assert (
             _sort_query_params(self._object_value(g, pagination, HYDRA.firstPage)) ==
-            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=1, _external=True, modified_since='2018-03-22'))
+            _sort_query_params(url_for('dcat.read_catalog', _format='rdf', page=1, _external=True,
+                                       modified_since='2018-03-22'))
         )
 
     def test_catalog_profiles_not_found(self, app):
@@ -552,7 +550,7 @@ class TestTranslations():
         response = app.get(url)
 
         assert 'Notes de la versió' in response.body
-        assert not 'Version notes' in response.body
+        assert 'Version notes' not in response.body
 
     @pytest.mark.ckan_config('ckanext.dcat.translate_keys', False)
     def test_labels_disable_by_config(self, app):
@@ -564,8 +562,8 @@ class TestTranslations():
 
         response = app.get(url)
 
-        assert not 'Notes de la versió' in response.body
-        assert not 'Version notes' in response.body
+        assert 'Notes de la versió' not in response.body
+        assert 'Version notes' not in response.body
         assert 'version_notes' in response.body
 
 
@@ -595,4 +593,4 @@ class TestStructuredData():
         url = url_for('dataset.read', id=dataset['name'])
 
         response = app.get(url)
-        assert not '<script type="application/ld+json">' in response.body
+        assert '<script type="application/ld+json">' not in response.body

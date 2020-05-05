@@ -77,8 +77,7 @@ class TestRDFParser(object):
 
         p = RDFParser()
 
-        assert (sorted([pr.name for pr in p._profiles]) ==
-            sorted(DEFAULT_RDF_PROFILES))
+        assert (sorted([pr.name for pr in p._profiles]) == sorted(DEFAULT_RDF_PROFILES))
 
     def test_profiles_via_config_option(self):
 
@@ -179,7 +178,7 @@ class TestRDFParser(object):
 
         p.parse(data)
 
-        assert p.next_page() == None
+        assert p.next_page() is None
 
     def test_parse_pagination_last_page(self):
 
@@ -202,7 +201,7 @@ class TestRDFParser(object):
 
         p.parse(data)
 
-        assert p.next_page() == None
+        assert p.next_page() is None
 
     def test_parse_data_different_format(self):
 

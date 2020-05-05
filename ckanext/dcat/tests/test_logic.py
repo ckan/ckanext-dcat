@@ -234,7 +234,8 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=1'
+        assert pagination['current'] == 'http://example.com/feed/catalog.xml?' \
+                                        'modified_since=2018-03-22&profiles=schemaorg&page=1'
         assert pagination['first'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=1'
         assert pagination['last'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=2'
         assert pagination['next'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=2'

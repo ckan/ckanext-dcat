@@ -579,7 +579,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'issued': '2015-06-26T15:21:09.034694',
             'modified': '2015-06-26T15:21:09.075774',
             'size': 1234,
-            'documentation': '[\"http://dataset.info.org/distribution1/doc1\", \"http://dataset.info.org/distribution1/doc2\"]',
+            'documentation': '[\"http://dataset.info.org/distribution1/doc1\", '
+                             '\"http://dataset.info.org/distribution1/doc2\"]',
             'language': '[\"en\", \"es\", \"http://publications.europa.eu/resource/authority/language/ITA\"]',
             'conforms_to': '[\"Standard 1\", \"Standard 2\"]',
             'hash': '4304cf2e751e6053c90b1804c89c0ebb758f395a',

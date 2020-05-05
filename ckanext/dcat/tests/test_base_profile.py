@@ -94,7 +94,7 @@ class TestBaseRDFProfile(object):
         _object = p._object(URIRef('http://example.org/datasets/1'),
                             DCT.unknown_property)
 
-        assert _object == None
+        assert _object is None
 
     def test_object_value(self):
 
@@ -204,7 +204,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value_int(URIRef('http://example.org/datasets/1'),
                                     TEST.some_number)
 
-        assert value == None
+        assert value is None
 
     def test_object_int_wrong_value(self):
 
@@ -217,7 +217,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value_int(URIRef('http://example.org/datasets/1'),
                                     TEST.some_number)
 
-        assert value == None
+        assert value is None
 
     def test_object_list(self):
 

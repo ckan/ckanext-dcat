@@ -290,7 +290,8 @@ class DCATJSONHarvester(DCATHarvester):
             dataset = json.loads(harvest_object.content)
             dataset_name = dataset.get('name', '')
 
-            self._save_object_error('Error importing dataset %s: %r / %s' % (dataset_name, e, traceback.format_exc()), harvest_object, 'Import')
+            self._save_object_error('Error importing dataset %s: %r / %s'
+                                    % (dataset_name, e, traceback.format_exc()), harvest_object, 'Import')
             return False
 
         finally:

@@ -9,10 +9,8 @@ import re
 import operator
 
 
-import re
-import operator
-
 from ckantoolkit import config, h
+from ckanext.dcat.exceptions import RDFProfileException
 
 try:
     # CKAN >= 2.6
@@ -28,7 +26,6 @@ import ckan.plugins.toolkit as toolkit
 # For parsing {name};q=x and {name} style fields from the accept header
 accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
-from ckanext.dcat.exceptions import RDFProfileException
 
 if toolkit.check_ckan_version(max_version='2.8.99'):
     from ckan.controllers.package import PackageController
@@ -333,6 +330,7 @@ def rdflib_to_url_format(_format):
 # For parsing {name};q=x and {name} style fields from the accept header
 accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
+
 def parse_accept_header(accept_header=''):
     '''
     Parses the supplied accept header and tries to determine
@@ -396,8 +394,7 @@ def generate_static_json(output):
         try:
             data_dict['page'] = data_dict['page'] + 1
             datasets = \
-                toolkit.get_action('dcat_datasets_list')({},
-                                                           data_dict)
+                toolkit.get_action('dcat_datasets_list')({}, data_dict)
         except toolkit.ValidationError as e:
             log.exception(e)
             break
@@ -422,18 +419,17 @@ def check_access_header():
 
 
 def dcat_json_page():
-     data_dict = {
-         'page': toolkit.request.params.get('page'),
-         'modified_since': toolkit.request.params.get('modified_since'),
-     }
+    data_dict = {
+        'page': toolkit.request.params.get('page'),
+        'modified_since': toolkit.request.params.get('modified_since'),
+    }
 
-     try:
-         datasets = toolkit.get_action('dcat_datasets_list')({},
-                                                             data_dict)
-     except toolkit.ValidationError as e:
-         return toolkit.abort(409, str(e))
+    try:
+        datasets = toolkit.get_action('dcat_datasets_list')({}, data_dict)
+    except toolkit.ValidationError as e:
+        return toolkit.abort(409, str(e))
 
-     return datasets
+    return datasets
 
 
 def read_dataset_page(_id, _format):
@@ -452,7 +448,7 @@ def read_dataset_page(_id, _format):
 
     try:
         response = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
-            'format': _format, 'profiles': _profiles})
+                                                                'format': _format, 'profiles': _profiles})
     except toolkit.ObjectNotFound:
         toolkit.abort(404)
     except (toolkit.ValidationError, RDFProfileException) as e:
@@ -466,6 +462,7 @@ def read_dataset_page(_id, _format):
         response.headers['Content-type'] = CONTENT_TYPES[_format]
 
     return response
+
 
 def read_catalog_page(_format):
     if not _format:

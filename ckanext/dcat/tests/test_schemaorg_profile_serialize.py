@@ -7,7 +7,6 @@ from dateutil.parser import parse as parse_date
 from rdflib import URIRef, Literal
 from rdflib.namespace import RDF
 
-from ckantoolkit.tests import helpers
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import click
-import ckan.plugins.toolkit as tk
 import ckanext.dcat.utils as utils
+
 
 @click.group()
 def generate_static():
@@ -10,6 +10,7 @@ def generate_static():
 
     """
     pass
+
 
 @generate_static.command()
 @click.argument('output', type=click.File(mode="w"))

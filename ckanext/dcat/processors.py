@@ -31,7 +31,6 @@ COMPAT_MODE_CONFIG_OPTION = 'ckanext.dcat.compatibility_mode'
 DEFAULT_RDF_PROFILES = ['euro_dcat_ap']
 
 
-
 class RDFProcessor(object):
 
     def __init__(self, profiles=None, compatibility_mode=False):

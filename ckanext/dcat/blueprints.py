@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, jsonify, make_response
+from flask import Blueprint, jsonify
 
 from ckantoolkit import config
 
@@ -21,6 +21,7 @@ def read_catalog(_format=None, package_type=None):
 
 def read_dataset(_id, _format=None, package_type=None):
     return utils.read_dataset_page(_id, _format)
+
 
 if toolkit.asbool(config.get(utils.ENABLE_RDF_ENDPOINTS_CONFIG, True)):
 

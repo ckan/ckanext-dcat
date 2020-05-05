@@ -11,7 +11,7 @@ import ckan.tests.factories as factories
 
 from ckanext.dcat.harvesters._json import copy_across_resource_ids, DCATJSONHarvester
 
-from .test_harvester import FunctionalHarvestTest, harvest_setup, clean_queues
+from .test_harvester import FunctionalHarvestTest
 
 
 @pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index', 'harvest_setup', 'clean_queues')
@@ -103,12 +103,12 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
-                               body=content, content_type=content_type)
+                      body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+                      status=405, content_type=content_type)
 
         kwargs['source_type'] = 'dcat_json'
         harvest_source = self._create_harvest_source(url, **kwargs)
@@ -156,8 +156,8 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         content_type = self.json_content_type
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
-                               body=content_first_harvest,
-                               content_type=content_type)
+                      body=content_first_harvest,
+                      content_type=content_type)
 
         # Mock an update in the remote dataset.
         # Change title just to be sure we harvest ok
@@ -165,13 +165,13 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
             content_second_harvest.replace('Example dataset 1',
                                            'Example dataset 1 (updated)')
         responses.add(responses.GET, url,
-                               body=content_second_harvest,
-                               content_type=content_type)
+                      body=content_second_harvest,
+                      content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+                      status=405, content_type=content_type)
 
         kwargs = {'source_type': 'dcat_json'}
         harvest_source = self._create_harvest_source(url, **kwargs)
@@ -189,7 +189,6 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
 
         existing_dataset = results['results'][0]
         existing_resources = existing_dataset.get('resources')
-
 
         # Run a second job
         self._run_full_job(harvest_source['id'])
@@ -263,8 +262,8 @@ class TestCopyAcrossResourceIds(object):
             harvested_dataset,
         )
         assert ([(r.get('id'), r['title']) for r in harvested_dataset['resources']] ==
-            [('1', 'link1'), ('5', 'link5'), ('3', 'link3'), ('2', 'link2'),
-             ('4', 'link4'), (None, 'link new')])
+                [('1', 'link1'), ('5', 'link5'), ('3', 'link3'), ('2', 'link2'),
+                 ('4', 'link4'), (None, 'link new')])
 
     def test_not_copied_because_completely_different(self):
         harvested_dataset = {'resources': [
@@ -273,7 +272,8 @@ class TestCopyAcrossResourceIds(object):
             {'url': 'http://abc', 'title': 'link', 'id': '1'}]},
             harvested_dataset,
         )
-        assert harvested_dataset['resources'][0].get('id') == None
+        assert harvested_dataset['resources'][0].get('id') is None
+
 
 @pytest.mark.usefixtures('clean_db', 'clean_index', 'harvest_setup', 'clean_queues')
 class TestImportStage(object):

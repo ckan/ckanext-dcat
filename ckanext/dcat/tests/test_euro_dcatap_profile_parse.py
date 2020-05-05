@@ -10,9 +10,6 @@ from rdflib.namespace import RDF
 
 from ckan.plugins import toolkit
 
-from ckantoolkit import config
-from ckantoolkit.tests import helpers, factories
-
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT, VCARD)
@@ -99,11 +96,11 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         # Tags
 
         assert (sorted(dataset['tags'], key=lambda k: k['name']) ==
-            [
-                {'name': u'exploration'},
-                {'name': u'geochemistry'},
-                {'name': u'geology'}
-            ])
+                [
+                    {'name': u'exploration'},
+                    {'name': u'geochemistry'},
+                    {'name': u'geology'}
+                ])
 
         # Extras
 
@@ -144,7 +141,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
                  u'http://eurovoc.europa.eu/209065'])
         assert sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1' == u'Standard 2']
 
-        assert sorted(_get_extra_value_as_list('alternate_identifier')), [u'alternate-identifier-1' == u'alternate-identifier-2']
+        assert sorted(_get_extra_value_as_list('alternate_identifier')), \
+            [u'alternate-identifier-1' == u'alternate-identifier-2']
         assert (sorted(_get_extra_value_as_list('documentation')) ==
                 [u'http://dataset.info.org/doc1',
                  u'http://dataset.info.org/doc2'])
@@ -154,11 +152,13 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert (sorted(_get_extra_value_as_list('has_version')) ==
                 [u'https://data.some.org/catalog/datasets/derived-dataset-1',
                  u'https://data.some.org/catalog/datasets/derived-dataset-2'])
-        assert sorted(_get_extra_value_as_list('is_version_of')) == [u'https://data.some.org/catalog/datasets/original-dataset']
+        assert sorted(_get_extra_value_as_list('is_version_of')) == [u'https://data.some.org/'
+                                                                     u'catalog/datasets/original-dataset']
         assert (sorted(_get_extra_value_as_list('source')) ==
                 [u'https://data.some.org/catalog/datasets/source-dataset-1',
                  u'https://data.some.org/catalog/datasets/source-dataset-2'])
-        assert sorted(_get_extra_value_as_list('sample')) == [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample']
+        assert sorted(_get_extra_value_as_list('sample')) == [u'https://data.some.org/catalog/datasets/'
+                                                              u'9df8df51-63db-37a8-e044-0003ba9b0d98/sample']
 
         # Dataset URI
         assert _get_extra_value('uri') == u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98'
@@ -666,7 +666,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         # IANA mediatype URI should be added to mimetype field as well
         assert u'json' in resources[0].get('format').lower()
         assert (u'https://www.iana.org/assignments/media-types/application/json' ==
-            resources[0].get('mimetype'))
+                resources[0].get('mimetype'))
 
     def test_distribution_mediatype_iana_uri_without_format(self):
         resources = self._build_and_parse_format_mediatype_graph(
@@ -674,17 +674,17 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         )
         # IANA mediatype URI should be added to mimetype field and to format as well
         assert (u'https://www.iana.org/assignments/media-types/application/json' ==
-            resources[0].get('mimetype'))
+                resources[0].get('mimetype'))
         assert (u'https://www.iana.org/assignments/media-types/application/json' ==
-            resources[0].get('format'))
+                resources[0].get('format'))
 
     def test_distribution_dct_format_other_uri(self):
         resources = self._build_and_parse_format_mediatype_graph(
             format_item=URIRef("https://example.com/my/format")
         )
         assert (u'https://example.com/my/format' ==
-            resources[0].get('format'))
-        assert None == resources[0].get('mimetype')
+                resources[0].get('format'))
+        assert resources[0].get('mimetype') is None
 
     def test_distribution_dct_format_mediatype_text(self):
         resources = self._build_and_parse_format_mediatype_graph(
@@ -693,7 +693,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         # IANA mediatype should be added to mimetype field as well
         assert u'json' in resources[0].get('format').lower()
         assert (u'application/json' ==
-            resources[0].get('mimetype'))
+                resources[0].get('mimetype'))
 
     def test_distribution_format_and_dcat_mediatype(self):
         # Even if dct:format is a valid IANA type, prefer dcat:mediaType if given
@@ -704,7 +704,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         # both should be stored
         assert u'json' in resources[0].get('format').lower()
         assert (u'test-mediatype' ==
-            resources[0].get('mimetype'))
+                resources[0].get('mimetype'))
 
     def test_catalog_xml_rdf(self):
 
@@ -803,7 +803,9 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         resource = dataset['resources'][0]
         assert resource['name'] == u'download.zip'
         assert resource['url'] == u'http://example2.org/files/download.zip'
-        assert resource['access_url'] == u'https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47'
+        assert resource['access_url'] == u'https://ckan.example.org/dataset/' \
+                                         u'd4ce4e6e-ab89-44cb-bf5c-33a162c234de/' \
+                                         u'resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47'
         assert resource['download_url'] == u'http://example2.org/files/download.zip'
 
     def test_dataset_compatibility_mode(self):
@@ -873,7 +875,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         for subcatalog in subcatalogs:
             datasets = p.g.objects(subcatalog, DCAT.dataset)
             for dataset in datasets:
-                subdatasets.append((dataset,subcatalog,))
+                subdatasets.append((dataset, subcatalog,))
         assert subdatasets
 
         datasets = dict([(d['title'], d) for d in p.datasets()])
@@ -1153,7 +1155,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert self.VALID_TAG in datasets[0]['tags']
         assert self.INVALID_TAG not in datasets[0]['tags']
-
 
     @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
     def test_tags_with_commas_clean_tags_off(self):

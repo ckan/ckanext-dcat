@@ -4,8 +4,6 @@ from builtins import range
 import time
 import nose
 
-from six.moves import xrange
-
 from ckan import plugins as p
 from ckan.lib.helpers import url_for
 
@@ -340,7 +338,7 @@ class TestEndpoints(DCATFunctionalTestBase):
     def test_catalog_q_search(self):
 
         dataset1 = factories.Dataset(title='First dataset')
-        dataset2 = factories.Dataset(title='Second dataset')
+        factories.Dataset(title='Second dataset')
 
         url = url_for('dcat_catalog',
                       _format='ttl',
@@ -368,7 +366,7 @@ class TestEndpoints(DCATFunctionalTestBase):
             title='Second dataset',
             tags=[{'name': 'economy'}]
         )
-        dataset3 = factories.Dataset(
+        factories.Dataset(
             title='Third dataset',
             tags=[{'name': 'statistics'}]
         )
