@@ -11,7 +11,7 @@ import ckan.tests.factories as factories
 
 from ckanext.dcat.harvesters._json import copy_across_resource_ids, DCATJSONHarvester
 
-from .test_harvester import FunctionalHarvestTest
+from .test_harvester import FunctionalHarvestTest, harvest_setup, clean_queues  # noqa: F401
 
 
 @pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index', 'harvest_setup', 'clean_queues')
