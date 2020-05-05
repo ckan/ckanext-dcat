@@ -70,8 +70,9 @@ class DCATJSONHarvester(DCATHarvester):
         # Get the previous guids for this source
         query = \
             model.Session.query(HarvestObject.guid, HarvestObject.package_id) \
-            .filter(HarvestObject.current is True) \
-            .filter(HarvestObject.harvest_source_id == harvest_job.source.id)
+            .filter(
+                HarvestObject.current == True  # noqa
+            ).filter(HarvestObject.harvest_source_id == harvest_job.source.id)
         guid_to_package_id = {}
 
         for guid, package_id in query:
@@ -211,8 +212,9 @@ class DCATJSONHarvester(DCATHarvester):
         # Get the last harvested object (if any)
         previous_object = model.Session.query(HarvestObject) \
             .filter(HarvestObject.guid == harvest_object.guid) \
-            .filter(HarvestObject.current is True) \
-            .first()
+            .filter(
+            HarvestObject.current == True  # noqa
+        ).first()
 
         # Flag previous object as not current anymore
         if previous_object and not self.force_import:

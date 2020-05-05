@@ -103,9 +103,10 @@ class DCATRDFHarvester(DCATHarvester):
         object_ids = []
 
         # Get all previous current guids and dataset ids for this source
-        query = model.Session.query(HarvestObject.guid, HarvestObject.package_id) \
-                             .filter(HarvestObject.current is True) \
-                             .filter(HarvestObject.harvest_source_id == harvest_job.source.id)
+        query = model.Session.query(HarvestObject.guid, HarvestObject.package_id)\
+            .filter(
+            HarvestObject.current == True  # noqa
+        ).filter(HarvestObject.harvest_source_id == harvest_job.source.id)
 
         guid_to_package_id = {}
         for guid, package_id in query:
@@ -291,8 +292,9 @@ class DCATRDFHarvester(DCATHarvester):
         # Get the last harvested object (if any)
         previous_object = model.Session.query(HarvestObject) \
                                        .filter(HarvestObject.guid == harvest_object.guid) \
-                                       .filter(HarvestObject.current is True) \
-                                       .first()
+                                       .filter(
+            HarvestObject.current == True  # noqa
+        ).first()
 
         # Flag previous object as not current anymore
         if previous_object:
