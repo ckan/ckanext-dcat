@@ -3,7 +3,10 @@
 from builtins import str
 import logging
 import uuid
-import urllib
+try:
+    from urllib import quote # Python 2.x
+except ImportError:
+    from urllib.parse import quote
 import json
 import re
 import operator
@@ -311,7 +314,7 @@ def url_to_rdflib_format(_format):
 
 def url_quote(url):
     if url:
-        return urllib.quote(url, safe="%/:=&?~#+!$,;'@()[]")
+        return quote(url, safe="%/:=&?~#+!$,;'@()[]")
     return url
 
 def rdflib_to_url_format(_format):
