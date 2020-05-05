@@ -1,0 +1,63 @@
+{
+  "@context": {
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "vcard": "http://www.w3.org/2006/vcard/ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "https://example.org#catalog",
+      "@type": "dcat:Catalog",
+      "dcat:dataset": {
+        "@id": "https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de#dataset"
+      },
+      "dcterms:description": "Description example.org",
+      "dcterms:publisher": {
+        "@id": "https://www.example.org/impressum#publisher"
+      },
+      "dcterms:title": "Title example.org"
+    },
+    {
+      "@id": "https://www.example.org/impressum#publisher",
+      "@type": "foaf:Organization",
+      "foaf:name": "Organization example.org"
+    },
+    {
+      "@id": "https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de#dataset",
+      "@type": "dcat:Dataset",
+      "dcat:contactPoint": {
+        "@id": "_:ub1365bL31C21"
+      },
+      "dcat:distribution": {
+        "@id": "https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47#distribution"
+      },
+      "dcterms:description": "Description distribution",
+      "dcterms:title": "Title dataset"
+    },
+    {
+      "@id": "_:ub1365bL31C21",
+      "@type": "vcard:Individual",
+      "vcard:fn": "Jane Doe",
+      "vcard:hasEmail": "mailto:jane.doe@agency.gov",
+      "vcard:hasTelephone": "+49 40 123 45678"
+    },
+    {
+      "@id": "https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47#distribution",
+      "@type": "dcat:Distribution",
+      "dcterms:title": "download.zip",
+      "dcat:accessURL": {
+        "@id": "https://ckan.example.org/dataset/d4ce4e6e-ab89-44cb-bf5c-33a162c234de/resource/a289c289-55c9-410f-b4c7-f88e5f6f4e47"
+      },
+      "dcat:downloadURL": {
+        "@id": "http://example2.org/files/download.zip"
+      },
+      "dcterms:license": {
+        "@id": "http://www.opendefinition.org/licenses/cc-zero"
+      }
+    }
+  ]
+}

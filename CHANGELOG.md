@@ -1,6 +1,38 @@
 # Changelog
 
-## v0.0.8
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...HEAD)
+
+* TBD
+
+## [v1.1.0](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...v1.1.0) - 2020-03-12
+
+* Python 3 support and new pytest based test suite (#174)
+* Fix `after_show - set_titles` in plugins.py (#172)
+* Add support for DCT.rightsStatement in DCT.accessRights and DCT.rights (#177)
+* Add support for additional vcard representations (#178)
+* Fix format normalization configuration (#175)
+* Introduce the possibility to modify package update/create schema (#176)
+
+## [v1.0.0](https://github.com/ckan/ckanext-dcat/compare/v0.0.9...v1.0.0) - 2019-11-07
+
+* Updating the URLs to dataportals.org (#145)
+* Handle import stage errors (#149)
+* Pass `q` and `fq` parameters in catalog endpoint (#152)
+* Include templates in package (#154)
+* Ignore auth in internal search call (#156)
+* Support URIRef for dct:language (#158)
+* Support JSON-LD catalogs with @graph (#159)
+* Make read keywords re-usable (#160)
+* Extract read datasets from db to make it re-usable (#161)
+
+## [v0.0.9](https://github.com/ckan/ckanext-dcat/compare/v0.0.8...v0.0.9) - 2019-01-10
+
+* Make _object_value_int more robust by accepting decimals as well (#133)
+* Prefer default language values for some Literal nodes (#143)
+* Improved dct:format and dcat:mediaType handling (#144)
+* Assign URIRef or Literal types based on content (#140)
+
+## [v0.0.8](https://github.com/ckan/ckanext-dcat/compare/v0.0.7...v0.0.8) - 2018-10-05
 
 * Support for CKAN >= 2.8
 * Schema.org mapping improvements (#120, #139)
@@ -11,7 +43,7 @@
 * Improve email addresses handling (#134)
 * Escape and clean URL references (#138)
 
-## v0.0.7
+## [v0.0.7](https://github.com/ckan/ckanext-dcat/compare/v0.0.6...v0.0.7) - 2018-02-16
 
 * Support for embedding Schema.org structured data in dataset pages (#75)
 * Improve the error handling in the harvesting gather and import stage (#95)
@@ -22,7 +54,7 @@
 * Support fot cleaning tags in harvester (#103)
 
 
-## v0.0.6
+## [v0.0.6](https://github.com/ckan/ckanext-dcat/compare/v0.0.5...v0.0.6) - 2017-02-24
 
 * Use Resources rather than Literals for dcat:landingPage, dcat:accessURL,
    dcat:downloadURL, foaf:homepage, dcat:theme (#66)

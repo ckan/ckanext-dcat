@@ -35,12 +35,13 @@ It also offers other features related to Semantic Data like exposing the necessa
 - [Translation of fields](#translation-of-fields)
 - [Structured Data and Google Dataset Search indexing](#structured-data-and-google-dataset-search-indexing)
 - [Running the Tests](#running-the-tests)
+- [Releases](#releases)
 - [Acknowledgements](#acknowledgements)
 - [Copying and License](#copying-and-license)
 
 ## Overview
 
-With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [http://publicdata.eu](http://publicdata.eu) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
+With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [the EU Open Data Portal](https://data.europa.eu/euodp/en/data/) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
 
 There is growing consensus around [DCAT](http://www.w3.org/TR/vocab-dcat) being the right way forward, but actual implementations are needed. This extension aims to provide tools and guidance to allow publishers to publish and share DCAT based metadata easily.
 
@@ -105,12 +106,13 @@ The extension will determine the RDF serialization format returned. The currentl
 
 The fallback `rdf` format defaults to RDF/XML.
 
-Here's an example of the different formats available (links might not be live as they link to a demo site):
+Here's an example of the different formats:
 
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.rdf
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.ttl
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.n3
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.rdf
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.xml
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.ttl
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.n3
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.jsonld
 
 RDF representations will be advertised using `<link rel="alternate">` tags on the `<head>` sectionon the dataset page source code, eg:
 
@@ -128,8 +130,8 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 You can specify the profile by using the `profiles=<profile1>,<profile2>` query parameter on the dataset endpoint (as a comma-separated list):
 
-* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml?profiles=euro_dcat_ap,sweden_dcat_ap`
-* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.jsonld?profiles=schemaorg`
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.xml?profiles=euro_dcat_ap
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.jsonld?profiles=schemaorg
 
 *Note*: When using this plugin, the above endpoints will replace the old deprecated ones that were part of CKAN core.
 
@@ -138,7 +140,7 @@ You can specify the profile by using the `profiles=<profile1>,<profile2>` query 
 
 Additionally to the individual dataset representations, the extension also offers a catalog-wide endpoint for retrieving multiple datasets at the same time (the datasets are paginated, see below for details):
 
-    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]
+    https://{ckan-instance-host}/catalog.{format}?[page={page}]&[modified_since={date}]&[profiles={profile1},{profile2}]&[q={query}]&[fq={filter query}]
 
 This endpoint can be customized if necessary using the `ckanext.dcat.catalog_endpoint` configuration option, eg:
 
@@ -186,6 +188,11 @@ http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
 It's possible to specify the profile(s) to use for the serialization using the `profiles` parameter:
 
 http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
+
+To filter the output, the catalog endpoint supports the `q` and `fq` parameters to specify a [search query](https://lucene.apache.org/solr/guide/6_6/the-dismax-query-parser.html#TheDisMaxQueryParser-TheqParameter) or [filter query](https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-Thefq_FilterQuery_Parameter):
+
+http://demo.ckan.org/catalog.xml?q=budget
+http://demo.ckan.org/catalog.xml?fq=tags:economy
 
 
 
@@ -903,9 +910,23 @@ Example output of structured data in JSON-LD:
 
 ## Running the Tests
 
-To run the tests, do:
+To run the tests on CKAN >= 2.9, do:
 
-    nosetests --nologcapture --ckan --with-pylons=test.ini ckanext
+    pytest --ckan-ini=test.ini ckanext/dcat/tests
+
+
+To run the tests on CKAN <= 2.8, do:
+
+    nosetests --nologcapture --ckan --with-pylons=test-nose.ini ckanext/dcat/tests/nose
+    
+## Releases
+
+To create a new release, follow these steps:
+
+* Determine new release number based on the rules of [semantic versioning](http://semver.org)
+* Update the CHANGELOG, especially the link for the "Unreleased" section
+* Update the version number in `setup.py`
+* Create a new release on GitHub and add the CHANGELOG of this release as release notes
 
 ## Acknowledgements
 
@@ -917,7 +938,7 @@ Work on ckanext-dcat has been made possible by:
 If you can fund new developments or contribute please get in touch.
 
 
-## Copying and License
+## Copying and License 
 
 This material is copyright (c) Open Knowledge.
 

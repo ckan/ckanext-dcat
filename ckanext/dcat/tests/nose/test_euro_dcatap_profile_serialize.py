@@ -2,7 +2,7 @@ from builtins import str
 from builtins import object
 import json
 
-import pytest
+import nose
 
 from ckantoolkit import config
 
@@ -19,6 +19,9 @@ from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
                                    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
+
+eq_ = nose.tools.eq_
+assert_true = nose.tools.assert_true
 
 
 class BaseSerializeTest(object):
@@ -66,8 +69,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         resource_ref = list(g.objects(dataset_ref, DCAT.distribution))[0]
         dct_format = list(g.objects(resource_ref, DCT['format']))
         dcat_mediatype = list(g.objects(resource_ref, DCAT.mediaType))
-        assert expected_format == dct_format
-        assert expected_mediatype == dcat_mediatype
+        eq_(expected_format, dct_format)
+        eq_(expected_mediatype, dcat_mediatype)
 
     def _get_base_dataset_with_resource(self):
         """
@@ -114,17 +117,11 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'documentation', 'value': '[\"http://dataset.info.org/doc1\", \"http://dataset.info.org/doc2\"]'},
                 {'key': 'provenance', 'value': 'Some statement about provenance'},
                 {'key': 'dcat_type', 'value': 'test-type'},
-                {'key': 'related_resource', 'value':
-                 '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
-                {'key': 'has_version', 'value':
-                 '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", '
-                 '\"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
+                {'key': 'related_resource', 'value': '[\"http://dataset.info.org/related1\", \"http://dataset.info.org/related2\"]'},
+                {'key': 'has_version', 'value': '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", \"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
                 {'key': 'is_version_of', 'value': '[\"https://data.some.org/catalog/datasets/original-dataset\"]'},
-                {'key': 'source', 'value':
-                 '[\"https://data.some.org/catalog/datasets/source-dataset-1\", '
-                 '\"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
-                {'key': 'sample', 'value':
-                 '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
+                {'key': 'source', 'value': '[\"https://data.some.org/catalog/datasets/source-dataset-1\", \"https://data.some.org/catalog/datasets/source-dataset-2\"]'},
+                {'key': 'sample', 'value': '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\"]'},
             ]
         }
         extras = self._extras(dataset)
@@ -134,7 +131,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        assert str(dataset_ref) == utils.dataset_uri(dataset)
+        eq_(str(dataset_ref), utils.dataset_uri(dataset))
 
         # Basic fields
         assert self._triple(g, dataset_ref, RDF.type, DCAT.Dataset)
@@ -149,7 +146,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, DCT.type, extras['dcat_type'])
 
         # Tags
-        assert len([t for t in g.triples((dataset_ref, DCAT.keyword, None))]) == 2
+        eq_(len([t for t in g.triples((dataset_ref, DCAT.keyword, None))]), 2)
         for tag in dataset['tags']:
             assert self._triple(g, dataset_ref, DCAT.keyword, tag['name'])
 
@@ -171,11 +168,11 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('sample', ADMS.sample, Literal),
         ]:
             values = json.loads(extras[item[0]])
-            assert len([t for t in g.triples((dataset_ref, item[1], None))]) == len(values)
+            eq_(len([t for t in g.triples((dataset_ref, item[1], None))]), len(values))
             for num, value in enumerate(values):
                 _type = item[2]
                 if isinstance(item[2], list):
-                    assert len(item[2]) == len(values)
+                    eq_(len(item[2]), len(values))
                     _type = item[2][num]
                 assert self._triple(g, dataset_ref, item[1], _type(value))
 
@@ -271,7 +268,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
-        assert str(contact_details) == extras['contact_uri']
+        eq_(str(contact_details), extras['contact_uri'])
         assert self._triple(g, contact_details, VCARD.fn, extras['contact_name'])
         assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + extras['contact_email']))
 
@@ -292,7 +289,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
-        assert isinstance(contact_details, BNode)
+        assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['maintainer'])
         assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + dataset['maintainer_email']))
 
@@ -311,7 +308,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
-        assert isinstance(contact_details, BNode)
+        assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
         assert self._triple(g, contact_details, VCARD.hasEmail, URIRef('mailto:' + dataset['author_email']))
 
@@ -331,7 +328,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         contact_details = self._triple(g, dataset_ref, DCAT.contactPoint, None)[2]
         assert contact_details
-        assert isinstance(contact_details, BNode)
+        assert_true(isinstance(contact_details, BNode))
         assert self._triple(g, contact_details, VCARD.fn, dataset['author'])
         assert self._triple(g, contact_details, VCARD.hasEmail, URIRef(dataset['author_email']))
 
@@ -363,7 +360,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
         assert publisher
-        assert str(publisher) == extras['publisher_uri']
+        eq_(str(publisher), extras['publisher_uri'])
 
         assert self._triple(g, publisher, RDF.type, FOAF.Organization)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
@@ -410,7 +407,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
         assert publisher
-        assert isinstance(publisher, BNode)
+        assert_true(isinstance(publisher, BNode))
 
         assert self._triple(g, publisher, RDF.type, FOAF.Organization)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
@@ -445,10 +442,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'extras': [
                 {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
                 {'key': 'spatial_text', 'value': 'Tarragona'},
-                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": '
-                 '[[[1.1870606,41.0786393],[1.1870606,41.1655218],'
-                 '[1.3752339,41.1655218],[1.3752339,41.0786393],'
-                 '[1.1870606,41.0786393]]]}'},
+                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": [[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
 
             ]
         }
@@ -461,11 +455,11 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
-        assert str(spatial) == extras['spatial_uri']
+        eq_(str(spatial), extras['spatial_uri'])
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
+        eq_(len([t for t in g.triples((spatial, LOCN.geometry, None))]), 2)
         # Geometry in GeoJSON
         assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
@@ -491,12 +485,12 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
-        assert isinstance(spatial, BNode)
+        assert_true(isinstance(spatial, BNode))
         # Geometry in GeoJSON
         assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
         # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        eq_(len([t for t in g.triples((spatial, LOCN.geometry, None))]), 1)
 
     def test_spatial_bad_json_no_wkt(self):
         dataset = {
@@ -516,12 +510,12 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
-        assert isinstance(spatial, BNode)
+        assert_true(isinstance(spatial, BNode))
         # Geometry in GeoJSON
         assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
         # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        eq_(len([t for t in g.triples((spatial, LOCN.geometry, None))]), 1)
 
     def test_distributions(self):
 
@@ -554,7 +548,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 3
+        eq_(len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]), 3)
 
         for resource in dataset['resources']:
             distribution = self._triple(g,
@@ -601,11 +595,11 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+        eq_(len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]), 1)
 
         # URI
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        assert str(distribution) == utils.resource_uri(resource)
+        eq_(str(distribution), utils.resource_uri(resource))
 
         # Basic fields
         assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
@@ -622,11 +616,11 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('conforms_to', DCT.conformsTo, Literal),
         ]:
             values = json.loads(resource[item[0]])
-            assert len([t for t in g.triples((distribution, item[1], None))]) == len(values)
+            eq_(len([t for t in g.triples((distribution, item[1], None))]), len(values))
             for num, value in enumerate(values):
                 _type = item[2]
                 if isinstance(item[2], list):
-                    assert len(item[2]) == len(values)
+                    eq_(len(item[2]), len(values))
                     _type = item[2][num]
                 assert self._triple(g, distribution, item[1], _type(value))
 
@@ -641,10 +635,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
         assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
-        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'],
-                            data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
-        assert self._triple(g, checksum, SPDX.algorithm,
-                            URIRef(resource['hash_algorithm']))
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
 
     def test_distribution_size_not_number(self):
 
@@ -700,7 +692,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['url']))
         assert self._triple(g, distribution, DCAT.downloadURL, None) is None
-
+    
     def test_distribution_access_url_only(self):
 
         resource = {
@@ -783,9 +775,9 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['url']))
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['url']))
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
-
+    
     def test_distribution_both_urls_different_with_access_url(self):
 
         resource = {
@@ -812,9 +804,9 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
-
+    
     def test_distribution_prefer_access_url(self):
 
         resource = {
@@ -841,7 +833,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
         assert self._triple(g, distribution, DCAT.downloadURL, None) is None
 
     def test_distribution_prefer_access_url_with_download(self):
@@ -871,7 +863,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
-        assert self._triple(g, distribution, DCAT.accessURL, URIRef(resource['access_url']))
+        assert self._triple(g, distribution, DCAT.accessURL, URIRef( resource['access_url']))
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['download_url']))
 
     def test_distribution_both_urls_the_same(self):
@@ -903,7 +895,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, DCAT.downloadURL, URIRef(resource['url']))
         assert self._triple(g, distribution, DCAT.accessURL, None) is None
-
+    
     def test_distribution_both_urls_the_same_with_access_url(self):
 
         # when the access_url is present, it should be serialized regardless if it is the same as downloadURL.
@@ -1030,8 +1022,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
         assert checksum
         assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
-        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'],
-                            data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
+        assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
 
@@ -1048,7 +1039,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog()
 
-        assert str(catalog) == utils.catalog_uri()
+        eq_(str(catalog), utils.catalog_uri())
 
         # Basic fields
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
@@ -1070,7 +1061,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog(catalog_dict)
 
-        assert str(catalog) == utils.catalog_uri()
+        eq_(str(catalog), utils.catalog_uri())
 
         # Basic fields
         assert self._triple(g, catalog, RDF.type, DCAT.Catalog)
@@ -1093,7 +1084,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog(catalog_dict)
 
-        assert str(catalog) == utils.catalog_uri()
+        eq_(str(catalog), utils.catalog_uri())
 
         # language field
         assert self._triple(g, catalog, DCT.language, URIRef(catalog_dict['language']))
@@ -1107,11 +1098,11 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         catalog = s.graph_from_catalog()
 
-        assert str(catalog) == utils.catalog_uri()
+        eq_(str(catalog), utils.catalog_uri())
 
         assert self._triple(g, catalog, DCT.modified, dataset['metadata_modified'], XSD.dateTime)
 
-    @pytest.mark.ckan_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
+    @helpers.change_config(DCAT_EXPOSE_SUBCATALOGS, 'true')
     def test_subcatalog(self):
         publisher = {'name': 'Publisher',
                      'email': 'email@test.com',
@@ -1129,7 +1120,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
                 {'key': 'source_catalog_modified', 'value': '2000-01-01'},
                 {'key': 'source_catalog_publisher', 'value': json.dumps(publisher)}
             ]
-        }
+        }        
         catalog_dict = {
             'title': 'My Catalog',
             'description': 'An Open Data Catalog',
@@ -1145,22 +1136,22 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         # check if we have catalog->hasPart->subcatalog
         catalogs = list(g.triples((None, RDF.type, DCAT.Catalog,)))
         root = list(g.subjects(DCT.hasPart, None))
-        assert len(catalogs) > 0, catalogs
-        assert len(root) == 1, root
+        assert_true(len(catalogs)>0, catalogs)
+        assert_true(len(root) == 1, root)
 
         root_ref = root[0]
-
+        
         # check subcatalog
         subcatalogs = list(g.objects(root_ref, DCT.hasPart))
-        assert len(subcatalogs) == 1
+        assert_true(len(subcatalogs) == 1)
         stitle = list(g.objects(subcatalogs[0], DCT.title))
-        assert len(stitle) == 1
-        assert str(stitle[0]) == 'Subcatalog example'
+        assert_true(len(stitle) == 1)
+        assert_true(str(stitle[0]) == 'Subcatalog example')
 
         # check dataset
         dataset_ref = list(g.subjects(RDF.type, DCAT.Dataset))
-        assert len(dataset_ref) == 1
+        assert_true(len(dataset_ref) == 1)
         dataset_ref = dataset_ref[0]
         dataset_title = list(g.objects(dataset_ref, DCT.title))
-        assert len(dataset_title) == 1
-        assert str(dataset_title[0]) == dataset['title']
+        assert_true(len(dataset_title) == 1)
+        assert_true(str(dataset_title[0]) == dataset['title'])
