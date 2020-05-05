@@ -310,8 +310,9 @@ def url_to_rdflib_format(_format):
 
 
 def url_quote(url):
-    return urllib.quote(url, safe="%/:=&?~#+!$,;'@()[]")
-
+    if url:
+        return urllib.quote(url, safe="%/:=&?~#+!$,;'@()[]")
+    return url
 
 def rdflib_to_url_format(_format):
     '''
