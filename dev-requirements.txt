@@ -1,5 +1,6 @@
 beautifulsoup4==4.3.2
 responses==0.10.9
 mock==2.0.0
+pytest>=4.6
 pytest-ckan
 pytest-cov
