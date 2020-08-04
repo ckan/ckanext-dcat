@@ -326,4 +326,4 @@ class TestImportStage(object):
         args, _ = mock_save_object_error.call_args_list[0]
 
         assert 'Error importing dataset Invalid tags: ValidationError(None,)' in args[0]
-        assert '{\'tags\': [{}, u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]
+        assert '{\'tags\': [u\'Tag "test\\\'s" must be alphanumeric characters or symbols: -_.\', u\'Tag "invalid & wrong" must be alphanumeric characters or symbols: -_.\']}' in args[0]
