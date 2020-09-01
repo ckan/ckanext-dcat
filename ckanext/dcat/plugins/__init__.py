@@ -80,6 +80,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
     def get_helpers(self):
         return {
             'helper_available': utils.helper_available,
+            'dcat_get_endpoint': utils.get_endpoint,
         }
 
     # IActions

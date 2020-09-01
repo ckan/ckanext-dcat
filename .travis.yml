@@ -1,25 +1,22 @@
-# the new trusty images of Travis cause build errors with psycopg2, see https://github.com/travis-ci/travis-ci/issues/8897
-dist: trusty
-group: deprecated-2017Q4
-
+os: linux
+dist: focal
 language: python
 
-install:
-    - bash bin/travis-build.bash
 services:
+    - docker
     - redis
-    - postgresql
 
+install: bash bin/travis-build.bash
 script: bash bin/travis-run.bash
-before_install:
-    - pip install codecov
-after_success:
-    - codecov
+
+stages:
+  - Flake8
+  - Tests
 
 jobs:
   include:
     - stage: Flake8
-      python: 2.7
+      python: 3.6
       env: FLAKE8=True
       install:
         - pip install flake8==3.5.0
@@ -30,21 +27,60 @@ jobs:
         - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude ckan
         # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
         - flake8 . --count --max-line-length=127 --statistics --exclude ckan --exit-zero
+
     - stage: Tests
-      python: "2.7"
+      python: "3.6"
       env: CKANVERSION=master
+      services:
+          - postgresql
+          - redis
+          - docker
+
+    - python: "2.7"
+      env: CKANVERSION=2.9
+      services:
+          - postgresql
+          - redis
+          - docker
+
+
     - python: "3.6"
-      env: CKANVERSION=master
+      env: CKANVERSION=2.9
+      services:
+          - postgresql
+          - redis
+          - docker
+
     - python: "2.7"
       env: CKANVERSION=2.8
+      addons:
+        postgresql: '11'
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main'
+          packages:
+            - postgresql-11
+
     - python: "2.7"
       env: CKANVERSION=2.7
+      addons:
+        postgresql: '9.6'
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main'
+          packages:
+            - postgresql-9.6
+
     - python: "2.7"
       env: CKANVERSION=2.6
-    - python: "2.7"
-      env: CKANVERSION=2.5
-    - python: "2.7"
-      env: CKANVERSION=2.4
+      addons:
+        postgresql: '9.6'
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main'
+          packages:
+            - postgresql-9.6
+
 
 cache:
   directories:
