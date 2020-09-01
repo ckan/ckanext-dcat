@@ -12,11 +12,6 @@ fi
 
 export PYTHON_MAJOR_VERSION=${TRAVIS_PYTHON_VERSION%.*}
 
-
-echo "Installing the packages that CKAN requires..."
-sudo apt-get update -qq
-sudo apt-get install solr-jetty
-
 echo "Installing CKAN and its Python dependencies..."
 git clone https://github.com/ckan/ckan
 cd ckan
@@ -29,25 +24,13 @@ else
     echo "CKAN version: ${CKAN_TAG#ckan-}"
 fi
 
-# install the recommended version of setuptools
+echo "Installing the recommended setuptools requirement"
 if [ -f requirement-setuptools.txt ]
 then
-    echo "Updating setuptools..."
     pip install -r requirement-setuptools.txt
 fi
 
 python setup.py develop
-
-
-# TODO: remove once 2.5.3 is relesed
-# Pin this as newer versions installed by RDFLib give setuptools troubles
-pip install "html5lib==0.9999999"
-
-if [ $CKANVERSION == '2.7' ]
-then
-    echo "Installing setuptools"
-    pip install setuptools==39.0.1
-fi
 
 if (( $CKAN_MINOR_VERSION >= 9 )) && (( $PYTHON_MAJOR_VERSION == 2 ))
 then
@@ -55,22 +38,34 @@ then
 else
     pip install -r requirements.txt
 fi
+
 pip install -r dev-requirements.txt
 cd -
 
 echo "Setting up Solr..."
-printf "NO_START=0\nJETTY_HOST=127.0.0.1\nJETTY_PORT=8983\nJAVA_HOME=$JAVA_HOME" | sudo tee /etc/default/jetty
-sudo cp ckan/ckan/config/solr/schema.xml /etc/solr/conf/schema.xml
-sudo service jetty restart
+docker run --name ckan-solr -p 8983:8983 -d openknowledge/ckan-solr-dev:$CKANVERSION
+
+echo "Setting up Postgres..."
+export PG_VERSION="$(pg_lsclusters | grep online | awk '{print $1}')"
+export PG_PORT="$(pg_lsclusters | grep online | awk '{print $3}')"
+echo "Using Postgres $PGVERSION on port $PG_PORT"
+if [ $PG_PORT != "5432" ]
+then
+	echo "Using non-standard Postgres port, updating configuration..."
+	sed -i -e "s/postgresql:\/\/ckan_default:pass@localhost\/ckan_test/postgresql:\/\/ckan_default:pass@localhost:$PG_PORT\/ckan_test/" ckan/test-core.ini
+	sed -i -e "s/postgresql:\/\/ckan_default:pass@localhost\/datastore_test/postgresql:\/\/ckan_default:pass@localhost:$PG_PORT\/datastore_test/" ckan/test-core.ini
+	sed -i -e "s/postgresql:\/\/datastore_default:pass@localhost\/datastore_test/postgresql:\/\/datastore_default:pass@localhost:$PG_PORT\/datastore_test/" ckan/test-core.ini
+fi
+
 
 echo "Creating the PostgreSQL user and database..."
-sudo -u postgres psql -c "CREATE USER ckan_default WITH PASSWORD 'pass';"
-sudo -u postgres psql -c 'CREATE DATABASE ckan_test WITH OWNER ckan_default;'
+sudo -u postgres psql -p $PG_PORT -c "CREATE USER ckan_default WITH PASSWORD 'pass';"
+sudo -u postgres psql -p $PG_PORT -c "CREATE USER datastore_default WITH PASSWORD 'pass';"
+sudo -u postgres psql -p $PG_PORT -c 'CREATE DATABASE ckan_test WITH OWNER ckan_default;'
+sudo -u postgres psql -p $PG_PORT -c 'CREATE DATABASE datastore_test WITH OWNER ckan_default;'
 
 echo "Initialising the database..."
 cd ckan
-
-
 if (( $CKAN_MINOR_VERSION >= 9 ))
 then
     ckan -c test-core.ini db init
@@ -102,6 +97,5 @@ python setup.py develop
 echo "Moving test.ini into a subdir..."
 mkdir subdir
 mv test.ini subdir
-mv test-nose.ini subdir
 
 echo "travis-build.bash is done."
