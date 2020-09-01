@@ -1,7 +1,7 @@
 {% ckan_extends %}
 {% block links %}
     {{ super() }}
-    {% with endpoint='dcat.read_dataset' if h.ckan_version() > '2.9' else 'dcat_dataset'  %}
+    {% with endpoint='dcat_dataset' if h.ckan_version() < '2.9' else 'dcat.read_dataset'  %}
         <link rel="alternate" type="text/n3" href="{{ h.url_for(endpoint, _id=pkg.id, _format='n3', qualified=True) }}"/>
         <link rel="alternate" type="text/ttl" href="{{ h.url_for(endpoint, _id=pkg.id, _format='ttl', qualified=True) }}"/>
         <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for(endpoint, _id=pkg.id, _format='xml', qualified=True) }}"/>

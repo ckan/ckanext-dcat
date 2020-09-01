@@ -34,6 +34,11 @@ def _sort_query_params(url):
 def url_for(*args, **kwargs):
 
     if not p.toolkit.check_ckan_version(min_version='2.9'):
+
+        external = kwargs.pop('_external', False)
+        if external is not None:
+            kwargs['qualified'] = external
+
         if len(args) and args[0] == 'dcat.read_dataset':
             return core_url_for('dcat_dataset', **kwargs)
         elif len(args) and args[0] == 'dcat.read_catalog':
