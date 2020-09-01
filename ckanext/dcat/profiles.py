@@ -459,10 +459,7 @@ class RDFProfile(object):
             if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
                 result = self._object_value(obj, RDFS.label)
             elif isinstance(obj, Literal):
-                if six.PY2:
-                    result = unicode(obj)
-                else:
-                    result = str(obj)
+                result = six.text_type(obj)
         return result
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
