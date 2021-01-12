@@ -83,22 +83,22 @@ class DCATHarvester(HarvesterBase):
                 r = session.get(url, stream=True)
 
             length = 0
-            content = ''
+            content = '' if six.PY2 else b''
             for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
-                if six.PY2:
                     content = content + chunk
-                else:
-                    content = content + chunk.decode('utf8')
 
-                length += len(chunk)
+                    length += len(chunk)
 
-                if length >= self.MAX_FILE_SIZE:
-                    self._save_gather_error('Remote file is too big.',
-                                            harvest_job)
-                    return None, None
+                    if length >= self.MAX_FILE_SIZE:
+                        self._save_gather_error('Remote file is too big.',
+                                                harvest_job)
+                        return None, None
+
+            if not six.PY2:
+                    content = content.decode('utf-8')
 
             if content_type is None and r.headers.get('content-type'):
-                content_type = r.headers.get('content-type').split(";", 1)[0]
+                    content_type = r.headers.get('content-type').split(";", 1)[0]
 
             return content, content_type
 
