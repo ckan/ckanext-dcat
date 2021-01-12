@@ -85,14 +85,14 @@ class DCATHarvester(HarvesterBase):
             length = 0
             content = '' if six.PY2 else b''
             for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
-                    content = content + chunk
+                content = content + chunk
 
-                    length += len(chunk)
+                length += len(chunk)
 
-                    if length >= self.MAX_FILE_SIZE:
-                        self._save_gather_error('Remote file is too big.',
+                if length >= self.MAX_FILE_SIZE:
+                    self._save_gather_error('Remote file is too big.',
                                                 harvest_job)
-                        return None, None
+                    return None, None
 
             if not six.PY2:
                     content = content.decode('utf-8')
