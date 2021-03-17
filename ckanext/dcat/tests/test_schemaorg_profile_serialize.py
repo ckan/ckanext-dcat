@@ -70,8 +70,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, SCHEMA.license, dataset['license_url'])
         assert self._triple(g, dataset_ref, SCHEMA.identifier, extras['identifier'])
         url = self._triple(g, dataset_ref, SCHEMA.url, None)[2]
-        assert url
-        assert url == Literal('http://test.ckan.net/dataset/%s' % dataset['name'])
+        assert url == Literal('{}/dataset/{}'.format(config['ckan.site_url'].rstrip('/'), dataset['name']))
 
         # Dates
         assert self._triple(g, dataset_ref, SCHEMA.datePublished, dataset['metadata_created'])
@@ -187,8 +186,8 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         assert sorted(names), ['geography' == 'statistics']
         assert (sorted(urls) == [
-            'http://test.ckan.net/group/geography',
-            'http://test.ckan.net/group/statistics'])
+            '{}/group/geography'.format(config['ckan.site_url'].rstrip('/')),
+            '{}/group/statistics'.format(config['ckan.site_url'].rstrip('/'))])
 
     @pytest.mark.ckan_config('ckan.site_url', 'http://ckan.example.org')
     @pytest.mark.ckan_config('ckan.site_description', 'CKAN Portal')
