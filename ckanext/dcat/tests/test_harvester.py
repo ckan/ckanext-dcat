@@ -10,6 +10,7 @@ import responses
 from mock import patch
 
 import ckan.plugins as p
+from ckantoolkit import config
 from ckantoolkit.tests import helpers
 
 import ckanext.harvest.model as harvest_model
@@ -19,7 +20,8 @@ from ckanext.dcat.harvesters import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
-responses.add_passthru('http://127.0.0.1:8983/solr')
+
+responses.add_passthru(config['solr_url'])
 
 
 # TODO move to ckanext-harvest
