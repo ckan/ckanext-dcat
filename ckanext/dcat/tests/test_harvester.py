@@ -21,7 +21,7 @@ from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
 
-responses.add_passthru(config['solr_url'])
+responses.add_passthru(config.get('solr_url', 'http://127.0.0.1:8983/solr'))
 
 
 # TODO move to ckanext-harvest
