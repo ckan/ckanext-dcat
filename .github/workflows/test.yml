@@ -67,4 +67,8 @@ jobs:
         paster --plugin=ckan db init -c test.ini
         paster --plugin=ckanext-harvest harvester initdb -c test.ini
     - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --disable-warnings ckanext/dcat/tests
+      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=xml --cov-append --disable-warnings ckanext/dcat/tests
+    - name: Upload coverage report to codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
