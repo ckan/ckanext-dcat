@@ -1304,38 +1304,43 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         plugin = p.get_plugin('test_rdf_harvester')
         plugin.after_parsing_mode = 'return.empty.rdf_parser'
 
-        url = self.rdf_mock_url
-        content =  self.rdf_content
-        content_type = self.rdf_content_type
+        # ensure after_parsing_mode is reset, so wrap in try..finally block
+        try:
+            url = self.rdf_mock_url
+            content =  self.rdf_content
+            content_type = self.rdf_content_type
 
-        # Mock the GET request to get the file
-        responses.add(responses.GET, url,
-                               body=content, content_type=content_type)
+            # Mock the GET request to get the file
+            responses.add(responses.GET, url,
+                                body=content, content_type=content_type)
 
-        # The harvester will try to do a HEAD request first so we need to mock
-        # this as well
-        responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+            # The harvester will try to do a HEAD request first so we need to mock
+            # this as well
+            responses.add(responses.HEAD, url,
+                                status=405, content_type=content_type)
 
-        harvest_source = self._create_harvest_source(self.rdf_mock_url)
-        self._create_harvest_job(harvest_source['id'])
-        self._run_jobs(harvest_source['id'])
-        self._gather_queue(1)
+            harvest_source = self._create_harvest_source(self.rdf_mock_url)
+            self._create_harvest_job(harvest_source['id'])
+            self._run_jobs(harvest_source['id'])
+            self._gather_queue(1)
 
-        assert plugin.calls['after_parsing'] == 1
+            assert plugin.calls['after_parsing'] == 1
 
-        # Run the jobs to mark the previous one as Finished
-        self._run_jobs()
+            # Run the jobs to mark the previous one as Finished
+            self._run_jobs()
 
-        # Get the harvest source with the updated status
-        harvest_source = helpers.call_action('harvest_source_show',
-                                       id=harvest_source['id'])
+            # Get the harvest source with the updated status
+            harvest_source = helpers.call_action('harvest_source_show',
+                                        id=harvest_source['id'])
 
-        last_job_status = harvest_source['status']['last_job']
+            last_job_status = harvest_source['status']['last_job']
 
-        assert last_job_status['status'] == 'Finished'
+            assert last_job_status['status'] == 'Finished'
 
-        assert last_job_status['stats']['added'] == 0
+            assert last_job_status['stats']['added'] == 0
+        finally:
+            plugin.after_parsing_mode = ''
+
 
     @responses.activate
     def test_harvest_after_parsing_errors_get_stored(self, reset_calls_counter):
@@ -1344,38 +1349,41 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         plugin = p.get_plugin('test_rdf_harvester')
         plugin.after_parsing_mode = 'return.errors'
 
-        url = self.rdf_mock_url
-        content =  self.rdf_content
-        content_type = self.rdf_content_type
+        # ensure after_parsing_mode is reset, so wrap in try..finally block
+        try:
+            url = self.rdf_mock_url
+            content =  self.rdf_content
+            content_type = self.rdf_content_type
 
-        # Mock the GET request to get the file
-        responses.add(responses.GET, url,
-                               body=content, content_type=content_type)
+            # Mock the GET request to get the file
+            responses.add(responses.GET, url,
+                                body=content, content_type=content_type)
 
-        # The harvester will try to do a HEAD request first so we need to mock
-        # this as well
-        responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+            # The harvester will try to do a HEAD request first so we need to mock
+            # this as well
+            responses.add(responses.HEAD, url,
+                                status=405, content_type=content_type)
 
-        harvest_source = self._create_harvest_source(self.rdf_mock_url)
-        self._create_harvest_job(harvest_source['id'])
-        self._run_jobs(harvest_source['id'])
-        self._gather_queue(1)
+            harvest_source = self._create_harvest_source(self.rdf_mock_url)
+            self._create_harvest_job(harvest_source['id'])
+            self._run_jobs(harvest_source['id'])
+            self._gather_queue(1)
 
-        assert plugin.calls['after_parsing'] == 1
+            assert plugin.calls['after_parsing'] == 1
 
-        # Run the jobs to mark the previous one as Finished
-        self._run_jobs()
+            # Run the jobs to mark the previous one as Finished
+            self._run_jobs()
 
-        # Get the harvest source with the updated status
-        harvest_source = helpers.call_action('harvest_source_show',
-                                       id=harvest_source['id'])
+            # Get the harvest source with the updated status
+            harvest_source = helpers.call_action('harvest_source_show',
+                                        id=harvest_source['id'])
 
-        last_job_status = harvest_source['status']['last_job']
+            last_job_status = harvest_source['status']['last_job']
 
-        assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
-        assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
-
+            assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
+            assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+        finally:
+            plugin.after_parsing_mode = ''
 
     @responses.activate
     def test_harvest_import_extensions_point_gets_called(self, reset_calls_counter):
