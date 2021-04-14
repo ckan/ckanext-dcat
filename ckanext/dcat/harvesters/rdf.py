@@ -214,6 +214,9 @@ class DCATRDFHarvester(DCATHarvester):
                 for error_msg in after_parsing_errors:
                     self._save_gather_error(error_msg, harvest_job)
 
+            if not parser:
+                return []
+
             try:
 
                 source_dataset = model.Package.get(harvest_job.source.id)
