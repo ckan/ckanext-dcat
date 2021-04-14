@@ -76,6 +76,17 @@ class TestRDFHarvester(p.SingletonPlugin):
         else:
             return content, []
 
+    def after_parsing(self, rdf_parser, harvest_job):
+
+        self.calls['after_parsing'] += 1
+
+        if rdf_parser == 'return.empty.rdf_parser':
+            return None, []
+        elif rdf_parser == 'return.errors':
+            return None, ['Error 1', 'Error 2']
+        else:
+            return rdf_parser, []
+
     def before_update(self, harvest_object, dataset_dict, temp_dict):
         self.calls['before_update'] += 1
 
