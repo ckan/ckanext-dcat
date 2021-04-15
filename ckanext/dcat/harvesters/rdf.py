@@ -208,6 +208,15 @@ class DCATRDFHarvester(DCATHarvester):
                 self._save_gather_error('Error parsing the RDF file: {0}'.format(e), harvest_job)
                 return []
 
+            for harvester in p.PluginImplementations(IDCATRDFHarvester):
+                parser, after_parsing_errors = harvester.after_parsing(parser, harvest_job)
+
+                for error_msg in after_parsing_errors:
+                    self._save_gather_error(error_msg, harvest_job)
+
+            if not parser:
+                return []
+
             try:
 
                 source_dataset = model.Package.get(harvest_job.source.id)

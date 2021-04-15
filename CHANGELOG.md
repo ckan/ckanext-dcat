@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.1...HEAD)
 
-* TBD
+* Introduce new interface method `after_parsing` (#196)
 
 ## [v1.1.1](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...v1.1.1) - 2021-03-17
 
