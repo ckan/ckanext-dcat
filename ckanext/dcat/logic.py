@@ -9,7 +9,7 @@ from ckan.plugins import toolkit
 import ckanext.dcat.converters as converters
 
 from ckanext.dcat.processors import RDFSerializer
-
+from ckanext.dcat.utils import catalog_uri
 
 DATASETS_PER_PAGE = 100
 
@@ -144,9 +144,7 @@ def _pagination_info(query, data_dict):
 
     def _page_url(page):
 
-        base_url = config.get('ckan.site_url', '').strip('/')
-        if not base_url:
-            base_url = toolkit.request.host_url
+        base_url = catalog_uri()
         base_url = '%s%s' % (
             base_url, toolkit.request.path)
 
