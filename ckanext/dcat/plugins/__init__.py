@@ -3,6 +3,8 @@
 from builtins import object
 import os
 
+import six
+
 from ckantoolkit import config
 
 from ckan import plugins as p
@@ -78,6 +80,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
     def get_helpers(self):
         return {
             'helper_available': utils.helper_available,
+            'dcat_get_endpoint': utils.get_endpoint,
         }
 
     # IActions
@@ -110,7 +113,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
             field_labels = utils.field_labels()
 
             def set_titles(object_dict):
-                for key, value in object_dict.copy().iteritems():
+                for key, value in six.iteritems(object_dict.copy()):
                     if key in field_labels:
                         object_dict[field_labels[key]] = object_dict[key]
                         del object_dict[key]

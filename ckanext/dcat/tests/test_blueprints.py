@@ -9,10 +9,9 @@ from six.moves.urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 import pytest
 
 from ckan import plugins as p
-from ckan.lib.helpers import url_for
 
 from rdflib import Graph
-
+from ckantoolkit import url_for as core_url_for
 from ckantoolkit.tests import factories
 
 from ckanext.dcat.processors import RDFParser
@@ -24,11 +23,33 @@ def _sort_query_params(url):
     parts = urlparse(url)
     qs = parse_qs(parts.query)
     ordered_qs = OrderedDict(sorted(qs.items()))
+    encoded_qs = urlencode(ordered_qs).replace('u%27', '%27')
 
     return urlunparse(
         (parts.scheme, parts.netloc, parts.path, parts.params,
-         urlencode(ordered_qs), parts.fragment)
+         encoded_qs, parts.fragment)
     )
+
+
+def url_for(*args, **kwargs):
+
+    if not p.toolkit.check_ckan_version(min_version='2.9'):
+
+        external = kwargs.pop('_external', False)
+        if external is not None:
+            kwargs['qualified'] = external
+
+        if len(args) and args[0] == 'dcat.read_dataset':
+            return core_url_for('dcat_dataset', **kwargs)
+        elif len(args) and args[0] == 'dcat.read_catalog':
+            return core_url_for('dcat_catalog', **kwargs)
+        elif len(args) and args[0] == 'dataset.new':
+            return core_url_for(controller='package', action='new', **kwargs)
+        elif len(args) and args[0] == 'dataset.read':
+            return core_url_for(controller='package', action='read', **kwargs)
+
+
+    return core_url_for(*args, **kwargs)
 
 
 @pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index')
