@@ -3,6 +3,8 @@ import json
 
 import pytest
 
+from ckantoolkit import config
+
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, Literal
 from rdflib.namespace import RDF
