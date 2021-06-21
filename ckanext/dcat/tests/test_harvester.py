@@ -1277,17 +1277,17 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         plugin = p.get_plugin('test_rdf_harvester')
 
         url = self.rdf_mock_url
-        content =  self.rdf_content
+        content = self.rdf_content
         content_type = self.rdf_content_type
 
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
-                               body=content, content_type=content_type)
+                      body=content, content_type=content_type)
 
         # The harvester will try to do a HEAD request first so we need to mock
         # this as well
         responses.add(responses.HEAD, url,
-                               status=405, content_type=content_type)
+                      status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(self.rdf_mock_url)
         self._create_harvest_job(harvest_source['id'])
@@ -1306,17 +1306,17 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         # ensure after_parsing_mode is reset, so wrap in try..finally block
         try:
             url = self.rdf_mock_url
-            content =  self.rdf_content
+            content = self.rdf_content
             content_type = self.rdf_content_type
 
             # Mock the GET request to get the file
             responses.add(responses.GET, url,
-                                body=content, content_type=content_type)
+                          body=content, content_type=content_type)
 
             # The harvester will try to do a HEAD request first so we need to mock
             # this as well
             responses.add(responses.HEAD, url,
-                                status=405, content_type=content_type)
+                          status=405, content_type=content_type)
 
             harvest_source = self._create_harvest_source(self.rdf_mock_url)
             self._create_harvest_job(harvest_source['id'])
@@ -1330,7 +1330,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
             # Get the harvest source with the updated status
             harvest_source = helpers.call_action('harvest_source_show',
-                                        id=harvest_source['id'])
+                                                 id=harvest_source['id'])
 
             last_job_status = harvest_source['status']['last_job']
 
@@ -1339,7 +1339,6 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
             assert last_job_status['stats']['added'] == 0
         finally:
             plugin.after_parsing_mode = ''
-
 
     @responses.activate
     def test_harvest_after_parsing_errors_get_stored(self, reset_calls_counter):
@@ -1351,17 +1350,17 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         # ensure after_parsing_mode is reset, so wrap in try..finally block
         try:
             url = self.rdf_mock_url
-            content =  self.rdf_content
+            content = self.rdf_content
             content_type = self.rdf_content_type
 
             # Mock the GET request to get the file
             responses.add(responses.GET, url,
-                                body=content, content_type=content_type)
+                          body=content, content_type=content_type)
 
             # The harvester will try to do a HEAD request first so we need to mock
             # this as well
             responses.add(responses.HEAD, url,
-                                status=405, content_type=content_type)
+                          status=405, content_type=content_type)
 
             harvest_source = self._create_harvest_source(self.rdf_mock_url)
             self._create_harvest_job(harvest_source['id'])
@@ -1375,7 +1374,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
             # Get the harvest source with the updated status
             harvest_source = helpers.call_action('harvest_source_show',
-                                        id=harvest_source['id'])
+                                                 id=harvest_source['id'])
 
             last_job_status = harvest_source['status']['last_job']
 
@@ -1568,15 +1567,15 @@ class TestDCATRDFHarvester(object):
     def test_validates_correct_config(self):
         harvester = DCATRDFHarvester()
 
-        for config in ['{}', '{"rdf_format":"text/turtle"}']:
-            assert config == harvester.validate_config(config)
+        for config_obj in ['{}', '{"rdf_format":"text/turtle"}']:
+            assert config_obj == harvester.validate_config(config_obj)
 
     def test_does_not_validate_incorrect_config(self):
         harvester = DCATRDFHarvester()
 
-        for config in ['invalid', '{invalid}', '{rdf_format:invalid}']:
+        for config_obj in ['invalid', '{invalid}', '{rdf_format:invalid}']:
             try:
-                harvester.validate_config(config)
+                harvester.validate_config(config_obj)
                 assert False
             except ValueError:
                 assert True

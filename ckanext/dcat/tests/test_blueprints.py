@@ -48,7 +48,6 @@ def url_for(*args, **kwargs):
         elif len(args) and args[0] == 'dataset.read':
             return core_url_for(controller='package', action='read', **kwargs)
 
-
     return core_url_for(*args, **kwargs)
 
 
