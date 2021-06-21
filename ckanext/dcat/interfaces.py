@@ -78,6 +78,33 @@ class IDCATRDFHarvester(Interface):
         '''
         return content, []
 
+    def after_parsing(self, rdf_parser, harvest_job):
+        '''
+        Called just after the content from the remote RDF file has been parsed
+
+        It returns a tuple with the parser (which can be modified) and an
+        optional list of error messages.
+
+        This extension point can be useful to work with the graph and put it to
+        other stores, e.g. a triple store.
+
+        :param rdf_parser: The RDF parser with the remote content as a graph object
+        :type rdf_parser: ckanext.dcat.processors.RDFParser
+        :param harvest_job: A ``HarvestJob`` domain object which contains a
+                            reference to the harvest source
+                            (``harvest_job.source``).
+        :type harvest_job: object
+
+
+        :returns: A tuple with two items:
+                    * The RDF parser. If this is False the gather stage will
+                      stop.
+                    * A list of error messages. These will get stored as gather
+                      errors by the harvester
+        :rtype: tuple
+        '''
+        return rdf_parser, []
+
     def before_update(self, harvest_object, dataset_dict, temp_dict):
         '''
         Called just before the ``package_update`` action.
