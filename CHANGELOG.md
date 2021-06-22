@@ -1,7 +1,13 @@
 # Changelog
 
+
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.1...HEAD)
 
+
+## [v1.1.2](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...v1.1.1) - 2021-06-22
+
+* Use safer encoder for Structured Data output (#198)
+* Fix: use catalog_uri logic for pagination URIs (#197)
 * Introduce new interface method `after_parsing` (#196)
 
 ## [v1.1.1](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...v1.1.1) - 2021-03-17
