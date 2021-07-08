@@ -911,14 +911,9 @@ Example output of structured data in JSON-LD:
 
 ## Running the Tests
 
-To run the tests on CKAN >= 2.9, do:
+To run the tests do:
 
     pytest --ckan-ini=test.ini ckanext/dcat/tests
-
-
-To run the tests on CKAN <= 2.8, do:
-
-    nosetests --nologcapture --ckan --with-pylons=test-nose.ini ckanext/dcat/tests/nose
     
 ## Releases
 
