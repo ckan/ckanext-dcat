@@ -1,8 +1,9 @@
 # Changelog
 
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.1...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...HEAD)
 
+* Also process URIRef in rights statements
 
 ## [v1.1.2](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...v1.1.1) - 2021-06-22
 
