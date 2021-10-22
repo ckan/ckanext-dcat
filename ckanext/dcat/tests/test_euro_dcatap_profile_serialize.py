@@ -409,6 +409,39 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, RDF.type, FOAF.Organization)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
 
+    def test_publisher_org_no_uri(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'organization': {
+                'id': '',
+                'name': 'publisher1',
+                'title': 'Example Publisher from Org',
+            },
+            'extras': [
+                {'key': 'publisher_name', 'value': 'Example Publisher'},
+                {'key': 'publisher_email', 'value': 'publisher@example.com'},
+                {'key': 'publisher_url', 'value': 'http://example.com/publisher/home'},
+                {'key': 'publisher_type', 'value': 'http://purl.org/adms/publishertype/Company'},
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
+        assert publisher
+        assert isinstance(publisher, BNode)
+
+        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
+        assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
+        assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
+        assert self._triple(g, publisher, DCT.type, URIRef(extras['publisher_type']))
+
     def test_temporal(self):
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',

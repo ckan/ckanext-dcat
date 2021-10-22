@@ -22,7 +22,7 @@ from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
 from ckan.lib.helpers import url_for
 
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
+from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -1135,18 +1135,25 @@ class EuropeanDCATAPProfile(RDFProfile):
             dataset_dict.get('organization'),
         ]):
 
-            publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
+            publisher_uri = self._get_dataset_value(dataset_dict, 'publisher_uri')
+            publisher_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
+            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if publisher_uri:
                 publisher_details = CleanedURIRef(publisher_uri)
+            elif not publisher_name and publisher_uri_fallback:
+                # neither URI nor name are available, use organization as fallback
+                publisher_details = CleanedURIRef(publisher_uri_fallback)
             else:
-                # No organization nor publisher_uri
+                # No publisher_uri
                 publisher_details = BNode()
 
             g.add((publisher_details, RDF.type, FOAF.Organization))
             g.add((dataset_ref, DCT.publisher, publisher_details))
 
-            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
-            if not publisher_name and dataset_dict.get('organization'):
+            # In case no name and URI are available, again fall back to organization.
+            # If no name but an URI is available, the name literal remains empty to
+            # avoid mixing organization and dataset values.
+            if not publisher_name and not publisher_uri and dataset_dict.get('organization'):
                 publisher_name = dataset_dict['organization']['title']
 
             g.add((publisher_details, FOAF.name, Literal(publisher_name)))
@@ -1481,19 +1488,25 @@ class SchemaOrgProfile(RDFProfile):
             dataset_dict.get('organization'),
         ]):
 
-            publisher_uri = publisher_uri_from_dataset_dict(dataset_dict)
+            publisher_uri = self._get_dataset_value(dataset_dict, 'publisher_uri')
+            publisher_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
+            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if publisher_uri:
-                publisher_details = URIRef(publisher_uri)
+                publisher_details = CleanedURIRef(publisher_uri)
+            elif not publisher_name and publisher_uri_fallback:
+                # neither URI nor name are available, use organization as fallback
+                publisher_details = CleanedURIRef(publisher_uri_fallback)
             else:
-                # No organization nor publisher_uri
+                # No publisher_uri
                 publisher_details = BNode()
 
             self.g.add((publisher_details, RDF.type, SCHEMA.Organization))
             self.g.add((dataset_ref, SCHEMA.publisher, publisher_details))
 
-
-            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
-            if not publisher_name and dataset_dict.get('organization'):
+            # In case no name and URI are available, again fall back to organization.
+            # If no name but an URI is available, the name literal remains empty to
+            # avoid mixing organization and dataset values.
+            if not publisher_name and not publisher_uri and dataset_dict.get('organization'):
                 publisher_name = dataset_dict['organization']['title']
             self.g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
 
