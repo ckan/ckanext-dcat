@@ -458,7 +458,7 @@ class RDFProfile(object):
         if obj:
             if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
                 result = self._object_value(obj, RDFS.label)
-            elif isinstance(obj, Literal):
+            elif isinstance(obj, Literal) or isinstance(obj, URIRef):
                 result = six.text_type(obj)
         return result
 
