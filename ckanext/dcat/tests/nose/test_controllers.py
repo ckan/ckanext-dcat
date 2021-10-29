@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from builtins import str
+from builtins import range
 import time
 import nose
 
@@ -15,7 +17,7 @@ from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
 
-from ckanext.dcat.tests import DCATFunctionalTestBase
+from ckanext.dcat.tests.nose import DCATFunctionalTestBase
 
 eq_ = nose.tools.eq_
 assert_true = nose.tools.assert_true
@@ -35,7 +37,7 @@ class TestEndpoints(DCATFunctionalTestBase):
     def _object_value(self, graph, subject, predicate):
 
         objects = [o for o in graph.objects(subject, predicate)]
-        return unicode(objects[0]) if objects else None
+        return str(objects[0]) if objects else None
 
     def test_dataset_default(self):
 
@@ -254,7 +256,7 @@ class TestEndpoints(DCATFunctionalTestBase):
 
     def test_catalog_default(self):
 
-        for i in xrange(4):
+        for i in range(4):
             factories.Dataset()
 
         url = url_for('dcat_catalog', _format='rdf')
@@ -278,7 +280,7 @@ class TestEndpoints(DCATFunctionalTestBase):
 
     def test_catalog_ttl(self):
 
-        for i in xrange(4):
+        for i in range(4):
             factories.Dataset()
 
         url = url_for('dcat_catalog', _format='ttl')
@@ -390,7 +392,7 @@ class TestEndpoints(DCATFunctionalTestBase):
     @helpers.change_config('ckanext.dcat.datasets_per_page', 10)
     def test_catalog_pagination(self):
 
-        for i in xrange(12):
+        for i in range(12):
             factories.Dataset()
 
         app = self._get_test_app()
@@ -424,7 +426,7 @@ class TestEndpoints(DCATFunctionalTestBase):
     @helpers.change_config('ckanext.dcat.datasets_per_page', 10)
     def test_catalog_pagination_parameters(self):
 
-        for i in xrange(12):
+        for i in range(12):
             factories.Dataset()
 
         app = self._get_test_app()

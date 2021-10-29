@@ -41,7 +41,7 @@ It also offers other features related to Semantic Data like exposing the necessa
 
 ## Overview
 
-With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [http://publicdata.eu](http://publicdata.eu) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
+With the emergence of Open Data initiatives around the world, the need to share metadata across different catalogs has became more evident. Sites like [the EU Open Data Portal](https://data.europa.eu/euodp/en/data/) aggregate datasets from different portals, and there has been a growing demand to provide a clear and standard interface to allow incorporating metadata into them automatically.
 
 There is growing consensus around [DCAT](http://www.w3.org/TR/vocab-dcat) being the right way forward, but actual implementations are needed. This extension aims to provide tools and guidance to allow publishers to publish and share DCAT based metadata easily.
 
@@ -106,12 +106,13 @@ The extension will determine the RDF serialization format returned. The currentl
 
 The fallback `rdf` format defaults to RDF/XML.
 
-Here's an example of the different formats available (links might not be live as they link to a demo site):
+Here's an example of the different formats:
 
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.rdf
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.ttl
-* http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.n3
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.rdf
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.xml
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.ttl
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.n3
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.jsonld
 
 RDF representations will be advertised using `<link rel="alternate">` tags on the `<head>` sectionon the dataset page source code, eg:
 
@@ -129,8 +130,8 @@ Check the [RDF DCAT Serializer](#rdf-dcat-serializer) section for more details a
 
 You can specify the profile by using the `profiles=<profile1>,<profile2>` query parameter on the dataset endpoint (as a comma-separated list):
 
-* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.xml?profiles=euro_dcat_ap,sweden_dcat_ap`
-* `http://demo.ckan.org/dataset/newcastle-city-council-payments-over-500.jsonld?profiles=schemaorg`
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.xml?profiles=euro_dcat_ap
+* https://opendata.swiss/en/dataset/verbreitung-der-steinbockkolonien.jsonld?profiles=schemaorg
 
 *Note*: When using this plugin, the above endpoints will replace the old deprecated ones that were part of CKAN core.
 
@@ -909,9 +910,14 @@ Example output of structured data in JSON-LD:
 
 ## Running the Tests
 
-To run the tests, do:
+To run the tests on CKAN >= 2.9, do:
 
-    nosetests --nologcapture --ckan --with-pylons=test.ini ckanext
+    pytest --ckan-ini=test.ini ckanext/dcat/tests
+
+
+To run the tests on CKAN <= 2.8, do:
+
+    nosetests --nologcapture --ckan --with-pylons=test-nose.ini ckanext/dcat/tests/nose
     
 ## Releases
 

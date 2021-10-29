@@ -1,10 +1,12 @@
 {% ckan_extends %}
 {% block links %}
-   {{ super() }}
-   <link rel="alternate" type="text/n3" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='n3', qualified=True) }}"/>
-   <link rel="alternate" type="text/ttl" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='ttl', qualified=True) }}"/>
-   <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='xml', qualified=True) }}"/>
-   <link rel="alternate" type="application/ld+json" href="{{ h.url_for('dcat_dataset', _id=pkg.id, _format='jsonld', qualified=True) }}"/>
+    {{ super() }}
+    {% with endpoint='dcat.read_dataset' if h.ckan_version() > '2.9' else 'dcat_dataset'  %}
+        <link rel="alternate" type="text/n3" href="{{ h.url_for(endpoint, _id=pkg.id, _format='n3', qualified=True) }}"/>
+        <link rel="alternate" type="text/ttl" href="{{ h.url_for(endpoint, _id=pkg.id, _format='ttl', qualified=True) }}"/>
+        <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for(endpoint, _id=pkg.id, _format='xml', qualified=True) }}"/>
+        <link rel="alternate" type="application/ld+json" href="{{ h.url_for(endpoint, _id=pkg.id, _format='jsonld', qualified=True) }}"/>
+    {% endwith %}
 {% endblock -%}
 {% block body_extras %}
   {{ super() }}
@@ -17,10 +19,10 @@
     https://developers.google.com/search/docs/guides/intro-structured-data
     #}
 
-    {% if h.helper_available('structured_data') %}
-    <script type="application/ld+json">
-    {{ h.structured_data(pkg.id)|safe }}
-    </script>
-    {% endif %}
+      {% if h.helper_available('structured_data') %}
+          <script type="application/ld+json">
+           {{ h.structured_data(pkg.id)|safe }}
+          </script>
+      {% endif %}
   {% endblock %}
 {% endblock %}
