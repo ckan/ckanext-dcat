@@ -3,7 +3,7 @@
 from builtins import str
 import logging
 import uuid
-import json
+import simplejson as json
 import re
 import operator
 
@@ -133,7 +133,7 @@ def structured_data(dataset_id, profiles=None, _format='jsonld'):
     try:
         json_data = json.loads(data)
         return json.dumps(json_data, sort_keys=True,
-                          indent=4, separators=(',', ': '))
+                          indent=4, separators=(',', ': '), cls=json.JSONEncoderForHTML)
     except ValueError:
         # result was not JSON, return anyway
         return data
@@ -490,3 +490,10 @@ def read_catalog_page(_format):
         response.headers['Content-type'] = CONTENT_TYPES[_format]
 
     return response
+
+
+def get_endpoint(_type='dataset'):
+    if toolkit.check_ckan_version(min_version='2.9'):
+        return 'dcat.read_dataset' if _type == 'dataset' else 'dcat.read_catalog'
+    else:
+        return 'dcat_dataset' if _type == 'dataset' else 'dcat_catalog'

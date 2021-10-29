@@ -1,5 +1,23 @@
 # Changelog
 
+
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.1...HEAD)
+
+
+## [v1.1.2](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...v1.1.1) - 2021-06-22
+
+* Use safer encoder for Structured Data output (#198)
+* Fix: use catalog_uri logic for pagination URIs (#197)
+* Introduce new interface method `after_parsing` (#196)
+
+## [v1.1.1](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...v1.1.1) - 2021-03-17
+
+* Fix harvest encoding error on py3 (#189)
+* Fix py3 syntax error (#184)
+* Fixed Internal server error on login (#181)
+* Remove Beautifulsoup requirement (#195)
+* Migrate tests to GitHub Actions
+
 ## [v1.1.0](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...v1.1.0) - 2020-03-12
 
 * Python 3 support and new pytest based test suite (#174)

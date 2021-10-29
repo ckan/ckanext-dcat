@@ -1,6 +1,7 @@
 # ckanext-dcat
 
-[![Build Status](https://travis-ci.org/ckan/ckanext-dcat.svg?branch=master)](https://travis-ci.org/ckan/ckanext-dcat)
+
+[![Tests](https://github.com/ckan/ckanext-pages/workflows/Tests/badge.svg?branch=master)](https://github.com/ckan/ckanext-dcat/actions)
 [![Code Coverage](http://codecov.io/github/ckan/ckanext-dcat/coverage.svg?branch=master)](http://codecov.io/github/ckan/ckanext-dcat?branch=master)
 
 
@@ -938,7 +939,7 @@ Work on ckanext-dcat has been made possible by:
 If you can fund new developments or contribute please get in touch.
 
 
-## Copying and License
+## Copying and License 
 
 This material is copyright (c) Open Knowledge.
 

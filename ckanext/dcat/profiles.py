@@ -1,6 +1,3 @@
-from future import standard_library
-standard_library.install_aliases()
-
 from builtins import str
 from past.builtins import basestring
 from builtins import object
@@ -8,7 +5,7 @@ import datetime
 import json
 
 import six
-from urllib.parse import quote
+from six.moves.urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 
@@ -462,10 +459,7 @@ class RDFProfile(object):
             if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
                 result = self._object_value(obj, RDFS.label)
             elif isinstance(obj, Literal):
-                if six.PY2:
-                    result = unicode(obj)
-                else:
-                    result = str(obj)
+                result = six.text_type(obj)
         return result
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):

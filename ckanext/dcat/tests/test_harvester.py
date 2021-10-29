@@ -10,6 +10,7 @@ import responses
 from mock import patch
 
 import ckan.plugins as p
+from ckantoolkit import config
 from ckantoolkit.tests import helpers
 
 import ckanext.harvest.model as harvest_model
@@ -19,7 +20,8 @@ from ckanext.dcat.harvesters import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
-responses.add_passthru('http://127.0.0.1:8983/solr')
+
+responses.add_passthru(config.get('solr_url', 'http://127.0.0.1:8983/solr'))
 
 
 # TODO move to ckanext-harvest
@@ -46,6 +48,8 @@ class TestRDFHarvester(p.SingletonPlugin):
     p.implements(IDCATRDFHarvester)
 
     calls = defaultdict(int)
+    # change return values of after_parsing via this parameter
+    after_parsing_mode = ''
 
     def before_download(self, url, harvest_job):
 
@@ -73,6 +77,17 @@ class TestRDFHarvester(p.SingletonPlugin):
             return None, ['Error 1', 'Error 2']
         else:
             return content, []
+
+    def after_parsing(self, rdf_parser, harvest_job):
+
+        self.calls['after_parsing'] += 1
+
+        if self.after_parsing_mode == 'return.empty.rdf_parser':
+            return None, []
+        elif self.after_parsing_mode == 'return.errors':
+            return None, ['Error 1', 'Error 2']
+        else:
+            return rdf_parser, []
 
     def before_update(self, harvest_object, dataset_dict, temp_dict):
         self.calls['before_update'] += 1
@@ -1257,6 +1272,120 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
         assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
 
     @responses.activate
+    def test_harvest_after_parsing_extension_point_gets_called(self, reset_calls_counter):
+
+        reset_calls_counter('test_rdf_harvester')
+        plugin = p.get_plugin('test_rdf_harvester')
+
+        url = self.rdf_mock_url
+        content =  self.rdf_content
+        content_type = self.rdf_content_type
+
+        # Mock the GET request to get the file
+        responses.add(responses.GET, url,
+                               body=content, content_type=content_type)
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        responses.add(responses.HEAD, url,
+                               status=405, content_type=content_type)
+
+        harvest_source = self._create_harvest_source(self.rdf_mock_url)
+        self._create_harvest_job(harvest_source['id'])
+        self._run_jobs(harvest_source['id'])
+        self._gather_queue(1)
+
+        assert plugin.calls['after_parsing'] == 1
+
+    @responses.activate
+    def test_harvest_after_parsing_empty_content_stops_gather_stage(self, reset_calls_counter):
+
+        reset_calls_counter('test_rdf_harvester')
+        plugin = p.get_plugin('test_rdf_harvester')
+        plugin.after_parsing_mode = 'return.empty.rdf_parser'
+
+        # ensure after_parsing_mode is reset, so wrap in try..finally block
+        try:
+            url = self.rdf_mock_url
+            content =  self.rdf_content
+            content_type = self.rdf_content_type
+
+            # Mock the GET request to get the file
+            responses.add(responses.GET, url,
+                                body=content, content_type=content_type)
+
+            # The harvester will try to do a HEAD request first so we need to mock
+            # this as well
+            responses.add(responses.HEAD, url,
+                                status=405, content_type=content_type)
+
+            harvest_source = self._create_harvest_source(self.rdf_mock_url)
+            self._create_harvest_job(harvest_source['id'])
+            self._run_jobs(harvest_source['id'])
+            self._gather_queue(1)
+
+            assert plugin.calls['after_parsing'] == 1
+
+            # Run the jobs to mark the previous one as Finished
+            self._run_jobs()
+
+            # Get the harvest source with the updated status
+            harvest_source = helpers.call_action('harvest_source_show',
+                                        id=harvest_source['id'])
+
+            last_job_status = harvest_source['status']['last_job']
+
+            assert last_job_status['status'] == 'Finished'
+
+            assert last_job_status['stats']['added'] == 0
+        finally:
+            plugin.after_parsing_mode = ''
+
+
+    @responses.activate
+    def test_harvest_after_parsing_errors_get_stored(self, reset_calls_counter):
+
+        reset_calls_counter('test_rdf_harvester')
+        plugin = p.get_plugin('test_rdf_harvester')
+        plugin.after_parsing_mode = 'return.errors'
+
+        # ensure after_parsing_mode is reset, so wrap in try..finally block
+        try:
+            url = self.rdf_mock_url
+            content =  self.rdf_content
+            content_type = self.rdf_content_type
+
+            # Mock the GET request to get the file
+            responses.add(responses.GET, url,
+                                body=content, content_type=content_type)
+
+            # The harvester will try to do a HEAD request first so we need to mock
+            # this as well
+            responses.add(responses.HEAD, url,
+                                status=405, content_type=content_type)
+
+            harvest_source = self._create_harvest_source(self.rdf_mock_url)
+            self._create_harvest_job(harvest_source['id'])
+            self._run_jobs(harvest_source['id'])
+            self._gather_queue(1)
+
+            assert plugin.calls['after_parsing'] == 1
+
+            # Run the jobs to mark the previous one as Finished
+            self._run_jobs()
+
+            # Get the harvest source with the updated status
+            harvest_source = helpers.call_action('harvest_source_show',
+                                        id=harvest_source['id'])
+
+            last_job_status = harvest_source['status']['last_job']
+
+            assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
+            assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+        finally:
+            plugin.after_parsing_mode = ''
+
+    @responses.activate
     def test_harvest_import_extensions_point_gets_called(self, reset_calls_counter):
 
         reset_calls_counter('test_rdf_harvester')
@@ -1476,6 +1605,17 @@ class TestIDCATRDFHarvester(object):
         values = i.after_download(content, {})
 
         assert values[0] == content
+        assert values[1] == []
+
+    def test_after_parsing(self):
+
+        i = IDCATRDFHarvester()
+
+        rdf_parser = 'some.parser'
+
+        values = i.after_parsing(rdf_parser, {})
+
+        assert values[0] == rdf_parser
         assert values[1] == []
 
     def test_update_package_schema_for_create(self):
