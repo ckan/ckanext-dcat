@@ -1,9 +1,13 @@
 # Changelog
 
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...HEAD)
 
-* Also process URIRef in rights statements
+
+## [v1.1.3](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...v1.1.2) - 2021-11-05
+
+* Fix behavior if `publisher_uri` is not available (#201)
+* Also process URIRef in rights statements (#200)
 
 ## [v1.1.2](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...v1.1.1) - 2021-06-22
 
