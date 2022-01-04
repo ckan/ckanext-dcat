@@ -1,7 +1,7 @@
 # ckanext-dcat
 
 
-[![Tests](https://github.com/ckan/ckanext-pages/workflows/Tests/badge.svg?branch=master)](https://github.com/ckan/ckanext-dcat/actions)
+[![Tests](https://github.com/ckan/ckanext-dcat/workflows/Tests/badge.svg?branch=master)](https://github.com/ckan/ckanext-dcat/actions)
 [![Code Coverage](http://codecov.io/github/ckan/ckanext-dcat/coverage.svg?branch=master)](http://codecov.io/github/ckan/ckanext-dcat?branch=master)
 
 
