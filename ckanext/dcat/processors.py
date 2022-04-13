@@ -236,13 +236,6 @@ class RDFSerializer(RDFProcessor):
         Returns the reference to the dataset, which will be an rdflib URIRef.
         '''
 
-        uri_value = dataset_dict.get('uri')
-        if not uri_value:
-            for extra in dataset_dict.get('extras', []):
-                if extra['key'] == 'uri':
-                    uri_value = extra['value']
-                    break
-
         dataset_ref = URIRef(dataset_uri(dataset_dict))
 
         for profile_class in self._profiles:
