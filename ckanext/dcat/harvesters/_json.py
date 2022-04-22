@@ -11,7 +11,7 @@ from ckan import model
 from ckan import logic
 from ckan import plugins as p
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
-
+from ckanext.harvest.logic.schema import unicode_safe
 from ckanext.dcat import converters
 from ckanext.dcat.harvesters.base import DCATHarvester
 
@@ -263,7 +263,7 @@ class DCATJSONHarvester(DCATHarvester):
 
                 # We need to explicitly provide a package ID
                 package_dict['id'] = str(uuid.uuid4())
-                package_schema['id'] = [str]
+                package_schema['id'] = [unicode_safe]
 
                 # Save reference to the package on the object
                 harvest_object.package_id = package_dict['id']

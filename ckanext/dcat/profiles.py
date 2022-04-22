@@ -20,8 +20,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
-from ckan.lib.helpers import url_for
-
+from ckanext.dcat.urls import url_for
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
@@ -459,6 +458,7 @@ class RDFProfile(object):
             if isinstance(obj, BNode) and self._object(obj, RDF.type) == DCT.RightsStatement:
                 result = self._object_value(obj, RDFS.label)
             elif isinstance(obj, Literal) or isinstance(obj, URIRef):
+                # unicode_safe not include Literal or URIRef
                 result = six.text_type(obj)
         return result
 
@@ -1443,9 +1443,9 @@ class SchemaOrgProfile(RDFProfile):
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
         # Dataset URL
-        dataset_url = url_for('dataset_read',
+        dataset_url = url_for('dataset.read',
                               id=dataset_dict['name'],
-                              qualified=True)
+                              _external=True)
         self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
 
     def _catalog_graph(self, dataset_ref, dataset_dict):
@@ -1461,7 +1461,7 @@ class SchemaOrgProfile(RDFProfile):
             group_url = url_for(controller='group',
                                 action='read',
                                 id=group.get('id'),
-                                qualified=True)
+                                _external=True)
             about = BNode()
 
             self.g.add((about, RDF.type, SCHEMA.Thing))

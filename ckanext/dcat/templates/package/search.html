@@ -2,9 +2,9 @@
 {% block links %}
     {{ super() }}
     {% with endpoint=h.dcat_get_endpoint('catalog')  %}
-        <link rel="alternate" type="text/n3" href="{{ h.url_for(endpoint, _format='n3', qualified=True) }}"/>
-        <link rel="alternate" type="text/ttl" href="{{ h.url_for(endpoint, _format='ttl', qualified=True) }}"/>
-        <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for(endpoint, _format='xml', qualified=True) }}"/>
-        <link rel="alternate" type="application/ld+json" href="{{ h.url_for(endpoint, _format='jsonld', qualified=True) }}"/>
+        <link rel="alternate" type="text/n3" href="{{ h.url_for(endpoint, _format='n3', _external=True) }}"/>
+        <link rel="alternate" type="text/ttl" href="{{ h.url_for(endpoint, _format='ttl', _external=True) }}"/>
+        <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for(endpoint, _format='xml', _external=True) }}"/>
+        <link rel="alternate" type="application/ld+json" href="{{ h.url_for(endpoint, _format='jsonld', _external=True) }}"/>
     {% endwith %}
 {% endblock -%}
