@@ -4,7 +4,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
         with:
           python-version: '3.6'
@@ -44,9 +44,7 @@ jobs:
       CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-    - name: adding github workspace as safe directory
-      run: git config --global --add safe.directory $GITHUB_WORKSPACE
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install requirements
       run: |
         pip install -r requirements.txt
