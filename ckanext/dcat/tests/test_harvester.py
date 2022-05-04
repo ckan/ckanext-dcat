@@ -25,7 +25,7 @@ from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
 
-responses.add_passthru(config.get('solr_url', 'http://127.0.0.1:8983/solr'))
+
 
 
 # TODO move to ckanext-harvest
@@ -541,6 +541,13 @@ class FunctionalHarvestTest(object):
           dc:title "Example dataset 1" .
           '''
 
+    def _add_responses_solr_passthru(self):
+        responses.add_passthru(
+            re.compile(
+                config.get(
+                    'solr_url', 'http://127.0.0.1:8983/solr').rstrip('/') + "/\\w+"
+            )
+        )
 
     def _create_harvest_source(self, mock_url, **kwargs):
 
@@ -655,6 +662,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     @responses.activate
     def _test_harvest_create(self, url, content, content_type, **kwargs):
 
+        self._add_responses_solr_passthru()
+
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=content, content_type=content_type)
@@ -679,6 +688,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
     @responses.activate
     def test_harvest_create_rdf_pagination(self):
+
+        self._add_responses_solr_passthru()
 
         # Mock the GET requests needed to get the file
         responses.add(responses.GET, self.rdf_mock_url_pagination_1,
@@ -715,6 +726,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
     @responses.activate
     def test_harvest_create_rdf_pagination_same_content(self):
+
+        self._add_responses_solr_passthru()
 
         # Mock the GET requests needed to get the file. Two different URLs but
         # same content to mock a misconfigured server
@@ -775,6 +788,9 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
     @responses.activate
     def _test_harvest_update(self, url, content, content_type):
+
+        self._add_responses_solr_passthru()
+
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=content, content_type=content_type)
@@ -833,6 +849,9 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
     @responses.activate
     def _test_harvest_update_resources(self, url, content, content_type):
+
+        self._add_responses_solr_passthru()
+
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=content, content_type=content_type)
@@ -896,6 +915,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     @responses.activate
     def _test_harvest_delete(self, url, content, content_small, content_type):
 
+        self._add_responses_solr_passthru()
+
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=content, content_type=content_type)
@@ -942,6 +963,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     @responses.activate
     def _test_harvest_bad_format(self, url, bad_content, content_type):
 
+        self._add_responses_solr_passthru()
+
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=bad_content, content_type=content_type)
@@ -972,6 +995,9 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     @responses.activate
     @patch.object(ckanext.dcat.harvesters.rdf.RDFParser, 'datasets')
     def test_harvest_exception_in_profile(self, mock_datasets):
+
+        self._add_responses_solr_passthru()
+
         mock_datasets.side_effect = Exception
 
         # Mock the GET request to get the file
@@ -1003,6 +1029,8 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
     @responses.activate
     def test_harvest_create_duplicate_titles(self):
+
+        self._add_responses_solr_passthru()
 
         # Mock the GET request to get the file
         responses.add(responses.GET, self.rdf_mock_url_duplicates,
@@ -1053,6 +1081,8 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_before_download_null_url_stops_gather_stage(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
+
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1094,6 +1124,8 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
     @responses.activate
     def test_harvest_before_download_errors_get_stored(self, reset_calls_counter):
+
+        self._add_responses_solr_passthru()
 
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
@@ -1149,6 +1181,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_update_session_add_header(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1172,6 +1205,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_after_download_extension_point_gets_called(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1193,6 +1227,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_after_download_empty_content_stops_gather_stage(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1236,6 +1271,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_after_download_errors_get_stored(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1278,6 +1314,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_after_parsing_extension_point_gets_called(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1304,6 +1341,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_after_parsing_empty_content_stops_gather_stage(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
         plugin.after_parsing_mode = 'return.empty.rdf_parser'
@@ -1349,6 +1387,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_after_parsing_errors_get_stored(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
         plugin.after_parsing_mode = 'return.errors'
@@ -1392,6 +1431,7 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_import_extensions_point_gets_called(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_harvester')
         plugin = p.get_plugin('test_rdf_harvester')
 
@@ -1459,6 +1499,7 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_with_before_create_null(self, reset_calls_counter):
 
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_null_harvester')
         plugin = p.get_plugin('test_rdf_null_harvester')
 
@@ -1518,6 +1559,8 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
 
     @responses.activate
     def test_harvest_with_before_create_raising_exception(self, reset_calls_counter):
+
+        self._add_responses_solr_passthru()
         reset_calls_counter('test_rdf_exception_harvester')
         plugin = p.get_plugin('test_rdf_exception_harvester')
 
