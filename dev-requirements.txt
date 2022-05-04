@@ -1,4 +1,4 @@
-responses==0.10.9
-mock==2.0.0
+responses==0.20.0
+mock
 pytest-ckan
 pytest-cov
