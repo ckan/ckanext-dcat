@@ -4,10 +4,14 @@ from builtins import str
 from builtins import range
 from builtins import object
 from collections import defaultdict
+import re
 
 import pytest
 import responses
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 import ckan.plugins as p
 from ckantoolkit import config

@@ -3,7 +3,10 @@ from builtins import object
 
 import responses
 import pytest
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 from ckantoolkit.tests import helpers
 

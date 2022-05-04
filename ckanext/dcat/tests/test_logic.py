@@ -1,7 +1,10 @@
 from builtins import range
 from builtins import object
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 
