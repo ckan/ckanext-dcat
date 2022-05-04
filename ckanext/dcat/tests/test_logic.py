@@ -69,16 +69,16 @@ def test_dataset_show_without_format():
 
 # Pagination
 
-
+@pytest.mark.usefixtures("with_request_context")
 class TestPagination(object):
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 10)
-    @pytest.mark.ckan_config('ckan.site_url', 'http://example.com')
+    @pytest.mark.ckan_config('ckan.site_url', 'http://test.ckan.net')
     @mock.patch('ckan.plugins.toolkit.request')
     def test_pagination(self, mock_request):
 
         mock_request.params = {}
-        mock_request.host_url = 'http://ckan.example.com'
+        mock_request.host_url = 'http://test.ckan.net'
         mock_request.path = ''
 
         # No page defined (defaults to 1)
@@ -94,10 +94,10 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com?page=1'
-        assert pagination['first'] == 'http://example.com?page=1'
-        assert pagination['last'] == 'http://example.com?page=2'
-        assert pagination['next'] == 'http://example.com?page=2'
+        assert pagination['current'] == 'http://test.ckan.net?page=1'
+        assert pagination['first'] == 'http://test.ckan.net?page=1'
+        assert pagination['last'] == 'http://test.ckan.net?page=2'
+        assert pagination['next'] == 'http://test.ckan.net?page=2'
         assert 'previous' not in pagination
 
         # Page 1
@@ -113,10 +113,10 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com?page=1'
-        assert pagination['first'] == 'http://example.com?page=1'
-        assert pagination['last'] == 'http://example.com?page=2'
-        assert pagination['next'] == 'http://example.com?page=2'
+        assert pagination['current'] == 'http://test.ckan.net?page=1'
+        assert pagination['first'] == 'http://test.ckan.net?page=1'
+        assert pagination['last'] == 'http://test.ckan.net?page=2'
+        assert pagination['next'] == 'http://test.ckan.net?page=2'
         assert 'previous' not in pagination
 
         # Page 2
@@ -133,10 +133,10 @@ class TestPagination(object):
         assert pagination['count'] == 12
 
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com?page=2'
-        assert pagination['first'] == 'http://example.com?page=1'
-        assert pagination['last'] == 'http://example.com?page=2'
-        assert pagination['previous'] == 'http://example.com?page=1'
+        assert pagination['current'] == 'http://test.ckan.net?page=2'
+        assert pagination['first'] == 'http://test.ckan.net?page=1'
+        assert pagination['last'] == 'http://test.ckan.net?page=2'
+        assert pagination['previous'] == 'http://test.ckan.net?page=1'
         assert 'next' not in pagination
 
         # Page 3
@@ -152,19 +152,19 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com?page=3'
-        assert pagination['first'] == 'http://example.com?page=1'
-        assert pagination['last'] == 'http://example.com?page=2'
-        assert pagination['previous'] == 'http://example.com?page=2'
+        assert pagination['current'] == 'http://test.ckan.net?page=3'
+        assert pagination['first'] == 'http://test.ckan.net?page=1'
+        assert pagination['last'] == 'http://test.ckan.net?page=2'
+        assert pagination['previous'] == 'http://test.ckan.net?page=2'
         assert 'next' not in pagination
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 100)
-    @pytest.mark.ckan_config('ckan.site_url', 'http://example.com')
+    @pytest.mark.ckan_config('ckan.site_url', 'http://test.ckan.net')
     @mock.patch('ckan.plugins.toolkit.request')
     def test_pagination_less_results_than_page_size(self, mock_request):
 
         mock_request.params = {}
-        mock_request.host_url = 'http://ckan.example.com'
+        mock_request.host_url = 'http://ckan.test.ckan.net'
         mock_request.path = ''
 
         # No page defined (defaults to 1)
@@ -180,19 +180,19 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com?page=1'
-        assert pagination['first'] == 'http://example.com?page=1'
-        assert pagination['last'] == 'http://example.com?page=1'
+        assert pagination['current'] == 'http://test.ckan.net?page=1'
+        assert pagination['first'] == 'http://test.ckan.net?page=1'
+        assert pagination['last'] == 'http://test.ckan.net?page=1'
         assert 'next' not in pagination
         assert 'previous' not in pagination
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 10)
-    @pytest.mark.ckan_config('ckan.site_url', 'http://example.com')
+    @pytest.mark.ckan_config('ckan.site_url', 'http://test.ckan.net')
     @mock.patch('ckan.plugins.toolkit.request')
     def test_pagination_same_results_than_page_size(self, mock_request):
 
         mock_request.params = {}
-        mock_request.host_url = 'http://ckan.example.com'
+        mock_request.host_url = 'http://ckan.test.ckan.net'
         mock_request.path = ''
 
         # No page defined (defaults to 1)
@@ -209,19 +209,19 @@ class TestPagination(object):
         assert pagination['count'] == 10
 
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com?page=1'
-        assert pagination['first'] == 'http://example.com?page=1'
-        assert pagination['last'] == 'http://example.com?page=1'
+        assert pagination['current'] == 'http://test.ckan.net?page=1'
+        assert pagination['first'] == 'http://test.ckan.net?page=1'
+        assert pagination['last'] == 'http://test.ckan.net?page=1'
         assert 'next' not in pagination
         assert 'previous' not in pagination
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 10)
-    @pytest.mark.ckan_config('ckan.site_url', 'http://example.com')
+    @pytest.mark.ckan_config('ckan.site_url', 'http://test.ckan.net')
     @mock.patch('ckan.plugins.toolkit.request')
     def test_pagination_keeps_only_supported_params(self, mock_request):
 
         mock_request.params = {'a': 1, 'b': 2, 'modified_since': '2018-03-22', 'profiles': 'schemaorg'}
-        mock_request.host_url = 'http://ckan.example.com'
+        mock_request.host_url = 'http://ckan.test.ckan.net'
         mock_request.path = '/feed/catalog.xml'
 
         # No page defined (defaults to 1)
@@ -237,19 +237,19 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=1'
-        assert pagination['first'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=1'
-        assert pagination['last'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=2'
-        assert pagination['next'] == 'http://example.com/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=2'
+        assert pagination['current'] == 'http://test.ckan.net/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=1'
+        assert pagination['first'] == 'http://test.ckan.net/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=1'
+        assert pagination['last'] == 'http://test.ckan.net/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=2'
+        assert pagination['next'] == 'http://test.ckan.net/feed/catalog.xml?modified_since=2018-03-22&profiles=schemaorg&page=2'
         assert 'previous' not in pagination
 
     @pytest.mark.ckan_config('ckanext.dcat.datasets_per_page', 10)
-    @pytest.mark.ckan_config('ckanext.dcat.base_uri', 'http://example.com/data')
+    @pytest.mark.ckan_config('ckanext.dcat.base_uri', 'http://test.ckan.net/data')
     @mock.patch('ckan.plugins.toolkit.request')
     def test_pagination_with_dcat_base_uri(self, mock_request):
 
         mock_request.params = {}
-        mock_request.host_url = 'http://ckan.example.com'
+        mock_request.host_url = 'http://ckan.test.ckan.net'
         mock_request.path = '/feed/catalog.xml'
 
         # No page defined (defaults to 1)
@@ -265,10 +265,10 @@ class TestPagination(object):
 
         assert pagination['count'] == 12
         assert pagination['items_per_page'] == config.get('ckanext.dcat.datasets_per_page')
-        assert pagination['current'] == 'http://example.com/data/feed/catalog.xml?page=1'
-        assert pagination['first'] == 'http://example.com/data/feed/catalog.xml?page=1'
-        assert pagination['last'] == 'http://example.com/data/feed/catalog.xml?page=2'
-        assert pagination['next'] == 'http://example.com/data/feed/catalog.xml?page=2'
+        assert pagination['current'] == 'http://test.ckan.net/data/feed/catalog.xml?page=1'
+        assert pagination['first'] == 'http://test.ckan.net/data/feed/catalog.xml?page=1'
+        assert pagination['last'] == 'http://test.ckan.net/data/feed/catalog.xml?page=2'
+        assert pagination['next'] == 'http://test.ckan.net/data/feed/catalog.xml?page=2'
         assert 'previous' not in pagination
 
     def test_pagination_no_results_empty_dict(self):
