@@ -45,9 +45,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install requirements
+    - name: Install requirements (Python 3)
+      if: ${{ matrix.ckan-version != '2.7' && matrix.ckan-version != '2.8' && matrix.ckan-version != '2.9-py2'}}
       run: |
         pip install -r requirements.txt
+    - name: Install requirements (Python 2)
+      if: ${{ matrix.ckan-version == '2.7' || matrix.ckan-version == '2.8' || matrix.ckan-version == '2.9-py2'}}
+      run: |
+        pip install -r requirements-py2.txt
+    - name: Install requirements (common)
+      run: |
         pip install -r dev-requirements.txt
         pip install -e .
         # Replace default path to CKAN core config file with the one on the container
