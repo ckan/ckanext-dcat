@@ -61,19 +61,20 @@ class URIRefOrLiteral(object):
     Like CleanedURIRef, this is a factory class.
     '''
     def __new__(cls, value):
-        stripped_value = value.strip()
-        if (isinstance(value, basestring) and (stripped_value.startswith("http://")
-                                               or stripped_value.startswith("https://"))):
-            uri_obj = CleanedURIRef(value)
-            # although all invalid chars checked by rdflib should have been quoted, try to serialize
-            # the object. If it breaks, use Literal instead.
-            try:
+        try:
+            stripped_value = value.strip()
+            if (isinstance(value, basestring) and (stripped_value.startswith("http://")
+                                                or stripped_value.startswith("https://"))):
+                uri_obj = CleanedURIRef(value)
+                # although all invalid chars checked by rdflib should have been quoted, try to serialize
+                # the object. If it breaks, use Literal instead.
                 uri_obj.n3()
-            except Exception:
+                # URI is fine, return the object
+                return uri_obj
+            else:
                 return Literal(value)
-            # URI is fine, return the object
-            return uri_obj
-        else:
+        except Exception:
+            # In case something goes wrong: use Literal
             return Literal(value)
 
 
@@ -1060,11 +1061,11 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('title', DCT.title, None, Literal),
             ('notes', DCT.description, None, Literal),
             ('url', DCAT.landingPage, None, URIRef),
-            ('identifier', DCT.identifier, ['guid', 'id'], Literal),
+            ('identifier', DCT.identifier, ['guid', 'id'], URIRefOrLiteral),
             ('version', OWL.versionInfo, ['dcat_version'], Literal),
             ('version_notes', ADMS.versionNotes, None, Literal),
             ('frequency', DCT.accrualPeriodicity, None, URIRefOrLiteral),
-            ('access_rights', DCT.accessRights, None, Literal),
+            ('access_rights', DCT.accessRights, None, URIRefOrLiteral),
             ('dcat_type', DCT.type, None, Literal),
             ('provenance', DCT.provenance, None, Literal),
         ]
@@ -1086,13 +1087,13 @@ class EuropeanDCATAPProfile(RDFProfile):
             ('language', DCT.language, None, URIRefOrLiteral),
             ('theme', DCAT.theme, None, URIRef),
             ('conforms_to', DCT.conformsTo, None, Literal),
-            ('alternate_identifier', ADMS.identifier, None, Literal),
+            ('alternate_identifier', ADMS.identifier, None, URIRefOrLiteral),
             ('documentation', FOAF.page, None, URIRefOrLiteral),
             ('related_resource', DCT.relation, None, URIRefOrLiteral),
             ('has_version', DCT.hasVersion, None, URIRefOrLiteral),
             ('is_version_of', DCT.isVersionOf, None, URIRefOrLiteral),
-            ('source', DCT.source, None, Literal),
-            ('sample', ADMS.sample, None, Literal),
+            ('source', DCT.source, None, URIRefOrLiteral),
+            ('sample', ADMS.sample, None, URIRefOrLiteral),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
