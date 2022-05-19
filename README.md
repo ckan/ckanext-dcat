@@ -283,6 +283,7 @@ the `IDCATRDFHarvester` interface. Right now it provides the following methods:
 * `update_session`: called before making the remote requests to update the `requests` session object, useful to add additional headers or for setting client certificates. Check the [`requests` documentation](http://docs.python-requests.org/en/master/user/advanced/#session-objects) for details.
 * `before_create` / `after_create`: called before and after the `package_create` action has been performed
 * `before_update` / `after_update`: called before and after the `package_update` action has been performed
+* `after_parsing`: Called just after the content from the remote RDF file has been parsed
 
 To know more about these methods, please check the source of [`ckanext-dcat/ckanext/dcat/interfaces.py`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/interfaces.py).
 
