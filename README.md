@@ -22,6 +22,7 @@ It also offers other features related to Semantic Data like exposing the necessa
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
+    - [Maximum file size](#maximum-file-size)
     - [Transitive harvesting](#transitive-harvesting)
     - [Extending the RDF harvester](#extending-the-rdf-harvester)
 - [JSON DCAT harvester](#json-dcat-harvester)
@@ -255,6 +256,12 @@ The harvester will look at the `content-type` HTTP header field to determine the
 
 *TODO*: configure profiles.
 
+### Maximum file size
+
+The default max size of the file (for each HTTP response) to harvest is actually 50 MB. The size can be customised by setting the configuration option `ckanext.dcat.max_file_size` to your CKAN configuration file.
+Here‘s an example of setting the max file size to 100 MB:
+
+`ckanext.dcat.max_file_size = 100`
 
 ### Transitive harvesting
 
