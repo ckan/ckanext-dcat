@@ -22,6 +22,7 @@ It also offers other features related to Semantic Data like exposing the necessa
     - [URIs](#uris)
     - [Content negotiation](#content-negotiation)
 - [RDF DCAT harvester](#rdf-dcat-harvester)
+    - [Maximum file size](#maximum-file-size)
     - [Transitive harvesting](#transitive-harvesting)
     - [Extending the RDF harvester](#extending-the-rdf-harvester)
 - [JSON DCAT harvester](#json-dcat-harvester)
@@ -255,6 +256,12 @@ The harvester will look at the `content-type` HTTP header field to determine the
 
 *TODO*: configure profiles.
 
+### Maximum file size
+
+The default max size of the file (for each HTTP response) to harvest is actually 50 MB. The size can be customised by setting the configuration option `ckanext.dcat.max_file_size` to your CKAN configuration file.
+Here‘s an example of setting the max file size to 100 MB:
+
+`ckanext.dcat.max_file_size = 100`
 
 ### Transitive harvesting
 
@@ -283,6 +290,7 @@ the `IDCATRDFHarvester` interface. Right now it provides the following methods:
 * `update_session`: called before making the remote requests to update the `requests` session object, useful to add additional headers or for setting client certificates. Check the [`requests` documentation](http://docs.python-requests.org/en/master/user/advanced/#session-objects) for details.
 * `before_create` / `after_create`: called before and after the `package_create` action has been performed
 * `before_update` / `after_update`: called before and after the `package_update` action has been performed
+* `after_parsing`: Called just after the content from the remote RDF file has been parsed
 
 To know more about these methods, please check the source of [`ckanext-dcat/ckanext/dcat/interfaces.py`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/interfaces.py).
 

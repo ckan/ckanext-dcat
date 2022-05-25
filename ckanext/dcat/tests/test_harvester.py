@@ -6,6 +6,7 @@ from builtins import object
 from collections import defaultdict
 import re
 
+import six
 import pytest
 import responses
 try:
@@ -685,6 +686,61 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         for result in results['results']:
             assert result['title'] in ('Example dataset 1',
                                        'Example dataset 2')
+
+    @patch('ckanext.dcat.harvesters.DCATRDFHarvester._save_gather_error')
+    @responses.activate
+    def test_harvest_default_file_size(self, mock_save_gather_error):
+        # prepare
+        harvester = DCATRDFHarvester()
+        actual_file_size =  1024 * 1024 * 110
+        allowed_file_size = 1024 * 1024 * 50
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well
+        responses.add(responses.HEAD, self.ttl_mock_url,
+                               status=200, content_type=self.ttl_content_type,
+                               adding_headers = {'content-length': six.text_type(actual_file_size)})
+
+        harvest_source = self._create_harvest_source(self.ttl_mock_url)
+        # Create new job for the source
+        harvest_job = self._create_harvest_job(harvest_source['id'])
+
+        # execute
+        harvester._get_content_and_type(self.ttl_mock_url, harvest_job, 1, self.ttl_content_type)
+
+        # verify
+        msg = '''Remote file is too big. Allowed
+                    file size: {allowed}, Content-Length: {actual}.'''.format(
+                    allowed=allowed_file_size, actual=actual_file_size)
+        mock_save_gather_error.assert_called_once_with(msg, harvest_job)
+
+    @patch('ckanext.dcat.harvesters.DCATRDFHarvester._save_gather_error')
+    @responses.activate
+    @pytest.mark.ckan_config('ckanext.dcat.max_file_size', 100)
+    def test_harvest_config_file_size(self, mock_save_gather_error):
+        # prepare
+        harvester = DCATRDFHarvester()
+        actual_file_size =  1024 * 1024 * 110
+        allowed_file_size = 1024 * 1024 * 100
+
+        # The harvester will try to do a HEAD request first so we need to mock
+        # this as well  , content_length=file_size
+        responses.add(responses.HEAD, self.ttl_mock_url,
+                               status=200, content_type=self.ttl_content_type,
+                               adding_headers = {'content-length': six.text_type(actual_file_size)})
+
+        harvest_source = self._create_harvest_source(self.ttl_mock_url)
+        # Create new job for the source
+        harvest_job = self._create_harvest_job(harvest_source['id'])
+
+        # execute
+        harvester._get_content_and_type(self.ttl_mock_url, harvest_job, 1, self.ttl_content_type)
+
+        # verify
+        msg = '''Remote file is too big. Allowed
+                    file size: {allowed}, Content-Length: {actual}.'''.format(
+                    allowed=allowed_file_size, actual=actual_file_size)
+        mock_save_gather_error.assert_called_once_with(msg, harvest_job)
 
     @responses.activate
     def test_harvest_create_rdf_pagination(self):
