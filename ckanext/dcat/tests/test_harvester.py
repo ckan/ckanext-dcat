@@ -691,6 +691,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     @responses.activate
     def test_harvest_default_file_size(self, mock_save_gather_error):
         # prepare
+        self._add_responses_solr_passthru()
         harvester = DCATRDFHarvester()
         actual_file_size =  1024 * 1024 * 110
         allowed_file_size = 1024 * 1024 * 50
@@ -720,6 +721,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     def test_harvest_config_file_size(self, mock_save_gather_error):
         # prepare
         harvester = DCATRDFHarvester()
+        self._add_responses_solr_passthru()
         actual_file_size =  1024 * 1024 * 110
         allowed_file_size = 1024 * 1024 * 100
 
