@@ -1422,7 +1422,7 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((subject, predicate, _type(value)))
 
     def _bind_namespaces(self):
-        self.g.bind('schema', namespaces['schema'])
+        self.g.namespace_manager.bind('schema', namespaces['schema'], replace=True)
 
     def _basic_fields_graph(self, dataset_ref, dataset_dict):
         items = [

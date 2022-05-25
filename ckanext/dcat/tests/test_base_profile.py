@@ -269,7 +269,7 @@ class TestBaseRDFProfile(object):
 
         g = Graph()
 
-        g.parse(data=data)
+        g.parse(format='xml', data=data)
 
         p = RDFProfile(g)
 
@@ -307,7 +307,7 @@ class TestBaseRDFProfile(object):
 
         g = Graph()
 
-        g.parse(data=data)
+        g.parse(format='xml', data=data)
 
         p = RDFProfile(g)
 
@@ -339,7 +339,7 @@ class TestBaseRDFProfile(object):
 
         g = Graph()
 
-        g.parse(data=data)
+        g.parse(format='xml', data=data)
 
         p = RDFProfile(g)
 
@@ -366,7 +366,7 @@ class TestBaseRDFProfile(object):
 
         g = Graph()
 
-        g.parse(data=data)
+        g.parse(format='xml', data=data)
 
         p = RDFProfile(g)
 
@@ -396,7 +396,7 @@ class TestBaseRDFProfile(object):
 
         g = Graph()
 
-        g.parse(data=data)
+        g.parse(format='xml', data=data)
 
         p = RDFProfile(g)
 

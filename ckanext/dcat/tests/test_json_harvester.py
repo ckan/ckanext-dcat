@@ -3,7 +3,10 @@ from builtins import object
 
 import responses
 import pytest
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 from ckantoolkit.tests import helpers
 
@@ -101,6 +104,7 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         **kwargs
     ):
 
+        self._add_responses_solr_passthru()
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=content, content_type=content_type)
@@ -157,6 +161,8 @@ class TestDCATJSONHarvestFunctional(FunctionalHarvestTest):
         '''Based on _test_harvest_update_resources'''
         url = self.json_mock_url
         content_type = self.json_content_type
+
+        self._add_responses_solr_passthru()
         # Mock the GET request to get the file
         responses.add(responses.GET, url,
                                body=content_first_harvest,
