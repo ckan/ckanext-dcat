@@ -3,6 +3,13 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...HEAD)
 
+## [v1.2.0](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...v1.2.0) - 2022-05-25
+
+* Support for CKAN 2.10 and Python 3.9 (#208)
+* Upgrade RDFLib version (#213)
+* Support URIs in more fields of the default profile (#214)
+* Make HTTP-Response size configurable (#215)
+* Increase harvester get content chunk size (#217)
 
 ## [v1.1.3](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...v1.1.2) - 2021-11-05
 
