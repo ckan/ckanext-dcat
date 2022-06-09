@@ -236,7 +236,7 @@ class TestBaseRDFProfile(object):
         assert isinstance(value, list)
         assert isinstance(value[0], string_types)
         assert len(value) == 2
-        assert sorted(value), ['moon' == 'space']
+        assert sorted(value) == ['moon', 'space']
 
     def test_object_list_not_found(self):
 

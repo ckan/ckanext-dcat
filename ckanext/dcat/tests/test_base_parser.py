@@ -89,7 +89,7 @@ class TestRDFParser(object):
             RDFParser()
         except RDFProfileException as e:
 
-            assert str(e), 'Unknown RDF profiles: profile_conf_1 == profile_conf_2'
+            assert str(e) == 'Unknown RDF profiles: profile_conf_1, profile_conf_2'
 
         config.clear()
         config.update(original_config)
