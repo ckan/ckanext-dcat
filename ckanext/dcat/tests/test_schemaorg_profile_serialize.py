@@ -221,7 +221,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
             names.append(str(g.value(item[2], SCHEMA.name)))
             urls.append(str(g.value(item[2], SCHEMA.url)))
 
-        assert sorted(names), ['geography' == 'statistics']
+        assert sorted(names) == ['geography', 'statistics']
         assert (sorted(urls) == [
             '{}/group/geography'.format(config['ckan.site_url'].rstrip('/')),
             '{}/group/statistics'.format(config['ckan.site_url'].rstrip('/'))])

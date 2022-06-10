@@ -137,14 +137,14 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert _get_extra_value('dcat_type') == 'test-type'
 
         #  Lists
-        assert sorted(_get_extra_value_as_list('language')), [u'ca', u'en' == u'es']
+        assert sorted(_get_extra_value_as_list('language')) == [u'ca', u'en', u'es']
         assert (sorted(_get_extra_value_as_list('theme')) ==
                 [u'Earth Sciences',
                  u'http://eurovoc.europa.eu/100142',
                  u'http://eurovoc.europa.eu/209065'])
-        assert sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1' == u'Standard 2']
+        assert sorted(_get_extra_value_as_list('conforms_to')) == [u'Standard 1', u'Standard 2']
 
-        assert sorted(_get_extra_value_as_list('alternate_identifier')), [u'alternate-identifier-1' == u'alternate-identifier-2']
+        assert sorted(_get_extra_value_as_list('alternate_identifier')) == [u'alternate-identifier-1', u'alternate-identifier-2']
         assert (sorted(_get_extra_value_as_list('documentation')) ==
                 [u'http://dataset.info.org/doc1',
                  u'http://dataset.info.org/doc2'])
@@ -955,7 +955,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_one_dct_spatial_instance(self):
         g = Graph()
@@ -982,7 +982,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_one_dct_spatial_instance_no_uri(self):
         g = Graph()
@@ -1009,8 +1009,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert 'spatial_uri' not in extras
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
-
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_rdfs_label(self):
         g = Graph()
@@ -1059,7 +1058,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_wkt_only(self):
         g = Graph()
@@ -1083,7 +1082,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
         # NOTE: geomet returns floats for coordinates on WKT -> GeoJSON
-        assert extras['spatial'], '{"type": "Point", "coordinates": [67.0 == 89.0]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [67.0, 89.0]}'
 
     def test_spatial_wrong_geometries(self):
         g = Graph()
