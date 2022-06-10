@@ -361,6 +361,29 @@ class RDFProfile(object):
 
         return contact
 
+    def _parse_geodata(self, spatial, datatype, cur_value):
+        '''
+        Extract geodata with the given datatype from the spatial data and check if it contains a valid GeoJSON
+        or WKT geometry.
+
+        Returns the String or None if the value is no valid GeoJSON or WKT geometry.
+        '''
+        for geometry in self.g.objects(spatial, datatype):
+            if (geometry.datatype == URIRef(GEOJSON_IMT) or
+                    not geometry.datatype):
+                try:
+                    json.loads(str(geometry))
+                    cur_value = str(geometry)
+                except (ValueError, TypeError):
+                    pass
+            if not cur_value and geometry.datatype == GSP.wktLiteral:
+                try:
+                    cur_value = json.dumps(wkt.loads(str(geometry)))
+                except (ValueError, TypeError):
+                    pass
+        return cur_value
+
+
     def _spatial(self, subject, predicate):
         '''
         Returns a dict with details about the spatial location
@@ -381,6 +404,8 @@ class RDFProfile(object):
         uri = None
         text = None
         geom = None
+        bbox = None
+        cent = None
 
         for spatial in self.g.objects(subject, predicate):
 
@@ -391,19 +416,9 @@ class RDFProfile(object):
                 text = str(spatial)
 
             if (spatial, RDF.type, DCT.Location) in self.g:
-                for geometry in self.g.objects(spatial, LOCN.geometry):
-                    if (geometry.datatype == URIRef(GEOJSON_IMT) or
-                            not geometry.datatype):
-                        try:
-                            json.loads(str(geometry))
-                            geom = str(geometry)
-                        except (ValueError, TypeError):
-                            pass
-                    if not geom and geometry.datatype == GSP.wktLiteral:
-                        try:
-                            geom = json.dumps(wkt.loads(str(geometry)))
-                        except (ValueError, TypeError):
-                            pass
+                geom = self._parse_geodata(spatial, LOCN.geometry, geom)
+                bbox = self._parse_geodata(spatial, DCAT.bbox, bbox)
+                cent = self._parse_geodata(spatial, DCAT.centroid, cent)
                 for label in self.g.objects(spatial, SKOS.prefLabel):
                     text = str(label)
                 for label in self.g.objects(spatial, RDFS.label):
@@ -413,6 +428,8 @@ class RDFProfile(object):
             'uri': uri,
             'text': text,
             'geom': geom,
+            'bbox': bbox,
+            'centroid': cent,
         }
 
     def _license(self, dataset_ref):
@@ -558,6 +575,24 @@ class RDFProfile(object):
                 return extra['value']
 
         return default
+
+    def _add_spatial_value_to_graph(self, g, spatial_ref, predicate, value):
+        '''
+        Adds spatial triples to the graph.
+        '''
+        # GeoJSON
+        g.add((spatial_ref,
+                predicate,
+                Literal(value, datatype=GEOJSON_IMT)))
+        # WKT, because GeoDCAT-AP says so
+        try:
+            g.add((spatial_ref,
+                    predicate,
+                    Literal(wkt.dumps(json.loads(value),
+                                        decimals=4),
+                            datatype=GSP.wktLiteral)))
+        except (TypeError, ValueError, InvalidGeoJSONException):
+            pass
 
     def _get_dataset_value(self, dataset_dict, key, default=None):
         '''
@@ -929,7 +964,7 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Spatial
         spatial = self._spatial(dataset_ref, DCT.spatial)
-        for key in ('uri', 'text', 'geom'):
+        for key in ('uri', 'text', 'geom', 'bbox', 'centroid'):
             if spatial.get(key):
                 dataset_dict['extras'].append(
                     {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
@@ -1187,8 +1222,10 @@ class EuropeanDCATAPProfile(RDFProfile):
         spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
         spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
         spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
+        spatial_bbox = self._get_dataset_value(dataset_dict, 'spatial_bbox')
+        spatial_cent = self._get_dataset_value(dataset_dict, 'spatial_centroid')
 
-        if spatial_uri or spatial_text or spatial_geom:
+        if spatial_uri or spatial_text or spatial_geom or spatial_bbox or spatial_cent:
             if spatial_uri:
                 spatial_ref = CleanedURIRef(spatial_uri)
             else:
@@ -1201,19 +1238,13 @@ class EuropeanDCATAPProfile(RDFProfile):
                 g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
 
             if spatial_geom:
-                # GeoJSON
-                g.add((spatial_ref,
-                       LOCN.geometry,
-                       Literal(spatial_geom, datatype=GEOJSON_IMT)))
-                # WKT, because GeoDCAT-AP says so
-                try:
-                    g.add((spatial_ref,
-                           LOCN.geometry,
-                           Literal(wkt.dumps(json.loads(spatial_geom),
-                                             decimals=4),
-                                   datatype=GSP.wktLiteral)))
-                except (TypeError, ValueError, InvalidGeoJSONException):
-                    pass
+                self._add_spatial_value_to_graph(g, spatial_ref, LOCN.geometry, spatial_geom)
+
+            if spatial_bbox:
+                self._add_spatial_value_to_graph(g, spatial_ref, DCAT.bbox, spatial_bbox)
+
+            if spatial_cent:
+                self._add_spatial_value_to_graph(g, spatial_ref, DCAT.centroid, spatial_cent)
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
