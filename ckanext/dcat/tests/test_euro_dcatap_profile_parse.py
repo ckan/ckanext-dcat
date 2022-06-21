@@ -1,6 +1,5 @@
 from builtins import str
 from builtins import object
-import os
 import json
 
 import pytest
@@ -17,22 +16,7 @@ from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT, VCARD)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
-
-
-class BaseParseTest(object):
-
-    def _extras(self, dataset):
-        extras = {}
-        for extra in dataset.get('extras'):
-            extras[extra['key']] = extra['value']
-        return extras
-
-    def _get_file_contents(self, file_name):
-        path = os.path.join(os.path.dirname(__file__),
-                            '..', '..', '..', 'examples',
-                            file_name)
-        with open(path, 'r') as f:
-            return f.read()
+from ckanext.dcat.tests.utils import BaseParseTest
 
 
 class TestEuroDCATAPProfileParsing(BaseParseTest):
@@ -921,6 +905,56 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             # check if we had subcatalog in extras
             assert has_subcat
 
+    def test_tags_with_commas(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal('Tree, forest, shrub')))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets[0]['tags']) == 3
+
+    INVALID_TAG = "Som`E-in.valid tag!;"
+    VALID_TAG = {'name': 'some-invalid-tag'}
+
+    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'true')
+    def test_tags_with_commas_clean_tags_on(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert self.VALID_TAG in datasets[0]['tags']
+        assert self.INVALID_TAG not in datasets[0]['tags']
+
+    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
+    def test_tags_with_commas_clean_tags_off(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        # when config flag is set to false, bad tags can happen
+
+        datasets = [d for d in p.datasets()]
+        assert self.VALID_TAG not in datasets[0]['tags']
+        assert {'name': self.INVALID_TAG} in datasets[0]['tags']
+
 
 class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
@@ -936,15 +970,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         location_ref = BNode()
         g.add((location_ref, RDF.type, DCT.Location))
         g.add((dataset, DCT.spatial, location_ref))
-
-        geometry_val = '{"type": "Point", "coordinates": [23, 45]}'
-        g.add((location_ref, LOCN.geometry, Literal(geometry_val, datatype=GEOJSON_IMT)))
-
-        bbox_val = '{"type": "Polygon", "coordinates": [[[1, 1], [1, 2], [2, 2], [2, 1], [1, 1]]]}'
-        g.add((location_ref, DCAT.bbox, Literal(bbox_val, datatype=GEOJSON_IMT)))
-
-        centroid_val = '{"type": "Point", "coordinates": [1.5, 1.5]}'
-        g.add((location_ref, DCAT.centroid, Literal(centroid_val, datatype=GEOJSON_IMT)))
+        g.add((location_ref,
+               LOCN.geometry,
+               Literal('{"type": "Point", "coordinates": [23, 45]}', datatype=GEOJSON_IMT)))
 
         location_ref = BNode()
         g.add((location_ref, RDF.type, DCT.Location))
@@ -961,9 +989,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'] == geometry_val
-        assert extras['spatial_bbox'] == bbox_val
-        assert extras['spatial_centroid'] == centroid_val
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_one_dct_spatial_instance(self):
         g = Graph()
@@ -973,17 +999,12 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         spatial_uri = URIRef('http://geonames/Newark')
         g.add((dataset, DCT.spatial, spatial_uri))
+
         g.add((spatial_uri, RDF.type, DCT.Location))
+        g.add((spatial_uri,
+               LOCN.geometry,
+               Literal('{"type": "Point", "coordinates": [23, 45]}', datatype=GEOJSON_IMT)))
         g.add((spatial_uri, SKOS.prefLabel, Literal('Newark')))
-
-        geometry_val = '{"type": "Point", "coordinates": [23, 45]}'
-        g.add((spatial_uri, LOCN.geometry, Literal(geometry_val, datatype=GEOJSON_IMT)))
-
-        bbox_val = '{"type": "Polygon", "coordinates": [[[1, 1], [1, 2], [2, 2], [2, 1], [1, 1]]]}'
-        g.add((spatial_uri, DCAT.bbox, Literal(bbox_val, datatype=GEOJSON_IMT)))
-
-        centroid_val = '{"type": "Point", "coordinates": [1.5, 1.5]}'
-        g.add((spatial_uri, DCAT.centroid, Literal(centroid_val, datatype=GEOJSON_IMT)))
 
         p = RDFParser(profiles=['euro_dcat_ap'])
 
@@ -995,11 +1016,9 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'] == geometry_val
-        assert extras['spatial_bbox'] == bbox_val
-        assert extras['spatial_centroid'] == centroid_val
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
-    def test_spatial_one_dct_spatial_instance_no_uri_no_bbox_no_centroid(self):
+    def test_spatial_one_dct_spatial_instance_no_uri(self):
         g = Graph()
 
         dataset = URIRef('http://example.org/datasets/1')
@@ -1023,8 +1042,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         extras = self._extras(datasets[0])
 
         assert 'spatial_uri' not in extras
-        assert 'spatial_bbox' not in extras
-        assert 'spatial_centroid' not in extras
         assert extras['spatial_text'] == 'Newark'
         assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
@@ -1066,18 +1083,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         g.add((spatial_uri,
                LOCN.geometry,
                Literal('POINT (67 89)', datatype=GSP.wktLiteral)))
-        g.add((spatial_uri,
-               DCAT.bbox,
-               Literal('{"type": "Point", "coordinates": [24, 46]}', datatype=GEOJSON_IMT)))
-        g.add((spatial_uri,
-               DCAT.bbox,
-               Literal('POINT (68 90)', datatype=GSP.wktLiteral)))
-        g.add((spatial_uri,
-               DCAT.centroid,
-               Literal('{"type": "Point", "coordinates": [25, 47]}', datatype=GEOJSON_IMT)))
-        g.add((spatial_uri,
-               DCAT.centroid,
-               Literal('POINT (69 91)', datatype=GSP.wktLiteral)))
 
         p = RDFParser(profiles=['euro_dcat_ap'])
 
@@ -1088,8 +1093,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         extras = self._extras(datasets[0])
 
         assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
-        assert extras['spatial_bbox'] == '{"type": "Point", "coordinates": [24, 46]}'
-        assert extras['spatial_centroid'] == '{"type": "Point", "coordinates": [25, 47]}'
 
     def test_spatial_wkt_only(self):
         g = Graph()
@@ -1104,12 +1107,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         g.add((spatial_uri,
                LOCN.geometry,
                Literal('POINT (67 89)', datatype=GSP.wktLiteral)))
-        g.add((spatial_uri,
-               DCAT.bbox,
-               Literal('POINT (68 90)', datatype=GSP.wktLiteral)))
-        g.add((spatial_uri,
-               DCAT.centroid,
-               Literal('POINT (69 91)', datatype=GSP.wktLiteral)))
 
         p = RDFParser(profiles=['euro_dcat_ap'])
 
@@ -1120,8 +1117,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         extras = self._extras(datasets[0])
         # NOTE: geomet returns floats for coordinates on WKT -> GeoJSON
         assert extras['spatial'] == '{"type": "Point", "coordinates": [67.0, 89.0]}'
-        assert extras['spatial_bbox'] == '{"type": "Point", "coordinates": [68.0, 90.0]}'
-        assert extras['spatial_centroid'] == '{"type": "Point", "coordinates": [69.0, 91.0]}'
 
     def test_spatial_wrong_geometries(self):
         g = Graph()
@@ -1139,18 +1134,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         g.add((spatial_uri,
                LOCN.geometry,
                Literal('Not WKT', datatype=GSP.wktLiteral)))
-        g.add((spatial_uri,
-               DCAT.bbox,
-               Literal('Not GeoJSON', datatype=GEOJSON_IMT)))
-        g.add((spatial_uri,
-               DCAT.bbox,
-               Literal('Not WKT', datatype=GSP.wktLiteral)))
-        g.add((spatial_uri,
-               DCAT.centroid,
-               Literal('Not GeoJSON', datatype=GEOJSON_IMT)))
-        g.add((spatial_uri,
-               DCAT.centroid,
-               Literal('Not WKT', datatype=GSP.wktLiteral)))
 
         p = RDFParser(profiles=['euro_dcat_ap'])
 
@@ -1161,8 +1144,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         extras = self._extras(datasets[0])
 
         assert 'spatial' not in extras
-        assert 'spatial_bbox' not in extras
-        assert 'spatial_centroid' not in extras
 
     def test_spatial_literal_only(self):
         g = Graph()
@@ -1183,8 +1164,6 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         assert extras['spatial_text'] == 'Newark'
         assert 'spatial_uri' not in extras
         assert 'spatial' not in extras
-        assert 'spatial_bbox' not in extras
-        assert 'spatial_centroid' not in extras
 
     def test_spatial_uri_only(self):
         g = Graph()
@@ -1205,56 +1184,3 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert 'spatial_text' not in extras
         assert 'spatial' not in extras
-        assert 'spatial_bbox' not in extras
-        assert 'spatial_centroid' not in extras
-
-    def test_tags_with_commas(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-        g.add((dataset, DCAT.keyword, Literal('Tree, forest, shrub')))
-        p = RDFParser(profiles=['euro_dcat_ap'])
-
-        p.g = g
-
-        datasets = [d for d in p.datasets()]
-
-        assert len(datasets[0]['tags']) == 3
-
-    INVALID_TAG = "Som`E-in.valid tag!;"
-    VALID_TAG = {'name': 'some-invalid-tag'}
-
-    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'true')
-    def test_tags_with_commas_clean_tags_on(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
-        p = RDFParser(profiles=['euro_dcat_ap'])
-
-        p.g = g
-
-        datasets = [d for d in p.datasets()]
-
-        assert self.VALID_TAG in datasets[0]['tags']
-        assert self.INVALID_TAG not in datasets[0]['tags']
-
-
-    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
-    def test_tags_with_commas_clean_tags_off(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
-        p = RDFParser(profiles=['euro_dcat_ap'])
-
-        p.g = g
-
-        # when config flag is set to false, bad tags can happen
-
-        datasets = [d for d in p.datasets()]
-        assert self.VALID_TAG not in datasets[0]['tags']
-        assert {'name': self.INVALID_TAG} in datasets[0]['tags']

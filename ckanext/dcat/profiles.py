@@ -576,23 +576,29 @@ class RDFProfile(object):
 
         return default
 
-    def _add_spatial_value_to_graph(self, g, spatial_ref, predicate, value):
+    def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
         '''
         Adds spatial triples to the graph.
         '''
         # GeoJSON
-        g.add((spatial_ref,
+        self.g.add((spatial_ref,
                 predicate,
                 Literal(value, datatype=GEOJSON_IMT)))
         # WKT, because GeoDCAT-AP says so
         try:
-            g.add((spatial_ref,
+            self.g.add((spatial_ref,
                     predicate,
                     Literal(wkt.dumps(json.loads(value),
                                         decimals=4),
                             datatype=GSP.wktLiteral)))
         except (TypeError, ValueError, InvalidGeoJSONException):
             pass
+
+    def _add_spatial_to_dict(self, dataset_dict, key, spatial):
+        if spatial.get(key):
+            dataset_dict['extras'].append(
+                {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
+                 'value': spatial.get(key)})
 
     def _get_dataset_value(self, dataset_dict, key, default=None):
         '''
@@ -795,6 +801,21 @@ class RDFProfile(object):
             roots = list(self.g.subjects(RDF.type, DCAT.Catalog))
         return roots[0]
 
+    def _get_or_create_spatial_ref(self, dataset_dict, dataset_ref):
+        for spatial_ref in self.g.objects(dataset_ref, DCT.spatial):
+            if spatial_ref:
+                return spatial_ref
+
+        # Create new spatial_ref
+        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
+        if spatial_uri:
+            spatial_ref = CleanedURIRef(spatial_uri)
+        else:
+            spatial_ref = BNode()
+        self.g.add((spatial_ref, RDF.type, DCT.Location))
+        self.g.add((dataset_ref, DCT.spatial, spatial_ref))
+        return spatial_ref
+
     # Public methods for profiles to implement
 
     def parse_dataset(self, dataset_dict, dataset_ref):
@@ -964,11 +985,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Spatial
         spatial = self._spatial(dataset_ref, DCT.spatial)
-        for key in ('uri', 'text', 'geom', 'bbox', 'centroid'):
-            if spatial.get(key):
-                dataset_dict['extras'].append(
-                    {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
-                     'value': spatial.get(key)})
+        for key in ('uri', 'text', 'geom'):
+            self._add_spatial_to_dict(dataset_dict, key, spatial)
 
         # Dataset URI (explicitly show the missing ones)
         dataset_uri = (str(dataset_ref)
@@ -1219,32 +1237,17 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((dataset_ref, DCT.temporal, temporal_extent))
 
         # Spatial
-        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
         spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
         spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
-        spatial_bbox = self._get_dataset_value(dataset_dict, 'spatial_bbox')
-        spatial_cent = self._get_dataset_value(dataset_dict, 'spatial_centroid')
 
-        if spatial_uri or spatial_text or spatial_geom or spatial_bbox or spatial_cent:
-            if spatial_uri:
-                spatial_ref = CleanedURIRef(spatial_uri)
-            else:
-                spatial_ref = BNode()
-
-            g.add((spatial_ref, RDF.type, DCT.Location))
-            g.add((dataset_ref, DCT.spatial, spatial_ref))
+        if spatial_text or spatial_geom:
+            spatial_ref = self._get_or_create_spatial_ref(dataset_dict, dataset_ref)
 
             if spatial_text:
                 g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
 
             if spatial_geom:
-                self._add_spatial_value_to_graph(g, spatial_ref, LOCN.geometry, spatial_geom)
-
-            if spatial_bbox:
-                self._add_spatial_value_to_graph(g, spatial_ref, DCAT.bbox, spatial_bbox)
-
-            if spatial_cent:
-                self._add_spatial_value_to_graph(g, spatial_ref, DCAT.centroid, spatial_cent)
+                self._add_spatial_value_to_graph(spatial_ref, LOCN.geometry, spatial_geom)
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
@@ -1371,6 +1374,52 @@ class EuropeanDCATAPProfile(RDFProfile):
         modified = self._last_catalog_modification()
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
+
+
+class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
+    '''
+    An RDF profile based on the DCAT-AP 2 for data portals in Europe
+
+    More information and specification:
+
+    https://joinup.ec.europa.eu/asset/dcat_application_profile
+
+    '''
+
+    def parse_dataset(self, dataset_dict, dataset_ref):
+
+        # call super method
+        super(EuropeanDCATAP2Profile, self).parse_dataset(dataset_dict, dataset_ref)
+
+        # Spatial
+        spatial = self._spatial(dataset_ref, DCT.spatial)
+        for key in ('bbox', 'centroid'):
+            self._add_spatial_to_dict(dataset_dict, key, spatial)
+
+        return dataset_dict
+
+    def graph_from_dataset(self, dataset_dict, dataset_ref):
+
+        # call super method
+        super(EuropeanDCATAP2Profile, self).graph_from_dataset(dataset_dict, dataset_ref)
+
+        # spatial
+        spatial_bbox = self._get_dataset_value(dataset_dict, 'spatial_bbox')
+        spatial_cent = self._get_dataset_value(dataset_dict, 'spatial_centroid')
+
+        if spatial_bbox or spatial_cent:
+            spatial_ref = self._get_or_create_spatial_ref(dataset_dict, dataset_ref)
+
+            if spatial_bbox:
+                self._add_spatial_value_to_graph(spatial_ref, DCAT.bbox, spatial_bbox)
+
+            if spatial_cent:
+                self._add_spatial_value_to_graph(spatial_ref, DCAT.centroid, spatial_cent)
+
+    def graph_from_catalog(self, catalog_dict, catalog_ref):
+
+        # call super method
+        super(EuropeanDCATAP2Profile, self).graph_from_catalog(catalog_dict, catalog_ref)
 
 
 class SchemaOrgProfile(RDFProfile):
