@@ -41,6 +41,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'extras': [
                 {'key': 'temporal_resolution', 'value': '[\"PT15M\", \"P1D\"]'},
                 {'key': 'spatial_resolution_in_meters', 'value': '[30,20]'},
+                {'key': 'is_referenced_by', 'value': '[\"https://doi.org/10.1038/sdata.2018.22\", \"test_isreferencedby\"]'},
             ]
         }
 
@@ -51,12 +52,21 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        # TemporalResolution
-        values = json.loads(extras['temporal_resolution'])
-        assert len([t for t in g.triples((dataset_ref, DCAT.temporalResolution, None))]) == len(values)
-        for value in values:
-            assert self._triple(g, dataset_ref, DCAT.temporalResolution,  Literal(value,
-                                datatype=XSD.duration))
+        # List
+        for item in [
+            ('temporal_resolution', DCAT.temporalResolution, [Literal, Literal], [XSD.duration, XSD.duration]),
+            ('is_referenced_by', DCT.isReferencedBy, [URIRef, Literal], [None, None]),
+        ]:
+            values = json.loads(extras[item[0]])
+            assert len([t for t in g.triples((dataset_ref, item[1], None))]) == len(values)
+            for num, value in enumerate(values):
+                _type = item[2]
+                _datatype = item[3]
+                if isinstance(item[2], list):
+                    assert len(item[2]) == len(values)
+                    _type = item[2][num]
+                    _datatype = item[3][num]
+                assert self._triple(g, dataset_ref, item[1], _type(value), _datatype)
 
         # Spatial Resolution in Meters
         values = json.loads(extras['spatial_resolution_in_meters'])

@@ -116,6 +116,52 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert  spatial_resolution_in_meters in spatial_resolution_list
         assert  spatial_resolution_in_meters_2 in spatial_resolution_list
 
+    def test_isreferencedby(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        isreferencedby_uri = 'https://doi.org/10.1038/sdata.2018.22'
+        g.add((dataset, DCT.isReferencedBy, URIRef(isreferencedby_uri)))
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        isreferencedby_list = json.loads(extras['is_referenced_by'])
+        assert len(isreferencedby_list) == 1
+        assert isreferencedby_uri in isreferencedby_list
+
+    def test_isreferencedby_multiple(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        isreferencedby_uri = 'https://doi.org/10.1038/sdata.2018.22'
+        g.add((dataset, DCT.isReferencedBy, URIRef(isreferencedby_uri)))
+
+        isreferencedby_uri_2 = 'https://doi.org/10.1093/ajae/aaq063'
+        g.add((dataset, DCT.isReferencedBy, URIRef(isreferencedby_uri_2)))
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        isreferencedby_list = json.loads(extras['is_referenced_by'])
+        assert len(isreferencedby_list) == 2
+        assert isreferencedby_uri in isreferencedby_list
+        assert isreferencedby_uri_2 in isreferencedby_list
+
 class TestEuroDCATAP2ProfileParsingSpatial(BaseParseTest):
 
     def test_spatial_multiple_dct_spatial_instances(self):

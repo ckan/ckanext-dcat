@@ -676,6 +676,7 @@ class RDFProfile(object):
                               list_value=False,
                               date_value=False,
                               _type=Literal,
+                              _datatype=None,
                               value_modifier=None):
         '''
         Adds a new triple to the graph with the provided parameters
@@ -705,7 +706,7 @@ class RDFProfile(object):
             value = value_modifier(value)
 
         if value and list_value:
-            self._add_list_triple(subject, predicate, value, _type)
+            self._add_list_triple(subject, predicate, value, _type, _datatype)
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
@@ -713,9 +714,13 @@ class RDFProfile(object):
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
-            self.g.add((subject, predicate, _type(value)))
+            if _datatype:
+                object = _type(value, datatype=_datatype)
+            else:
+                object = _type(value)
+            self.g.add((subject, predicate, object))
 
-    def _add_list_triple(self, subject, predicate, value, _type=Literal):
+    def _add_list_triple(self, subject, predicate, value, _type=Literal, _datatype=None):
         '''
         Adds as many triples to the graph as values
 
@@ -729,7 +734,11 @@ class RDFProfile(object):
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
-            self.g.add((subject, predicate, _type(item)))
+            if _datatype:
+                object = _type(item, datatype=_datatype)
+            else:
+                object = _type(item)
+            self.g.add((subject, predicate, object))
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
         '''
@@ -1412,14 +1421,14 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         super(EuropeanDCATAP2Profile, self).parse_dataset(dataset_dict, dataset_ref)
 
         # Lists
-        for key, predicate, in (
+        for key, predicate in (
             ('temporal_resolution', DCAT.temporalResolution),
+            ('is_referenced_by', DCT.isReferencedBy),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
                 dataset_dict['extras'].append({'key': key,
                                             'value': json.dumps(values)})
-
 
         # Spatial
         spatial = self._spatial(dataset_ref, DCT.spatial)
@@ -1438,6 +1447,14 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
         # call super method
         super(EuropeanDCATAP2Profile, self).graph_from_dataset(dataset_dict, dataset_ref)
+
+        # Lists
+        for key, predicate, fallbacks, type, datatype in (
+            ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration),
+            ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None)
+        ):
+            self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
+                                       fallbacks=fallbacks, _type=type, _datatype=datatype)
 
         # spatial
         spatial_bbox = self._get_dataset_value(dataset_dict, 'spatial_bbox')
@@ -1462,13 +1479,6 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                                 Literal(float(value), datatype=XSD.decimal)))
                 except (ValueError, TypeError):
                     self.g.add((dataset_ref, DCAT.spatialResolutionInMeters, Literal(value)))
-
-        # TemporalResolution
-        temporal_resolution = self._get_dataset_value(dataset_dict, 'temporal_resolution')
-        if temporal_resolution:
-            temporal_resolution_list = json.loads(temporal_resolution)
-            for value in temporal_resolution_list:
-                self.g.add((dataset_ref, DCAT.temporalResolution , Literal(value, datatype=XSD.duration)))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
