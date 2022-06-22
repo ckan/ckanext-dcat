@@ -15,12 +15,60 @@ from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
-                                   GEOJSON_IMT, VCARD)
+                                   GEOJSON_IMT, VCARD, XSD)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 from ckanext.dcat.tests.utils import BaseParseTest
 
 DCAT_AP_2_PROFILE = 'euro_dcat_ap_2'
 DCAT_AP_PROFILES = [DCAT_AP_2_PROFILE]
+
+
+class TestEuroDCATAP2ProfileParsing(BaseParseTest):
+
+    def test_temporal_resolution(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        temporal_resolution = 'P1D'
+        g.add((dataset, DCAT.temporalResolution, Literal(temporal_resolution, datatype=XSD.duration)))
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        temporal_resolution_list = json.loads(extras['temporal_resolution'])
+        assert len(temporal_resolution_list) == 1
+        assert  temporal_resolution in temporal_resolution_list
+
+    def test_temporal_resolution_multiple(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        temporal_resolution = 'P1D'
+        g.add((dataset, DCAT.temporalResolution, Literal(temporal_resolution, datatype=XSD.duration)))
+        temporal_resolution_2 = 'PT15M'
+        g.add((dataset, DCAT.temporalResolution, Literal(temporal_resolution_2, datatype=XSD.duration)))
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        temporal_resolution_list = json.loads(extras['temporal_resolution'])
+        assert len(temporal_resolution_list) == 2
+        assert  temporal_resolution in temporal_resolution_list
+        assert  temporal_resolution_2 in temporal_resolution_list
 
 
 class TestEuroDCATAP2ProfileParsingSpatial(BaseParseTest):

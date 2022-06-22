@@ -27,6 +27,36 @@ DCAT_AP_PROFILES = [DCAT_AP_2_PROFILE]
 
 class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
+    def test_graph_from_dataset(self):
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT 2 dataset',
+            'notes': 'Lorem ipsum',
+            'url': 'http://example.com/ds1',
+            'version': '1.0b',
+            'metadata_created': '2021-06-21T15:21:09.034694',
+            'metadata_modified': '2021-06-21T15:21:09.075774',
+            'extras': [
+                {'key': 'temporal_resolution', 'value': '[\"PT15M\", \"P1D\"]'},
+            ]
+        }
+
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        # TemporalResolution
+        values = json.loads(extras['temporal_resolution'])
+        assert len([t for t in g.triples((dataset_ref, DCAT.temporalResolution, None))]) == len(values)
+        for value in values:
+            assert self._triple(g, dataset_ref, DCAT.temporalResolution,  Literal(value,
+                                datatype=XSD.duration))
+
     def test_spatial(self):
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',

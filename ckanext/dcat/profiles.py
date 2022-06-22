@@ -1391,6 +1391,16 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         # call super method
         super(EuropeanDCATAP2Profile, self).parse_dataset(dataset_dict, dataset_ref)
 
+        # Lists
+        for key, predicate, in (
+            ('temporal_resolution', DCAT.temporalResolution),
+        ):
+            values = self._object_value_list(dataset_ref, predicate)
+            if values:
+                dataset_dict['extras'].append({'key': key,
+                                            'value': json.dumps(values)})
+
+
         # Spatial
         spatial = self._spatial(dataset_ref, DCT.spatial)
         for key in ('bbox', 'centroid'):
@@ -1415,6 +1425,13 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
             if spatial_cent:
                 self._add_spatial_value_to_graph(spatial_ref, DCAT.centroid, spatial_cent)
+
+        # TemporalResolution
+        temporal_resolution = self._get_dataset_value(dataset_dict, 'temporal_resolution')
+        if temporal_resolution:
+            temporal_resolution_list = json.loads(temporal_resolution)
+            for value in temporal_resolution_list:
+                self.g.add((dataset_ref, DCAT.temporalResolution , Literal(value, datatype=XSD.duration)))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
