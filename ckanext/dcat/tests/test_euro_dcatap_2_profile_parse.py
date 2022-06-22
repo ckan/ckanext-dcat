@@ -70,6 +70,51 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert  temporal_resolution in temporal_resolution_list
         assert  temporal_resolution_2 in temporal_resolution_list
 
+    def test_spatial_resolution_in_meters(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_resolution_in_meters = 30
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal(spatial_resolution_in_meters, datatype=XSD.decimal)))
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
+        assert len(spatial_resolution_list) == 1
+        assert  spatial_resolution_in_meters in spatial_resolution_list
+
+    def test_spatial_resolution_in_meters_multiple(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+
+        spatial_resolution_in_meters = 30
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal(spatial_resolution_in_meters, datatype=XSD.decimal)))
+
+        spatial_resolution_in_meters_2 = 20
+        g.add((dataset, DCAT.spatialResolutionInMeters, Literal(spatial_resolution_in_meters_2, datatype=XSD.decimal)))
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        extras = self._extras(datasets[0])
+
+        spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
+        assert len(spatial_resolution_list) == 2
+        assert  spatial_resolution_in_meters in spatial_resolution_list
+        assert  spatial_resolution_in_meters_2 in spatial_resolution_list
 
 class TestEuroDCATAP2ProfileParsingSpatial(BaseParseTest):
 

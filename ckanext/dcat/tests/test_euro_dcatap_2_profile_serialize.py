@@ -40,6 +40,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'metadata_modified': '2021-06-21T15:21:09.075774',
             'extras': [
                 {'key': 'temporal_resolution', 'value': '[\"PT15M\", \"P1D\"]'},
+                {'key': 'spatial_resolution_in_meters', 'value': '[30,20]'},
             ]
         }
 
@@ -56,6 +57,97 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         for value in values:
             assert self._triple(g, dataset_ref, DCAT.temporalResolution,  Literal(value,
                                 datatype=XSD.duration))
+
+        # Spatial Resolution in Meters
+        values = json.loads(extras['spatial_resolution_in_meters'])
+        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == len(values)
+
+        for value in values:
+            assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(float(value),
+                                datatype=XSD.decimal))
+
+    def test_spatial_resolution_in_meters_single_value(self):
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT 2 dataset',
+            'notes': 'Lorem ipsum',
+            'url': 'http://example.com/ds1',
+            'version': '1.0b',
+            'metadata_created': '2021-06-21T15:21:09.034694',
+            'metadata_modified': '2021-06-21T15:21:09.075774',
+            'extras': [
+                {'key': 'spatial_resolution_in_meters', 'value': '30'}
+            ]
+        }
+
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == 1
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
+                            Literal(float(extras['spatial_resolution_in_meters']), datatype=XSD.decimal))
+
+    def test_spatial_resolution_in_meters_a_value_is_not_a_number(self):
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT 2 dataset',
+            'notes': 'Lorem ipsum',
+            'url': 'http://example.com/ds1',
+            'version': '1.0b',
+            'metadata_created': '2021-06-21T15:21:09.034694',
+            'metadata_modified': '2021-06-21T15:21:09.075774',
+            'extras': [
+                {'key': 'spatial_resolution_in_meters', 'value': '[\"foo\",20]'}
+            ]
+        }
+
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        values = json.loads(extras['spatial_resolution_in_meters'])
+        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == len(values)
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(values[0]))
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
+                            Literal(float(values[1]), datatype=XSD.decimal))
+
+    def test_spatial_resolution_value_is_invalid_json(self):
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT 2 dataset',
+            'notes': 'Lorem ipsum',
+            'url': 'http://example.com/ds1',
+            'version': '1.0b',
+            'metadata_created': '2021-06-21T15:21:09.034694',
+            'metadata_modified': '2021-06-21T15:21:09.075774',
+            'extras': [
+                {'key': 'spatial_resolution_in_meters', 'value': 'foo 30'}
+            ]
+        }
+
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == 1
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
+                            Literal(extras['spatial_resolution_in_meters']))
 
     def test_spatial(self):
         dataset = {

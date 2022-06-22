@@ -210,6 +210,24 @@ class RDFProfile(object):
                 pass
         return None
 
+    def _object_value_int_list(self, subject, predicate):
+        '''
+        Given a subject and a predicate, returns the value of the object as a
+        list of integers
+
+        Both subject and predicate must be rdflib URIRef or BNode objects
+
+        If the value can not be parsed as intger, returns an empty list
+        '''
+        object_values = []
+        for object in self.g.objects(subject, predicate):
+            if object:
+                try:
+                    object_values.append(int(float(object)))
+                except ValueError:
+                    pass
+        return object_values
+
     def _object_value_list(self, subject, predicate):
         '''
         Given a subject and a predicate, returns a list with all the values of
@@ -576,6 +594,24 @@ class RDFProfile(object):
 
         return default
 
+    def _read_list_value(self, value):
+        items = []
+        # List of values
+        if isinstance(value, list):
+            items = value
+        elif isinstance(value, basestring):
+            try:
+                items = json.loads(value)
+                if isinstance(items, ((int, float, complex))):
+                    items = [items]  # JSON list
+            except ValueError:
+                if ',' in value:
+                    # Comma-separated list
+                    items = value.split(',')
+                else:
+                    items = [value]  # Normal text value
+        return items
+
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
         '''
         Adds spatial triples to the graph.
@@ -687,23 +723,7 @@ class RDFProfile(object):
         item. If `value` is a string there is an attempt to split it using
         commas, to support legacy fields.
         '''
-        items = []
-        # List of values
-        if isinstance(value, list):
-            items = value
-        elif isinstance(value, basestring):
-            try:
-                # JSON list
-                items = json.loads(value)
-                if isinstance(items, ((int, int, float, complex))):
-                    items = [items]
-            except ValueError:
-                if ',' in value:
-                    # Comma-separated list
-                    items = value.split(',')
-                else:
-                    # Normal text value
-                    items = [value]
+        items = self._read_list_value(value)
 
         for item in items:
             # ensure URIRef items are preprocessed (space removal/url encoding)
@@ -1406,6 +1426,12 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         for key in ('bbox', 'centroid'):
             self._add_spatial_to_dict(dataset_dict, key, spatial)
 
+        # Spatial resolution in meters
+        spatial_resolution_in_meters = self._object_value_int_list(dataset_ref, DCAT.spatialResolutionInMeters)
+        if spatial_resolution_in_meters:
+            dataset_dict['extras'].append({'key': 'spatial_resolution_in_meters',
+                                            'value': json.dumps(spatial_resolution_in_meters)})
+
         return dataset_dict
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
@@ -1425,6 +1451,17 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
             if spatial_cent:
                 self._add_spatial_value_to_graph(spatial_ref, DCAT.centroid, spatial_cent)
+
+        # Spatial resolution in meters
+        spatial_resolution_in_meters = self._read_list_value(
+            self._get_dataset_value(dataset_dict, 'spatial_resolution_in_meters'))
+        if spatial_resolution_in_meters:
+            for value in spatial_resolution_in_meters:
+                try:
+                    self.g.add((dataset_ref, DCAT.spatialResolutionInMeters,
+                                Literal(float(value), datatype=XSD.decimal)))
+                except (ValueError, TypeError):
+                    self.g.add((dataset_ref, DCAT.spatialResolutionInMeters, Literal(value)))
 
         # TemporalResolution
         temporal_resolution = self._get_dataset_value(dataset_dict, 'temporal_resolution')
