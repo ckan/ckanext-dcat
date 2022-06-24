@@ -25,26 +25,63 @@ DCAT_AP_PROFILES = [DCAT_AP_2_PROFILE]
 
 class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
-    def test_temporal_resolution(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
+    def test_dataset_all_fields(self):
 
         temporal_resolution = 'P1D'
-        g.add((dataset, DCAT.temporalResolution, Literal(temporal_resolution, datatype=XSD.duration)))
+        spatial_resolution_in_meters = 30
+        isreferencedby_uri = 'https://doi.org/10.1038/sdata.2018.22'
+        temporal_start = '1905-03-01T03:00:00+02:00'
+        temporal_end = '2013-01-05'
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">{start}</dcat:startDate>
+                    <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">{end}</dcat:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+            <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">{temp_res}</dcat:temporalResolution>
+            <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">{spatial_res}</dcat:spatialResolutionInMeters>
+            <dct:isReferencedBy rdf:resource="{referenced_by}"/>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''.format(start=temporal_start, end=temporal_end, temp_res=temporal_resolution,
+                   spatial_res=spatial_resolution_in_meters, referenced_by=isreferencedby_uri)
 
         p = RDFParser(profiles=DCAT_AP_PROFILES)
 
-        p.g = g
+        p.parse(data)
 
         datasets = [d for d in p.datasets()]
 
-        extras = self._extras(datasets[0])
+        assert len(datasets) == 1
+
+        dataset = datasets[0]
+
+        extras = self._extras(dataset)
 
         temporal_resolution_list = json.loads(extras['temporal_resolution'])
         assert len(temporal_resolution_list) == 1
-        assert  temporal_resolution in temporal_resolution_list
+        assert temporal_resolution in temporal_resolution_list
+
+        spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
+        assert len(spatial_resolution_list) == 1
+        assert spatial_resolution_in_meters in spatial_resolution_list
+
+        isreferencedby_list = json.loads(extras['is_referenced_by'])
+        assert len(isreferencedby_list) == 1
+        assert isreferencedby_uri in isreferencedby_list
+
+        assert extras['temporal_start'] == temporal_start
+        assert extras['temporal_end'] == temporal_end
 
     def test_temporal_resolution_multiple(self):
         g = Graph()
@@ -70,27 +107,6 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert  temporal_resolution in temporal_resolution_list
         assert  temporal_resolution_2 in temporal_resolution_list
 
-    def test_spatial_resolution_in_meters(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-
-        spatial_resolution_in_meters = 30
-        g.add((dataset, DCAT.spatialResolutionInMeters, Literal(spatial_resolution_in_meters, datatype=XSD.decimal)))
-
-        p = RDFParser(profiles=DCAT_AP_PROFILES)
-
-        p.g = g
-
-        datasets = [d for d in p.datasets()]
-
-        extras = self._extras(datasets[0])
-
-        spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
-        assert len(spatial_resolution_list) == 1
-        assert  spatial_resolution_in_meters in spatial_resolution_list
-
     def test_spatial_resolution_in_meters_multiple(self):
         g = Graph()
 
@@ -115,27 +131,6 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert len(spatial_resolution_list) == 2
         assert  spatial_resolution_in_meters in spatial_resolution_list
         assert  spatial_resolution_in_meters_2 in spatial_resolution_list
-
-    def test_isreferencedby(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-
-        isreferencedby_uri = 'https://doi.org/10.1038/sdata.2018.22'
-        g.add((dataset, DCT.isReferencedBy, URIRef(isreferencedby_uri)))
-
-        p = RDFParser(profiles=DCAT_AP_PROFILES)
-
-        p.g = g
-
-        datasets = [d for d in p.datasets()]
-
-        extras = self._extras(datasets[0])
-
-        isreferencedby_list = json.loads(extras['is_referenced_by'])
-        assert len(isreferencedby_list) == 1
-        assert isreferencedby_uri in isreferencedby_list
 
     def test_isreferencedby_multiple(self):
         g = Graph()

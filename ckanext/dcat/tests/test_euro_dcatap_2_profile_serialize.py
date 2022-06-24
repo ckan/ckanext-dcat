@@ -264,3 +264,42 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         # Always only one single triple
         assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 1
         assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 1
+
+    def test_temporal(self):
+        """
+        Tests that the DCAT date properties are included in the graph in addition to schema.org dates.
+        """
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'temporal_start', 'value': '2015-06-26T15:21:09.075774'},
+                {'key': 'temporal_end', 'value': '2015-07-14'},
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        temporals = self._triples(g, dataset_ref, DCT.temporal, None)
+        assert temporals
+        assert len(temporals) == 2
+
+        assert len([self._triple(g, temporal[2] , RDF.type, DCT.PeriodOfTime) for temporal in temporals]) == 2
+
+        temporal_obj_list = [temporal[2] for temporal in temporals]
+        for predicate in [SCHEMA.startDate, DCAT.startDate]:
+            triples = []
+            for temporal_obj in temporal_obj_list:
+                triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime))
+            assert len(triples) == 1
+
+        for predicate in [SCHEMA.endDate, DCAT.endDate]:
+            triples = []
+            for temporal_obj in temporal_obj_list:
+                triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime))
+            assert len(triples) == 1

@@ -193,6 +193,23 @@ class RDFProfile(object):
                 return str(o)
         return fallback
 
+    def _object_value_multiple_predicate(self, subject, predicates):
+        '''
+        Given a subject and a list of predicates, returns the value of the object
+        according to the order in which it was specified.
+
+        Both subject and predicates must be rdflib URIRef or BNode objects
+
+        If found, the string representation is returned, else an empty string
+        '''
+        object_value = ''
+        for predicate in predicates:
+            object_value = self._object_value(subject, predicate)
+            if object_value:
+                break
+
+        return object_value
+
     def _object_value_int(self, subject, predicate):
         '''
         Given a subject and a predicate, returns the value of the object as an
@@ -264,14 +281,14 @@ class RDFProfile(object):
 
         return result
 
-    def _time_interval(self, subject, predicate):
+    def _time_interval(self, subject, predicate, dcat_ap_version=1):
         '''
         Returns the start and end date for a time interval object
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        It checks for time intervals defined with both schema.org startDate &
-        endDate and W3C Time hasBeginning & hasEnd.
+        It checks for time intervals defined with DCAT, W3C Time hasBeginning & hasEnd
+        and schema.org startDate & endDate.
 
         Note that partial dates will be expanded to the first month / day
         value, eg '1904' -> '1904-01-01'.
@@ -282,27 +299,70 @@ class RDFProfile(object):
 
         start_date = end_date = None
 
+        if dcat_ap_version == 1:
+            start_date, end_date = self._read_time_interval_schema_org(subject, predicate)
+            if start_date or end_date:
+                return start_date, end_date
+            return self._read_time_interval_time(subject, predicate)
+        elif dcat_ap_version == 2:
+            start_date, end_date = self._read_time_interval_dcat(subject, predicate)
+            if start_date or end_date:
+                return start_date, end_date
+            start_date, end_date = self._read_time_interval_time(subject, predicate)
+            if start_date or end_date:
+                return start_date, end_date
+            return self._read_time_interval_schema_org(subject, predicate)
+
+    def _read_time_interval_schema_org(self, subject, predicate):
+        start_date = end_date = None
+
         for interval in self.g.objects(subject, predicate):
-            # Fist try the schema.org way
             start_date = self._object_value(interval, SCHEMA.startDate)
             end_date = self._object_value(interval, SCHEMA.endDate)
 
             if start_date or end_date:
                 return start_date, end_date
 
-            # If no luck, try the w3 time way
+        return start_date, end_date
+
+    def _read_time_interval_dcat(self, subject, predicate):
+        start_date = end_date = None
+
+        for interval in self.g.objects(subject, predicate):
+            start_date = self._object_value(interval, DCAT.startDate)
+            end_date = self._object_value(interval, DCAT.endDate)
+
+            if start_date or end_date:
+                return start_date, end_date
+
+        return start_date, end_date
+
+    def _read_time_interval_time(self, subject, predicate):
+        start_date = end_date = None
+
+        for interval in self.g.objects(subject, predicate):
             start_nodes = [t for t in self.g.objects(interval,
                                                      TIME.hasBeginning)]
             end_nodes = [t for t in self.g.objects(interval,
                                                    TIME.hasEnd)]
             if start_nodes:
-                start_date = self._object_value(start_nodes[0],
-                                                TIME.inXSDDateTime)
+                start_date = self._object_value_multiple_predicate(start_nodes[0],
+                                            [TIME.inXSDDateTimeStamp, TIME.inXSDDateTime, TIME.inXSDDate])
             if end_nodes:
-                end_date = self._object_value(end_nodes[0],
-                                              TIME.inXSDDateTime)
+                end_date = self._object_value_multiple_predicate(end_nodes[0],
+                                            [TIME.inXSDDateTimeStamp, TIME.inXSDDateTime, TIME.inXSDDate])
+
+            if start_date or end_date:
+                return start_date, end_date
 
         return start_date, end_date
+
+    def _insert_or_update_temporal(self, dataset_dict, key, value):
+        temporal = next((item for item in dataset_dict['extras'] if(item['key'] == key)), None)
+        if temporal:
+            temporal['value'] = value
+        else:
+            dataset_dict['extras'].append({'key': key , 'value': value})
 
     def _publisher(self, subject, predicate):
         '''
@@ -1428,7 +1488,13 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
                 dataset_dict['extras'].append({'key': key,
-                                            'value': json.dumps(values)})
+                                               'value': json.dumps(values)})
+        # Temporal
+        start, end = self._time_interval(dataset_ref, DCT.temporal, dcat_ap_version=2)
+        if start:
+            self._insert_or_update_temporal(dataset_dict, 'temporal_start', start)
+        if end:
+            self._insert_or_update_temporal(dataset_dict, 'temporal_end', end)
 
         # Spatial
         spatial = self._spatial(dataset_ref, DCT.spatial)
@@ -1436,10 +1502,11 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             self._add_spatial_to_dict(dataset_dict, key, spatial)
 
         # Spatial resolution in meters
-        spatial_resolution_in_meters = self._object_value_int_list(dataset_ref, DCAT.spatialResolutionInMeters)
+        spatial_resolution_in_meters = self._object_value_int_list(
+            dataset_ref, DCAT.spatialResolutionInMeters)
         if spatial_resolution_in_meters:
             dataset_dict['extras'].append({'key': 'spatial_resolution_in_meters',
-                                            'value': json.dumps(spatial_resolution_in_meters)})
+                                           'value': json.dumps(spatial_resolution_in_meters)})
 
         return dataset_dict
 
@@ -1455,6 +1522,19 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         ):
             self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
                                        fallbacks=fallbacks, _type=type, _datatype=datatype)
+
+        # Temporal
+        start = self._get_dataset_value(dataset_dict, 'temporal_start')
+        end = self._get_dataset_value(dataset_dict, 'temporal_end')
+        if start or end:
+            temporal_extent_dcat = BNode()
+
+            self.g.add((temporal_extent_dcat, RDF.type, DCT.PeriodOfTime))
+            if start:
+                self._add_date_triple(temporal_extent_dcat, DCAT.startDate, start)
+            if end:
+                self._add_date_triple(temporal_extent_dcat, DCAT.endDate, end)
+            self.g.add((dataset_ref, DCT.temporal, temporal_extent_dcat))
 
         # spatial
         spatial_bbox = self._get_dataset_value(dataset_dict, 'spatial_bbox')
