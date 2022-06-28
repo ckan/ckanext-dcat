@@ -36,12 +36,17 @@ class SPARQLClient:
         dataset_ref = serializer.graph_from_dataset(dataset_dict)
         g = serializer.g
 
-        prefixes = '\n'.join([f'PREFIX {prefix}: {ns.n3()}' for prefix, ns in g.namespaces()])
-        triples = ' .\n'.join([f'{s.n3()} {p.n3()} {o.n3()}' for (s, p, o) in g.triples((dataset_ref, None, None))])
+        prefix_fmt = 'PREFIX {}: {}'.format
+        triple_fmt = '{} {} {}'.format
+
+        prefixes = '\n'.join([prefix_fmt(prefix, ns.n3()) for prefix, ns in g.namespaces()])
+        triples = ' .\n'.join([triple_fmt(s.n3(), p.n3(), o.n3())
+                               for (s, p, o) in g.triples((dataset_ref, None, None))])
         dataset_id = dataset_dict['id']
 
-        delete_query = f'{prefixes} DELETE WHERE {{ ?s ?p ?o ; dct:identifier "{dataset_id}"}}'
+        delete_query = ('{} DELETE WHERE {{ ?s ?p ?o ; dct:identifier "{}"}}'
+                        .format(prefixes, dataset_id))
         self.update(delete_query)
 
-        insert_query = f'{prefixes} INSERT DATA {{ {triples} . }}'
+        insert_query = '{} INSERT DATA {{ {} . }}'.format(prefixes, triples)
         self.update(insert_query)
