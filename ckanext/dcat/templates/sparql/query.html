@@ -1,0 +1,16 @@
+{% extends 'page.html' %}
+
+{% block primary_content_inner %}
+<div>
+  {% asset 'ckanext-dcat/yasgui_js' %}
+  {% asset 'ckanext-dcat/yasgui_css' %}
+
+  {# Hide endpoint input #}
+  <style>
+    .yasgui .autocompleteWrapper {
+      display: none !important;
+    }
+  </style>
+  <div data-module="yasgui" data-module-endpoint="{{ h.url_for('sparql.sparql_query') }}"></div>
+</div>
+{% endblock %}

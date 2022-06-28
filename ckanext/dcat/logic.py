@@ -10,6 +10,7 @@ import ckanext.dcat.converters as converters
 
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.utils import catalog_uri
+from ckanext.dcat.sparql import SPARQLClient, SPARQLExceptions
 
 DATASETS_PER_PAGE = 100
 
@@ -207,3 +208,61 @@ def dcat_auth(context, data_dict):
     All users can access DCAT endpoints by default
     '''
     return {'success': True}
+
+
+@toolkit.side_effect_free
+def sparql_query(context, data_dict):
+    '''
+    Execute read-only SPARQL queries
+    '''
+    toolkit.check_access('sparql_query', context, data_dict)
+
+    sparql = SPARQLClient(query_endpoint=config.get('ckanext.dcat.sparql.query_endpoint'),
+                          username=config.get('ckanext.dcat.sparql.username'),
+                          password=config.get('ckanext.dcat.sparql.password'))
+    query = data_dict.get('q') or data_dict.get('query')
+    if not query:
+        raise toolkit.ValidationError('SPARQL query is empty')
+    try:
+        return sparql.query(query, return_format=data_dict.get('format', 'json'))
+    except SPARQLExceptions.QueryBadFormed as e:
+        # SPARQLExceptions contain escape sequences that need to be processed
+        error = str(e).encode('latin1', 'backslashreplace').decode('unicode-escape')
+        raise toolkit.ValidationError(error)
+
+
+def sparql_update(context, data_dict):
+    '''
+    Execute SPARQL queries with write access
+    '''
+    toolkit.check_access('sparql_update', context, data_dict)
+
+    sparql = SPARQLClient(query_endpoint=config.get('ckanext.dcat.sparql.query_endpoint'),
+                          update_endpoint=config.get('ckanext.dcat.sparql.update_endpoint'),
+                          username=config.get('ckanext.dcat.sparql.username'),
+                          password=config.get('ckanext.dcat.sparql.password'))
+    query = data_dict.get('q') or data_dict.get('query')
+    if not query:
+        raise toolkit.ValidationError('SPARQL query is empty')
+    try:
+        return sparql.update(query, return_format=data_dict.get('format', 'json'))
+    except SPARQLExceptions.QueryBadFormed as e:
+        # SPARQLExceptions contain escape sequences that need to be processed
+        error = str(e).encode('latin1', 'backslashreplace').decode('unicode-escape')
+        raise toolkit.ValidationError(error)
+
+
+@toolkit.auth_allow_anonymous_access
+def sparql_query_auth(context, data_dict):
+    '''
+    All users can make SPARQL queries
+    '''
+    return {'success': True}
+
+
+@toolkit.auth_allow_anonymous_access
+def sparql_update_auth(context, data_dict):
+    '''
+    Only administrators can execute SPARQL updates
+    '''
+    return {'success': False}
