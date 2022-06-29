@@ -20,16 +20,20 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_catalog_search,
                                 dcat_datasets_list,
                                 dcat_auth,
+                                sparql_query,
+                                sparql_update,
+                                sparql_query_auth,
+                                sparql_update_auth
                                 )
-from ckanext.dcat import utils
+from ckanext.dcat import utils, sparql
 
 if p.toolkit.check_ckan_version('2.9'):
     from ckanext.dcat.plugins.flask_plugin import (
-        MixinDCATPlugin, MixinDCATJSONInterface
+        MixinDCATPlugin, MixinDCATJSONInterface, MixinSPARQLPlugin
     )
 else:
     from ckanext.dcat.plugins.pylons_plugin import (
-        MixinDCATPlugin, MixinDCATJSONInterface
+        MixinDCATPlugin, MixinDCATJSONInterface, MixinSPARQLPlugin
     )
 
 
@@ -59,6 +63,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
 
     def update_config(self, config):
         p.toolkit.add_template_directory(config, '../templates')
+        p.toolkit.add_resource('../assets', 'ckanext-dcat')
 
         # Check catalog URI on startup to emit a warning if necessary
         utils.catalog_uri()
@@ -155,4 +160,43 @@ class StructuredDataPlugin(p.SingletonPlugin):
     def get_helpers(self):
         return {
             'structured_data': utils.structured_data,
+        }
+
+
+class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
+    p.implements(p.IConfigurable, inherit=True)
+    p.implements(p.IPackageController, inherit=True)
+    p.implements(p.IActions)
+    p.implements(p.IAuthFunctions, inherit=True)
+
+    # IConfigurable
+
+    def configure(self, config):
+        self.sparql = sparql.SPARQLClient(config.get('ckanext.dcat.sparql.query_endpoint'),
+                                          update_endpoint=config.get('ckanext.dcat.sparql.update_endpoint'),
+                                          username=config.get('ckanext.dcat.sparql.username'),
+                                          password=config.get('ckanext.dcat.sparql.password'))
+        self.profiles = p.toolkit.aslist(config.get('ckanext.dcat.sparql.profiles', []))
+
+    # IPackageController
+
+    def before_index(self, pkg_dict):
+        self.sparql.update_dataset(pkg_dict, self.profiles)
+
+        return pkg_dict
+
+    # IActions
+
+    def get_actions(self):
+        return {
+            'sparql_query': sparql_query,
+            'sparql_update': sparql_update,
+        }
+
+    # IAuthFunctions
+
+    def get_auth_functions(self):
+        return {
+            'sparql_query': sparql_query_auth,
+            'sparql_update': sparql_update_auth,
         }

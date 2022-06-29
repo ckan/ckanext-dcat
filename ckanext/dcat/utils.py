@@ -510,3 +510,20 @@ def get_endpoint(_type='dataset'):
         return 'dcat.read_dataset' if _type == 'dataset' else 'dcat.read_catalog'
     else:
         return 'dcat_dataset' if _type == 'dataset' else 'dcat_catalog'
+
+
+def sparql_ui():
+    return toolkit.render('sparql/query.html')
+
+
+def sparql_query(query):
+    context = {}
+    data_dict = {'q': query}
+    try:
+        result = toolkit.get_action('sparql_query')(context, data_dict)
+    except toolkit.ValidationError as e:
+        return e.error_dict.get('message')
+    if result.get('success') is True:
+        return result.get('results')
+    else:
+        return result

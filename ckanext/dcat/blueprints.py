@@ -49,3 +49,25 @@ def dcat_json():
 dcat_json_interface.add_url_rule(config.get('ckanext.dcat.json_endpoint',
                                             '/dcat.json'),
                                  view_func=dcat_json)
+
+sparql = Blueprint('sparql', __name__)
+
+
+@sparql.route('/sparql')
+def sparql_ui():
+    '''
+    Renders yasgui SPARQL ui
+    '''
+    return utils.sparql_ui()
+
+
+@sparql.route('/sparql/query', methods=['GET', 'POST'])
+def sparql_query():
+    '''
+    SPARQL query facade
+    '''
+    if toolkit.request.method == 'POST':
+        query = toolkit.request.form.get('query')
+    else:
+        query = toolkit.request.params.get('query')
+    return utils.sparql_query(query)

@@ -35,6 +35,7 @@ It also offers other features related to Semantic Data like exposing the necessa
 - [XML DCAT harvester (deprecated)](#xml-dcat-harvester-deprecated)
 - [Translation of fields](#translation-of-fields)
 - [Structured Data and Google Dataset Search indexing](#structured-data-and-google-dataset-search-indexing)
+- [SPARQL server support](#sparql-server-support)
 - [Running the Tests](#running-the-tests)
 - [Releases](#releases)
 - [Acknowledgements](#acknowledgements)
@@ -908,6 +909,26 @@ Example output of structured data in JSON-LD:
       </body>
     </html>
 
+
+## SPARQL server support
+
+If you have a SPARQL server, such as Apache Fuseki deployed, you can utilize `SPARQLPlugin` to automatically update the semantic data of your datasets to the server and provide a simple API and query UI for your users.
+
+To enable SPARQL support, add `dcat_sparql` to your CKAN plugins and configure the following options to your CKAN configuration:
+
+Configuration | Description
+--------------|------------
+`ckanext.dcat.sparql.profiles` | List of profiles to use when converting datasets to triples
+`ckanext.dcat.sparql.query_endpoint`| URL of the SPARQL server's query endpoint
+`ckanext.dcat.sparql.update_endpoint` | URL of the SPARQL server's update endpoint (optional, defaults to same as `query_endpoint`)
+`ckanext.dcat.sparql.username` | Username to use when connecting to the SPARQL server (optional) 
+`ckanext.dcat.sparql.password` | Password to use when connecting to the SPARQL server (optional)
+
+Every time a dataset is indexed, it is also updated on the SPARQL server. It is recommended to run a full `search-index rebuild` after deploying this plugin.
+
+The plugin provides two actions for interacting with the SPARQL server: `sparql_query` and `sparql_update`. The former supports only read-only operations like `SELECT`, while the latter can be used for maintenance tasks that require write access. `sparql_query` is by default open to everyone, while `sparql_update` is reserved only for administrators.
+
+The plugin also provides a query interface based on [Yasgui](https://triply.cc/docs/yasgui) at `/sparql` and a limited SPARQL query endpoint at `/sparql/query` to use with it. They are not linked to by default, but you can link to it in a CKAN page using the route name `sparql_ui`.
 
 ## Running the Tests
 

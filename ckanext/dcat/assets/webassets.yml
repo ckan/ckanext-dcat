@@ -1,0 +1,14 @@
+yasgui_js:
+  contents:
+    - javascript/yasgui.min.js
+    - javascript/yasguiModule.js
+  filters: rjsmin
+  output: dcat/%(version)s_yasgui.js
+  extra:
+    preload:
+      - base/main
+
+yasgui_css:
+  contents:
+    - css/yasgui.min.css
+  output: dcat/%(version)s_yasgui.css

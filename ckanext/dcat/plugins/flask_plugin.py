@@ -28,3 +28,12 @@ class MixinDCATJSONInterface(p.SingletonPlugin):
 
     def get_blueprint(self):
         return [blueprints.dcat_json_interface]
+
+
+class MixinSPARQLPlugin(p.SingletonPlugin):
+    p.implements(p.IBlueprint)
+
+    # IBlueprint
+
+    def get_blueprint(self):
+        return [blueprints.sparql]

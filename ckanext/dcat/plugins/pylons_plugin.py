@@ -52,3 +52,17 @@ class MixinDCATJSONInterface(p.SingletonPlugin):
         map.connect(route, controller=controller, action='dcat_json')
 
         return map
+
+
+class MixinSPARQLPlugin(p.SingletonPlugin):
+    p.implements(p.IRoutes, inherit=True)
+
+    # IRoutes
+
+    def after_map(self, map):
+
+        controller = 'ckanext.dcat.controllers:SPARQLController'
+        map.connect('sparql_ui', '/sparql', controller=controller, action='sparql_ui')
+        map.connect('sparql_query', '/sparql/query', controller=controller, action='sparql_query')
+
+        return map

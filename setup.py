@@ -35,6 +35,8 @@ setup(
 
     structured_data=ckanext.dcat.plugins:StructuredDataPlugin
 
+    dcat_sparql=ckanext.dcat.plugins:SPARQLPlugin
+
     # Test plugins
     test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
     test_rdf_null_harvester=ckanext.dcat.tests.test_harvester:TestRDFNullHarvester
