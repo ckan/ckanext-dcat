@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from builtins import str
 from builtins import object
 import json
@@ -16,7 +18,7 @@ from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
-from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
+from ckanext.dcat.profiles import (DCAT, DCATAP, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
                                    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.tests.utils import BaseSerializeTest
@@ -303,3 +305,63 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             for temporal_obj in temporal_obj_list:
                 triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime))
             assert len(triples) == 1
+
+    def test_distribution_fields(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name',
+            'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
+        assert self._triple(g, distribution, DCATAP.availability, URIRef(resource['availability']))
+
+    def test_distribution_availability_literal(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name',
+            'availability': 'EXPERIMENTAL',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
+        assert self._triple(g, distribution, DCATAP.availability, Literal(resource['availability']))

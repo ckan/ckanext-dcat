@@ -25,6 +25,7 @@ from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
+DCATAP = Namespace("http://data.europa.eu/r5r/")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -40,6 +41,7 @@ GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+
 namespaces = {
     'dct': DCT,
     'dcat': DCAT,
+    'dcatap': DCATAP,
     'adms': ADMS,
     'vcard': VCARD,
     'foaf': FOAF,
@@ -1172,6 +1174,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                   rdflib.term.URIRef)
                                     else '')
 
+            # Remember the (internal) distribution reference for referencing in
+            # further profiles, e.g. for adding more properties
+            resource_dict['distribution_ref'] = str(distribution)
+
             dataset_dict['resources'].append(resource_dict)
 
         if self.compatibility_mode:
@@ -1508,6 +1514,20 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             dataset_dict['extras'].append({'key': 'spatial_resolution_in_meters',
                                            'value': json.dumps(spatial_resolution_in_meters)})
 
+        # Resources
+        for distribution in self._distributions(dataset_ref):
+            distribution_ref = str(distribution)
+            for resource_dict in dataset_dict.get('resources', []):
+                # Match distribution in graph and distribution in resource dict
+                if resource_dict and distribution_ref == resource_dict.get('distribution_ref'):
+                    #  Simple values
+                    for key, predicate in (
+                            ('availability', DCATAP.availability),
+                            ):
+                        value = self._object_value(distribution, predicate)
+                        if value:
+                            resource_dict[key] = value
+
         return dataset_dict
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
@@ -1559,6 +1579,18 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                                 Literal(float(value), datatype=XSD.decimal)))
                 except (ValueError, TypeError):
                     self.g.add((dataset_ref, DCAT.spatialResolutionInMeters, Literal(value)))
+
+        # Resources
+        for resource_dict in dataset_dict.get('resources', []):
+
+            distribution = CleanedURIRef(resource_uri(resource_dict))
+
+            #  Simple values
+            items = [
+                ('availability', DCATAP.availability, None, URIRefOrLiteral)
+            ]
+
+            self._add_triples_from_dict(resource_dict, distribution, items)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from builtins import str
 from builtins import object
 import os
@@ -32,11 +34,13 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         isreferencedby_uri = 'https://doi.org/10.1038/sdata.2018.22'
         temporal_start = '1905-03-01T03:00:00+02:00'
         temporal_end = '2013-01-05'
+        dist_availability = "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
          xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
          xmlns:time="http://www.w3.org/2006/time"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -51,10 +55,21 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
             <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">{temp_res}</dcat:temporalResolution>
             <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">{spatial_res}</dcat:spatialResolutionInMeters>
             <dct:isReferencedBy rdf:resource="{referenced_by}"/>
+            <dcat:distribution>
+                <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
+                    <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
+                    <dct:description>Das ist eine deutsche Beschreibung der Distribution</dct:description>
+                    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcatap:availability rdf:resource="{availability}"/>
+                </dcat:Distribution>
+            </dcat:distribution>
         </dcat:Dataset>
         </rdf:RDF>
         '''.format(start=temporal_start, end=temporal_end, temp_res=temporal_resolution,
-                   spatial_res=spatial_resolution_in_meters, referenced_by=isreferencedby_uri)
+                   spatial_res=spatial_resolution_in_meters, referenced_by=isreferencedby_uri,
+                   availability=dist_availability)
 
         p = RDFParser(profiles=DCAT_AP_PROFILES)
 
@@ -66,6 +81,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         dataset = datasets[0]
 
+        # Dataset
         extras = self._extras(dataset)
 
         temporal_resolution_list = json.loads(extras['temporal_resolution'])
@@ -82,6 +98,168 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         assert extras['temporal_start'] == temporal_start
         assert extras['temporal_end'] == temporal_end
+
+        # Resources
+        assert len(dataset['resources']) == 1
+
+        resource = dataset['resources'][0]
+
+        #  Simple values
+        assert resource['availability'] == dist_availability
+
+    def test_availability_distibutions_without_uri(self):
+
+        dist_availability = "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+                <dcat:Distribution>
+                    <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
+                    <dct:description>Das ist eine deutsche Beschreibung der Distribution</dct:description>
+                    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcatap:availability rdf:resource="{availability}"/>
+                </dcat:Distribution>
+            </dcat:distribution>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''.format(availability=dist_availability)
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.parse(data)
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+
+        dataset = datasets[0]
+
+        assert len(dataset['resources']) == 1
+
+        resource = dataset['resources'][0]
+
+        assert resource['availability'] == dist_availability
+
+    def test_availability_multiple_distibutions(self):
+
+        dist_availability_1 = "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
+        dist_availability_2 = "http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL"
+        dist_availability_3 = "http://publications.europa.eu/resource/authority/planned-availability/STABLE"
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+                <dcat:Distribution>
+                    <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
+                    <dct:description>{availability_1}</dct:description>
+                    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcatap:availability rdf:resource="{availability_1}"/>
+                </dcat:Distribution>
+            </dcat:distribution>
+            <dcat:distribution>
+                <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
+                    <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
+                    <dct:description>{availability_2}</dct:description>
+                    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcatap:availability rdf:resource="{availability_2}"/>
+                </dcat:Distribution>
+            </dcat:distribution>
+            <dcat:distribution>
+                <dcat:Distribution>
+                    <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
+                    <dct:description>{availability_3}</dct:description>
+                    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcatap:availability rdf:resource="{availability_3}"/>
+                </dcat:Distribution>
+            </dcat:distribution>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''.format(availability_1=dist_availability_1, availability_2=dist_availability_2,
+                   availability_3=dist_availability_3)
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.parse(data)
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+
+        dataset = datasets[0]
+
+        assert len(dataset['resources']) == 3
+
+        for resource in dataset['resources']:
+            assert resource['availability'] == resource['description']
+
+    def test_availability_distibutions_literal(self):
+
+        dist_availability = "AVAILABLE"
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+                <dcat:Distribution>
+                    <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
+                    <dct:description>Das ist eine deutsche Beschreibung der Distribution</dct:description>
+                    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcatap:availability>{availability}</dcatap:availability>
+                </dcat:Distribution>
+            </dcat:distribution>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''.format(availability=dist_availability)
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.parse(data)
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+
+        dataset = datasets[0]
+
+        assert len(dataset['resources']) == 1
+
+        resource = dataset['resources'][0]
+
+        assert resource['availability'] == dist_availability
 
     def test_temporal_resolution_multiple(self):
         g = Graph()
@@ -156,6 +334,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert len(isreferencedby_list) == 2
         assert isreferencedby_uri in isreferencedby_list
         assert isreferencedby_uri_2 in isreferencedby_list
+
 
 class TestEuroDCATAP2ProfileParsingSpatial(BaseParseTest):
 
