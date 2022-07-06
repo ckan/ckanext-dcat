@@ -35,6 +35,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         temporal_start = '1905-03-01T03:00:00+02:00'
         temporal_end = '2013-01-05'
         dist_availability = "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
+        compress_format = "http://www.iana.org/assignments/media-types/application/gzip"
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
@@ -63,13 +64,14 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
                     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
                     <dcatap:availability rdf:resource="{availability}"/>
+                    <dcat:compressFormat rdf:resource="{compressFormat}"/>
                 </dcat:Distribution>
             </dcat:distribution>
         </dcat:Dataset>
         </rdf:RDF>
         '''.format(start=temporal_start, end=temporal_end, temp_res=temporal_resolution,
                    spatial_res=spatial_resolution_in_meters, referenced_by=isreferencedby_uri,
-                   availability=dist_availability)
+                   availability=dist_availability, compressFormat=compress_format)
 
         p = RDFParser(profiles=DCAT_AP_PROFILES)
 
@@ -106,6 +108,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         #  Simple values
         assert resource['availability'] == dist_availability
+        assert resource['compress_format'] == compress_format
 
     def test_availability_distibutions_without_uri(self):
 
@@ -217,9 +220,10 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         for resource in dataset['resources']:
             assert resource['availability'] == resource['description']
 
-    def test_availability_distibutions_literal(self):
+    def test_dataset_all_fields_literal(self):
 
         dist_availability = "AVAILABLE"
+        compress_format = "gzip"
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
@@ -239,11 +243,12 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
                     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
                     <dcatap:availability>{availability}</dcatap:availability>
+                    <dcat:compressFormat rdf:resource="{compressFormat}"/>
                 </dcat:Distribution>
             </dcat:distribution>
         </dcat:Dataset>
         </rdf:RDF>
-        '''.format(availability=dist_availability)
+        '''.format(availability=dist_availability, compressFormat=compress_format)
 
         p = RDFParser(profiles=DCAT_AP_PROFILES)
 
@@ -260,6 +265,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         resource = dataset['resources'][0]
 
         assert resource['availability'] == dist_availability
+        assert resource['compress_format'] == compress_format
 
     def test_temporal_resolution_multiple(self):
         g = Graph()

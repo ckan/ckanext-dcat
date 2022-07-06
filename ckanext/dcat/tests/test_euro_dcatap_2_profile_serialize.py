@@ -313,6 +313,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'Distribution name',
             'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
+            'compress_format': 'http://www.iana.org/assignments/media-types/application/gzip',
         }
 
         dataset = {
@@ -335,14 +336,16 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
         assert self._triple(g, distribution, DCATAP.availability, URIRef(resource['availability']))
+        assert self._triple(g, distribution, DCAT.compressFormat, URIRef(resource['compress_format']))
 
-    def test_distribution_availability_literal(self):
+    def test_distribution_fields_literal(self):
 
         resource = {
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'Distribution name',
             'availability': 'EXPERIMENTAL',
+            'compress_format': 'gzip',
         }
 
         dataset = {
@@ -365,3 +368,4 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
         assert self._triple(g, distribution, DCATAP.availability, Literal(resource['availability']))
+        assert self._triple(g, distribution, DCAT.compressFormat, Literal(resource['compress_format']))
