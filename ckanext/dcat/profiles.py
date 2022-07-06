@@ -1524,6 +1524,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                     for key, predicate in (
                             ('availability', DCATAP.availability),
                             ('compress_format', DCAT.compressFormat),
+                            ('package_format', DCAT.packageFormat),
                             ):
                         value = self._object_value(distribution, predicate)
                         if value:
@@ -1590,6 +1591,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             items = [
                 ('availability', DCATAP.availability, None, URIRefOrLiteral),
                 ('compress_format', DCAT.compressFormat, None, URIRefOrLiteral),
+                ('package_format', DCAT.packageFormat, None, URIRefOrLiteral)
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
