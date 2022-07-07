@@ -303,12 +303,12 @@ class TestEndpoints():
 
     def test_catalog_q_search(self, app):
 
-        dataset1 = factories.Dataset(title='Fïrst dataset')
+        dataset1 = factories.Dataset(title=u'Fïrst dataset')
         dataset2 = factories.Dataset(title='Second dataset')
 
         url = url_for('dcat.read_catalog',
                       _format='ttl',
-                      q='Fïrst')
+                      q=u'Fïrst')
 
         response = app.get(url)
         content = response.body
