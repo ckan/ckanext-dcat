@@ -1,6 +1,5 @@
 from builtins import str
 from builtins import object
-import os
 import json
 
 import pytest
@@ -17,22 +16,7 @@ from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT, VCARD)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
-
-
-class BaseParseTest(object):
-
-    def _extras(self, dataset):
-        extras = {}
-        for extra in dataset.get('extras'):
-            extras[extra['key']] = extra['value']
-        return extras
-
-    def _get_file_contents(self, file_name):
-        path = os.path.join(os.path.dirname(__file__),
-                            '..', '..', '..', 'examples',
-                            file_name)
-        with open(path, 'r') as f:
-            return f.read()
+from ckanext.dcat.tests.utils import BaseParseTest
 
 
 class TestEuroDCATAPProfileParsing(BaseParseTest):
@@ -921,6 +905,56 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             # check if we had subcatalog in extras
             assert has_subcat
 
+    def test_tags_with_commas(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal('Tree, forest, shrub')))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets[0]['tags']) == 3
+
+    INVALID_TAG = "Som`E-in.valid tag!;"
+    VALID_TAG = {'name': 'some-invalid-tag'}
+
+    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'true')
+    def test_tags_with_commas_clean_tags_on(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert self.VALID_TAG in datasets[0]['tags']
+        assert self.INVALID_TAG not in datasets[0]['tags']
+
+    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
+    def test_tags_with_commas_clean_tags_off(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        # when config flag is set to false, bad tags can happen
+
+        datasets = [d for d in p.datasets()]
+        assert self.VALID_TAG not in datasets[0]['tags']
+        assert {'name': self.INVALID_TAG} in datasets[0]['tags']
+
 
 class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
@@ -1150,54 +1184,3 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert 'spatial_text' not in extras
         assert 'spatial' not in extras
-
-    def test_tags_with_commas(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-        g.add((dataset, DCAT.keyword, Literal('Tree, forest, shrub')))
-        p = RDFParser(profiles=['euro_dcat_ap'])
-
-        p.g = g
-
-        datasets = [d for d in p.datasets()]
-
-        assert len(datasets[0]['tags']) == 3
-
-    INVALID_TAG = "Som`E-in.valid tag!;"
-    VALID_TAG = {'name': 'some-invalid-tag'}
-
-    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'true')
-    def test_tags_with_commas_clean_tags_on(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
-        p = RDFParser(profiles=['euro_dcat_ap'])
-
-        p.g = g
-
-        datasets = [d for d in p.datasets()]
-
-        assert self.VALID_TAG in datasets[0]['tags']
-        assert self.INVALID_TAG not in datasets[0]['tags']
-
-
-    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
-    def test_tags_with_commas_clean_tags_off(self):
-        g = Graph()
-
-        dataset = URIRef('http://example.org/datasets/1')
-        g.add((dataset, RDF.type, DCAT.Dataset))
-        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
-        p = RDFParser(profiles=['euro_dcat_ap'])
-
-        p.g = g
-
-        # when config flag is set to false, bad tags can happen
-
-        datasets = [d for d in p.datasets()]
-        assert self.VALID_TAG not in datasets[0]['tags']
-        assert {'name': self.INVALID_TAG} in datasets[0]['tags']

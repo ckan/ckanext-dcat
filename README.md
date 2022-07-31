@@ -317,7 +317,7 @@ the DCAT publisher property with a CKAN dataset author, maintainer or organizati
 and may depend on a particular instance needs. When mapping from CKAN metadata to DCAT though, there are in some cases fallback fields
 that are used if the default field is not present (see [RDF Serializer](#rdf-dcat-serializer) for more details on this.
 
-This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11).
+This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11) and [DCAT-AP v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210). It depends on the active profile(s) (see [Profiles](#profiles)) which DCAT properties are mapped.
 
 
 | DCAT class        | DCAT property          | CKAN dataset field                        | CKAN fallback fields           | Stored as |                                                                                                                                                               |
@@ -345,8 +345,11 @@ This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/a
 | dcat:Dataset      | dct:isVersionOf        | extra:is_version_of                       |                                | list      | See note about lists. It is assumed that these are one or more URIs referring to another dcat:Dataset                                                         |
 | dcat:Dataset      | dct:source             | extra:source                              |                                | list      | See note about lists. It is assumed that these are one or more URIs referring to another dcat:Dataset                                                         |
 | dcat:Dataset      | adms:sample            | extra:sample                              |                                | list      | See note about lists. It is assumed that these are one or more URIs referring to dcat:Distribution instances                                                  |
-| dcat:Dataset      | dct:spatial            | extra:spatial_uri                         |                                | text      | If the RDF provides them, profiles should store the textual and geometric representation of the location in extra:spatial_text and extra:spatial respectively |
+| dcat:Dataset      | dct:spatial            | extra:spatial_uri                         |                                | text      | If the RDF provides them, profiles should store the textual and geometric representation of the location in extra:spatial_text, extra:spatial, extra:spatial_bbox and extra:spatial_centroid respectively |
 | dcat:Dataset      | dct:temporal           | extra:temporal_start + extra:temporal_end |                                | text      | None, one or both extras can be present                                                                                                                       |
+| dcat:Dataset      | dcat:temporalResolution| extra:temporal_resolution                 |                                | list      |                                                                                                                                                               |
+| dcat:Dataset      | dcat:spatialResolutionInMeters| extra:spatial_resolution_in_meters |                                | list      |                                                                                                                                                               |
+| dcat:Dataset      | dct:isReferencedBy     | extra:is_referenced_by                    |                                | list      |                                                                                                                                                               |
 | dcat:Dataset      | dct:publisher          | extra:publisher_uri                       |                                | text      | See note about URIs                                                                                                                                           |
 | foaf:Agent        | foaf:name              | extra:publisher_name                      |                                | text      |                                                                                                                                                               |
 | foaf:Agent        | foaf:mbox              | extra:publisher_email                     | organization:title             | text      |                                                                                                                                                               |
@@ -372,6 +375,9 @@ This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/a
 | dcat:Distribution | foaf:page              | resource:documentation                    |                                | list      | See note about lists                                                                                                                                          |
 | dcat:Distribution | dct:language           | resource:language                         |                                | list      | See note about lists                                                                                                                                          |
 | dcat:Distribution | dct:conformsTo         | resource:conforms_to                      |                                | list      | See note about lists                                                                                                                                          |
+| dcat:Distribution | dcatap:availability    | resource:availability                     |                                | text      |                                                                                                                                                               |
+| dcat:Distribution | dcat:compressFormat    | resource:compress_format                  |                                | text      |                                                                                                                                                               |
+| dcat:Distribution | dcat:packageFormat     | resource:package_format                   |                                | text      |                                                                                                                                                               |
 | spdx:Checksum     | spdx:checksumValue     | resource:hash                             |                                | text      |                                                                                                                                                               |
 | spdx:Checksum     | spdx:algorithm         | resource:hash_algorithm                   |                                | text      |                                                                                                                                                               |
 
@@ -664,7 +670,12 @@ In most cases the default profile will provide a good mapping that will cover mo
 need custom logic, you can write a custom to profile that extends or replaces the default one.
 
 The default profile is mostly based in the
-[DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). It is actually fully-compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11). As mentioned before though, it should be generic enough for most DCAT based representations.
+[DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). It is actually fully-compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), and partially compatible with [DCAT-AP v2.1.0](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210). As mentioned before though, it should be generic enough for most DCAT based representations.
+
+Sites that want to support a particular version of the DCAT-AP can enable a specific profile using one of the methods below:
+
+* DCAT-AP v2.1.0 (default): `euro_dcat_ap_2`
+* DCAT-AP v1.1.1: `euro_dcat_ap`
 
 This plugin also contains a profile to serialize a CKAN dataset to a [schema.org Dataset](http://schema.org/Dataset) called `schemaorg`. This is especially useful to provide [JSON-LD structured data](#structured-data).
 
@@ -698,7 +709,7 @@ used to define publishers or contact points. Check the source code of `ckanex.dc
 
 Profiles can extend other profiles to avoid repeating rules, or can be completely independent.
 
-The following example shows a complete example of a profile built on top of the default one (`euro_dcat_ap`):
+The following example shows a complete example of a profile built on top of the European DCAT-AP profile (`euro_dcat_ap`):
 
 ```python
 
@@ -751,6 +762,8 @@ Extensions define their available profiles using the `ckan.rdf.profiles` in the 
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
+    euro_dcat_ap_2=ckanext.dcat.profiles:EuropeanDCATAP2Profile
+    schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
 ### Command line interface
 
@@ -790,7 +803,7 @@ To see all available options, run the script with the `-h` argument:
                             xml, n3 ... Defaults to 'xml'.
       -P, --pretty          Make the output more human readable
       -p [PROFILE [PROFILE ...]], --profile [PROFILE [PROFILE ...]]
-                            RDF Profiles to use, defaults to euro_dcat_ap
+                            RDF Profiles to use, defaults to euro_dcat_ap_2
       -m, --compat-mode     Enable compatibility mode
 
 

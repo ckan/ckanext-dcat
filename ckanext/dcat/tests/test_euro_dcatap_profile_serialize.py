@@ -19,29 +19,7 @@ from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
                                    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
-
-
-class BaseSerializeTest(object):
-
-    def _extras(self, dataset):
-        extras = {}
-        for extra in dataset.get('extras'):
-            extras[extra['key']] = extra['value']
-        return extras
-
-    def _triples(self, graph, subject, predicate, _object, data_type=None):
-
-        if not (isinstance(_object, URIRef) or isinstance(_object, BNode) or _object is None):
-            if data_type:
-                _object = Literal(_object, datatype=data_type)
-            else:
-                _object = Literal(_object)
-        triples = [t for t in graph.triples((subject, predicate, _object))]
-        return triples
-
-    def _triple(self, graph, subject, predicate, _object, data_type=None):
-        triples = self._triples(graph, subject, predicate, _object, data_type)
-        return triples[0] if triples else None
+from ckanext.dcat.tests.utils import BaseSerializeTest
 
 
 class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
@@ -57,7 +35,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         :param expected_mediatype:
             expected list of dcat:mediaType items in the resource
         """
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset_dict)
@@ -123,7 +101,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -184,7 +162,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -202,7 +180,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -219,7 +197,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -232,7 +210,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'name': 'test-dataset',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -248,7 +226,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -266,7 +244,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -283,7 +261,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -309,7 +287,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -332,7 +310,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'author_email': 'ped@example.com',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -351,7 +329,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'author_email': 'ped@example.com',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -371,7 +349,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'author_email': 'mailto:ped@example.com',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -403,7 +381,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -429,7 +407,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             }
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -450,7 +428,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -480,7 +458,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -506,7 +484,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -531,7 +509,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -561,7 +539,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -586,7 +564,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         }
         extras = self._extras(dataset)
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -626,7 +604,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -673,7 +651,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -739,7 +717,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -766,7 +744,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -794,7 +772,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -822,7 +800,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -851,7 +829,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -880,7 +858,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -909,7 +887,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -939,7 +917,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -969,7 +947,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -999,7 +977,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -1095,7 +1073,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ]
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset)
@@ -1117,7 +1095,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
     def test_graph_from_catalog(self):
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         catalog = s.graph_from_catalog()
@@ -1139,7 +1117,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
             'language': 'de',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         catalog = s.graph_from_catalog(catalog_dict)
@@ -1162,7 +1140,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
             'language': 'http://publications.europa.eu/resource/authority/language/ITA',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         catalog = s.graph_from_catalog(catalog_dict)
@@ -1176,7 +1154,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
         dataset = factories.Dataset()
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         catalog = s.graph_from_catalog()
@@ -1211,7 +1189,7 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
             'language': 'de',
         }
 
-        s = RDFSerializer()
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
         g = s.g
 
         s.serialize_catalog(catalog_dict, dataset_dicts=[dataset])

@@ -25,6 +25,7 @@ from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
+DCATAP = Namespace("http://data.europa.eu/r5r/")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -40,6 +41,7 @@ GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+
 namespaces = {
     'dct': DCT,
     'dcat': DCAT,
+    'dcatap': DCATAP,
     'adms': ADMS,
     'vcard': VCARD,
     'foaf': FOAF,
@@ -193,6 +195,23 @@ class RDFProfile(object):
                 return str(o)
         return fallback
 
+    def _object_value_multiple_predicate(self, subject, predicates):
+        '''
+        Given a subject and a list of predicates, returns the value of the object
+        according to the order in which it was specified.
+
+        Both subject and predicates must be rdflib URIRef or BNode objects
+
+        If found, the string representation is returned, else an empty string
+        '''
+        object_value = ''
+        for predicate in predicates:
+            object_value = self._object_value(subject, predicate)
+            if object_value:
+                break
+
+        return object_value
+
     def _object_value_int(self, subject, predicate):
         '''
         Given a subject and a predicate, returns the value of the object as an
@@ -209,6 +228,24 @@ class RDFProfile(object):
             except ValueError:
                 pass
         return None
+
+    def _object_value_int_list(self, subject, predicate):
+        '''
+        Given a subject and a predicate, returns the value of the object as a
+        list of integers
+
+        Both subject and predicate must be rdflib URIRef or BNode objects
+
+        If the value can not be parsed as intger, returns an empty list
+        '''
+        object_values = []
+        for object in self.g.objects(subject, predicate):
+            if object:
+                try:
+                    object_values.append(int(float(object)))
+                except ValueError:
+                    pass
+        return object_values
 
     def _object_value_list(self, subject, predicate):
         '''
@@ -246,14 +283,14 @@ class RDFProfile(object):
 
         return result
 
-    def _time_interval(self, subject, predicate):
+    def _time_interval(self, subject, predicate, dcat_ap_version=1):
         '''
         Returns the start and end date for a time interval object
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        It checks for time intervals defined with both schema.org startDate &
-        endDate and W3C Time hasBeginning & hasEnd.
+        It checks for time intervals defined with DCAT, W3C Time hasBeginning & hasEnd
+        and schema.org startDate & endDate.
 
         Note that partial dates will be expanded to the first month / day
         value, eg '1904' -> '1904-01-01'.
@@ -264,27 +301,70 @@ class RDFProfile(object):
 
         start_date = end_date = None
 
+        if dcat_ap_version == 1:
+            start_date, end_date = self._read_time_interval_schema_org(subject, predicate)
+            if start_date or end_date:
+                return start_date, end_date
+            return self._read_time_interval_time(subject, predicate)
+        elif dcat_ap_version == 2:
+            start_date, end_date = self._read_time_interval_dcat(subject, predicate)
+            if start_date or end_date:
+                return start_date, end_date
+            start_date, end_date = self._read_time_interval_time(subject, predicate)
+            if start_date or end_date:
+                return start_date, end_date
+            return self._read_time_interval_schema_org(subject, predicate)
+
+    def _read_time_interval_schema_org(self, subject, predicate):
+        start_date = end_date = None
+
         for interval in self.g.objects(subject, predicate):
-            # Fist try the schema.org way
             start_date = self._object_value(interval, SCHEMA.startDate)
             end_date = self._object_value(interval, SCHEMA.endDate)
 
             if start_date or end_date:
                 return start_date, end_date
 
-            # If no luck, try the w3 time way
+        return start_date, end_date
+
+    def _read_time_interval_dcat(self, subject, predicate):
+        start_date = end_date = None
+
+        for interval in self.g.objects(subject, predicate):
+            start_date = self._object_value(interval, DCAT.startDate)
+            end_date = self._object_value(interval, DCAT.endDate)
+
+            if start_date or end_date:
+                return start_date, end_date
+
+        return start_date, end_date
+
+    def _read_time_interval_time(self, subject, predicate):
+        start_date = end_date = None
+
+        for interval in self.g.objects(subject, predicate):
             start_nodes = [t for t in self.g.objects(interval,
                                                      TIME.hasBeginning)]
             end_nodes = [t for t in self.g.objects(interval,
                                                    TIME.hasEnd)]
             if start_nodes:
-                start_date = self._object_value(start_nodes[0],
-                                                TIME.inXSDDateTime)
+                start_date = self._object_value_multiple_predicate(start_nodes[0],
+                                            [TIME.inXSDDateTimeStamp, TIME.inXSDDateTime, TIME.inXSDDate])
             if end_nodes:
-                end_date = self._object_value(end_nodes[0],
-                                              TIME.inXSDDateTime)
+                end_date = self._object_value_multiple_predicate(end_nodes[0],
+                                            [TIME.inXSDDateTimeStamp, TIME.inXSDDateTime, TIME.inXSDDate])
+
+            if start_date or end_date:
+                return start_date, end_date
 
         return start_date, end_date
+
+    def _insert_or_update_temporal(self, dataset_dict, key, value):
+        temporal = next((item for item in dataset_dict['extras'] if(item['key'] == key)), None)
+        if temporal:
+            temporal['value'] = value
+        else:
+            dataset_dict['extras'].append({'key': key , 'value': value})
 
     def _publisher(self, subject, predicate):
         '''
@@ -361,6 +441,29 @@ class RDFProfile(object):
 
         return contact
 
+    def _parse_geodata(self, spatial, datatype, cur_value):
+        '''
+        Extract geodata with the given datatype from the spatial data and check if it contains a valid GeoJSON
+        or WKT geometry.
+
+        Returns the String or None if the value is no valid GeoJSON or WKT geometry.
+        '''
+        for geometry in self.g.objects(spatial, datatype):
+            if (geometry.datatype == URIRef(GEOJSON_IMT) or
+                    not geometry.datatype):
+                try:
+                    json.loads(str(geometry))
+                    cur_value = str(geometry)
+                except (ValueError, TypeError):
+                    pass
+            if not cur_value and geometry.datatype == GSP.wktLiteral:
+                try:
+                    cur_value = json.dumps(wkt.loads(str(geometry)))
+                except (ValueError, TypeError):
+                    pass
+        return cur_value
+
+
     def _spatial(self, subject, predicate):
         '''
         Returns a dict with details about the spatial location
@@ -381,6 +484,8 @@ class RDFProfile(object):
         uri = None
         text = None
         geom = None
+        bbox = None
+        cent = None
 
         for spatial in self.g.objects(subject, predicate):
 
@@ -391,19 +496,9 @@ class RDFProfile(object):
                 text = str(spatial)
 
             if (spatial, RDF.type, DCT.Location) in self.g:
-                for geometry in self.g.objects(spatial, LOCN.geometry):
-                    if (geometry.datatype == URIRef(GEOJSON_IMT) or
-                            not geometry.datatype):
-                        try:
-                            json.loads(str(geometry))
-                            geom = str(geometry)
-                        except (ValueError, TypeError):
-                            pass
-                    if not geom and geometry.datatype == GSP.wktLiteral:
-                        try:
-                            geom = json.dumps(wkt.loads(str(geometry)))
-                        except (ValueError, TypeError):
-                            pass
+                geom = self._parse_geodata(spatial, LOCN.geometry, geom)
+                bbox = self._parse_geodata(spatial, DCAT.bbox, bbox)
+                cent = self._parse_geodata(spatial, DCAT.centroid, cent)
                 for label in self.g.objects(spatial, SKOS.prefLabel):
                     text = str(label)
                 for label in self.g.objects(spatial, RDFS.label):
@@ -413,6 +508,8 @@ class RDFProfile(object):
             'uri': uri,
             'text': text,
             'geom': geom,
+            'bbox': bbox,
+            'centroid': cent,
         }
 
     def _license(self, dataset_ref):
@@ -559,6 +656,48 @@ class RDFProfile(object):
 
         return default
 
+    def _read_list_value(self, value):
+        items = []
+        # List of values
+        if isinstance(value, list):
+            items = value
+        elif isinstance(value, basestring):
+            try:
+                items = json.loads(value)
+                if isinstance(items, ((int, float, complex))):
+                    items = [items]  # JSON list
+            except ValueError:
+                if ',' in value:
+                    # Comma-separated list
+                    items = value.split(',')
+                else:
+                    items = [value]  # Normal text value
+        return items
+
+    def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
+        '''
+        Adds spatial triples to the graph.
+        '''
+        # GeoJSON
+        self.g.add((spatial_ref,
+                predicate,
+                Literal(value, datatype=GEOJSON_IMT)))
+        # WKT, because GeoDCAT-AP says so
+        try:
+            self.g.add((spatial_ref,
+                    predicate,
+                    Literal(wkt.dumps(json.loads(value),
+                                        decimals=4),
+                            datatype=GSP.wktLiteral)))
+        except (TypeError, ValueError, InvalidGeoJSONException):
+            pass
+
+    def _add_spatial_to_dict(self, dataset_dict, key, spatial):
+        if spatial.get(key):
+            dataset_dict['extras'].append(
+                {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
+                 'value': spatial.get(key)})
+
     def _get_dataset_value(self, dataset_dict, key, default=None):
         '''
         Returns the value for the given key on a CKAN dict
@@ -599,6 +738,7 @@ class RDFProfile(object):
                               list_value=False,
                               date_value=False,
                               _type=Literal,
+                              _datatype=None,
                               value_modifier=None):
         '''
         Adds a new triple to the graph with the provided parameters
@@ -628,7 +768,7 @@ class RDFProfile(object):
             value = value_modifier(value)
 
         if value and list_value:
-            self._add_list_triple(subject, predicate, value, _type)
+            self._add_list_triple(subject, predicate, value, _type, _datatype)
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
@@ -636,9 +776,13 @@ class RDFProfile(object):
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
-            self.g.add((subject, predicate, _type(value)))
+            if _datatype:
+                object = _type(value, datatype=_datatype)
+            else:
+                object = _type(value)
+            self.g.add((subject, predicate, object))
 
-    def _add_list_triple(self, subject, predicate, value, _type=Literal):
+    def _add_list_triple(self, subject, predicate, value, _type=Literal, _datatype=None):
         '''
         Adds as many triples to the graph as values
 
@@ -646,29 +790,17 @@ class RDFProfile(object):
         item. If `value` is a string there is an attempt to split it using
         commas, to support legacy fields.
         '''
-        items = []
-        # List of values
-        if isinstance(value, list):
-            items = value
-        elif isinstance(value, basestring):
-            try:
-                # JSON list
-                items = json.loads(value)
-                if isinstance(items, ((int, int, float, complex))):
-                    items = [items]
-            except ValueError:
-                if ',' in value:
-                    # Comma-separated list
-                    items = value.split(',')
-                else:
-                    # Normal text value
-                    items = [value]
+        items = self._read_list_value(value)
 
         for item in items:
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
-            self.g.add((subject, predicate, _type(item)))
+            if _datatype:
+                object = _type(item, datatype=_datatype)
+            else:
+                object = _type(item)
+            self.g.add((subject, predicate, object))
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
         '''
@@ -759,6 +891,21 @@ class RDFProfile(object):
         if not roots:
             roots = list(self.g.subjects(RDF.type, DCAT.Catalog))
         return roots[0]
+
+    def _get_or_create_spatial_ref(self, dataset_dict, dataset_ref):
+        for spatial_ref in self.g.objects(dataset_ref, DCT.spatial):
+            if spatial_ref:
+                return spatial_ref
+
+        # Create new spatial_ref
+        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
+        if spatial_uri:
+            spatial_ref = CleanedURIRef(spatial_uri)
+        else:
+            spatial_ref = BNode()
+        self.g.add((spatial_ref, RDF.type, DCT.Location))
+        self.g.add((dataset_ref, DCT.spatial, spatial_ref))
+        return spatial_ref
 
     # Public methods for profiles to implement
 
@@ -930,10 +1077,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Spatial
         spatial = self._spatial(dataset_ref, DCT.spatial)
         for key in ('uri', 'text', 'geom'):
-            if spatial.get(key):
-                dataset_dict['extras'].append(
-                    {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
-                     'value': spatial.get(key)})
+            self._add_spatial_to_dict(dataset_dict, key, spatial)
 
         # Dataset URI (explicitly show the missing ones)
         dataset_uri = (str(dataset_ref)
@@ -1029,6 +1173,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                                     if isinstance(distribution,
                                                   rdflib.term.URIRef)
                                     else '')
+
+            # Remember the (internal) distribution reference for referencing in
+            # further profiles, e.g. for adding more properties
+            resource_dict['distribution_ref'] = str(distribution)
 
             dataset_dict['resources'].append(resource_dict)
 
@@ -1184,36 +1332,17 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((dataset_ref, DCT.temporal, temporal_extent))
 
         # Spatial
-        spatial_uri = self._get_dataset_value(dataset_dict, 'spatial_uri')
         spatial_text = self._get_dataset_value(dataset_dict, 'spatial_text')
         spatial_geom = self._get_dataset_value(dataset_dict, 'spatial')
 
-        if spatial_uri or spatial_text or spatial_geom:
-            if spatial_uri:
-                spatial_ref = CleanedURIRef(spatial_uri)
-            else:
-                spatial_ref = BNode()
-
-            g.add((spatial_ref, RDF.type, DCT.Location))
-            g.add((dataset_ref, DCT.spatial, spatial_ref))
+        if spatial_text or spatial_geom:
+            spatial_ref = self._get_or_create_spatial_ref(dataset_dict, dataset_ref)
 
             if spatial_text:
                 g.add((spatial_ref, SKOS.prefLabel, Literal(spatial_text)))
 
             if spatial_geom:
-                # GeoJSON
-                g.add((spatial_ref,
-                       LOCN.geometry,
-                       Literal(spatial_geom, datatype=GEOJSON_IMT)))
-                # WKT, because GeoDCAT-AP says so
-                try:
-                    g.add((spatial_ref,
-                           LOCN.geometry,
-                           Literal(wkt.dumps(json.loads(spatial_geom),
-                                             decimals=4),
-                                   datatype=GSP.wktLiteral)))
-                except (TypeError, ValueError, InvalidGeoJSONException):
-                    pass
+                self._add_spatial_value_to_graph(spatial_ref, LOCN.geometry, spatial_geom)
 
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
@@ -1340,6 +1469,137 @@ class EuropeanDCATAPProfile(RDFProfile):
         modified = self._last_catalog_modification()
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
+
+
+class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
+    '''
+    An RDF profile based on the DCAT-AP 2 for data portals in Europe
+
+    More information and specification:
+
+    https://joinup.ec.europa.eu/asset/dcat_application_profile
+
+    '''
+
+    def parse_dataset(self, dataset_dict, dataset_ref):
+
+        # call super method
+        super(EuropeanDCATAP2Profile, self).parse_dataset(dataset_dict, dataset_ref)
+
+        # Lists
+        for key, predicate in (
+            ('temporal_resolution', DCAT.temporalResolution),
+            ('is_referenced_by', DCT.isReferencedBy),
+        ):
+            values = self._object_value_list(dataset_ref, predicate)
+            if values:
+                dataset_dict['extras'].append({'key': key,
+                                               'value': json.dumps(values)})
+        # Temporal
+        start, end = self._time_interval(dataset_ref, DCT.temporal, dcat_ap_version=2)
+        if start:
+            self._insert_or_update_temporal(dataset_dict, 'temporal_start', start)
+        if end:
+            self._insert_or_update_temporal(dataset_dict, 'temporal_end', end)
+
+        # Spatial
+        spatial = self._spatial(dataset_ref, DCT.spatial)
+        for key in ('bbox', 'centroid'):
+            self._add_spatial_to_dict(dataset_dict, key, spatial)
+
+        # Spatial resolution in meters
+        spatial_resolution_in_meters = self._object_value_int_list(
+            dataset_ref, DCAT.spatialResolutionInMeters)
+        if spatial_resolution_in_meters:
+            dataset_dict['extras'].append({'key': 'spatial_resolution_in_meters',
+                                           'value': json.dumps(spatial_resolution_in_meters)})
+
+        # Resources
+        for distribution in self._distributions(dataset_ref):
+            distribution_ref = str(distribution)
+            for resource_dict in dataset_dict.get('resources', []):
+                # Match distribution in graph and distribution in resource dict
+                if resource_dict and distribution_ref == resource_dict.get('distribution_ref'):
+                    #  Simple values
+                    for key, predicate in (
+                            ('availability', DCATAP.availability),
+                            ('compress_format', DCAT.compressFormat),
+                            ('package_format', DCAT.packageFormat),
+                            ):
+                        value = self._object_value(distribution, predicate)
+                        if value:
+                            resource_dict[key] = value
+
+        return dataset_dict
+
+    def graph_from_dataset(self, dataset_dict, dataset_ref):
+
+        # call super method
+        super(EuropeanDCATAP2Profile, self).graph_from_dataset(dataset_dict, dataset_ref)
+
+        # Lists
+        for key, predicate, fallbacks, type, datatype in (
+            ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration),
+            ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None)
+        ):
+            self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
+                                       fallbacks=fallbacks, _type=type, _datatype=datatype)
+
+        # Temporal
+        start = self._get_dataset_value(dataset_dict, 'temporal_start')
+        end = self._get_dataset_value(dataset_dict, 'temporal_end')
+        if start or end:
+            temporal_extent_dcat = BNode()
+
+            self.g.add((temporal_extent_dcat, RDF.type, DCT.PeriodOfTime))
+            if start:
+                self._add_date_triple(temporal_extent_dcat, DCAT.startDate, start)
+            if end:
+                self._add_date_triple(temporal_extent_dcat, DCAT.endDate, end)
+            self.g.add((dataset_ref, DCT.temporal, temporal_extent_dcat))
+
+        # spatial
+        spatial_bbox = self._get_dataset_value(dataset_dict, 'spatial_bbox')
+        spatial_cent = self._get_dataset_value(dataset_dict, 'spatial_centroid')
+
+        if spatial_bbox or spatial_cent:
+            spatial_ref = self._get_or_create_spatial_ref(dataset_dict, dataset_ref)
+
+            if spatial_bbox:
+                self._add_spatial_value_to_graph(spatial_ref, DCAT.bbox, spatial_bbox)
+
+            if spatial_cent:
+                self._add_spatial_value_to_graph(spatial_ref, DCAT.centroid, spatial_cent)
+
+        # Spatial resolution in meters
+        spatial_resolution_in_meters = self._read_list_value(
+            self._get_dataset_value(dataset_dict, 'spatial_resolution_in_meters'))
+        if spatial_resolution_in_meters:
+            for value in spatial_resolution_in_meters:
+                try:
+                    self.g.add((dataset_ref, DCAT.spatialResolutionInMeters,
+                                Literal(float(value), datatype=XSD.decimal)))
+                except (ValueError, TypeError):
+                    self.g.add((dataset_ref, DCAT.spatialResolutionInMeters, Literal(value)))
+
+        # Resources
+        for resource_dict in dataset_dict.get('resources', []):
+
+            distribution = CleanedURIRef(resource_uri(resource_dict))
+
+            #  Simple values
+            items = [
+                ('availability', DCATAP.availability, None, URIRefOrLiteral),
+                ('compress_format', DCAT.compressFormat, None, URIRefOrLiteral),
+                ('package_format', DCAT.packageFormat, None, URIRefOrLiteral)
+            ]
+
+            self._add_triples_from_dict(resource_dict, distribution, items)
+
+    def graph_from_catalog(self, catalog_dict, catalog_ref):
+
+        # call super method
+        super(EuropeanDCATAP2Profile, self).graph_from_catalog(catalog_dict, catalog_ref)
 
 
 class SchemaOrgProfile(RDFProfile):
