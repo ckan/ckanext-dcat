@@ -1,7 +1,28 @@
 # Changelog
 
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...HEAD)
+
+## [v1.3.0](https://github.com/ckan/ckanext-dcat/compare/v1.2.0...v1.3.0) - 2022-08-01
+
+* Fix assert expressions in tests (#218)
+* Fix unicode encoding error on Python 2 (#225)
+* Support (partial, not complete) for DCAT-AP 2.1 (#220)
+
+#### Changed default profile
+With #220 the default profile has changed from `euro_dcat_ap` to `euro_dcat_ap_2`. The following properties are additionally supported by default:
+* dcat:Dataset
+  * dcat:bbox und dcat:centroid (in dct:Location of dct:spatial)
+  * dcat:startDate, dcat:endDate, time:hasBeginning, time:hasEnd (in dct:PeriodOfTime of dct:temporal)
+  * dcat:spatialResolutionInMeters
+  * dcat:temporalResolution
+  * dct:isReferencedBy
+* dcat:Distribution
+  * dcatap:availability
+  * dcat:compressFormat
+  * dcat:packageFormat
+
+How the default profile can be changed is described in the Documentation under [profiles](https://github.com/ckan/ckanext-dcat/#profiles).
 
 ## [v1.2.0](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...v1.2.0) - 2022-05-25
 
