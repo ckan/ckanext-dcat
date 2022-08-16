@@ -22,10 +22,15 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_auth,
                                 sparql_query,
                                 sparql_update,
+                                sparql_clear,
                                 sparql_query_auth,
-                                sparql_update_auth
+                                sparql_update_auth,
+                                sparql_clear_auth
                                 )
 from ckanext.dcat import utils, sparql
+import logging
+
+log = logging.getLogger(__name__)
 
 if p.toolkit.check_ckan_version('2.9'):
     from ckanext.dcat.plugins.flask_plugin import (
@@ -181,9 +186,18 @@ class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
     # IPackageController
 
     def before_index(self, pkg_dict):
-        self.sparql.update_dataset(pkg_dict, self.profiles)
+        try:
+            self.sparql.update_dataset(pkg_dict, self.profiles)
+        except Exception as e:
+            log.error('Could not update dataset %s to SPARQL server: %s', pkg_dict['id'], e)
 
         return pkg_dict
+
+    def after_delete(self, context, pkg_dict):
+        try:
+            self.sparql.remove_dataset(pkg_dict['id'])
+        except Exception as e:
+            log.error('Could not remove dataset %s from SPARQL server: %s', pkg_dict['id'], e)
 
     # IActions
 
@@ -191,6 +205,7 @@ class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
         return {
             'sparql_query': sparql_query,
             'sparql_update': sparql_update,
+            'sparql_clear': sparql_clear,
         }
 
     # IAuthFunctions
@@ -199,4 +214,5 @@ class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
         return {
             'sparql_query': sparql_query_auth,
             'sparql_update': sparql_update_auth,
+            'sparql_clear': sparql_clear_auth,
         }

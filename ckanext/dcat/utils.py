@@ -523,7 +523,5 @@ def sparql_query(query):
         result = toolkit.get_action('sparql_query')(context, data_dict)
     except toolkit.ValidationError as e:
         return e.error_dict.get('message')
-    if result.get('success') is True:
-        return result.get('results')
-    else:
-        return result
+
+    return result

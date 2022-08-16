@@ -252,6 +252,19 @@ def sparql_update(context, data_dict):
         raise toolkit.ValidationError(error)
 
 
+def sparql_clear(context, data_dict):
+    '''
+    Clear the SPARQL database
+    '''
+    toolkit.check_access('sparql_clear', context, data_dict)
+
+    sparql = SPARQLClient(query_endpoint=config.get('ckanext.dcat.sparql.query_endpoint'),
+                          update_endpoint=config.get('ckanext.dcat.sparql.update_endpoint'),
+                          username=config.get('ckanext.dcat.sparql.username'),
+                          password=config.get('ckanext.dcat.sparql.password'))
+    sparql.clear()
+
+
 @toolkit.auth_allow_anonymous_access
 def sparql_query_auth(context, data_dict):
     '''
@@ -264,5 +277,13 @@ def sparql_query_auth(context, data_dict):
 def sparql_update_auth(context, data_dict):
     '''
     Only administrators can execute SPARQL updates
+    '''
+    return {'success': False}
+
+
+@toolkit.auth_allow_anonymous_access
+def sparql_clear_auth(context, data_dict):
+    '''
+    Only administrators can clear the SPARQL database
     '''
     return {'success': False}
