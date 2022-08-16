@@ -22,8 +22,10 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_auth,
                                 sparql_query,
                                 sparql_update,
+                                sparql_clear,
                                 sparql_query_auth,
-                                sparql_update_auth
+                                sparql_update_auth,
+                                sparql_clear_auth
                                 )
 from ckanext.dcat import utils, sparql
 import logging
@@ -191,12 +193,19 @@ class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
 
         return pkg_dict
 
+    def after_delete(self, context, pkg_dict):
+        try:
+            self.sparql.remove_dataset(pkg_dict['id'])
+        except Exception as e:
+            log.error('Could not remove dataset %s from SPARQL server: %s', pkg_dict['id'], e)
+
     # IActions
 
     def get_actions(self):
         return {
             'sparql_query': sparql_query,
             'sparql_update': sparql_update,
+            'sparql_clear': sparql_clear,
         }
 
     # IAuthFunctions
@@ -205,4 +214,5 @@ class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
         return {
             'sparql_query': sparql_query_auth,
             'sparql_update': sparql_update_auth,
+            'sparql_clear': sparql_clear_auth,
         }

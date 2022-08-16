@@ -46,3 +46,12 @@ class SPARQLClient:
 
         insert_query = '{} INSERT DATA {{ {} . }}'.format(prefixes, triples)
         self.update(insert_query)
+
+    def remove_dataset(self, dataset_id):
+        delete_query = ('PREFIX dct: <http://purl.org/dc/terms/> DELETE WHERE {{ ?s ?p ?o ; dct:identifier "{}"}}'
+                        .format(dataset_id))
+        self.update(delete_query)
+
+    def clear(self):
+        clear_query = 'DELETE WHERE { ?s ?p ?o }'
+        self.update(clear_query)
