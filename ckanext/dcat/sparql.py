@@ -2,7 +2,6 @@ from SPARQLWrapper import SPARQLWrapper, POST, GET, JSON
 from SPARQLWrapper import SPARQLExceptions  # noqa: imported for convenience of SPARQLClient users
 from ckanext.dcat.processors import RDFSerializer
 import logging
-import json
 
 log = logging.getLogger(__name__)
 
@@ -22,10 +21,7 @@ class SPARQLClient:
     def query(self, q, return_format=JSON):
         self.sparql.setMethod(GET)
         result = self._query(q, return_format)
-        if return_format == JSON:
-            return json.load(result.response)
-        else:
-            return result.response.read()
+        return result.response.read()
 
     def update(self, q, return_format=JSON):
         self.sparql.setMethod(POST)
