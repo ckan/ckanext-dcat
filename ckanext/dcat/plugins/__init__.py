@@ -168,6 +168,18 @@ class StructuredDataPlugin(p.SingletonPlugin):
         }
 
 
+def update_dataset_job(pkg_dict):
+    try:
+        client = sparql.SPARQLClient(config.get('ckanext.dcat.sparql.query_endpoint'),
+                                     update_endpoint=config.get('ckanext.dcat.sparql.update_endpoint'),
+                                     username=config.get('ckanext.dcat.sparql.username'),
+                                     password=config.get('ckanext.dcat.sparql.password'))
+        profiles = p.toolkit.aslist(config.get('ckanext.dcat.sparql.profiles', []))
+        client.update_dataset(pkg_dict, profiles)
+    except Exception as e:
+        log.error('Could not update dataset %s to SPARQL server: %s', pkg_dict['id'], e)
+
+
 class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
     p.implements(p.IConfigurable, inherit=True)
     p.implements(p.IPackageController, inherit=True)
@@ -186,11 +198,7 @@ class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
     # IPackageController
 
     def before_index(self, pkg_dict):
-        try:
-            self.sparql.update_dataset(pkg_dict, self.profiles)
-        except Exception as e:
-            log.error('Could not update dataset %s to SPARQL server: %s', pkg_dict['id'], e)
-
+        p.toolkit.enqueue_job(update_dataset_job, [pkg_dict], queue='priority')
         return pkg_dict
 
     def after_delete(self, context, pkg_dict):
