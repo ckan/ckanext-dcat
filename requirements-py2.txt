@@ -4,3 +4,4 @@ geomet>=0.2.0
 ckantoolkit>=0.0.7
 future>=0.18.2
 six
+SPARQLWrapper
