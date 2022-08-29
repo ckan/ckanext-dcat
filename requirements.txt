@@ -1,6 +1,6 @@
-rdflib-jsonld==0.6.2
+rdflib==6.1.1
 geomet>=0.2.0
-ckantoolkit==0.0.3
+ckantoolkit>=0.0.7
 future>=0.18.2
 six
 SPARQLWrapper
