@@ -56,6 +56,9 @@ namespaces = {
 
 PREFIX_MAILTO = u'mailto:'
 
+DISTRIBUTION_LICENSE_FALLBACK_CONFIG = 'ckanext.dcat.resource.inherit.license'
+
+
 class URIRefOrLiteral(object):
     '''Helper which creates an URIRef if the value appears to be an http URL,
     or a Literal otherwise. URIRefs are also cleaned using CleanedURIRef.
@@ -1344,6 +1347,14 @@ class EuropeanDCATAPProfile(RDFProfile):
             if spatial_geom:
                 self._add_spatial_value_to_graph(spatial_ref, LOCN.geometry, spatial_geom)
 
+        # Use fallback license if set in config
+        resource_license_fallback = None
+        if toolkit.asbool(config.get(DISTRIBUTION_LICENSE_FALLBACK_CONFIG, False)):
+            if 'license_id' in dataset_dict and isinstance(URIRefOrLiteral(dataset_dict['license_id']), URIRef):
+                resource_license_fallback = dataset_dict['license_id']
+            elif 'license_url' in dataset_dict and isinstance(URIRefOrLiteral(dataset_dict['license_url']), URIRef):
+                resource_license_fallback = dataset_dict['license_url']
+
         # Resources
         for resource_dict in dataset_dict.get('resources', []):
 
@@ -1373,6 +1384,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('conforms_to', DCT.conformsTo, None, Literal),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
+
+            # Set default license for distribution if needed and available
+            if resource_license_fallback and not (distribution, DCT.license, None) in g:
+                g.add((distribution, DCT.license, URIRefOrLiteral(resource_license_fallback)))
 
             # Format
             mimetype = resource_dict.get('mimetype')

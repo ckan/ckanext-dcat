@@ -654,6 +654,12 @@ the following values will be used for `dct:accrualPeriodicity`:
 Once the dataset graph has been obtained, this is serialized into a text format using [RDFLib](https://rdflib.readthedocs.org/),
 so any format it supports can be obtained (common formats are 'xml', 'turtle' or 'json-ld').
 
+### Inherit license from the dataset as fallback in distributions
+It is possible to inherit the license from the dataset to the distributions, but only if there is no license defined in the resource yet. By default the license is not inherited from the dataset. This can be activated by setting the following parameter in the CKAN config file:
+
+    ckanext.dcat.resource.inherit.license = True
+
+
 ## Profiles
 
 Both the parser and the serializer use profiles to allow customization of how the values defined in the RDF graph are mapped to CKAN and viceversa.
