@@ -127,15 +127,15 @@ class DCATJSONHarvester(DCATHarvester):
                                 guid=guid, job=harvest_job,
                                 package_id=guid_to_package_id[guid],
                                 content=as_string,
-                                extras=[HarvestObjectExtra(key='status',
-                                                           value='change')])
+                                extras=[HarvestObjectExtra(key='status', value='change'),
+                                        HarvestObjectExtra(key='translate_lang', value=harvest_job.translate_lang)])
                         else:
                             # Dataset needs to be created
                             obj = HarvestObject(
                                 guid=guid, job=harvest_job,
                                 content=as_string,
-                                extras=[HarvestObjectExtra(key='status',
-                                                           value='new')])
+                                extras=[HarvestObjectExtra(key='status', value='new'),
+                                        HarvestObjectExtra(key='translate_lang', value=harvest_job.translate_lang)])
                         obj.save()
                         ids.append(obj.id)
 
@@ -189,6 +189,8 @@ class DCATJSONHarvester(DCATHarvester):
             status = 'change'
         else:
             status = self._get_object_extra(harvest_object, 'status')
+
+        translate_lang = status = self._get_object_extra(harvest_object, 'translate_lang')
 
         if status == 'delete':
             # Delete package
@@ -245,6 +247,14 @@ class DCATJSONHarvester(DCATHarvester):
             source_dataset = model.Package.get(harvest_object.source.id)
             if source_dataset.owner_org:
                 package_dict['owner_org'] = source_dataset.owner_org
+
+        # Initialize translator
+        if translate_lang:
+            log.debug('DCAT/Json translation language = {0}'.format(translate_lang))
+            self.init_translate(translate_lang)
+
+            # translate dataset content (with tags and groups)
+            self.translate_pakage(package_dict)
 
         # Flag this object as the current one
         harvest_object.current = True

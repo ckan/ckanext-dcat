@@ -233,6 +233,14 @@ class DCATRDFHarvester(DCATHarvester):
                         if source_dataset.owner_org:
                             dataset['owner_org'] = source_dataset.owner_org
 
+                    # Initialize translator
+                    if harvest_job.translate_lang:
+                        log.debug('DCAT/RDF translation language = {0}'.format(harvest_job.translate_lang))
+                        self.init_translate(harvest_job.translate_lang)
+
+                        # translate dataset content (with tags and groups)
+                        self.translate_pakage(dataset)
+
                     # Try to get a unique identifier for the harvested dataset
                     guid = self._get_guid(dataset, source_url=source_dataset.url)
 
