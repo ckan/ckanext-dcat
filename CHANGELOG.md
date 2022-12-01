@@ -3,6 +3,8 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...HEAD)
 
+* RDF serialization: Add fallback values for resource dates
+
 ## [v1.3.0](https://github.com/ckan/ckanext-dcat/compare/v1.2.0...v1.3.0) - 2022-08-01
 
 * Fix assert expressions in tests (#218)

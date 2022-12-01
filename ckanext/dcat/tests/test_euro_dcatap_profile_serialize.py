@@ -632,6 +632,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             'status': 'http://purl.org/adms/status/Completed',
             'rights': 'Some statement about rights',
             'license': 'http://creativecommons.org/licenses/by/3.0/',
+            'created': '2015-07-06T15:21:09.034694',
+            'metadata_modified': '2015-07-07T15:21:09.075774',
             'issued': '2015-06-26T15:21:09.034694',
             'modified': '2015-06-26T15:21:09.075774',
             'size': 1234,
@@ -1041,6 +1043,36 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             [],
             [Literal(fmt_text)]
         )
+
+    def test_distribution_dates_fallback(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d022',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'metadata_modified': '2015-06-26T15:21:09.075774',
+            'created': '2015-06-26T15:21:09.034694',
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        # Dates
+        assert self._triple(g, distribution, DCT.modified, resource['metadata_modified'], XSD.dateTime)
+        assert self._triple(g, distribution, DCT.issued, resource['created'], XSD.dateTime)
 
     def test_distribution_format_mediatype_different(self):
         dataset_dict, resource = self._get_base_dataset_with_resource()
