@@ -1,9 +1,12 @@
 # Changelog
 
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...HEAD)
 
-* RDF serialization: Add fallback values for resource dates
+## [v1.4.0](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...v1.4.0) - 2022-12-05
+
+* RDF serialization: Add fallback values for resource dates (#233)
+* Add option for fallback distribution license if missing (#231)
 
 ## [v1.3.0](https://github.com/ckan/ckanext-dcat/compare/v1.2.0...v1.3.0) - 2022-08-01
 
