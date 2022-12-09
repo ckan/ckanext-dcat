@@ -67,6 +67,17 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dcatap:availability rdf:resource="{availability}"/>
                     <dcat:compressFormat rdf:resource="{compressFormat}"/>
                     <dcat:packageFormat rdf:resource="{packageFormat}"/>
+                    <dcat:accessService>
+                        <dcat:DataService>
+                            <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"/>
+                            <dct:title>Sparql-end Point</dct:title>
+                            <dcat:endpointURL rdf:resource="http://publications.europa.eu/webapi/rdf/sparql"/>
+                            <dct:description>This SPARQL end point allow to directly query the EU Whoiswho content (organization / membership / person)</dct:description>
+                            <dcat:endpointDescription>SPARQL url description</dcat:endpointDescription>
+                            <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/COM_REUSE"/>
+                            <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+                        </dcat:DataService>
+                    </dcat:accessService>
                 </dcat:Distribution>
             </dcat:distribution>
         </dcat:Dataset>
@@ -113,6 +124,25 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert resource['availability'] == dist_availability
         assert resource['compress_format'] == compress_format
         assert resource['package_format'] == package_format
+
+        # Access services
+        access_service_list = json.loads(resource.get('access_services'))
+        assert len(access_service_list) == 1
+
+        access_service = access_service_list[0]
+
+        # Simple values
+        assert access_service.get('availability') == 'http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE'
+        assert access_service.get('title') == 'Sparql-end Point'
+        assert access_service.get('endpoint_description') == 'SPARQL url description'
+        assert access_service.get('license') == 'http://publications.europa.eu/resource/authority/licence/COM_REUSE'
+        assert access_service.get('access_rights') == 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
+        assert access_service.get('description') == 'This SPARQL end point allow to directly query the EU Whoiswho content (organization / membership / person)'
+
+        # List
+        endpoint_url_list = access_service.get('endpoint_url')
+        assert len(endpoint_url_list) == 1
+        assert 'http://publications.europa.eu/webapi/rdf/sparql' in endpoint_url_list
 
     def test_availability_distibutions_without_uri(self):
 
@@ -349,6 +379,152 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert isreferencedby_uri in isreferencedby_list
         assert isreferencedby_uri_2 in isreferencedby_list
 
+    def test_parse_distribution_access_service(self):
+
+        expected_access_services = [{
+            'availability': 'http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE',
+            'title': 'Sparql-end Point',
+            'endpoint_description': 'SPARQL url description',
+            'license': 'http://publications.europa.eu/resource/authority/licence/COM_REUSE',
+            'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+            'description': 'This SPARQL end point allow to directly query the EU Whoiswho content',
+            'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+            'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
+            'uri': ''
+            }, {
+            'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
+            'title': 'Sparql-end Point 2',
+            'endpoint_description': 'SPARQL url description 2',
+            'license': 'http://publications.europa.eu/resource/authority/licence/CC_BY',
+            'access_rights': 'http://publications.europa.eu/resource/authority/access-right/OP_DATPRO',
+            'description': 'This SPARQL end point allow to directly query the EU Whoiswho content',
+            'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+            'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
+            'uri': ''
+        }]
+
+        self._run_parse_access_service(expected_access_services)
+
+    def test_parse_distribution_access_service_literal(self):
+
+        expected_access_services = [{
+            'availability': 'http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE',
+            'title': 'Sparql-end Point',
+            'endpoint_description': 'SPARQL url description',
+            'license': 'COM_REUSE',
+            'access_rights': 'PUBLIC',
+            'description': 'This SPARQL end point allow to directly query the EU Whoiswho content',
+            'endpoint_url': ['sparql'],
+            'serves_dataset': ['eu-whoiswho-the-official-directory-of-the-european-union'],
+            'uri': ''
+            }, {
+            'availability': 'EXPERIMENTAL',
+            'title': 'Sparql-end Point 2',
+            'endpoint_description': 'SPARQL url description 2',
+            'license': 'CC_BY',
+            'access_rights': 'OP_DATPRO',
+            'description': 'This SPARQL end point allow to directly query the EU Whoiswho content',
+            'endpoint_url': ['sparql'],
+            'serves_dataset': ['eu-whoiswho-the-official-directory-of-the-european-union'],
+            'uri': ''
+        }]
+
+        self._run_parse_access_service(expected_access_services)
+
+    def _build_access_services_graph_from_list(self, access_service_list):
+        """
+        Creates an access service graph based on the given list.
+        :param: access_service_list
+            dict list of the access services
+        :returns:
+            The access service graph
+        """
+        service_graph = ''
+        for access_service_dict in access_service_list:
+            #Lists
+            endpoint_urls = access_service_dict.get('endpoint_url', [])
+            endpoint_url_string = ''
+            for endpoint_url in  endpoint_urls:
+                endpoint_url_string += ('<dcat:endpointURL rdf:resource="{ds_endpointURL}"/>'
+                                        .format(ds_endpointURL = endpoint_url))
+
+
+            serves_datasets = access_service_dict.get('serves_dataset', [])
+            serves_dataset_string = ''
+            for serves_dataset in  serves_datasets:
+                serves_dataset_string += ('<dcat:servesDataset rdf:resource="{ds_servesDataset}"/>'
+                                          .format(ds_servesDataset = serves_dataset))
+
+            data = '''
+            <dcat:accessService>
+                <dcat:DataService>
+                    <dcatap:availability rdf:resource="{ds_availability}"/>
+                    <dct:title>{ds_title}</dct:title>
+                    {ds_endpointURL}
+                    <dct:description>{ds_description}</dct:description>
+                    <dcat:endpointDescription>{ds_endpointDescription}</dcat:endpointDescription>
+                    <dct:license>{ds_license}</dct:license>
+                    <dct:accessRights>{ds_accessRights}</dct:accessRights>
+                    {ds_servesDataset}
+                </dcat:DataService>
+            </dcat:accessService>
+            '''.format(ds_availability = access_service_dict.get('availability'),
+                       ds_title = access_service_dict.get('title'), ds_endpointURL = endpoint_url_string,
+                       ds_description = access_service_dict.get('description'), ds_endpointDescription = access_service_dict.get('endpoint_description'),
+                       ds_accessRights = access_service_dict.get('access_rights'), ds_license = access_service_dict.get('license'),
+                       ds_servesDataset = serves_dataset_string)
+
+            service_graph += data
+
+        return service_graph
+
+    def _run_parse_access_service(self, expected_access_services):
+        """
+        Creates a minimal graph with access services based on the given list and checks
+        if the expected access services are present in the parsed resource dict.
+        """
+        access_services_graph = self._build_access_services_graph_from_list(expected_access_services)
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+                <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
+                    <dct:description>Das ist eine deutsche Beschreibung der Distribution</dct:description>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    {access_services}
+                </dcat:Distribution>
+            </dcat:distribution>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''.format(access_services = access_services_graph)
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.parse(data)
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+        dataset = datasets[0]
+
+        resources = dataset.get('resources')
+        assert len(resources) == 1
+        resource_dict = resources[0]
+
+        access_services = resource_dict.get('access_services')
+        access_services_list = json.loads(access_services)
+        assert len(access_services_list) == 2
+
+        for access_service in expected_access_services:
+            assert access_service in access_services_list
 
 class TestEuroDCATAP2ProfileParsingSpatial(BaseParseTest):
 

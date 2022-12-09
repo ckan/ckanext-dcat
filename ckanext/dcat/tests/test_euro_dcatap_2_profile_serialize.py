@@ -3,6 +3,7 @@
 from builtins import str
 from builtins import object
 import json
+import six
 
 import pytest
 
@@ -315,6 +316,28 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
             'compress_format': 'http://www.iana.org/assignments/media-types/application/gzip',
             'package_format': 'http://publications.europa.eu/resource/authority/file-type/TAR',
+            'access_services': json.dumps([
+                {
+                    'availability': 'http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE',
+                    'title': 'Sparql-end Point 1',
+                    'endpoint_description': 'SPARQL url description 1',
+                    'license': 'http://publications.europa.eu/resource/authority/licence/COM_REUSE',
+                    'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
+                    'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 1',
+                    'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                },
+                {
+                    'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
+                    'title': 'Sparql-end Point 2',
+                    'endpoint_description': 'SPARQL url description 2',
+                    'license': 'http://publications.europa.eu/resource/authority/licence/CC_BY',
+                    'access_rights': 'http://publications.europa.eu/resource/authority/access-right/OP_DATPRO',
+                    'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 2',
+                    'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                }
+            ])
         }
 
         dataset = {
@@ -340,6 +363,39 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCAT.compressFormat, URIRef(resource['compress_format']))
         assert self._triple(g, distribution, DCAT.packageFormat, URIRef(resource['package_format']))
 
+        # Access services
+        object_list = self._triples(g, distribution, DCAT.accessService, None)
+
+        assert len(object_list) == 2
+        access_services = json.loads(resource['access_services'])
+
+        for object in object_list:
+            title_objects = self._triples(g, object[2], DCT.title, None)
+            assert len(title_objects) == 1
+            access_service = self._get_dict_from_list(access_services, 'title',
+                                                                six.text_type(title_objects[0][2]))
+            assert access_service
+
+            # Simple values
+            self._assert_simple_value(g, object[2], DCATAP.availability,
+                                  URIRef(access_service.get('availability')))
+            self._assert_simple_value(g, object[2], DCT.accessRights,
+                                  URIRef(access_service.get('access_rights')))
+            self._assert_simple_value(g, object[2], DCT.license,
+                                  URIRef(access_service.get('license')))
+            self._assert_simple_value(g, object[2], DCT.title,
+                                  Literal(access_service.get('title')))
+            self._assert_simple_value(g, object[2], DCT.description,
+                                  Literal(access_service.get('description')))
+            self._assert_simple_value(g, object[2], DCAT.endpointDescription,
+                                  Literal(access_service.get('endpoint_description')))
+
+            # Lists
+            self._assert_values_list(g, object[2], DCAT.endpointURL,
+                               self._get_typed_list(access_service.get('endpoint_url'), URIRef))
+            self._assert_values_list(g, object[2], DCAT.servesDataset,
+                               self._get_typed_list(access_service.get('serves_dataset'), URIRef))
+
     def test_distribution_fields_literal(self):
 
         resource = {
@@ -349,6 +405,24 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'availability': 'EXPERIMENTAL',
             'compress_format': 'gzip',
             'package_format': 'TAR',
+            'access_services': json.dumps([
+                {
+                    'availability': 'AVAILABLE',
+                    'title': 'Sparql-end Point 1',
+                    'license': 'COM_REUSE',
+                    'access_rights': 'PUBLIC',
+                    'endpoint_url': ['sparql'],
+                    'serves_dataset': ['eu-whoiswho-the-official-directory-of-the-european-union']
+                },
+                {
+                    'availability': 'EXPERIMENTAL',
+                    'title': 'Sparql-end Point 2',
+                    'license': 'CC_BY',
+                    'access_rights': 'OP_DATPRO',
+                    'endpoint_url': ['sparql'],
+                    'serves_dataset': ['eu-whoiswho-the-official-directory-of-the-european-union']
+                }
+            ])
         }
 
         dataset = {
@@ -373,3 +447,83 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCATAP.availability, Literal(resource['availability']))
         assert self._triple(g, distribution, DCAT.compressFormat, Literal(resource['compress_format']))
         assert self._triple(g, distribution, DCAT.packageFormat, Literal(resource['package_format']))
+
+        # Access services
+        object_list = self._triples(g, distribution, DCAT.accessService, None)
+
+        assert len(object_list) == 2
+        access_services = json.loads(resource['access_services'])
+
+        for object in object_list:
+            title_objects = self._triples(g, object[2], DCT.title, None)
+            assert len(title_objects) == 1
+            access_service = self._get_dict_from_list(access_services, 'title',
+                                                                six.text_type(title_objects[0][2]))
+            assert access_service
+
+            # Simple values
+            self._assert_simple_value(g, object[2], DCATAP.availability,
+                                  Literal(access_service.get('availability')))
+            self._assert_simple_value(g, object[2], DCT.accessRights,
+                                  Literal(access_service.get('access_rights')))
+            self._assert_simple_value(g, object[2], DCT.license,
+                                  Literal(access_service.get('license')))
+            self._assert_simple_value(g, object[2], DCT.title,
+                                  Literal(access_service.get('title')))
+
+            # Lists
+            self._assert_values_list(g, object[2], DCAT.endpointURL,
+                               self._get_typed_list(access_service.get('endpoint_url'), Literal))
+            self._assert_values_list(g, object[2], DCAT.servesDataset,
+                               self._get_typed_list(access_service.get('serves_dataset'), Literal))
+
+    def test_access_service_fields_invalid_json(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name'
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        access_service_list = "Invalid Json"
+
+        dataset['resources'][0]['access_services'] = access_service_list
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+
+        object_list = [t for t in g.triples((distribution, DCAT.accessService, None))]
+        assert len(object_list) == 0
+
+    def _assert_simple_value(self, graph, object, predicate, value):
+        """
+        Checks if a triple with the given value is present in the graph
+        """
+        triples = self._triples(graph, object, predicate, None)
+        assert len(triples) == 1
+        assert triples[0][2] == value
+
+    def _assert_values_list(self, graph, object, predicate, values):
+        """
+        Checks if triples with the given values are present in the graph
+        """
+        triples = self._triples(graph, object, predicate, None)
+        assert len(triples) == len(values)
+        for triple in triples:
+            assert triple[2] in values
