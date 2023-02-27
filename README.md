@@ -282,7 +282,25 @@ When serializing, your Catalog will expose the harvested Catalog using the `dct:
         - `dcat:dataset` (dataset in the harvested catalog)
   - `dct:hasPart` 
      - `dcat:Catalog` (info of one of another harvester catalog)
-     ...   
+     ...
+
+
+#### Simulating RDF subcatalogs
+
+In case you are harvesting from a non-DCAT CKAN catalog, and you want to expose its datasets along with the source catalog info, you may want to associate the catalog info automatically.
+
+Since the catalog info are stored as extras, all you need to do is to add some `default_extras` to the harvested datasets. You need to add these entries to the CKAN harvester configuration:
+
+e.g.:
+```
+"default_extras": {
+   "source_catalog_title": "OpenData Alto Adige",
+   "source_catalog_description": "Catalogo OpenData dell'Alto Adige",
+   "source_catalog_homepage": "http://your_server/home",
+   "source_catalog_language": "ITA",
+   "source_catalog_modified": "2017-01-01T00:00:00",
+},
+```
 
 
 ### Extending the RDF harvester
