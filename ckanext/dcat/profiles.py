@@ -1241,7 +1241,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         # Tags
         tags = toolkit.h.get_translated(dataset_dict, 'tags')
         for tag in tags:
-            g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
+            g.add((dataset_ref, DCAT.keyword, Literal(tag)))
 
         # Dates
         items = [
