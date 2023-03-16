@@ -103,7 +103,12 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
 
     # IPackageController
 
+    # CKAN < 2.10 hooks
     def after_show(self, context, data_dict):
+        return self.after_dataset_show(context, data_dict)
+
+    # CKAN >= 2.10 hooks
+    def after_dataset_show(self, context, data_dict):
 
         # check if config is enabled to translate keys (default: True)
         if not p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG, True)):
