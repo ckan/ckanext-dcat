@@ -3,6 +3,8 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...HEAD)
 
+* Update hooks to support CKAN 2.10 (#241)
+
 ## [v1.4.0](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...v1.4.0) - 2022-12-05
 
 * RDF serialization: Add fallback values for resource dates (#233)
