@@ -125,7 +125,7 @@ RDF representations will be advertised using `<link rel="alternate">` tags on th
     <head>
 
         <link rel="alternate" type="application/rdf+xml" href="http://demo.ckan.org/dataset/34315559-2b08-44eb-a2e6-ebe9ce1a266b.rdf"/>
-        <link rel="alternate" type="text/ttl" href="http://demo.ckan.org/dataset/34315559-2b08-44eb-a2e6-ebe9ce1a266b.ttl"/>
+        <link rel="alternate" type="text/turtle" href="http://demo.ckan.org/dataset/34315559-2b08-44eb-a2e6-ebe9ce1a266b.ttl"/>
         <!-- ... -->
 
     </head>
@@ -167,7 +167,7 @@ RDF representations will be advertised using `<link rel="alternate">` tags on th
 
         <link rel="alternate" type="application/rdf+xml" href="http://demo.ckan.org/catalog.rdf"/>
         <link rel="alternate" type="application/rdf+xml" href="http://demo.ckan.org/catalog.xml"/>
-        <link rel="alternate" type="text/ttl" href="http://demo.ckan.org/catalog.ttl"/>
+        <link rel="alternate" type="text/turtle" href="http://demo.ckan.org/catalog.ttl"/>
         <!-- ... -->
 
     </head>
