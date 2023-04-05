@@ -11,12 +11,12 @@ import pytest
 from ckan import plugins as p
 
 from rdflib import Graph
-from ckantoolkit import url_for as core_url_for
 from ckantoolkit.tests import factories
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
+from ckanext.dcat.urls import url_for
 
 
 def _sort_query_params(url):
@@ -47,6 +47,7 @@ def url_for(*args, **kwargs):
             return core_url_for(controller='package', action='new', **kwargs)
         elif len(args) and args[0] == 'dataset.read':
             return core_url_for(controller='package', action='read', **kwargs)
+
 
     return core_url_for(*args, **kwargs)
 
@@ -324,12 +325,12 @@ class TestEndpoints():
 
     def test_catalog_q_search(self, app):
 
-        dataset1 = factories.Dataset(title='First dataset')
-        factories.Dataset(title='Second dataset')
+        dataset1 = factories.Dataset(title=u'Fïrst dataset')
+        dataset2 = factories.Dataset(title='Second dataset')
 
         url = url_for('dcat.read_catalog',
                       _format='ttl',
-                      q='First')
+                      q=u'Fïrst')
 
         response = app.get(url)
         content = response.body

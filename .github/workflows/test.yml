@@ -4,10 +4,16 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
         with:
+<<<<<<< HEAD
           python-version: '3.8'
+||||||| merged common ancestors
+          python-version: '3.6'
+=======
+          python-version: '3.7'
+>>>>>>> upstream/master
       - name: Install requirements
         run: pip install flake8 pycodestyle
       - name: Check syntax
@@ -17,7 +23,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        ckan-version: [2.9, 2.9-py2, 2.8, 2.7]
+        ckan-version: ["2.10", 2.9, 2.9-py2, 2.8, 2.7]
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
@@ -26,7 +32,7 @@ jobs:
       image: openknowledge/ckan-dev:${{ matrix.ckan-version }}
     services:
       solr:
-        image: ckan/ckan-solr-dev:${{ matrix.ckan-version }}
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}
       postgres:
         image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:
@@ -44,9 +50,18 @@ jobs:
       CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
+<<<<<<< HEAD
     - uses: actions/checkout@v2
     - name: Install requirements (Python 3)
       if: ${{ matrix.ckan-version != '2.7' && matrix.ckan-version != '2.8' && matrix.ckan-version != '2.9-py2'}}
+||||||| merged common ancestors
+    - uses: actions/checkout@v2
+    - name: Install requirements
+=======
+    - uses: actions/checkout@v3
+    - name: Install requirements (Python 3)
+      if: ${{ matrix.ckan-version != '2.7' && matrix.ckan-version != '2.8' && matrix.ckan-version != '2.9-py2'}}
+>>>>>>> upstream/master
       run: |
         pip install -r requirements.txt
         pip install -r dev-requirements.txt

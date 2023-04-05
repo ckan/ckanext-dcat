@@ -236,7 +236,7 @@ class TestBaseRDFProfile(object):
         assert isinstance(value, list)
         assert isinstance(value[0], string_types)
         assert len(value) == 2
-        assert sorted(value), ['moon' == 'space']
+        assert sorted(value) == ['moon', 'space']
 
     def test_object_list_not_found(self):
 
@@ -278,7 +278,7 @@ class TestBaseRDFProfile(object):
         assert start == '1905-03-01'
         assert end == '2013-01-05'
 
-    def test_time_interval_w3c_time(self):
+    def test_time_interval_w3c_time_inXSDDateTime(self):
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
@@ -312,6 +312,323 @@ class TestBaseRDFProfile(object):
         p = RDFProfile(g)
 
         start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
+
+        assert start == '1904-01-01'
+        assert end == '2014-03-22'
+
+    def test_time_interval_w3c_time_inXSDDateTimeStamp(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+          <dct:temporal>
+            <dct:PeriodOfTime>
+              <time:hasBeginning>
+                <time:Instant>
+                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTimeStamp>
+                </time:Instant>
+              </time:hasBeginning>
+              <time:hasEnd>
+                <time:Instant>
+                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-22</time:inXSDDateTimeStamp>
+                </time:Instant>
+              </time:hasEnd>
+            </dct:PeriodOfTime>
+          </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
+
+        assert start == '1904-01-01'
+        assert end == '2014-03-22'
+
+    def test_time_interval_w3c_time_inXSDDate(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+          <dct:temporal>
+            <dct:PeriodOfTime>
+              <time:hasBeginning>
+                <time:Instant>
+                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDate>
+                </time:Instant>
+              </time:hasBeginning>
+              <time:hasEnd>
+                <time:Instant>
+                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-22</time:inXSDDate>
+                </time:Instant>
+              </time:hasEnd>
+            </dct:PeriodOfTime>
+          </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
+
+        assert start == '1904-01-01'
+        assert end == '2014-03-22'
+
+    def test_time_interval_multiple_w3c_time(self):
+        """
+        Test priority for W3C Time. Order of priority: 1. XSDDateTimeStamp 2. XSDDateTime 3. XSDDate
+        """
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+          <dct:temporal>
+            <dct:PeriodOfTime>
+              <time:hasBeginning>
+                <time:Instant>
+                  <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2005</time:inXSDDateTime>
+                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTimeStamp>
+                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1974</time:inXSDDate>
+                </time:Instant>
+              </time:hasBeginning>
+              <time:hasEnd>
+                <time:Instant>
+                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-05-29</time:inXSDDate>
+                  <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2004-08-22</time:inXSDDateTime>
+                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-22</time:inXSDDateTimeStamp>
+                </time:Instant>
+              </time:hasEnd>
+            </dct:PeriodOfTime>
+          </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
+
+        assert start == '1904-01-01'
+        assert end == '2014-03-22'
+
+    def test_time_interval_dcat(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1905-03-01</dcat:startDate>
+                    <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-01-05</dcat:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal, dcat_ap_version=2)
+
+        assert start == '1905-03-01'
+        assert end == '2013-01-05'
+
+    def test_time_interval_all_dcat_ap_2_dcat_found(self):
+        """
+        DCAT-AP 2
+
+        Tests that DCAT dates have priority when W3C Time and schema.org are provided as well.
+        """
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                  <time:hasBeginning>
+                    <time:Instant>
+                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                    </time:Instant>
+                  </time:hasBeginning>
+                  <time:hasEnd>
+                    <time:Instant>
+                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-22</time:inXSDDateTime>
+                    </time:Instant>
+                  </time:hasEnd>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1905-03-01</dcat:startDate>
+                    <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-01-05</dcat:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1970-05-31</schema:startDate>
+                    <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2021-08-05</schema:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal, dcat_ap_version=2)
+
+        assert start == '1905-03-01'
+        assert end == '2013-01-05'
+
+    def test_time_interval_all_dcat_ap_1_schema_org_found(self):
+        """
+        DCAT-AP 1
+
+        Tests that schema.org has priority when W3C Time is provided as well, and DCAT dates are ignored.
+        """
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                  <time:hasBeginning>
+                    <time:Instant>
+                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                    </time:Instant>
+                  </time:hasBeginning>
+                  <time:hasEnd>
+                    <time:Instant>
+                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-22</time:inXSDDateTime>
+                    </time:Instant>
+                  </time:hasEnd>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1905-03-01</dcat:startDate>
+                    <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-01-05</dcat:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1970-05-31</schema:startDate>
+                    <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2021-08-05</schema:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
+
+        assert start == '1970-05-31'
+        assert end == '2021-08-05'
+
+    def test_time_interval_all_dcat_ap_2_w3c_time_found(self):
+        """
+        DCAT-AP 2
+
+        Tests that W3C Time has priority when schema.org is provided as well
+        and DCAT dates are not available.
+        """
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <rdfs:SomeClass rdf:about="http://example.org">
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1970-05-31</schema:startDate>
+                    <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2021-08-05</schema:endDate>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+            <dct:temporal>
+                <dct:PeriodOfTime>
+                    <time:hasBeginning>
+                        <time:Instant>
+                        <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                        </time:Instant>
+                    </time:hasBeginning>
+                    <time:hasEnd>
+                        <time:Instant>
+                        <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-03-22</time:inXSDDateTime>
+                        </time:Instant>
+                    </time:hasEnd>
+                </dct:PeriodOfTime>
+            </dct:temporal>
+        </rdfs:SomeClass>
+        </rdf:RDF>
+        '''
+
+        g = Graph()
+
+        g.parse(format='xml', data=data)
+
+        p = RDFProfile(g)
+
+        start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal, dcat_ap_version=2)
 
         assert start == '1904-01-01'
         assert end == '2014-03-22'

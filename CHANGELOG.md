@@ -1,7 +1,51 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.1.1...HEAD)
 
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...HEAD)
+
+## [v1.4.0](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...v1.4.0) - 2022-12-05
+
+* RDF serialization: Add fallback values for resource dates (#233)
+* Add option for fallback distribution license if missing (#231)
+
+## [v1.3.0](https://github.com/ckan/ckanext-dcat/compare/v1.2.0...v1.3.0) - 2022-08-01
+
+* Fix assert expressions in tests (#218)
+* Fix unicode encoding error on Python 2 (#225)
+* Support (partial, not complete) for DCAT-AP 2.1 (#220)
+
+#### Changed default profile
+With #220 the default profile has changed from `euro_dcat_ap` to `euro_dcat_ap_2`. The following properties are additionally supported by default:
+* dcat:Dataset
+  * dcat:bbox und dcat:centroid (in dct:Location of dct:spatial)
+  * dcat:startDate, dcat:endDate, time:hasBeginning, time:hasEnd (in dct:PeriodOfTime of dct:temporal)
+  * dcat:spatialResolutionInMeters
+  * dcat:temporalResolution
+  * dct:isReferencedBy
+* dcat:Distribution
+  * dcatap:availability
+  * dcat:compressFormat
+  * dcat:packageFormat
+
+How the default profile can be changed is described in the Documentation under [profiles](https://github.com/ckan/ckanext-dcat/#profiles).
+
+## [v1.2.0](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...v1.2.0) - 2022-05-25
+
+* Support for CKAN 2.10 and Python 3.9 (#208)
+* Upgrade RDFLib version (#213)
+* Support URIs in more fields of the default profile (#214)
+* Make HTTP-Response size configurable (#215)
+* Increase harvester get content chunk size (#217)
+
+## [v1.1.3](https://github.com/ckan/ckanext-dcat/compare/v1.1.3...v1.1.2) - 2021-11-05
+
+* Fix behavior if `publisher_uri` is not available (#201)
+* Also process URIRef in rights statements (#200)
+
+## [v1.1.2](https://github.com/ckan/ckanext-dcat/compare/v1.1.2...v1.1.1) - 2021-06-22
+
+* Use safer encoder for Structured Data output (#198)
+* Fix: use catalog_uri logic for pagination URIs (#197)
 * Introduce new interface method `after_parsing` (#196)
 
 ## [v1.1.1](https://github.com/ckan/ckanext-dcat/compare/v1.1.0...v1.1.1) - 2021-03-17

@@ -28,8 +28,7 @@ RDF_PROFILES_ENTRY_POINT_GROUP = 'ckan.rdf.profiles'
 RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
 COMPAT_MODE_CONFIG_OPTION = 'ckanext.dcat.compatibility_mode'
 
-DEFAULT_RDF_PROFILES = ['euro_dcat_ap']
-
+DEFAULT_RDF_PROFILES = ['euro_dcat_ap_2']
 
 class RDFProcessor(object):
 
@@ -418,7 +417,7 @@ Operation mode.
                         help='Make the output more human readable')
     parser.add_argument('-p', '--profile', nargs='*',
                         action='store',
-                        help='RDF Profiles to use, defaults to euro_dcat_ap')
+                        help='RDF Profiles to use, defaults to euro_dcat_ap_2')
     parser.add_argument('-m', '--compat-mode',
                         action='store_true',
                         help='Enable compatibility mode')

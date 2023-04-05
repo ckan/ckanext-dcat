@@ -251,18 +251,10 @@ def resource_uri(resource_dict):
     return url_quote(uri)
 
 
-def publisher_uri_from_dataset_dict(dataset_dict):
+def publisher_uri_organization_fallback(dataset_dict):
     '''
-    Returns an URI for a dataset's publisher
-
-    This will be used to uniquely reference the publisher on the RDF
-    serializations.
-
-    The value will be the first found of:
-
-        1. The value of the `publisher_uri` field
-        2. The value of an extra with key `publisher_uri`
-        3. `catalog_uri()` + '/organization/' + `organization id` field
+    Builds a fallback dataset URI of the form
+    `catalog_uri()` + '/organization/' + `organization id` field
 
     Check the documentation for `catalog_uri()` for the recommended ways of
     setting it.
@@ -270,19 +262,11 @@ def publisher_uri_from_dataset_dict(dataset_dict):
     Returns a string with the publisher URI, or None if no URI could be
     generated.
     '''
+    if dataset_dict.get('organization'):
+        return '{0}/organization/{1}'.format(catalog_uri().rstrip('/'),
+                                             dataset_dict['organization']['id'])
 
-    uri = dataset_dict.get('publisher_uri')
-    if not uri:
-        for extra in dataset_dict.get('extras', []):
-            if extra['key'] == 'publisher_uri':
-                uri = extra['value']
-                break
-    if not uri and dataset_dict.get('organization'):
-        uri = '{0}/organization/{1}'.format(catalog_uri().rstrip('/'),
-                                            dataset_dict['organization']['id'])
-
-    return url_quote(uri)
-
+    return None
 
 def dataset_id_from_resource(resource_dict):
     '''

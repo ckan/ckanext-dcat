@@ -1,6 +1,5 @@
 from builtins import str
 from builtins import object
-import os
 import json
 
 import pytest
@@ -14,22 +13,7 @@ from ckanext.dcat.processors import RDFParser, RDFSerializer
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, LOCN, SKOS, GSP, RDFS,
                                    GEOJSON_IMT, VCARD)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
-
-
-class BaseParseTest(object):
-
-    def _extras(self, dataset):
-        extras = {}
-        for extra in dataset.get('extras'):
-            extras[extra['key']] = extra['value']
-        return extras
-
-    def _get_file_contents(self, file_name):
-        path = os.path.join(os.path.dirname(__file__),
-                            '..', '..', '..', 'examples',
-                            file_name)
-        with open(path, 'r') as f:
-            return f.read()
+from ckanext.dcat.tests.utils import BaseParseTest
 
 
 class TestEuroDCATAPProfileParsing(BaseParseTest):
@@ -134,15 +118,15 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert _get_extra_value('dcat_type') == 'test-type'
 
         #  Lists
-        assert sorted(_get_extra_value_as_list('language')), [u'ca', u'en' == u'es']
+        assert sorted(_get_extra_value_as_list('language')) == [u'ca', u'en', u'es']
         assert (sorted(_get_extra_value_as_list('theme')) ==
                 [u'Earth Sciences',
                  u'http://eurovoc.europa.eu/100142',
                  u'http://eurovoc.europa.eu/209065'])
-        assert sorted(_get_extra_value_as_list('conforms_to')), [u'Standard 1' == u'Standard 2']
+        assert sorted(_get_extra_value_as_list('conforms_to')) == [u'Standard 1', u'Standard 2']
 
-        assert sorted(_get_extra_value_as_list('alternate_identifier')), \
-            [u'alternate-identifier-1' == u'alternate-identifier-2']
+        assert (sorted(_get_extra_value_as_list('alternate_identifier')) ==
+                [u'alternate-identifier-1', u'alternate-identifier-2'])
         assert (sorted(_get_extra_value_as_list('documentation')) ==
                 [u'http://dataset.info.org/doc1',
                  u'http://dataset.info.org/doc2'])
@@ -321,7 +305,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         extras = self._extras(dataset)
         assert extras['contact_email'] == 'contact@some.org'
 
-    def test_dataset_access_rights_and_distribution_rights_rights_statement(self):
+    def test_dataset_access_rights_and_distribution_rights_rights_statement_literal(self):
         # license_id retrieved from the URI of dcat:license object
         g = Graph()
 
@@ -351,6 +335,36 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert extras['access_rights'] == 'public dataset'
         resource = dataset['resources'][0]
         assert resource['rights'] == 'public distribution'
+
+    def test_dataset_access_rights_and_distribution_rights_rights_statement_uriref(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.org/datasets/1")
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+
+        # access_rights
+        access_rights = BNode()
+        g.add((access_rights, RDF.type, DCT.RightsStatement))
+        g.add((access_rights, RDFS.label, URIRef("http://example.org/datasets/1/ds/3")))
+        g.add((dataset_ref, DCT.accessRights, access_rights))
+        # rights
+        rights = BNode()
+        g.add((rights, RDF.type, DCT.RightsStatement))
+        g.add((rights, RDFS.label, URIRef("http://example.org/datasets/1/ds/2")))
+        distribution = URIRef("http://example.org/datasets/1/ds/1")
+        g.add((dataset_ref, DCAT.distribution, distribution))
+        g.add((distribution, RDF.type, DCAT.Distribution))
+        g.add((distribution, DCT.rights, rights))
+
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        dataset = [d for d in p.datasets()][0]
+        extras = self._extras(dataset)
+        assert extras['access_rights'] == 'http://example.org/datasets/1/ds/3'
+        resource = dataset['resources'][0]
+        assert resource['rights'] == 'http://example.org/datasets/1/ds/2'
 
     def test_distribution_access_url(self):
         g = Graph()
@@ -893,6 +907,56 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
             # check if we had subcatalog in extras
             assert has_subcat
 
+    def test_tags_with_commas(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal('Tree, forest, shrub')))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets[0]['tags']) == 3
+
+    INVALID_TAG = "Som`E-in.valid tag!;"
+    VALID_TAG = {'name': 'some-invalid-tag'}
+
+    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'true')
+    def test_tags_with_commas_clean_tags_on(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert self.VALID_TAG in datasets[0]['tags']
+        assert self.INVALID_TAG not in datasets[0]['tags']
+
+    @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
+    def test_tags_with_commas_clean_tags_off(self):
+        g = Graph()
+
+        dataset = URIRef('http://example.org/datasets/1')
+        g.add((dataset, RDF.type, DCAT.Dataset))
+        g.add((dataset, DCAT.keyword, Literal(self.INVALID_TAG)))
+        p = RDFParser(profiles=['euro_dcat_ap'])
+
+        p.g = g
+
+        # when config flag is set to false, bad tags can happen
+
+        datasets = [d for d in p.datasets()]
+        assert self.VALID_TAG not in datasets[0]['tags']
+        assert {'name': self.INVALID_TAG} in datasets[0]['tags']
+
 
 class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
@@ -927,7 +991,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_one_dct_spatial_instance(self):
         g = Graph()
@@ -954,7 +1018,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert extras['spatial_uri'] == 'http://geonames/Newark'
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_one_dct_spatial_instance_no_uri(self):
         g = Graph()
@@ -981,7 +1045,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert 'spatial_uri' not in extras
         assert extras['spatial_text'] == 'Newark'
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_rdfs_label(self):
         g = Graph()
@@ -1030,7 +1094,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        assert extras['spatial'], '{"type": "Point", "coordinates": [23 == 45]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [23, 45]}'
 
     def test_spatial_wkt_only(self):
         g = Graph()
@@ -1054,7 +1118,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         extras = self._extras(datasets[0])
         # NOTE: geomet returns floats for coordinates on WKT -> GeoJSON
-        assert extras['spatial'], '{"type": "Point", "coordinates": [67.0 == 89.0]}'
+        assert extras['spatial'] == '{"type": "Point", "coordinates": [67.0, 89.0]}'
 
     def test_spatial_wrong_geometries(self):
         g = Graph()
@@ -1155,6 +1219,7 @@ class TestEuroDCATAPProfileParsingSpatial(BaseParseTest):
 
         assert self.VALID_TAG in datasets[0]['tags']
         assert self.INVALID_TAG not in datasets[0]['tags']
+
 
     @pytest.mark.ckan_config(DCAT_CLEAN_TAGS, 'false')
     def test_tags_with_commas_clean_tags_off(self):
