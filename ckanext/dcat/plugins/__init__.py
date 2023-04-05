@@ -181,10 +181,16 @@ def update_dataset_job(pkg_dict):
 
 
 class SPARQLPlugin(MixinSPARQLPlugin, p.SingletonPlugin):
+    p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IConfigurable, inherit=True)
     p.implements(p.IPackageController, inherit=True)
     p.implements(p.IActions)
     p.implements(p.IAuthFunctions, inherit=True)
+
+    # IConfigurer
+
+    def update_config(self, config):
+        p.toolkit.add_template_directory(config, '../templates-sparql')
 
     # IConfigurable
 
