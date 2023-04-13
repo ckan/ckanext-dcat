@@ -1,13 +1,5 @@
 from past.builtins import basestring
-from ckan.plugins.toolkit import (
-    h,
-    get_action,
-    g,
-    abort,
-    _
-)
-from ckan import model
-from ckan.logic import NotFound
+from ckan.plugins.toolkit import h
 import logging
 
 log = logging.getLogger(__name__)
@@ -104,16 +96,9 @@ def ckan_to_dcat(package_dict):
 
     dcat_dict['distribution'] = []
     for resource in package_dict.get('resources', []):
-        context = {u'model': model, u'session': model.Session,
-                   u'user': g.user, u'auth_user_obj': g.userobj}
-        try:
-            res_dict = get_action(u'resource_show')(context, {'id': resource.get('id')})
-        except NotFound:
-            abort(404, _('Resource %s does not exist.' % resource.get('id')))
-
         distribution = {
-            'title': h.get_translated(res_dict, 'name'),
-            'description': h.get_translated(res_dict, 'description'),
+            'title': h.get_translated(resource, 'name'),
+            'description': h.get_translated(resource, 'description'),
             'format': resource.get('format'),
             'byteSize': resource.get('size'),
             # TODO: downloadURL or accessURL depending on resource type?
