@@ -19,8 +19,6 @@ from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
-from ckan import model
-from ckan.logic import NotFound
 from ckan.lib.munge import munge_tag
 from ckanext.dcat.urls import url_for
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
@@ -159,7 +157,7 @@ class RDFProfile(object):
         '''
         Returns all DCAT keywords on a particular dataset
         '''
-        keywords = toolkit.h.get_translated(dataset_ref, 'tags')
+        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
         # Split keywords with commas
         keywords_with_commas = [k for k in keywords if ',' in k]
         for keyword in keywords_with_commas:
@@ -993,20 +991,14 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         for key, predicate in (
+                ('title', DCT.title),
+                ('notes', DCT.description),
+                ('url', DCAT.landingPage),
                 ('version', OWL.versionInfo),
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = value
-
-        # Fluent URL workaround
-        url = url_for(dataset_dict.get('type', 'dataset') \
-                      + '.read', id=dataset_dict.get('id'), _external=True)
-        dataset_dict['url'] = url
-
-        # translation workaround
-        dataset_dict['title'] = toolkit.h.get_translated(dataset_dict, 'title')
-        dataset_dict['notes'] = toolkit.h.get_translated(dataset_dict, 'notes')
 
         if not dataset_dict.get('version'):
             # adms:version was supported on the first version of the DCAT-AP
@@ -1217,6 +1209,9 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         items = [
+            ('title', DCT.title, None, Literal),
+            ('notes', DCT.description, None, Literal),
+            ('url', DCAT.landingPage, None, URIRef),
             ('identifier', DCT.identifier, ['guid', 'id'], URIRefOrLiteral),
             ('version', OWL.versionInfo, ['dcat_version'], Literal),
             ('version_notes', ADMS.versionNotes, None, Literal),
@@ -1227,21 +1222,9 @@ class EuropeanDCATAPProfile(RDFProfile):
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        # Fluent URL workaround
-        url = url_for(dataset_dict.get('type', 'dataset') \
-                      + '.read', id=dataset_dict.get('id'), _external=True)
-        g.add((dataset_ref, DCAT.landingPage, URIRef(url)))
-
-        # translation workaround
-        title = toolkit.h.get_translated(dataset_dict, 'title')
-        notes = toolkit.h.get_translated(dataset_dict, 'notes')
-        g.add((dataset_ref, DCT.title, Literal(title)))
-        g.add((dataset_ref, DCT.description, Literal(notes)))
-
         # Tags
-        tags = toolkit.h.get_translated(dataset_dict, 'tags')
-        for tag in tags:
-            g.add((dataset_ref, DCAT.keyword, Literal(tag)))
+        for tag in dataset_dict.get('tags', []):
+            g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
 
         # Dates
         items = [
@@ -1303,16 +1286,10 @@ class EuropeanDCATAPProfile(RDFProfile):
             self._get_dataset_value(dataset_dict, 'publisher_name'),
             dataset_dict.get('organization'),
         ]):
-            context = {u'model': model, u'session': model.Session,
-                        u'user': toolkit.g.user, u'auth_user_obj': toolkit.g.userobj}
-            try:
-                org_dict = toolkit.get_action(u'organization_show')(context, {u'id': dataset_dict['organization']['id']})
-            except NotFound:
-                toolkit.abort(404, toolkit._('Organization not found'))
 
-            publisher_uri = toolkit.h.url_for('organization.read', id=org_dict.get('id'))
+            publisher_uri = self._get_dataset_value(dataset_dict, 'publisher_uri')
             publisher_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
-            publisher_name = toolkit.h.get_translated(org_dict, 'title')
+            publisher_name = self._get_dataset_value(dataset_dict, 'publisher_name')
             if publisher_uri:
                 publisher_details = CleanedURIRef(publisher_uri)
             elif not publisher_name and publisher_uri_fallback:
@@ -1389,6 +1366,8 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             #  Simple values
             items = [
+                ('name', DCT.title, None, Literal),
+                ('description', DCT.description, None, Literal),
                 ('status', ADMS.status, None, URIRefOrLiteral),
                 ('rights', DCT.rights, None, URIRefOrLiteral),
                 ('license', DCT.license, None, URIRefOrLiteral),
@@ -1397,19 +1376,6 @@ class EuropeanDCATAPProfile(RDFProfile):
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
-
-            # translation workaround
-            context = {u'model': model, u'session': model.Session,
-                       u'user': toolkit.g.user, u'auth_user_obj': toolkit.g.userobj}
-            try:
-                res_dict = toolkit.get_action(u'resource_show')(context, {'id': resource_dict.get('id')})
-            except NotFound:
-                toolkit.abort(404, toolkit._('Resource %s does not exist.' % resource_dict.get('id')))
-
-            name = toolkit.h.get_translated(res_dict, 'name')
-            description = toolkit.h.get_translated(res_dict, 'description') or ''
-            g.add((distribution, DCT.title, Literal(name)))
-            g.add((distribution, DCT.description, Literal(description)))
 
             #  Lists
             items = [
