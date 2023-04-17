@@ -1,5 +1,6 @@
 from past.builtins import basestring
 from ckan.plugins.toolkit import h
+from ckan.plugins import plugin_loaded
 import logging
 
 log = logging.getLogger(__name__)
@@ -59,16 +60,23 @@ def ckan_to_dcat(package_dict):
 
     dcat_dict = {}
 
-    dcat_dict['title'] = h.get_translated(package_dict, 'title')
-    dcat_dict['description'] = h.get_translated(package_dict, 'notes')
-    dcat_dict['landingPage'] = h.url_for(package_dict.get('type', 'dataset') \
-                                         + '.read', id=package_dict.get('id'))
+    dcat_dict['title'] = package_dict.get('title')
+    dcat_dict['description'] = package_dict.get('notes')
+    dcat_dict['landingPage'] = package_dict.get('url')
 
 
     dcat_dict['keyword'] = []
-    tags = h.get_translated(package_dict, 'tags')
-    for tag in tags:
+    for tag in package_dict.get('tags', []):
         dcat_dict['keyword'].append(tag['name'])
+
+
+    # Fluent compatibility
+    if plugin_loaded('fluent'):
+        dcat_dict['title'] = h.get_translated(package_dict, 'title')
+        dcat_dict['description'] = h.get_translated(package_dict, 'notes')
+        tags = h.get_translated(package_dict, 'tags')
+        for tag in tags:
+            dcat_dict['keyword'].append(tag['name'])
 
 
     dcat_dict['publisher'] = {}
@@ -97,13 +105,17 @@ def ckan_to_dcat(package_dict):
     dcat_dict['distribution'] = []
     for resource in package_dict.get('resources', []):
         distribution = {
-            'title': h.get_translated(resource, 'name'),
-            'description': h.get_translated(resource, 'description'),
+            'title': resource.get('name'),
+            'description': resource.get('description'),
             'format': resource.get('format'),
             'byteSize': resource.get('size'),
             # TODO: downloadURL or accessURL depending on resource type?
             'accessURL': resource.get('url'),
         }
+        # Fluent compatibility
+        if plugin_loaded('fluent'):
+            distribution['title'] = h.get_translated(resource, 'name')
+            distribution['description'] = h.get_translated(resource, 'description')
         dcat_dict['distribution'].append(distribution)
 
     return dcat_dict
