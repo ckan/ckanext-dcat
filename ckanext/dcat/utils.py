@@ -160,8 +160,6 @@ def catalog_uri():
     '''
 
     uri = config.get('ckanext.dcat.base_uri')
-    if uri and plugin_loaded('fluent') and has_request_context():
-        uri = re.sub('{{LANG}}', str(toolkit.h.lang()), uri)
     if not uri:
         uri = config.get('ckan.site_url')
     if not uri:
@@ -175,6 +173,9 @@ def catalog_uri():
             log.critical('Using a random id as catalog URI, you should set ' +
                          'the `ckanext.dcat.base_uri` or `ckan.site_url` ' +
                          'option')
+
+    if uri and plugin_loaded('fluent') and has_request_context():
+        uri = re.sub('{{LANG}}', str(toolkit.h.lang()), uri)
 
     return uri
 
