@@ -65,6 +65,31 @@ def dcat_catalog_show(context, data_dict):
     dataset_dicts = query['results']
     pagination_info = _pagination_info(query, data_dict)
 
+    # Fluent compatibility
+    if plugin_loaded('fluent'):
+        for dataset_dict in dataset_dicts:
+            # basic dataset fields
+            dataset_dict['title'] = toolkit.h.get_translated(dataset_dict, 'title')
+            dataset_dict['notes'] = toolkit.h.get_translated(dataset_dict, 'notes')
+            dataset_dict['tags'] = toolkit.h.get_translated(dataset_dict, 'tags')
+
+            # dataset resources
+            for resource in dataset_dict.get('resources', []):
+                resource['name'] = toolkit.h.get_translated(resource, 'name')
+                resource['description'] = toolkit.h.get_translated(resource, 'description')
+
+            # dataset organization
+            if 'organization' in dataset_dict \
+            and 'id' in dataset_dict['organization']:
+                try:
+                    org_dict = toolkit.get_action(u'organization_show')(
+                                {u'user': toolkit.g.user},
+                                {u'id': dataset_dict['organization']['id']})
+                except toolkit.ObjectNotFound:
+                    toolkit.abort(404, toolkit._('Organization not found'))
+                dataset_dict['organization']['title'] = toolkit.h.get_translated(org_dict, 'title')
+                dataset_dict['organization']['notes'] = toolkit.h.get_translated(org_dict, 'notes')
+
     serializer = RDFSerializer(profiles=data_dict.get('profiles'))
 
     output = serializer.serialize_catalog({}, dataset_dicts,
