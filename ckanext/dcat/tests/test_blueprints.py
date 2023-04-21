@@ -508,12 +508,10 @@ class TestAcceptHeader():
         assert response.headers['Content-Type'] == 'text/html; charset=utf-8'
 
 
+@pytest.mark.skipif(p.toolkit.check_ckan_version(max_version='2.4.99'),
+                    reason='ITranslations not available on CKAN < 2.5')
 @pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index')
 class TestTranslations():
-
-    def __init__(self):
-        if p.toolkit.check_ckan_version(max_version='2.4.99'):
-            pytest.skip('ITranslations not available on CKAN < 2.5')
 
     def test_labels_default(self, app):
 
