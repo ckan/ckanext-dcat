@@ -1,4 +1,0 @@
-responses==0.10.15
-mock
-pytest-ckan
-pytest-cov

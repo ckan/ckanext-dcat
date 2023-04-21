@@ -78,10 +78,6 @@ These are implemented internally using:
 
         (pyenv) $ pip install -r ckanext-dcat/requirements.txt
 
-    > **Note**
-    >
-    > If you are running on Python 2.7 or 3.6 please use `requirements-py2-py36.txt` instead
-
 4.  Enable the required plugins in your ini file:
 
         ckan.plugins = dcat dcat_rdf_harvester dcat_json_harvester dcat_json_interface structured_data

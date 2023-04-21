@@ -1,1 +1,0 @@
-requirements-py2.txt

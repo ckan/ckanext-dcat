@@ -45,9 +45,6 @@ setup(
     euro_dcat_ap_2=ckanext.dcat.profiles:EuropeanDCATAP2Profile
     schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
-    [paste.paster_command]
-    generate_static = ckanext.dcat.commands:GenerateStaticDCATCommand
-
     [babel.extractors]
     ckan = ckan.lib.extract:extract_ckan
     ''',

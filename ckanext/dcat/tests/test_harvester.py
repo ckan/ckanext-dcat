@@ -6,7 +6,6 @@ from builtins import object
 from collections import defaultdict
 import re
 
-import six
 import pytest
 import responses
 try:
@@ -700,7 +699,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         # this as well
         responses.add(responses.HEAD, self.ttl_mock_url,
                                status=200, content_type=self.ttl_content_type,
-                               adding_headers = {'content-length': six.text_type(actual_file_size)})
+                               adding_headers = {'content-length': str(actual_file_size)})
 
         harvest_source = self._create_harvest_source(self.ttl_mock_url)
         # Create new job for the source
@@ -729,7 +728,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
         # this as well  , content_length=file_size
         responses.add(responses.HEAD, self.ttl_mock_url,
                                status=200, content_type=self.ttl_content_type,
-                               adding_headers = {'content-length': six.text_type(actual_file_size)})
+                               adding_headers = {'content-length': str(actual_file_size)})
 
         harvest_source = self._create_harvest_source(self.ttl_mock_url)
         # Create new job for the source

@@ -499,11 +499,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         datasets = [d for d in p.datasets()]
 
         resource = datasets[0]['resources'][0]
-        if toolkit.check_ckan_version(min_version='2.3'):
-            assert resource['format'] == u'CSV'
-            assert resource['mimetype'] == u'text/csv'
-        else:
-            assert resource['format'] == u'text/csv'
+        assert resource['format'] == u'CSV'
+        assert resource['mimetype'] == u'text/csv'
 
     @pytest.mark.ckan_config('ckanext.dcat.normalize_ckan_format', False)
     def test_distribution_format_imt_only_normalize_false(self):
@@ -638,11 +635,8 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
 
         resource = datasets[0]['resources'][0]
 
-        if toolkit.check_ckan_version(min_version='2.3'):
-            assert resource['format'] == u'CSV'
-            assert resource['mimetype'] == u'text/csv'
-        else:
-            assert resource['format'] == u'Comma Separated Values'
+        assert resource['format'] == u'CSV'
+        assert resource['mimetype'] == u'text/csv'
 
     def test_distribution_format_IMT_field(self):
         g = Graph()

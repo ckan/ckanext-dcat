@@ -4,12 +4,12 @@ from builtins import object
 import datetime
 import json
 
-import six
-from six.moves.urllib.parse import quote
+from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 
 from ckantoolkit import config
+from ckantoolkit import url_for
 
 import rdflib
 from rdflib import URIRef, BNode, Literal
@@ -20,7 +20,6 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
-from ckanext.dcat.urls import url_for
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
@@ -560,7 +559,7 @@ class RDFProfile(object):
                 result = self._object_value(obj, RDFS.label)
             elif isinstance(obj, Literal) or isinstance(obj, URIRef):
                 # unicode_safe not include Literal or URIRef
-                result = six.text_type(obj)
+                result = str(obj)
         return result
 
     def _distribution_format(self, distribution, normalize_ckan_format=True):
@@ -588,7 +587,7 @@ class RDFProfile(object):
         2. label of dct:format if it is an instance of dct:IMT (see above)
         3. value of dct:format if it is an URIRef and doesn't look like an IANA type
 
-        If `normalize_ckan_format` is True and using CKAN>=2.3, the label will
+        If `normalize_ckan_format` is True the label will
         be tried to match against the standard list of formats that is included
         with CKAN core
         (https://github.com/ckan/ckan/blob/master/ckan/config/resource_formats.json)
@@ -625,8 +624,7 @@ class RDFProfile(object):
                 else:
                     label = format_uri
 
-        if ((imt or label) and normalize_ckan_format and
-                toolkit.check_ckan_version(min_version='2.3')):
+        if ((imt or label) and normalize_ckan_format):
             import ckan.config
             from ckan.lib import helpers
 

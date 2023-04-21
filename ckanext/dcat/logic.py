@@ -1,7 +1,6 @@
 from __future__ import division
 import math
 
-import six
 from ckantoolkit import config
 from dateutil.parser import parse as dateutil_parse
 
@@ -155,7 +154,7 @@ def _pagination_info(query, data_dict):
             qs = '&'.join(
                 ['{0}={1}'.format(
                     p[0],
-                    p[1].encode('utf8') if six.PY2 else p[1]
+                    p[1]
                     ) for p in params
                 ]
             )

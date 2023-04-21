@@ -3,8 +3,6 @@
 from builtins import object
 import os
 
-import six
-
 from ckantoolkit import config
 
 from ckan import plugins as p
@@ -23,14 +21,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 )
 from ckanext.dcat import utils
 
-if p.toolkit.check_ckan_version('2.9'):
-    from ckanext.dcat.plugins.flask_plugin import (
-        MixinDCATPlugin, MixinDCATJSONInterface
-    )
-else:
-    from ckanext.dcat.plugins.pylons_plugin import (
-        MixinDCATPlugin, MixinDCATJSONInterface
-    )
+from ckanext.dcat.plugins.flask_plugin import MixinDCATPlugin, MixinDCATJSONInterface
 
 
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
@@ -47,8 +38,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
     p.implements(p.IPackageController, inherit=True)
-    if p.toolkit.check_ckan_version(min_version='2.5.0'):
-        p.implements(p.ITranslation, inherit=True)
+    p.implements(p.ITranslation, inherit=True)
 
     # ITranslation
 
@@ -118,7 +108,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
             field_labels = utils.field_labels()
 
             def set_titles(object_dict):
-                for key, value in six.iteritems(object_dict.copy()):
+                for key, value in object_dict.copy().items():
                     if key in field_labels:
                         object_dict[field_labels[key]] = object_dict[key]
                         del object_dict[key]

@@ -2,7 +2,6 @@ from builtins import str
 from builtins import object
 
 import pytest
-from six import string_types
 
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import Namespace
@@ -103,7 +102,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, string_types)
+        assert isinstance(value, str)
         assert value == 'Test Dataset 1'
 
     def test_object_value_not_found(self):
@@ -127,7 +126,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, string_types)
+        assert isinstance(value, str)
         assert value == 'Test Datensatz 1'
 
     @pytest.mark.ckan_config('ckan.locale_default', 'fr')
@@ -140,7 +139,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, string_types)
+        assert isinstance(value, str)
         # FR is not in graph, so either node may be used
         assert value.startswith('Test D')
         assert value.endswith(' 1')
@@ -156,7 +155,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, string_types)
+        assert isinstance(value, str)
         # without config parameter, EN is used as default
         assert value == 'Test Dataset 1 (EN)'
 
@@ -166,7 +165,7 @@ class TestBaseRDFProfile(object):
         value = p._object_value(URIRef('http://example.org/datasets/1'),
                                 DCT.title)
 
-        assert isinstance(value, string_types)
+        assert isinstance(value, str)
         assert value == 'Test Dataset 1'
 
     def test_object_int(self):
@@ -234,7 +233,7 @@ class TestBaseRDFProfile(object):
                                      DCAT.keyword)
 
         assert isinstance(value, list)
-        assert isinstance(value[0], string_types)
+        assert isinstance(value[0], str)
         assert len(value) == 2
         assert sorted(value) == ['moon', 'space']
 
