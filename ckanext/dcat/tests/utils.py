@@ -40,3 +40,14 @@ class BaseSerializeTest(object):
     def _triple(self, graph, subject, predicate, _object, data_type=None):
         triples = self._triples(graph, subject, predicate, _object, data_type)
         return triples[0] if triples else None
+
+    def _get_typed_list(self, list, datatype):
+        """ returns the list with the given rdf type """
+        return [datatype(x) for x in list]
+
+    def _get_dict_from_list(self, dict_list, key, value):
+        """ returns the dict with the given key-value """
+        for dict in dict_list:
+            if(dict.get(key) == value):
+                return dict
+        return None
