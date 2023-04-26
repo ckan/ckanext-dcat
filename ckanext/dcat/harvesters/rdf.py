@@ -18,7 +18,6 @@ from ckanext.harvest.logic.schema import unicode_safe
 from ckanext.dcat.harvesters.base import DCATHarvester
 from ckanext.dcat.processors import RDFParserException, RDFParser
 from ckanext.dcat.interfaces import IDCATRDFHarvester
-from ckan.logic import NotFound
 
 log = logging.getLogger(__name__)
 
@@ -282,7 +281,7 @@ class DCATRDFHarvester(DCATHarvester):
                 p.toolkit.get_action('package_delete')(context, {'id': harvest_object.package_id})
                 log.info('Deleted package {0} with guid {1}'.format(harvest_object.package_id,
                                                                     harvest_object.guid))
-            except NotFound:
+            except p.toolkit.ObjectNotFound:
                 log.info('Package {0} already deleted.'.format(harvest_object.package_id))
             
             return True
