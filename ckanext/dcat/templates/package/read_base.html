@@ -3,7 +3,7 @@
     {{ super() }}
     {% with endpoint=h.dcat_get_endpoint('dataset')  %}
         <link rel="alternate" type="text/n3" href="{{ h.url_for(endpoint, _id=pkg.id, _format='n3', _external=True) }}"/>
-        <link rel="alternate" type="text/ttl" href="{{ h.url_for(endpoint, _id=pkg.id, _format='ttl', _external=True) }}"/>
+        <link rel="alternate" type="text/turtle" href="{{ h.url_for(endpoint, _id=pkg.id, _format='ttl', _external=True) }}"/>
         <link rel="alternate" type="application/rdf+xml" href="{{ h.url_for(endpoint, _id=pkg.id, _format='xml', _external=True) }}"/>
         <link rel="alternate" type="application/ld+json" href="{{ h.url_for(endpoint, _id=pkg.id, _format='jsonld', _external=True) }}"/>
     {% endwith %}
