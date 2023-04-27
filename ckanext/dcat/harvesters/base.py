@@ -1,7 +1,6 @@
 import os
 import logging
 
-import six
 import requests
 import rdflib
 
@@ -86,7 +85,7 @@ class DCATHarvester(HarvesterBase):
                 r = session.get(url, stream=True)
 
             length = 0
-            content = '' if six.PY2 else b''
+            content = b''
             for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
                 content = content + chunk
 
@@ -97,8 +96,7 @@ class DCATHarvester(HarvesterBase):
                                             harvest_job)
                     return None, None
 
-            if not six.PY2:
-                content = content.decode('utf-8')
+            content = content.decode('utf-8')
 
             if content_type is None and r.headers.get('content-type'):
                 content_type = r.headers.get('content-type').split(";", 1)[0]

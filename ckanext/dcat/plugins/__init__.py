@@ -3,17 +3,14 @@
 from builtins import object
 import os
 
-import six
-
 from ckantoolkit import config
 
 from ckan import plugins as p
-try:
-    from ckan.lib.plugins import DefaultTranslation
-except ImportError:
-    class DefaultTranslation(object):
-        pass
 
+from ckan.lib.plugins import DefaultTranslation
+
+import ckanext.dcat.blueprints as blueprints
+import ckanext.dcat.cli as cli
 
 from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_catalog_show,
@@ -23,15 +20,6 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 )
 from ckanext.dcat import utils
 
-if p.toolkit.check_ckan_version('2.9'):
-    from ckanext.dcat.plugins.flask_plugin import (
-        MixinDCATPlugin, MixinDCATJSONInterface
-    )
-else:
-    from ckanext.dcat.plugins.pylons_plugin import (
-        MixinDCATPlugin, MixinDCATJSONInterface
-    )
-
 
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
@@ -40,15 +28,26 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 I18N_DIR = os.path.join(HERE, u"../i18n")
 
 
-class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
+class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
     p.implements(p.IPackageController, inherit=True)
-    if p.toolkit.check_ckan_version(min_version='2.5.0'):
-        p.implements(p.ITranslation, inherit=True)
+    p.implements(p.ITranslation, inherit=True)
+    p.implements(p.IClick)
+    p.implements(p.IBlueprint)
+
+    # IClick
+
+    def get_commands(self):
+        return cli.get_commands()
+
+    # IBlueprint
+
+    def get_blueprint(self):
+        return [blueprints.dcat]
 
     # ITranslation
 
@@ -118,7 +117,7 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
             field_labels = utils.field_labels()
 
             def set_titles(object_dict):
-                for key, value in six.iteritems(object_dict.copy()):
+                for key, value in object_dict.copy().items():
                     if key in field_labels:
                         object_dict[field_labels[key]] = object_dict[key]
                         del object_dict[key]
@@ -133,9 +132,15 @@ class DCATPlugin(MixinDCATPlugin, p.SingletonPlugin, DefaultTranslation):
         return data_dict
 
 
-class DCATJSONInterface(MixinDCATJSONInterface, p.SingletonPlugin):
+class DCATJSONInterface(p.SingletonPlugin):
     p.implements(p.IActions)
     p.implements(p.IAuthFunctions, inherit=True)
+    p.implements(p.IBlueprint)
+
+    # IBlueprint
+
+    def get_blueprint(self):
+        return [blueprints.dcat_json_interface]
 
     # IActions
 

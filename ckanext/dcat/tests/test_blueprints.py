@@ -4,19 +4,19 @@ from builtins import range
 import time
 
 from collections import OrderedDict
-from six.moves.urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 import pytest
 
 from ckan import plugins as p
 
 from rdflib import Graph
+from ckantoolkit import url_for
 from ckantoolkit.tests import factories
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
-from ckanext.dcat.urls import url_for
 
 
 def _sort_query_params(url):
