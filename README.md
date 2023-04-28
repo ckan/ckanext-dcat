@@ -148,7 +148,7 @@ This endpoint can be customized if necessary using the `ckanext.dcat.catalog_end
 
     ckanext.dcat.catalog_endpoint = /dcat/catalog/{_format}
 
-The custom endpoint **must** start with a backslash (`/`) and contain the `{_format}` placeholder.
+The custom endpoint **must** start with a forward slash (`/`) and contain the `{_format}` placeholder.
 
 As described previously, the extension will determine the RDF serialization format returned.
 
@@ -273,12 +273,12 @@ The information contained in the harvested `dcat:Catalog` node will be stored as
 When serializing, your Catalog will expose the harvested Catalog using the `dct:hasPart` relation. This means that your catalog will have this structure:
 - `dcat:Catalog` (represents your current catalog)
   - `dcat:dataset` (1..n, the dataset created withing your catalog)
-  - `dct:hasPart` 
+  - `dct:hasPart`
      - `dcat:Catalog` (info of one of the harvested catalogs)
         - `dcat:dataset` (dataset in the harvested catalog)
-  - `dct:hasPart` 
+  - `dct:hasPart`
      - `dcat:Catalog` (info of one of another harvester catalog)
-     ...   
+     ...
 
 
 ### Extending the RDF harvester
@@ -395,7 +395,7 @@ This mapping is compatible with the [DCAT-AP v1.1](https://joinup.ec.europa.eu/a
     <?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
          xmlns:dct="http://purl.org/dc/terms/"
-	     xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:foaf="http://xmlns.com/foaf/0.1/"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 
@@ -950,7 +950,7 @@ Example output of structured data in JSON-LD:
 To run the tests do:
 
     pytest --ckan-ini=test.ini ckanext/dcat/tests
-    
+
 ## Releases
 
 To create a new release, follow these steps:
@@ -970,7 +970,7 @@ Work on ckanext-dcat has been made possible by:
 If you can fund new developments or contribute please get in touch.
 
 
-## Copying and License 
+## Copying and License
 
 This material is copyright (c) Open Knowledge.
 
