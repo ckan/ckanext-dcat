@@ -1,10 +1,17 @@
 # Changelog
 
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...HEAD)
+
+
+## [v1.5.0](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...v1.5.0) - 2023-05-02
 
 * Remove support for old CKAN versions prior 2.9 and Python 2 (#244)
 * Update hooks to support CKAN 2.10 (#241)
+* Fix description for RDF endpoints in README (#246)
+* Fix media type for links to the Turtle representation in HTML templates (#242)
+* Ignore already deleted packages when deleting (#238)
+* Add support for dcat:accessService in dcat:Distribution (#235)
 
 ## [v1.4.0](https://github.com/ckan/ckanext-dcat/compare/v1.3.0...v1.4.0) - 2022-12-05
 
