@@ -18,7 +18,7 @@ from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
-from ckan.plugins import toolkit
+from ckan.plugins import toolkit, plugin_loaded
 from ckan.lib.munge import munge_tag
 from ckanext.dcat.urls import url_for
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
@@ -727,14 +727,16 @@ class RDFProfile(object):
 
     def _add_triples_from_dict(self, _dict, subject, items,
                                list_value=False,
-                               date_value=False):
+                               date_value=False,
+                               multilingual=False):
         for item in items:
             key, predicate, fallbacks, _type = item
             self._add_triple_from_dict(_dict, subject, predicate, key,
                                        fallbacks=fallbacks,
                                        list_value=list_value,
                                        date_value=date_value,
-                                       _type=_type)
+                                       _type=_type,
+                                       multilingual=multilingual)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
@@ -742,7 +744,8 @@ class RDFProfile(object):
                               date_value=False,
                               _type=Literal,
                               _datatype=None,
-                              value_modifier=None):
+                              value_modifier=None,
+                              multilingual=False):
         '''
         Adds a new triple to the graph with the provided parameters
 
@@ -776,6 +779,12 @@ class RDFProfile(object):
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
             # Normal text value
+            if multilingual and isinstance(value, dict):
+                # We assume that all multilingual field values are Literals
+                for lang, translated_value in value.items():
+                    object = Literal(translated_value, lang=lang)
+                    self.g.add((subject, predicate, object))
+                return
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
@@ -1207,10 +1216,16 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         g.add((dataset_ref, RDF.type, DCAT.Dataset))
 
+        # Multilingual fields
+        multilingual_suffix = '_translated' if plugin_loaded('fluent') else ''
+        items = [
+            ('title%s' % multilingual_suffix, DCT.title, None, Literal),
+            ('notes%s' % multilingual_suffix, DCT.description, None, Literal),
+        ]
+        self._add_triples_from_dict(dataset_dict, dataset_ref, items, multilingual=True)
+
         # Basic fields
         items = [
-            ('title', DCT.title, None, Literal),
-            ('notes', DCT.description, None, Literal),
             ('url', DCAT.landingPage, None, URIRef),
             ('identifier', DCT.identifier, ['guid', 'id'], URIRefOrLiteral),
             ('version', OWL.versionInfo, ['dcat_version'], Literal),
@@ -1223,8 +1238,12 @@ class EuropeanDCATAPProfile(RDFProfile):
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
         # Tags
-        for tag in dataset_dict.get('tags', []):
-            g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
+        for tag in dataset_dict.get('tags%s' % multilingual_suffix, dataset_dict.get('tags', [])):
+            for lang, translated_value in tag.items():
+                if lang not in config.get('ckan.locales_offered'):
+                    g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
+                    break
+                g.add((dataset_ref, DCAT.keyword, Literal(translated_value['name'], lang=lang)))
 
         # Dates
         items = [
@@ -1306,9 +1325,15 @@ class EuropeanDCATAPProfile(RDFProfile):
             # If no name but an URI is available, the name literal remains empty to
             # avoid mixing organization and dataset values.
             if not publisher_name and not publisher_uri and dataset_dict.get('organization'):
-                publisher_name = dataset_dict['organization']['title']
-
-            g.add((publisher_details, FOAF.name, Literal(publisher_name)))
+                try:
+                    org_dict = toolkit.get_action(u'organization_show')({u'user': toolkit.g.user},
+                                                                        {u'id': dataset_dict['organization']['id']})
+                    items = [('title%s' % multilingual_suffix, FOAF.name, None, Literal)]
+                    self._add_triples_from_dict(org_dict, publisher_details, items, multilingual=True)
+                except toolkit.ObjectNotFound:
+                    pass
+            else:
+                g.add((publisher_details, FOAF.name, Literal(publisher_name)))
             # TODO: It would make sense to fallback these to organization
             # fields but they are not in the default schema and the
             # `organization` object in the dataset_dict does not include
@@ -1364,10 +1389,15 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             g.add((distribution, RDF.type, DCAT.Distribution))
 
+            # Multilingual fields
+            items = [
+                ('name%s' % multilingual_suffix, DCT.title, None, Literal),
+                ('description%s' % multilingual_suffix, DCT.description, None, Literal),
+            ]
+            self._add_triples_from_dict(resource_dict, distribution, items, multilingual=True)
+
             #  Simple values
             items = [
-                ('name', DCT.title, None, Literal),
-                ('description', DCT.description, None, Literal),
                 ('status', ADMS.status, None, URIRefOrLiteral),
                 ('rights', DCT.rights, None, URIRefOrLiteral),
                 ('license', DCT.license, None, URIRefOrLiteral),
