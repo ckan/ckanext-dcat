@@ -18,7 +18,7 @@ from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
-from ckan.plugins import toolkit, plugin_loaded
+from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
 from ckanext.dcat.urls import url_for
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
@@ -1217,10 +1217,11 @@ class EuropeanDCATAPProfile(RDFProfile):
         g.add((dataset_ref, RDF.type, DCAT.Dataset))
 
         # Multilingual fields
-        multilingual_suffix = '_translated' if plugin_loaded('fluent') else ''
+        title_key = 'title_translated' if 'title_translated' in dataset_dict else 'title'
+        notes_key = 'notes_translated' if 'notes_translated' in dataset_dict else 'notes'
         items = [
-            ('title%s' % multilingual_suffix, DCT.title, None, Literal),
-            ('notes%s' % multilingual_suffix, DCT.description, None, Literal),
+            (title_key, DCT.title, None, Literal),
+            (notes_key, DCT.description, None, Literal),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items, multilingual=True)
 
@@ -1238,7 +1239,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
         # Tags
-        for tag in dataset_dict.get('tags%s' % multilingual_suffix, dataset_dict.get('tags', [])):
+        for tag in dataset_dict.get('tags_translated', dataset_dict.get('tags', [])):
             for lang, translated_value in tag.items():
                 if lang not in config.get('ckan.locales_offered'):
                     g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
@@ -1328,7 +1329,8 @@ class EuropeanDCATAPProfile(RDFProfile):
                 try:
                     org_dict = toolkit.get_action(u'organization_show')({u'user': toolkit.g.user},
                                                                         {u'id': dataset_dict['organization']['id']})
-                    items = [('title%s' % multilingual_suffix, FOAF.name, None, Literal)]
+                    title_key = 'title_translated' if 'title_translated' in org_dict else 'title'
+                    items = [(title_key, FOAF.name, None, Literal)]
                     self._add_triples_from_dict(org_dict, publisher_details, items, multilingual=True)
                 except toolkit.ObjectNotFound:
                     pass
@@ -1390,9 +1392,11 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((distribution, RDF.type, DCAT.Distribution))
 
             # Multilingual fields
+            name_key = 'name_translated' if 'name_translated' in resource_dict else 'name'
+            description_key = 'description_translated' if 'description_translated' in resource_dict else 'description'
             items = [
-                ('name%s' % multilingual_suffix, DCT.title, None, Literal),
-                ('description%s' % multilingual_suffix, DCT.description, None, Literal),
+                (name_key, DCT.title, None, Literal),
+                (description_key, DCT.description, None, Literal),
             ]
             self._add_triples_from_dict(resource_dict, distribution, items, multilingual=True)
 
