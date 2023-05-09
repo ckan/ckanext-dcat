@@ -1240,11 +1240,11 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         # Tags
         for tag in dataset_dict.get('tags_translated', dataset_dict.get('tags', [])):
-            for lang, translated_value in tag.items():
-                if lang not in config.get('ckan.locales_offered'):
-                    g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
-                    break
-                g.add((dataset_ref, DCAT.keyword, Literal(translated_value['name'], lang=lang)))
+            if 'name' in tag:
+                g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
+            else:
+                for lang, translated_value in tag.items():
+                    g.add((dataset_ref, DCAT.keyword, Literal(translated_value['name'], lang=lang)))
 
         # Dates
         items = [
