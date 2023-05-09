@@ -1,6 +1,4 @@
 from past.builtins import basestring
-from ckan.plugins.toolkit import h
-from ckan.plugins import plugin_loaded
 import logging
 
 log = logging.getLogger(__name__)
@@ -70,15 +68,6 @@ def ckan_to_dcat(package_dict):
         dcat_dict['keyword'].append(tag['name'])
 
 
-    # Fluent compatibility
-    if plugin_loaded('fluent'):
-        dcat_dict['title'] = h.get_translated(package_dict, 'title')
-        dcat_dict['description'] = h.get_translated(package_dict, 'notes')
-        tags = h.get_translated(package_dict, 'tags')
-        for tag in tags:
-            dcat_dict['keyword'].append(tag['name'])
-
-
     dcat_dict['publisher'] = {}
 
     for extra in package_dict.get('extras', []):
@@ -112,10 +101,6 @@ def ckan_to_dcat(package_dict):
             # TODO: downloadURL or accessURL depending on resource type?
             'accessURL': resource.get('url'),
         }
-        # Fluent compatibility
-        if plugin_loaded('fluent'):
-            distribution['title'] = h.get_translated(resource, 'name')
-            distribution['description'] = h.get_translated(resource, 'description')
         dcat_dict['distribution'].append(distribution)
 
     return dcat_dict

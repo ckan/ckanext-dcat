@@ -20,7 +20,6 @@ except ImportError:
 
 from ckan import model
 import ckan.plugins.toolkit as toolkit
-from ckan.plugins import plugin_loaded
 from flask import has_request_context
 
 from ckanext.dcat.exceptions import RDFProfileException
@@ -174,7 +173,7 @@ def catalog_uri():
                          'the `ckanext.dcat.base_uri` or `ckan.site_url` ' +
                          'option')
 
-    if uri and plugin_loaded('fluent') and has_request_context():
+    if uri and has_request_context():
         uri = re.sub('{{LANG}}', str(toolkit.h.lang()), uri)
 
     return uri
