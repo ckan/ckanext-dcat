@@ -1244,7 +1244,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
             else:
                 for lang, translated_value in tag.items():
-                    g.add((dataset_ref, DCAT.keyword, Literal(translated_value['name'], lang=lang)))
+                    g.add((dataset_ref, DCAT.keyword, Literal(translated_value, lang=lang)))
 
         # Dates
         items = [
