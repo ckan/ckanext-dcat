@@ -728,7 +728,7 @@ class RDFProfile(object):
     def _add_triples_from_dict(self, _dict, subject, items,
                                list_value=False,
                                date_value=False,
-                               multilingual=False):
+                               all_translated=False):
         for item in items:
             key, predicate, fallbacks, _type = item
             self._add_triple_from_dict(_dict, subject, predicate, key,
@@ -736,7 +736,7 @@ class RDFProfile(object):
                                        list_value=list_value,
                                        date_value=date_value,
                                        _type=_type,
-                                       multilingual=multilingual)
+                                       all_translated=multilingual)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
@@ -745,7 +745,7 @@ class RDFProfile(object):
                               _type=Literal,
                               _datatype=None,
                               value_modifier=None,
-                              multilingual=False):
+                              all_translated=False):
         '''
         Adds a new triple to the graph with the provided parameters
 
@@ -1223,7 +1223,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             (title_key, DCT.title, None, Literal),
             (notes_key, DCT.description, None, Literal),
         ]
-        self._add_triples_from_dict(dataset_dict, dataset_ref, items, multilingual=True)
+        self._add_triples_from_dict(dataset_dict, dataset_ref, items, all_translated=True)
 
         # Basic fields
         items = [
@@ -1331,7 +1331,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                                         {u'id': dataset_dict['organization']['id']})
                     title_key = 'title_translated' if 'title_translated' in org_dict else 'title'
                     items = [(title_key, FOAF.name, None, Literal)]
-                    self._add_triples_from_dict(org_dict, publisher_details, items, multilingual=True)
+                    self._add_triples_from_dict(org_dict, publisher_details, items, all_translated=True)
                 except toolkit.ObjectNotFound:
                     pass
             else:
@@ -1398,7 +1398,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 (name_key, DCT.title, None, Literal),
                 (description_key, DCT.description, None, Literal),
             ]
-            self._add_triples_from_dict(resource_dict, distribution, items, multilingual=True)
+            self._add_triples_from_dict(resource_dict, distribution, items, all_translated=True)
 
             #  Simple values
             items = [
