@@ -779,8 +779,8 @@ class RDFProfile(object):
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
             # Normal text value
-            if multilingual and isinstance(value, dict):
-                # We assume that all multilingual field values are Literals
+            if all_translated and isinstance(value, dict):
+                # We assume that all translated field values are Literals
                 for lang, translated_value in value.items():
                     object = Literal(translated_value, lang=lang)
                     self.g.add((subject, predicate, object))
