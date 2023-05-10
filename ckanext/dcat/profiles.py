@@ -1239,12 +1239,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
         # Tags
-        for tag in dataset_dict.get('tags_translated', dataset_dict.get('tags', [])):
+        tags = dataset_dict.get('tags_translated', dataset_dict.get('tags', []))
+        for tag in tags:
             if 'name' in tag:
                 g.add((dataset_ref, DCAT.keyword, Literal(tag['name'])))
             else:
-                for lang, translated_value in tag.items():
-                    g.add((dataset_ref, DCAT.keyword, Literal(translated_value, lang=lang)))
+                # translated tags are stored as {'lang': ['tag1', 'tag2', ...]}
+                for translated_value in tags[tag]:
+                    g.add((dataset_ref, DCAT.keyword, Literal(translated_value, lang=tag)))
 
         # Dates
         items = [
