@@ -736,7 +736,7 @@ class RDFProfile(object):
                                        list_value=list_value,
                                        date_value=date_value,
                                        _type=_type,
-                                       all_translated=multilingual)
+                                       all_translated=all_translated)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
