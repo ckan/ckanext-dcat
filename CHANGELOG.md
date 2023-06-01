@@ -3,6 +3,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...HEAD)
 
+* Fix tests to work with `ckanext-harvest >= 1.5.4`.
 
 ## [v1.5.0](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...v1.5.0) - 2023-05-02
 
