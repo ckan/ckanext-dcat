@@ -1047,7 +1047,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         assert last_job_status['status'] == 'Finished'
         assert ('Error parsing the RDF file'
-                in last_job_status['gather_error_summary'][0][0])
+                in last_job_status['gather_error_summary'][0]['message'])
 
     @responses.activate
     @patch.object(ckanext.dcat.harvesters.rdf.RDFParser, 'datasets')
@@ -1082,7 +1082,7 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
         assert last_job_status['status'] == 'Finished'
         assert ('Error when processsing dataset'
-                in last_job_status['gather_error_summary'][0][0])
+                in last_job_status['gather_error_summary'][0]['message'])
 
     @responses.activate
     def test_harvest_create_duplicate_titles(self):
@@ -1219,8 +1219,8 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
-        assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+        assert 'Error 1' == last_job_status['gather_error_summary'][0]['message']
+        assert 'Error 2' == last_job_status['gather_error_summary'][1]['message']
 
     def test_harvest_update_session_extension_point_gets_called(self, reset_calls_counter):
 
@@ -1365,8 +1365,8 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
         last_job_status = harvest_source['status']['last_job']
 
-        assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
-        assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+        assert 'Error 1' == last_job_status['gather_error_summary'][0]['message']
+        assert 'Error 2' == last_job_status['gather_error_summary'][1]['message']
 
     @responses.activate
     def test_harvest_after_parsing_extension_point_gets_called(self, reset_calls_counter):
@@ -1480,8 +1480,8 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
 
             last_job_status = harvest_source['status']['last_job']
 
-            assert 'Error 1' == last_job_status['gather_error_summary'][0][0]
-            assert 'Error 2' == last_job_status['gather_error_summary'][1][0]
+            assert 'Error 1' == last_job_status['gather_error_summary'][0]['message']
+            assert 'Error 2' == last_job_status['gather_error_summary'][1]['message']
         finally:
             plugin.after_parsing_mode = ''
 
@@ -1648,7 +1648,7 @@ class TestDCATHarvestFunctionalRaiseExcpetion(FunctionalHarvestTest):
         assert last_job_status['status'] == 'Finished'
 
         assert ('Error importing dataset'
-                in last_job_status['object_error_summary'][0][0])
+                in last_job_status['object_error_summary'][0]['message'])
 
         assert (
             last_job_status['stats'] ==
