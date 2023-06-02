@@ -523,8 +523,10 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         access_services_list = json.loads(access_services)
         assert len(access_services_list) == 2
 
-        for access_service in expected_access_services:
-            assert access_service in access_services_list
+        for access_service in access_services_list:
+            assert access_service.get('access_service_ref')
+            access_service.pop('access_service_ref')
+            assert access_service in expected_access_services
 
 class TestEuroDCATAP2ProfileParsingSpatial(BaseParseTest):
 
