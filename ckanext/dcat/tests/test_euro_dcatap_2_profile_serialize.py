@@ -460,6 +460,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             access_service = self._get_dict_from_list(access_services, 'title',
                                                                 six.text_type(title_objects[0][2]))
             assert access_service
+            assert access_service.get('access_service_ref', None)
 
             # Simple values
             self._assert_simple_value(g, object[2], DCATAP.availability,
@@ -510,6 +511,36 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         object_list = [t for t in g.triples((distribution, DCAT.accessService, None))]
         assert len(object_list) == 0
+
+    def test_access_services_absent(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name'
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        object_list = [t for t in g.triples((distribution, DCAT.accessService, None))]
+        assert len(object_list) == 0
+        assert 'access_services' not in dataset['resources'][0]
 
     def _assert_simple_value(self, graph, object, predicate, value):
         """

@@ -3,7 +3,8 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...HEAD)
 
-* Fix tests to work with `ckanext-harvest >= 1.5.4`.
+* Fix tests to work with `ckanext-harvest >= 1.5.4`. (#250)
+* Add references for dcat:accessService to the `euro_dcat_ap_2` profile (#251)
 
 ## [v1.5.0](https://github.com/ckan/ckanext-dcat/compare/v1.4.0...v1.5.0) - 2023-05-02
 

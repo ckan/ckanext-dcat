@@ -1574,6 +1574,11 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                             access_service_dict['uri'] = (str(access_service)
                                     if isinstance(access_service, URIRef)
                                     else '')
+
+                            # Remember the (internal) access service reference for referencing in
+                            # further profiles, e.g. for adding more properties
+                            access_service_dict['access_service_ref'] = str(access_service)
+
                             access_service_list.append(access_service_dict)
 
                         if access_service_list:
@@ -1655,6 +1660,9 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         access_service_node = CleanedURIRef(access_service_uri)
                     else:
                         access_service_node = BNode()
+                        # Remember the (internal) access service reference for referencing in
+                        # further profiles
+                        access_service_dict['access_service_ref'] = str(access_service_node)
 
                     self.g.add((distribution, DCAT.accessService, access_service_node))
 
@@ -1678,6 +1686,9 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         ('serves_dataset', DCAT.servesDataset, None, URIRefOrLiteral),
                     ]
                     self._add_list_triples_from_dict(access_service_dict, access_service_node, items)
+
+                if access_service_list:
+                    resource_dict['access_services'] = json.dumps(access_service_list)
             except ValueError:
                 pass
 
