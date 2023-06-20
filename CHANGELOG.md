@@ -1,7 +1,9 @@
 # Changelog
 
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.1...HEAD)
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...HEAD)
+
+## [v1.5.1](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...v1.5.1) - 2023-06-20
 
 * Fix tests to work with `ckanext-harvest >= 1.5.4`. (#250)
 * Add references for dcat:accessService to the `euro_dcat_ap_2` profile (#251)
