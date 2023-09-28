@@ -431,6 +431,65 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         self._run_parse_access_service(expected_access_services)
 
+    def test_dataset_distribution_access_service_list_values_only(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+                <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
+                    <dct:description>Das ist eine deutsche Beschreibung der Distribution</dct:description>
+                    <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
+                    <dcat:accessService>
+                        <dcat:DataService>
+                            <dcat:endpointURL rdf:resource="http://publications.europa.eu/webapi/rdf/sparql"/>
+                            <dcat:servesDataset rdf:resource="http://example.org" />
+                        </dcat:DataService>
+                    </dcat:accessService>
+                </dcat:Distribution>
+            </dcat:distribution>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.parse(data)
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+
+        dataset = datasets[0]
+
+        # Resources
+        assert len(dataset['resources']) == 1
+
+        resource = dataset['resources'][0]
+
+        # Access services
+        access_service_list = json.loads(resource.get('access_services'))
+        assert len(access_service_list) == 1
+
+        access_service = access_service_list[0]
+
+        # List
+        endpoint_url_list = access_service.get('endpoint_url')
+        print(access_service)
+        assert len(endpoint_url_list) == 1
+        assert 'http://publications.europa.eu/webapi/rdf/sparql' in endpoint_url_list
+
+        serves_dataset_list = access_service.get('serves_dataset')
+        assert len(serves_dataset_list) == 1
+        assert 'http://example.org' in serves_dataset_list
+
     def _build_access_services_graph_from_list(self, access_service_list):
         """
         Creates an access service graph based on the given list.
