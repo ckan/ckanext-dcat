@@ -80,6 +80,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
         return {
             'helper_available': utils.helper_available,
             'dcat_get_endpoint': utils.get_endpoint,
+            'dcat_endpoints_enabled': utils.endpoints_enabled,
         }
 
     # IActions
