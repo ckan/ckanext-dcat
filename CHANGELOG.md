@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.1...HEAD)
 
+* Improve access service tests (#258)
+* Fix missing access service items when parsing dataset (#256)
 
 ## [v1.5.1](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...v1.5.1) - 2023-06-20
 

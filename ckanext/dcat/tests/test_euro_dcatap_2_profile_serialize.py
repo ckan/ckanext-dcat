@@ -542,6 +542,51 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         assert len(object_list) == 0
         assert 'access_services' not in dataset['resources'][0]
 
+    def test_access_services_list_values_only(self):
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name',
+            'access_services': json.dumps([
+                {
+                    'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                }
+            ])
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [
+                resource
+            ]
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert len([t for t in g.triples((dataset_ref, DCAT.distribution, None))]) == 1
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+
+        assert len([t for t in g.triples((distribution, DCAT.accessService, None))]) == 1
+
+        # Access services
+        access_service_object = self._triple(g, distribution, DCAT.accessService, None)[2]
+
+        access_services = json.loads(resource['access_services'])
+
+        # Lists
+        self._assert_values_list(g, access_service_object, DCAT.endpointURL,
+                            self._get_typed_list(access_services[0].get('endpoint_url'), URIRef))
+        self._assert_values_list(g, access_service_object, DCAT.servesDataset,
+                            self._get_typed_list(access_services[0].get('serves_dataset'), URIRef))
+
     def _assert_simple_value(self, graph, object, predicate, value):
         """
         Checks if a triple with the given value is present in the graph
