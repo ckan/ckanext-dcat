@@ -133,6 +133,9 @@ class RDFProfile(object):
         # _license().
         self._licenceregister_cache = None
 
+        # Cache for Organizations
+        self._org_cache = None
+
     def _datasets(self):
         '''
         Generator that returns all DCAT datasets on the graph
@@ -728,7 +731,7 @@ class RDFProfile(object):
     def _add_triples_from_dict(self, _dict, subject, items,
                                list_value=False,
                                date_value=False,
-                               all_translated=False):
+                               translated=False):
         for item in items:
             key, predicate, fallbacks, _type = item
             self._add_triple_from_dict(_dict, subject, predicate, key,
@@ -736,7 +739,7 @@ class RDFProfile(object):
                                        list_value=list_value,
                                        date_value=date_value,
                                        _type=_type,
-                                       all_translated=all_translated)
+                                       translated=translated)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
@@ -745,7 +748,7 @@ class RDFProfile(object):
                               _type=Literal,
                               _datatype=None,
                               value_modifier=None,
-                              all_translated=False):
+                              translated=False):
         '''
         Adds a new triple to the graph with the provided parameters
 
@@ -779,7 +782,7 @@ class RDFProfile(object):
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
             # Normal text value
-            if all_translated and isinstance(value, dict):
+            if translated and isinstance(value, dict):
                 # We assume that all translated field values are Literals
                 for lang, translated_value in value.items():
                     object = Literal(translated_value, lang=lang)
@@ -1223,7 +1226,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             (title_key, DCT.title, None, Literal),
             (notes_key, DCT.description, None, Literal),
         ]
-        self._add_triples_from_dict(dataset_dict, dataset_ref, items, all_translated=True)
+        self._add_triples_from_dict(dataset_dict, dataset_ref, items, translated=True)
 
         # Basic fields
         items = [
@@ -1328,14 +1331,21 @@ class EuropeanDCATAPProfile(RDFProfile):
             # If no name but an URI is available, the name literal remains empty to
             # avoid mixing organization and dataset values.
             if not publisher_name and not publisher_uri and dataset_dict.get('organization'):
-                try:
-                    org_dict = toolkit.get_action(u'organization_show')({u'user': toolkit.g.user},
-                                                                        {u'id': dataset_dict['organization']['id']})
+                org_id = dataset_dict["organization"]["id"]
+                org_dict = None
+                if org_id in self._org_cache:
+                    org_dict = self._org_cache[org_id]
+                else:
+                    try:
+                        org_dict = toolkit.get_action(u'organization_show')({u'ignore_auth': True},
+                                                                            {u'id': org_id})
+                        self._org_cache[org_id] = org_dict
+                    except toolkit.ObjectNotFound:
+                        pass
+                if org_dict:
                     title_key = 'title_translated' if 'title_translated' in org_dict else 'title'
                     items = [(title_key, FOAF.name, None, Literal)]
-                    self._add_triples_from_dict(org_dict, publisher_details, items, all_translated=True)
-                except toolkit.ObjectNotFound:
-                    pass
+                    self._add_triples_from_dict(org_dict, publisher_details, items, translated=True)
             else:
                 g.add((publisher_details, FOAF.name, Literal(publisher_name)))
             # TODO: It would make sense to fallback these to organization
@@ -1400,7 +1410,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 (name_key, DCT.title, None, Literal),
                 (description_key, DCT.description, None, Literal),
             ]
-            self._add_triples_from_dict(resource_dict, distribution, items, all_translated=True)
+            self._add_triples_from_dict(resource_dict, distribution, items, translated=True)
 
             #  Simple values
             items = [
