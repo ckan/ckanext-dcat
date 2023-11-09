@@ -350,6 +350,7 @@ class DCATRDFHarvester(DCATHarvester):
                         harvest_object.package_id = dataset['id']
                         harvest_object.add()
 
+                        dataset = self._convert_extras_to_declared_schema_fields(dataset)
                         p.toolkit.get_action('package_update')(context, dataset)
                     else:
                         log.info('Ignoring dataset %s' % existing_dataset['name'])
@@ -395,6 +396,7 @@ class DCATRDFHarvester(DCATHarvester):
                         model.Session.execute('SET CONSTRAINTS harvest_object_package_id_fkey DEFERRED')
                         model.Session.flush()
 
+                        dataset = self._convert_extras_to_declared_schema_fields(dataset)
                         p.toolkit.get_action('package_create')(context, dataset)
                     else:
                         log.info('Ignoring dataset %s' % name)
