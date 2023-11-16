@@ -452,5 +452,9 @@ def read_catalog_page(_format):
     return response
 
 
+def endpoints_enabled():
+    return toolkit.asbool(config.get(ENABLE_RDF_ENDPOINTS_CONFIG, True))
+
+
 def get_endpoint(_type='dataset'):
     return 'dcat.read_dataset' if _type == 'dataset' else 'dcat.read_catalog'

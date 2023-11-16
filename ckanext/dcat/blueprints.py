@@ -22,7 +22,8 @@ def read_catalog(_format=None, package_type=None):
 def read_dataset(_id, _format=None, package_type=None):
     return utils.read_dataset_page(_id, _format)
 
-if toolkit.asbool(config.get(utils.ENABLE_RDF_ENDPOINTS_CONFIG, True)):
+
+if utils.endpoints_enabled():
 
     # requirements={'_format': 'xml|rdf|n3|ttl|jsonld'}
     dcat.add_url_rule(config.get('ckanext.dcat.catalog_endpoint',
