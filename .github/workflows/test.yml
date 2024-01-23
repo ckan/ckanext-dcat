@@ -62,7 +62,7 @@ jobs:
     - name: Setup extension
       run: |
         ckan -c test.ini db init
-        ckan -c test.ini harvester initdb
+        ckan -c test.ini db pending-migrations --apply
     - name: Run tests
       run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=xml --cov-append --disable-warnings ckanext/dcat/tests
     - name: Upload coverage report to codecov
