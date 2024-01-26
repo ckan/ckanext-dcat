@@ -1503,6 +1503,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         for key, predicate in (
             ('temporal_resolution', DCAT.temporalResolution),
             ('is_referenced_by', DCT.isReferencedBy),
+            ('applicable_legislation', DCATAP.applicableLegislation),
+            ('hvd_category', DCATAP.hvdCategory),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:

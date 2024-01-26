@@ -57,6 +57,8 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
             <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">{temp_res}</dcat:temporalResolution>
             <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">{spatial_res}</dcat:spatialResolutionInMeters>
             <dct:isReferencedBy rdf:resource="{referenced_by}"/>
+            <dcatap:hvdCategory rdf:resource="http://data.europa.eu/bna/c_dd313021"/>
+            <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
             <dcat:distribution>
                 <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
                     <dcat:accessURL rdf:resource="http://geodienste.hamburg.de/darf_nicht_die_gleiche_url_wie_downloadurl_sein_da_es_sonst_nicht_angezeigt_wird"/>
@@ -111,6 +113,12 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         isreferencedby_list = json.loads(extras['is_referenced_by'])
         assert len(isreferencedby_list) == 1
         assert isreferencedby_uri in isreferencedby_list
+
+        applicable_legislation_list = json.loads(extras['applicable_legislation'])
+        assert len(applicable_legislation_list) == 1
+
+        hvd_category_list = json.loads(extras['hvd_category'])
+        assert len(hvd_category_list) == 1
 
         assert extras['temporal_start'] == temporal_start
         assert extras['temporal_end'] == temporal_end
