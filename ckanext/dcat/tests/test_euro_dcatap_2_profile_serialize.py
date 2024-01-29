@@ -316,15 +316,15 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'id': 'c041c635-054f-4431-b647-f9186926d021',
             'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'Distribution name',
-            'applicableLegislation': json.dumps(['http://data.europa.eu/eli/reg_impl/2023/138/oj', 'http://data.europa.eu/eli/reg_impl/2023/138/oj_alt']),
+            'applicable_legislation': json.dumps(['http://data.europa.eu/eli/reg_impl/2023/138/oj', 'http://data.europa.eu/eli/reg_impl/2023/138/oj_alt']),
         }
 
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
             'extras': [
-                {'key': 'applicableLegislation', 'value': '[\"http://data.europa.eu/eli/reg_impl/2023/138/oj\", \"http://data.europa.eu/eli/reg_impl/2023/138/oj_alt\"]'},
-                {'key': 'hvdCategory', 'value': '[\"http://data.europa.eu/bna/c_164e0bf5\", \"http://data.europa.eu/bna/c_ac64a52d\"]'},
+                {'key': 'applicable_legislation', 'value': '[\"http://data.europa.eu/eli/reg_impl/2023/138/oj\", \"http://data.europa.eu/eli/reg_impl/2023/138/oj_alt\"]'},
+                {'key': 'hvd_category', 'value': '[\"http://data.europa.eu/bna/c_164e0bf5\", \"http://data.europa.eu/bna/c_ac64a52d\"]'},
             ],
             'resources': [
                 resource
@@ -337,17 +337,17 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        values = json.loads(extras['applicableLegislation'])
+        values = json.loads(extras['applicable_legislation'])
         assert len([t for t in g.triples((dataset_ref, DCATAP.applicableLegislation, None))]) == len(values)
         assert self._triple(g, dataset_ref, DCATAP.applicableLegislation, URIRef(values[0]))
 
-        values = json.loads(extras['hvdCategory'])
+        values = json.loads(extras['hvd_category'])
         assert len([t for t in g.triples((dataset_ref, DCATAP.hvdCategory, None))]) == len(values)
         assert self._triple(g, dataset_ref, DCATAP.hvdCategory, URIRef(values[0]))
 
         distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         self._assert_values_list(g, distribution, DCATAP.applicableLegislation,
-                               self._get_typed_list(json.loads(resource['applicableLegislation']), URIRef))
+                               self._get_typed_list(json.loads(resource['applicable_legislation']), URIRef))
 
 
     def test_distribution_fields(self):

@@ -1503,8 +1503,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         for key, predicate in (
             ('temporal_resolution', DCAT.temporalResolution),
             ('is_referenced_by', DCT.isReferencedBy),
-            ('applicableLegislation', DCATAP.applicableLegislation),
-            ('hvdCategory', DCATAP.hvdCategory),
+            ('applicable_legislation', DCATAP.applicableLegislation),
+            ('hvd_category', DCATAP.hvdCategory),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -1547,7 +1547,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
                     #  Lists
                     for key, predicate in (
-                            ('applicableLegislation', DCATAP.applicableLegislation),
+                            ('applicable_legislation', DCATAP.applicableLegislation),
                             ):
                         values = self._object_value_list(distribution, predicate)
                         if values:
@@ -1605,8 +1605,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         for key, predicate, fallbacks, type, datatype in (
             ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration),
             ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None),
-            ('applicableLegislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None),
-            ('hvdCategory', DCATAP.hvdCategory, None, URIRefOrLiteral, None),
+            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None),
+            ('hvd_category', DCATAP.hvdCategory, None, URIRefOrLiteral, None),
         ):
             self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
                                        fallbacks=fallbacks, _type=type, _datatype=datatype)
@@ -1664,7 +1664,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
             #  Lists
             items = [
-                ('applicableLegislation', DCATAP.applicableLegislation, None, URIRefOrLiteral),
+                ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 

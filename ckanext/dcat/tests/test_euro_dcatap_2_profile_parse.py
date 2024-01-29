@@ -121,11 +121,11 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert extras['temporal_start'] == temporal_start
         assert extras['temporal_end'] == temporal_end
 
-        applicable_legislation_list = json.loads(extras['applicableLegislation'])
+        applicable_legislation_list = json.loads(extras['applicable_legislation'])
         assert len(applicable_legislation_list) == 1
         assert applicable_legislation in applicable_legislation_list
 
-        hvd_category_list = json.loads(extras['hvdCategory'])
+        hvd_category_list = json.loads(extras['hvd_category'])
         assert len(hvd_category_list) == 1
         assert hvd_category in hvd_category_list
 
@@ -140,7 +140,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert resource['package_format'] == package_format
 
         # List values
-        dist_applicable_legislation_list = json.loads(resource.get('applicableLegislation'))
+        dist_applicable_legislation_list = json.loads(resource.get('applicable_legislation'))
         assert dist_applicable_legislation_list == applicable_legislation_list
 
         # Access services
@@ -440,12 +440,12 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         # Dataset
         extras = self._extras(dataset)
 
-        applicable_legislation_list = json.loads(extras['applicableLegislation'])
+        applicable_legislation_list = json.loads(extras['applicable_legislation'])
         assert len(applicable_legislation_list) == 2
         assert applicable_legislation in applicable_legislation_list
         assert applicable_legislation_alt in applicable_legislation_list
 
-        hvd_category_list = json.loads(extras['hvdCategory'])
+        hvd_category_list = json.loads(extras['hvd_category'])
         assert len(hvd_category_list) == 2
         assert hvd_category in hvd_category_list
         assert hvd_category_alt in hvd_category_list
