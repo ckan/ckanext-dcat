@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.1...HEAD)
 
+* Add support for `DCATAP.applicableLegislation` and `DCATAP.hvdCategory` to the `euro_dcat_ap_2` profile
 * Improve access service tests (#258)
 * Fix missing access service items when parsing dataset (#256)
 

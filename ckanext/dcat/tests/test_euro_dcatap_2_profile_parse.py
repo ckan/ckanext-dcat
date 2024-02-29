@@ -37,6 +37,8 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         dist_availability = "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
         compress_format = "http://www.iana.org/assignments/media-types/application/gzip"
         package_format = 'http://publications.europa.eu/resource/authority/file-type/TAR'
+        applicable_legislation = 'http://data.europa.eu/eli/reg_impl/2023/138/oj'
+        hvd_category = 'http://data.europa.eu/bna/c_164e0bf5'
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
@@ -54,6 +56,8 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">{end}</dcat:endDate>
                 </dct:PeriodOfTime>
             </dct:temporal>
+            <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
+            <dcatap:hvdCategory rdf:resource="{hvd_category}"/>
             <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">{temp_res}</dcat:temporalResolution>
             <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">{spatial_res}</dcat:spatialResolutionInMeters>
             <dct:isReferencedBy rdf:resource="{referenced_by}"/>
@@ -67,6 +71,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dcatap:availability rdf:resource="{availability}"/>
                     <dcat:compressFormat rdf:resource="{compressFormat}"/>
                     <dcat:packageFormat rdf:resource="{packageFormat}"/>
+                    <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
                     <dcat:accessService>
                         <dcat:DataService>
                             <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"/>
@@ -85,7 +90,8 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         '''.format(start=temporal_start, end=temporal_end, temp_res=temporal_resolution,
                    spatial_res=spatial_resolution_in_meters, referenced_by=isreferencedby_uri,
                    availability=dist_availability, compressFormat=compress_format,
-                   packageFormat=package_format)
+                   packageFormat=package_format, applicable_legislation=applicable_legislation,
+                   hvd_category=hvd_category)
 
         p = RDFParser(profiles=DCAT_AP_PROFILES)
 
@@ -115,15 +121,27 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert extras['temporal_start'] == temporal_start
         assert extras['temporal_end'] == temporal_end
 
+        applicable_legislation_list = json.loads(extras['applicable_legislation'])
+        assert len(applicable_legislation_list) == 1
+        assert applicable_legislation in applicable_legislation_list
+
+        hvd_category_list = json.loads(extras['hvd_category'])
+        assert len(hvd_category_list) == 1
+        assert hvd_category in hvd_category_list
+
         # Resources
         assert len(dataset['resources']) == 1
 
         resource = dataset['resources'][0]
 
-        #  Simple values
+        # Simple values
         assert resource['availability'] == dist_availability
         assert resource['compress_format'] == compress_format
         assert resource['package_format'] == package_format
+
+        # List values
+        dist_applicable_legislation_list = json.loads(resource.get('applicable_legislation'))
+        assert dist_applicable_legislation_list == applicable_legislation_list
 
         # Access services
         access_service_list = json.loads(resource.get('access_services'))
@@ -378,6 +396,67 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert len(isreferencedby_list) == 2
         assert isreferencedby_uri in isreferencedby_list
         assert isreferencedby_uri_2 in isreferencedby_list
+
+    def test_high_value_datasets(self):
+        applicable_legislation = 'http://data.europa.eu/eli/reg_impl/2023/138/oj'
+        applicable_legislation_alt = 'http://data.europa.eu/eli/reg_impl/2023/138/oj_alt'
+        hvd_category = 'http://data.europa.eu/bna/c_164e0bf5'
+        hvd_category_alt = 'http://data.europa.eu/bna/c_ac64a52d'
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:schema="http://schema.org/"
+         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+        <dcat:Dataset rdf:about="http://example.org">
+            <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
+            <dcatap:applicableLegislation>{applicable_legislation_alt}</dcatap:applicableLegislation>
+            <dcatap:hvdCategory rdf:resource="{hvd_category}"/>
+            <dcatap:hvdCategory>{hvd_category_alt}</dcatap:hvdCategory>
+            <dcat:distribution>
+                <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
+                    <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
+                    <dcatap:applicableLegislation>{applicable_legislation_alt}</dcatap:applicableLegislation>
+                </dcat:Distribution>
+            </dcat:distribution>
+        </dcat:Dataset>
+        </rdf:RDF>
+        '''.format(applicable_legislation=applicable_legislation, applicable_legislation_alt=applicable_legislation_alt,
+                   hvd_category=hvd_category, hvd_category_alt=hvd_category_alt)
+
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+
+        p.parse(data)
+
+        datasets = [d for d in p.datasets()]
+        assert len(datasets) == 1
+
+        dataset = datasets[0]
+
+        # Dataset
+        extras = self._extras(dataset)
+
+        applicable_legislation_list = json.loads(extras['applicable_legislation'])
+        assert len(applicable_legislation_list) == 2
+        assert applicable_legislation in applicable_legislation_list
+        assert applicable_legislation_alt in applicable_legislation_list
+
+        hvd_category_list = json.loads(extras['hvd_category'])
+        assert len(hvd_category_list) == 2
+        assert hvd_category in hvd_category_list
+        assert hvd_category_alt in hvd_category_list
+
+        # Resources
+        assert len(dataset['resources']) == 1
+
+        resource = dataset['resources'][0]
+
+        dist_applicable_legislation_list = [applicable_legislation, applicable_legislation_alt]
+        assert dist_applicable_legislation_list == applicable_legislation_list
 
     def test_parse_distribution_access_service(self):
 

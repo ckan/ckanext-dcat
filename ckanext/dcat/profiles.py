@@ -1503,6 +1503,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         for key, predicate in (
             ('temporal_resolution', DCAT.temporalResolution),
             ('is_referenced_by', DCT.isReferencedBy),
+            ('applicable_legislation', DCATAP.applicableLegislation),
+            ('hvd_category', DCATAP.hvdCategory),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -1542,6 +1544,14 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         value = self._object_value(distribution, predicate)
                         if value:
                             resource_dict[key] = value
+
+                    #  Lists
+                    for key, predicate in (
+                            ('applicable_legislation', DCATAP.applicableLegislation),
+                            ):
+                        values = self._object_value_list(distribution, predicate)
+                        if values:
+                            resource_dict[key] = json.dumps(values)
 
                     # Access services
                         access_service_list = []
@@ -1594,7 +1604,9 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         # Lists
         for key, predicate, fallbacks, type, datatype in (
             ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration),
-            ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None)
+            ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None),
+            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None),
+            ('hvd_category', DCATAP.hvdCategory, None, URIRefOrLiteral, None),
         ):
             self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
                                        fallbacks=fallbacks, _type=type, _datatype=datatype)
@@ -1649,6 +1661,12 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
+
+            #  Lists
+            items = [
+                ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral),
+            ]
+            self._add_list_triples_from_dict(resource_dict, distribution, items)
 
             try:
                 access_service_list = json.loads(resource_dict.get('access_services', '[]'))
