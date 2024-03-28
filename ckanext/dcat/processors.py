@@ -116,10 +116,14 @@ class RDFParser(RDFProcessor):
         Returns the URL of the next page or None if there is no next page
         '''
         for pagination_node in self.g.subjects(RDF.type, HYDRA.PagedCollection):
+            # Try to find HYDRA.next first
+            for o in self.g.objects(pagination_node, HYDRA.next):
+                return str(o)
+
+            # If HYDRA.next is not found, try HYDRA.nextPage (deprecated)
             for o in self.g.objects(pagination_node, HYDRA.nextPage):
                 return str(o)
         return None
-
 
     def parse(self, data, _format=None):
         '''
@@ -178,7 +182,6 @@ class RDFParser(RDFProcessor):
 
             yield dataset_dict
 
-
 class RDFSerializer(RDFProcessor):
     '''
     A CKAN to RDF serializer based on rdflib
@@ -209,19 +212,23 @@ class RDFSerializer(RDFProcessor):
             pagination_ref = BNode()
         self.g.add((pagination_ref, RDF.type, HYDRA.PagedCollection))
 
+        #  The predicates `nextPage`, `previousPage`, `firstPage`, `lastPage`
+        #  and `itemsPerPage` are deprecated and will be removed in the future
         items = [
-            ('next', HYDRA.nextPage),
-            ('previous', HYDRA.previousPage),
-            ('first', HYDRA.firstPage),
-            ('last', HYDRA.lastPage),
-            ('count', HYDRA.totalItems),
-            ('items_per_page', HYDRA.itemsPerPage),
+            ('next', [HYDRA.nextPage, HYDRA.next]),
+            ('previous', [HYDRA.previousPage, HYDRA.previous]),
+            ('first', [HYDRA.firstPage, HYDRA.first]),
+            ('last', [HYDRA.lastPage, HYDRA.last]),
+            ('count', [HYDRA.totalItems]),
+            ('items_per_page', [HYDRA.itemsPerPage]),
         ]
+
         for item in items:
-            key, predicate = item
+            key, predicates = item
             if paging_info.get(key):
-                self.g.add((pagination_ref, predicate,
-                            Literal(paging_info[key])))
+                for predicate in predicates:
+                    self.g.add((pagination_ref, predicate,
+                                Literal(paging_info[key])))
 
         return pagination_ref
 
