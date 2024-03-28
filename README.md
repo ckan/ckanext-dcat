@@ -173,10 +173,9 @@ The number of datasets returned is limited. The response will include paging inf
     @prefix hydra: <http://www.w3.org/ns/hydra/core#> .
 
     <http://example.com/catalog.ttl?page=1> a hydra:PagedCollection ;
-        hydra:firstPage "http://example.com/catalog.ttl?page=1" ;
-        hydra:itemsPerPage 100 ;
-        hydra:lastPage "http://example.com/catalog.ttl?page=3" ;
-        hydra:nextPage "http://example.com/catalog.ttl?page=2" ;
+        hydra:first "http://example.com/catalog.ttl?page=1" ;
+        hydra:last "http://example.com/catalog.ttl?page=3" ;
+        hydra:next "http://example.com/catalog.ttl?page=2" ;
         hydra:totalItems 283 .
 
 The default number of datasets returned (100) can be modified by CKAN site maintainers using the following configuration option on your ini file:

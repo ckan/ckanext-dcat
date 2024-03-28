@@ -140,7 +140,7 @@ class TestRDFParser(object):
 
         assert len(p.g) == 2
 
-    def test_parse_pagination_next_page(self):
+    def test_parse_pagination_next_page_deprecated_vocabulary_only(self):
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
         <rdf:RDF
@@ -162,6 +162,50 @@ class TestRDFParser(object):
         p.parse(data)
 
         assert p.next_page() == 'http://example.com/catalog.xml?page=2'
+
+    def test_parse_pagination_next_page_updated_vocabulary_only(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:hydra="http://www.w3.org/ns/hydra/core#">
+         <hydra:PagedCollection rdf:about="http://example.com/catalog.xml?page=1">
+            <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">245</hydra:totalItems>
+            <hydra:last>http://example.com/catalog.xml?page=3</hydra:last>
+            <hydra:next>http://example.com/catalog.xml?page=2</hydra:next>
+            <hydra:first>http://example.com/catalog.xml?page=1</hydra:first>
+        </hydra:PagedCollection>
+        </rdf:RDF>
+        '''
+
+        p = RDFParser()
+
+        p.parse(data)
+
+        assert p.next_page() == 'http://example.com/catalog.xml?page=2'
+
+    def test_parse_pagination_next_page_both_vocabularies(self):
+
+        data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:hydra="http://www.w3.org/ns/hydra/core#">
+         <hydra:PagedCollection rdf:about="http://example.com/catalog.xml?page=1">
+            <hydra:last>http://example.com/catalog.xml?page=3</hydra:last>
+            <hydra:next>http://example.com/catalog.xml?page=next</hydra:next>
+            <hydra:nextPage>http://example.com/catalog.xml?page=nextPage</hydra:nextPage>
+            <hydra:first>http://example.com/catalog.xml?page=1</hydra:first>
+        </hydra:PagedCollection>
+        </rdf:RDF>
+        '''
+
+        p = RDFParser()
+
+        p.parse(data)
+
+        assert p.next_page() == 'http://example.com/catalog.xml?page=next'
 
     def test_parse_without_pagination(self):
 

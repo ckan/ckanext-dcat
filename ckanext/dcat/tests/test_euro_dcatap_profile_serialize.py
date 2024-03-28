@@ -15,7 +15,7 @@ from geomet import wkt
 from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
-from ckanext.dcat.processors import RDFSerializer
+from ckanext.dcat.processors import RDFSerializer, HYDRA
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
                                    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT, 
                                    DISTRIBUTION_LICENSE_FALLBACK_CONFIG)
@@ -1249,6 +1249,77 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         dataset_title = list(g.objects(dataset_ref, DCT.title))
         assert len(dataset_title) == 1
         assert str(dataset_title[0]) == dataset['title']
+
+    def test_catalog_pagination(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'test dataset',
+            'extras': [
+                {'key': 'source_catalog_title', 'value': 'Subcatalog example'},
+                {'key': 'source_catalog_homepage', 'value': 'http://subcatalog.example'},
+                {'key': 'source_catalog_description', 'value': 'Subcatalog example description'}
+            ]
+        }
+        catalog_dict = {
+            'title': 'My Catalog',
+            'description': 'An Open Data Catalog',
+            'homepage': 'http://example.com',
+            'language': 'de',
+        }
+
+        expected_first = 'http://subcatalog.example?page=1'
+        expected_next = 'http://subcatalog.example?page=2'
+        expected_last = 'http://subcatalog.example?page=3'
+
+        pagination = {
+            'count': 12,
+            'items_per_page': 5,
+            'current':expected_first,
+            'first':expected_first,
+            'last':expected_last,
+            'next':expected_next,
+        }
+
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
+        g = s.g
+
+        s.serialize_catalog(catalog_dict, dataset_dicts=[dataset], pagination_info=pagination)
+
+        paged_collection = list(g.subjects(RDF.type, HYDRA.PagedCollection))
+        assert len(paged_collection) == 1
+
+        # Pagination item: next
+        next = list(g.objects(paged_collection[0], HYDRA.next))
+        assert len(next) == 1
+        assert str(next[0]) == expected_next
+        next_page = list(g.objects(paged_collection[0], HYDRA.nextPage))
+        assert len(next_page) == 1
+        assert str(next_page[0]) == expected_next
+
+        # Pagination item: previous
+        previous_page = list(g.objects(paged_collection[0], HYDRA.previousPage))
+        assert len(previous_page) == 0
+        previous = list(g.objects(paged_collection[0], HYDRA.previous))
+        assert len(previous) == 0
+
+        # Pagination item: last
+        last = list(g.objects(paged_collection[0], HYDRA.last))
+        assert len(last) == 1
+        assert str(last[0]) == expected_last
+        last_page = list(g.objects(paged_collection[0], HYDRA.lastPage))
+        assert len(last_page) == 1
+        assert str(last_page[0]) == expected_last
+
+        # Pagination item: count
+        total_items = list(g.objects(paged_collection[0], HYDRA.totalItems))
+        assert len(total_items) == 1
+        assert str(total_items[0]) == "12"
+
+        # Pagination item: items_per_page
+        items_per_page = list(g.objects(paged_collection[0], HYDRA.itemsPerPage))
+        assert len(items_per_page) == 1
+        assert str(items_per_page[0]) == "5"
 
     @pytest.mark.ckan_config(DISTRIBUTION_LICENSE_FALLBACK_CONFIG, 'true')
     def test_set_missing_license_for_resource(self):
