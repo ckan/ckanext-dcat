@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.6.0...HEAD)
 
+* Adds support for the latest Hydra vocabulary. For backward compatibility, the old properties are still supported but marked as deprecated.
 
 ## [v1.6.0](https://github.com/ckan/ckanext-dcat/compare/v1.5.1...v1.6.0) - 2024-02-29
 
