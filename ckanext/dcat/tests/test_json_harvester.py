@@ -1,8 +1,11 @@
 from __future__ import absolute_import
+import pytest
+
+pytest.importorskip("ckanext.harvest", reason="Harvest extension not installed")
+
 from builtins import object
 
 import responses
-import pytest
 try:
     from unittest.mock import patch
 except ImportError:

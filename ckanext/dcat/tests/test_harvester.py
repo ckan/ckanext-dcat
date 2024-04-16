@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import pytest
+
+pytest.importorskip("ckanext.harvest", reason="Harvest extension not installed")
 
 from builtins import str
 from builtins import range
@@ -6,7 +9,6 @@ from builtins import object
 from collections import defaultdict
 import re
 
-import pytest
 import responses
 try:
     from unittest.mock import patch
@@ -17,13 +19,14 @@ import ckan.plugins as p
 from ckantoolkit import config
 from ckantoolkit.tests import helpers
 
-import ckanext.harvest.model as harvest_model
-from ckanext.harvest import queue
+
 
 from ckanext.dcat.harvesters import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 import ckanext.dcat.harvesters.rdf
 
+import ckanext.harvest.model as harvest_model
+from ckanext.harvest import queue
 
 
 
