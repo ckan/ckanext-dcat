@@ -66,6 +66,7 @@ jobs:
     - name: Run tests
       run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=xml --cov-append --disable-warnings ckanext/dcat/tests
     - name: Upload coverage report to codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v4
       with:
-        file: ./coverage.xml
+        files: ./coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
