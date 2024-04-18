@@ -614,7 +614,7 @@ class RDFProfile(object):
             if self._object(_format, RDF.type) == DCT.IMT:
                 if not imt:
                     imt = str(self.g.value(_format, default=None))
-                label = str(self.g.label(_format, default=None))
+                label = self._object_value(_format, RDFS.label)
             elif isinstance(_format, URIRef):
                 # If the URIRef does not reference a BNode, it could reference an IANA type.
                 # Otherwise, use it as label.
