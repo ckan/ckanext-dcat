@@ -69,4 +69,5 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         files: ./coverage.xml
+      env:
         token: ${{ secrets.CODECOV_TOKEN }}
