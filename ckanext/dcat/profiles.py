@@ -1,6 +1,3 @@
-from builtins import str
-from past.builtins import basestring
-from builtins import object
 import datetime
 import json
 
@@ -20,6 +17,7 @@ from geomet import wkt, InvalidGeoJSONException
 from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
+from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
 
 DCT = Namespace("http://purl.org/dc/terms/")
@@ -67,7 +65,7 @@ class URIRefOrLiteral(object):
     def __new__(cls, value):
         try:
             stripped_value = value.strip()
-            if (isinstance(value, basestring) and (stripped_value.startswith("http://")
+            if (isinstance(value, str) and (stripped_value.startswith("http://")
                                                 or stripped_value.startswith("https://"))):
                 uri_obj = CleanedURIRef(value)
                 # although all invalid chars checked by rdflib should have been quoted, try to serialize
@@ -101,7 +99,7 @@ class CleanedURIRef(object):
         return value
 
     def __new__(cls, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             value = CleanedURIRef._careful_quote(value.strip())
         return URIRef(value)
 
@@ -614,7 +612,7 @@ class RDFProfile(object):
             if self._object(_format, RDF.type) == DCT.IMT:
                 if not imt:
                     imt = str(self.g.value(_format, default=None))
-                label = str(self.g.label(_format, default=None))
+                label = self._object_value(_format, RDFS.label)
             elif isinstance(_format, URIRef):
                 # If the URIRef does not reference a BNode, it could reference an IANA type.
                 # Otherwise, use it as label.
@@ -625,10 +623,8 @@ class RDFProfile(object):
                     label = format_uri
 
         if ((imt or label) and normalize_ckan_format):
-            import ckan.config
-            from ckan.lib import helpers
 
-            format_registry = helpers.resource_formats()
+            format_registry = resource_formats()
 
             if imt in format_registry:
                 label = format_registry[imt][1]
@@ -662,7 +658,7 @@ class RDFProfile(object):
         # List of values
         if isinstance(value, list):
             items = value
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             try:
                 items = json.loads(value)
                 if isinstance(items, ((int, float, complex))):

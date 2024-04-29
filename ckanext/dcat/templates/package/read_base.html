@@ -12,7 +12,7 @@
       {% endwith %}
     {% endif %}
 {% endblock -%}
-{% block body_extras %}
+{% block scripts %}
   {{ super() }}
   {% block structured_data %}
     {#
@@ -22,7 +22,6 @@
     More information about structured data:
     https://developers.google.com/search/docs/guides/intro-structured-data
     #}
-
       {% if h.helper_available('structured_data') %}
           <script type="application/ld+json">
            {{ h.structured_data(pkg.id)|safe }}
