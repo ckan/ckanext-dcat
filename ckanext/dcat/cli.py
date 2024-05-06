@@ -44,10 +44,10 @@ def generate_static(output):
     help="RDF profiles to use",
 )
 @click.option(
-    "-P", "--pretty", default=False, help="Make the output more human readable"
+    "-P", "--pretty", is_flag=True, help="Make the output more human readable"
 )
 @click.option(
-    "-m", "--compat_mode", default=False, help="Compatibility mode (deprecated)"
+    "-m", "--compat_mode", is_flag=True, help="Compatibility mode (deprecated)"
 )
 def consume(input, output, format, profiles, pretty, compat_mode):
     """
@@ -72,6 +72,58 @@ def consume(input, output, format, profiles, pretty, compat_mode):
 
     indent = 4 if pretty else None
     out = json.dumps(ckan_datasets, indent=indent)
+
+    output.write(out)
+
+
+@dcat.command(context_settings={"show_default": True})
+@click.argument("input", type=click.File(mode="r"))
+@click.option(
+    "-o",
+    "--output",
+    type=click.File(mode="w"),
+    default="-",
+    help="By default the command will output the result to stdin, "
+    "alternatively you can provide a file path with this option",
+)
+@click.option(
+    "-f", "--format", default="xml", help="Serialization format (eg ttl, jsonld)"
+)
+@click.option(
+    "-p",
+    "--profiles",
+    default=" ".join(DEFAULT_RDF_PROFILES),
+    help="RDF profiles to use",
+)
+@click.option(
+    "-P", "--pretty", is_flag=True, help="Make the output more human readable"
+)
+@click.option(
+    "-m", "--compat_mode", is_flag=True, help="Compatibility mode (deprecated)"
+)
+def produce(input, output, format, profiles, pretty, compat_mode):
+    """
+    Transforms CKAN dataset JSON objects into DCAT RDF serializations.
+
+    The input datasets can be provided as a path to a file, e.g.:
+
+        ckan dcat consume examples/ckan_dataset.json
+
+    Or be read from stdin:
+
+        ckan dcat produce -
+    """
+    contents = input.read()
+
+    if profiles:
+        profiles = profiles.split()
+    serializer = RDFSerializer(
+        profiles=profiles,
+        compatibility_mode=compat_mode
+    )
+
+    dataset = json.loads(contents)
+    out = serializer.serialize_dataset(dataset, _format=format)
 
     output.write(out)
 
