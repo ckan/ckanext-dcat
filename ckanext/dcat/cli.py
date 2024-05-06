@@ -98,7 +98,7 @@ def consume(input, output, format, profiles, pretty, compat_mode):
 @click.option(
     "-m", "--compat_mode", is_flag=True, help="Compatibility mode (deprecated)"
 )
-def produce(input, output, format, profiles, pretty, compat_mode):
+def produce(input, output, format, profiles, compat_mode):
     """
     Transforms CKAN dataset JSON objects into DCAT RDF serializations.
 
