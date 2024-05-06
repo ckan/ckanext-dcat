@@ -96,9 +96,6 @@ def consume(input, output, format, profiles, pretty, compat_mode):
     help="RDF profiles to use",
 )
 @click.option(
-    "-P", "--pretty", is_flag=True, help="Make the output more human readable"
-)
-@click.option(
     "-m", "--compat_mode", is_flag=True, help="Compatibility mode (deprecated)"
 )
 def produce(input, output, format, profiles, pretty, compat_mode):
@@ -123,7 +120,10 @@ def produce(input, output, format, profiles, pretty, compat_mode):
     )
 
     dataset = json.loads(contents)
-    out = serializer.serialize_dataset(dataset, _format=format)
+    if isinstance(dataset, list):
+        out = serializer.serialize_datasets(dataset, _format=format)
+    else:
+        out = serializer.serialize_dataset(dataset, _format=format)
 
     output.write(out)
 

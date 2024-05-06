@@ -291,6 +291,22 @@ class RDFSerializer(RDFProcessor):
 
         return output
 
+    def serialize_datasets(self, dataset_dicts, _format='xml'):
+        '''
+        Given a list of CKAN dataset dicts, returns an RDF serialization
+
+        The serialization format can be defined using the `_format` parameter.
+        It must be one of the ones supported by RDFLib, defaults to `xml`.
+
+        Returns a string with the serialized datasets
+        '''
+        out = []
+        for dataset_dict in dataset_dicts:
+            out.append(self.serialize_dataset(dataset_dict, _format))
+        return '\n'.join(out)
+
+
+
     def serialize_catalog(self, catalog_dict=None, dataset_dicts=None,
                           _format='xml', pagination_info=None):
         '''
