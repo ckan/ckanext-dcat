@@ -291,6 +291,22 @@ class RDFSerializer(RDFProcessor):
 
         return output
 
+    def serialize_datasets(self, dataset_dicts, _format='xml'):
+        '''
+        Given a list of CKAN dataset dicts, returns an RDF serialization
+
+        The serialization format can be defined using the `_format` parameter.
+        It must be one of the ones supported by RDFLib, defaults to `xml`.
+
+        Returns a string with the serialized datasets
+        '''
+        out = []
+        for dataset_dict in dataset_dicts:
+            out.append(self.serialize_dataset(dataset_dict, _format))
+        return '\n'.join(out)
+
+
+
     def serialize_catalog(self, catalog_dict=None, dataset_dicts=None,
                           _format='xml', pagination_info=None):
         '''
@@ -394,59 +410,3 @@ class RDFSerializer(RDFProcessor):
                     g.add((agent, predicate, _type(val)))
 
         return catalog_ref
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(
-        description='DCAT RDF - CKAN operations')
-    parser.add_argument('mode',
-                        default='consume',
-                        help='''
-Operation mode.
-`consume` parses DCAT RDF graphs to CKAN dataset JSON objects.
-`produce` serializes CKAN dataset JSON objects into DCAT RDF.
-                        ''')
-    parser.add_argument('file', nargs='?', type=argparse.FileType('r'),
-                        default=sys.stdin,
-                        help='Input file. If omitted will read from stdin')
-    parser.add_argument('-f', '--format',
-                        default='xml',
-                        help='''Serialization format (as understood by rdflib)
-                                eg: xml, n3 ... Defaults to \'xml\'.''')
-    parser.add_argument('-P', '--pretty',
-                        action='store_true',
-                        help='Make the output more human readable')
-    parser.add_argument('-p', '--profile', nargs='*',
-                        action='store',
-                        help='RDF Profiles to use, defaults to euro_dcat_ap_2')
-    parser.add_argument('-m', '--compat-mode',
-                        action='store_true',
-                        help='Enable compatibility mode')
-
-    parser.add_argument('-s', '--subcatalogs', action='store_true', dest='subcatalogs',
-                        default=False,
-                        help="Enable subcatalogs handling (dct:hasPart support)")
-    args = parser.parse_args()
-
-    contents = args.file.read()
-
-    config.update({DCAT_EXPOSE_SUBCATALOGS: args.subcatalogs})
-
-    if args.mode == 'produce':
-        serializer = RDFSerializer(profiles=args.profile,
-                                   compatibility_mode=args.compat_mode)
-
-        dataset = json.loads(contents)
-        out = serializer.serialize_dataset(dataset, _format=args.format)
-        print(out)
-    else:
-        parser = RDFParser(profiles=args.profile,
-                           compatibility_mode=args.compat_mode)
-
-        parser.parse(contents, _format=args.format)
-
-        ckan_datasets = [d for d in parser.datasets()]
-
-        indent = 4 if args.pretty else None
-        print(json.dumps(ckan_datasets, indent=indent))
