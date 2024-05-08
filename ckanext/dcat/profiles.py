@@ -5,6 +5,7 @@ from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 
+import ckantoolkit as toolkit
 from ckantoolkit import config
 from ckantoolkit import url_for
 
@@ -15,7 +16,6 @@ from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 from geomet import wkt, InvalidGeoJSONException
 
 from ckan.model.license import LicenseRegister
-from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
 from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
@@ -54,6 +54,19 @@ namespaces = {
 PREFIX_MAILTO = u'mailto:'
 
 DISTRIBUTION_LICENSE_FALLBACK_CONFIG = 'ckanext.dcat.resource.inherit.license'
+
+ROOT_DATASET_FIELDS = [
+    'name',
+    'title',
+    'url',
+    'version',
+    'tags',
+    'license_id',
+    'maintainer',
+    'maintainer_email',
+    'author',
+    'author_email',
+]
 
 
 class URIRefOrLiteral(object):
@@ -111,7 +124,9 @@ class RDFProfile(object):
        custom profiles
     '''
 
-    def __init__(self, graph, compatibility_mode=False):
+    _dataset_schema = None
+
+    def __init__(self, graph, dataset_schema='dataset', compatibility_mode=False):
         '''Class constructor
 
         Graph is an rdflib.Graph instance.
@@ -129,6 +144,15 @@ class RDFProfile(object):
         # Cache for mappings of licenses URL/title to ID built when needed in
         # _license().
         self._licenceregister_cache = None
+
+        schema_show = toolkit.get_action("scheming_dataset_schema_show")
+        if schema_show:
+            try:
+                schema = schema_show({}, {"type": dataset_schema})
+            except toolkit.ObjectNotFound:
+                raise toolkit.ObjectNotFound(f"Unknown dataset schema: {dataset_schema}")
+
+            self._dataset_schema = schema
 
     def _datasets(self):
         '''
@@ -695,6 +719,38 @@ class RDFProfile(object):
                 {'key': 'spatial_{0}'.format(key) if key != 'geom' else 'spatial',
                  'value': spatial.get(key)})
 
+    def _schema_field(self, key):
+        '''
+        Returns the schema field information if the provided key exists as a field in
+        the dataset schema (if one was provided)
+        '''
+        if not self._dataset_schema:
+            return None
+
+        for field in self._dataset_schema['dataset_fields']:
+            if field['field_name'] == key:
+                return field
+
+    def _set_dataset_value(self, dataset_dict, key, value):
+        '''
+        Sets the value for a given key in a CKAN dataset dict
+
+        If a dataset schema was provided, the schema will be checked to see if
+        a custom field is present for the key. If so the key will be stored at
+        the dict root level, otherwise it will be stored as an extra.
+
+        Standard CKAN fields (defined in ROOT_DATASET_FIELDS) are always stored
+        at the root level.
+        '''
+        if self._schema_field(key) or key in ROOT_DATASET_FIELDS:
+            dataset_dict[key] = value
+        else:
+            if not dataset_dict.get('extras'):
+                dataset_dict['extras'] = []
+            dataset_dict['extras'].append({'key': key, 'value': value})
+
+        return dataset_dict
+
     def _get_dataset_value(self, dataset_dict, key, default=None):
         '''
         Returns the value for the given key on a CKAN dict
@@ -1021,7 +1077,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
-                dataset_dict['extras'].append({'key': key, 'value': value})
+                self._set_dataset_value(dataset_dict, key, value)
 
         #  Lists
         for key, predicate, in (

@@ -33,7 +33,7 @@ DEFAULT_RDF_PROFILES = ['euro_dcat_ap_2']
 
 class RDFProcessor(object):
 
-    def __init__(self, profiles=None, compatibility_mode=False):
+    def __init__(self, profiles=None, dataset_schema='dataset', compatibility_mode=False):
         '''
         Creates a parser or serializer instance
 
@@ -55,6 +55,8 @@ class RDFProcessor(object):
         if not self._profiles:
             raise RDFProfileException(
                 'No suitable RDF profiles could be loaded')
+
+        self.dataset_schema = dataset_schema
 
         if not compatibility_mode:
             compatibility_mode = p.toolkit.asbool(
@@ -177,10 +179,15 @@ class RDFParser(RDFProcessor):
         for dataset_ref in self._datasets():
             dataset_dict = {}
             for profile_class in self._profiles:
-                profile = profile_class(self.g, self.compatibility_mode)
+                profile = profile_class(
+                    self.g,
+                    dataset_schema=self.dataset_schema,
+                    compatibility_mode=self.compatibility_mode
+                )
                 profile.parse_dataset(dataset_dict, dataset_ref)
 
             yield dataset_dict
+
 
 class RDFSerializer(RDFProcessor):
     '''
@@ -245,7 +252,7 @@ class RDFSerializer(RDFProcessor):
         dataset_ref = URIRef(dataset_uri(dataset_dict))
 
         for profile_class in self._profiles:
-            profile = profile_class(self.g, self.compatibility_mode)
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
             profile.graph_from_dataset(dataset_dict, dataset_ref)
 
         return dataset_ref
@@ -263,7 +270,7 @@ class RDFSerializer(RDFProcessor):
         catalog_ref = URIRef(catalog_uri())
 
         for profile_class in self._profiles:
-            profile = profile_class(self.g, self.compatibility_mode)
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
             profile.graph_from_catalog(catalog_dict, catalog_ref)
 
         return catalog_ref
