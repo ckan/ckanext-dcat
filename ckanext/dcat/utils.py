@@ -409,6 +409,8 @@ def read_dataset_page(_id, _format):
     try:
         response = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
             'format': _format, 'profiles': _profiles})
+    except toolkit.NotAuthorized:
+        toolkit.abort(403)
     except toolkit.ObjectNotFound:
         toolkit.abort(404)
     except (toolkit.ValidationError, RDFProfileException) as e:
