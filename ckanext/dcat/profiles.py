@@ -751,6 +751,13 @@ class RDFProfile(object):
 
         return dataset_dict
 
+    def _set_list_dataset_value(self, dataset_dict, key, value):
+        schema_field = self._schema_field(key)
+        if schema_field and 'scheming_multiple_text' in schema_field['validators']:
+            return self._set_dataset_value(dataset_dict, key, value)
+        else:
+            return self._set_dataset_value(dataset_dict, key, json.dumps(value))
+
     def _get_dataset_value(self, dataset_dict, key, default=None):
         '''
         Returns the value for the given key on a CKAN dict
@@ -1094,8 +1101,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
-                dataset_dict['extras'].append({'key': key,
-                                               'value': json.dumps(values)})
+                self._set_list_dataset_value(dataset_dict, key, values)
 
         # Contact details
         contact = self._contact_details(dataset_ref, DCAT.contactPoint)
