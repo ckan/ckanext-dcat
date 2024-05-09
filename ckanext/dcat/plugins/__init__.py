@@ -134,20 +134,22 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     def before_dataset_index(self, dataset_dict):
         schema = None
-        schema_show = toolkit.get_action("scheming_dataset_schema_show")
+        schema_show = p.toolkit.get_action("scheming_dataset_schema_show")
         if schema_show:
             try:
                 schema = schema_show({}, {"type": dataset_dict["type"]})
-            except toolkit.ObjectNotFound:
+            except p.toolkit.ObjectNotFound:
                 pass
 
         if schema:
-            for field in schemas[dataset_dict['type']]['dataset_fields']:
-                if field['field_name'] not in dataset_dict and 'repeating_subfields' in field:
-                    for key in dataset_dict[field['field_name']]:
-                        # Index a flattened version
-                        new_key = f'{field["field_name"]}_{key}'
-                        dataset_dict[new_key] = dataset_dict[field['field_name']][key]
+            for field in schema['dataset_fields']:
+                if field['field_name'] in dataset_dict and 'repeating_subfields' in field:
+                    for index, item in enumerate(dataset_dict[field['field_name']]):
+                        for key in item:
+                            # Index a flattened version
+                            new_key = f'{field["field_name"]}_{index}_{key}'
+
+                            dataset_dict[new_key] = dataset_dict[field['field_name']][index][key]
                     dataset_dict.pop(field['field_name'], None)
 
         return dataset_dict
