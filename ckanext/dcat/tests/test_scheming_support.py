@@ -90,5 +90,8 @@ class TestSchemingSupport(BaseSerializeTest):
 
         contact_details = [t for t in g.triples((dataset_ref, DCAT.contactPoint, None))]
 
-        # TODO this will fail
         assert len(contact_details) == len(dataset["contact"])
+        self._triple(g, contact_details[0][2], VCARD.fn, dataset_dict["contact"][0]["name"])
+        self._triple(g, contact_details[0][2], VCARD.hasEmail, dataset_dict["contact"][0]["email"])
+        self._triple(g, contact_details[1][2], VCARD.fn, dataset_dict["contact"][1]["name"])
+        self._triple(g, contact_details[1][2], VCARD.hasEmail, dataset_dict["contact"][1]["email"])
