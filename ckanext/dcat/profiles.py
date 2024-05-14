@@ -1336,6 +1336,32 @@ class EuropeanDCATAPProfile(RDFProfile):
                 _type=URIRef, value_modifier=self._add_mailto
             )
 
+        # TODO: this will go into a separate profile
+        contact = dataset_dict.get("contact")
+        if isinstance(contact, list) and len(contact):
+            for item in contact:
+                contact_uri = item.get('uri')
+                if contact_uri:
+                    contact_details = CleanedURIRef(contact_uri)
+                else:
+                    contact_details = BNode()
+
+                g.add((contact_details, RDF.type, VCARD.Organization))
+                g.add((dataset_ref, DCAT.contactPoint, contact_details))
+
+                self._add_triple_from_dict(
+                    item, contact_details,
+                    VCARD.fn, 'name'
+                )
+                # Add mail address as URIRef, and ensure it has a mailto: prefix
+                self._add_triple_from_dict(
+                    item, contact_details,
+                    VCARD.hasEmail, 'email',
+                    _type=URIRef, value_modifier=self._add_mailto
+                )
+
+
+
         # Publisher
         if any([
             self._get_dataset_value(dataset_dict, 'publisher_uri'),
