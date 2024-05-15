@@ -94,6 +94,7 @@ dataset_fields:
 - field_name: conforms_to
   label: Conforms to
   preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
 
 
 resource_fields:
@@ -114,3 +115,27 @@ resource_fields:
 - field_name: format
   label: Format
   preset: resource_format_autocomplete
+
+- field_name: rights
+  label: Rights
+  form_snippet: markdown.html
+  form_placeholder: Some statement about the rights associated with the resource
+
+- field_name: language
+  label: Language
+  preset: multiple_text
+
+- field_name: access_services
+  label: Access services
+  repeating_label: Access service
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: title
+      label: Title
+
+    - field_name: endpoint_url
+      label: Endpoint URL
+      preset: multiple_text
