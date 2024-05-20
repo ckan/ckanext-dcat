@@ -731,6 +731,18 @@ class RDFProfile(object):
             if field['field_name'] == key:
                 return field
 
+    def _schema_resource_field(self, key):
+        '''
+        Returns the schema field information if the provided key exists as a field in
+        the resources fields of the dataset schema (if one was provided)
+        '''
+        if not self._dataset_schema:
+            return None
+
+        for field in self._dataset_schema['resource_fields']:
+            if field['field_name'] == key:
+                return field
+
     def _set_dataset_value(self, dataset_dict, key, value):
         '''
         Sets the value for a given key in a CKAN dataset dict
@@ -757,6 +769,15 @@ class RDFProfile(object):
             return self._set_dataset_value(dataset_dict, key, value)
         else:
             return self._set_dataset_value(dataset_dict, key, json.dumps(value))
+
+    def _set_list_resource_value(self, resource_dict, key, value):
+        schema_field = self._schema_resource_field(key)
+        if schema_field and 'scheming_multiple_text' in schema_field['validators']:
+            resource_dict[key] = value
+        else:
+            resource_dict[key] = json.dumps(value)
+
+        return resource_dict
 
     def _get_dataset_value(self, dataset_dict, key, default=None):
         '''
@@ -1084,7 +1105,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ):
             value = self._object_value(dataset_ref, predicate)
             if value:
-                self._set_dataset_value(dataset_dict, key, value)
+                dataset_dict['extras'].append({'key': key, 'value': value})
 
         #  Lists
         for key, predicate, in (
@@ -1101,7 +1122,8 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
-                self._set_list_dataset_value(dataset_dict, key, values)
+                dataset_dict['extras'].append({'key': key,
+                                               'value': json.dumps(values)})
 
         # Contact details
         contact = self._contact_details(dataset_ref, DCAT.contactPoint)
@@ -1110,7 +1132,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             contact = self._contact_details(dataset_ref, ADMS.contactPoint)
 
         if contact:
-            for key in ('uri', 'name', 'email'):
+           for key in ('uri', 'name', 'email'):
                 if contact.get(key):
                     dataset_dict['extras'].append(
                         {'key': 'contact_{0}'.format(key),
@@ -1335,32 +1357,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                   'author_email'],
                 _type=URIRef, value_modifier=self._add_mailto
             )
-
-        # TODO: this will go into a separate profile
-        contact = dataset_dict.get("contact")
-        if isinstance(contact, list) and len(contact):
-            for item in contact:
-                contact_uri = item.get('uri')
-                if contact_uri:
-                    contact_details = CleanedURIRef(contact_uri)
-                else:
-                    contact_details = BNode()
-
-                g.add((contact_details, RDF.type, VCARD.Organization))
-                g.add((dataset_ref, DCAT.contactPoint, contact_details))
-
-                self._add_triple_from_dict(
-                    item, contact_details,
-                    VCARD.fn, 'name'
-                )
-                # Add mail address as URIRef, and ensure it has a mailto: prefix
-                self._add_triple_from_dict(
-                    item, contact_details,
-                    VCARD.hasEmail, 'email',
-                    _type=URIRef, value_modifier=self._add_mailto
-                )
-
-
 
         # Publisher
         if any([
@@ -1752,8 +1748,6 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
-            # TODO: this will go into a separate profile
-
             access_service_list = resource_dict.get('access_services', [])
             if isinstance(access_service_list, str):
                 try:
@@ -1796,9 +1790,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                 ]
                 self._add_list_triples_from_dict(access_service_dict, access_service_node, items)
 
-            # TODO: re-enable when separating into a profile
-            # if access_service_list:
-            #    resource_dict['access_services'] = json.dumps(access_service_list)
+            if access_service_list:
+               resource_dict['access_services'] = json.dumps(access_service_list)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
@@ -2097,3 +2090,88 @@ class SchemaOrgProfile(RDFProfile):
     def _distribution_numbers_graph(self, distribution, resource_dict):
         if resource_dict.get('size'):
             self.g.add((distribution, SCHEMA.contentSize, Literal(resource_dict['size'])))
+
+
+# TODO: split all these classes in different files
+class EuropeanDCATAPSchemingProfile(RDFProfile):
+    '''
+    This is a compatibilty profile meant to add support for ckanext-scheming to the existing
+    `euro_dcat_ap` and `euro_dcat_ap_2` profiles.
+
+    It does not add or remove any properties from these profiles, it just transforms the
+    resulting dataset_dict so it is compatible with a ckanext-scheming schema
+
+    TODO: summarize changes and link to docs
+    '''
+
+    def parse_dataset(self, dataset_dict, dataset_ref):
+
+        if not self._dataset_schema:
+            # Not using scheming
+            return dataset_dict
+
+        # Move extras to root
+
+        extras_to_remove = []
+        extras = dataset_dict.get('extras', [])
+        for extra in extras:
+            if self._schema_field(extra['key']):
+                # This is a field defined in the dataset schema
+                dataset_dict[extra['key']] = extra['value']
+                extras_to_remove.append(extra['key'])
+
+        dataset_dict['extras'] = [e for e in extras if e['key'] not in extras_to_remove]
+
+
+        # Parse lists
+        def _parse_list_value(data_dict, field_name):
+            schema_field = self._schema_field(field_name) or self._schema_resource_field(field_name)
+
+            if schema_field and 'scheming_multiple_text' in schema_field.get('validators', []):
+                if isinstance(data_dict[field_name], str):
+                    try:
+                        data_dict[field_name] = json.loads(data_dict[field_name])
+                    except ValueError:
+                        pass
+
+        for field_name in dataset_dict.keys():
+            _parse_list_value(dataset_dict, field_name)
+
+        for resource_dict in dataset_dict.get('resources', []):
+            for field_name in resource_dict.keys():
+                _parse_list_value(resource_dict, field_name)
+
+
+        # Repeating subfields
+        for schema_field in self._dataset_schema['dataset_fields']:
+            if 'repeating_subfields' in schema_field:
+                # Check if existing extras need to be migrated
+                field_name = schema_field['field_name']
+                new_extras = []
+                new_dict = {}
+                for extra in dataset_dict.get('extras', []):
+                    if extra['key'].startswith(f'{field_name}_'):
+                        subfield = extra['key'][extra['key'].index('_') + 1:]
+                        if subfield in [f['field_name'] for f in schema_field['repeating_subfields']]:
+                            new_dict[subfield] = extra['value']
+                        else:
+                            new_extras.append(extra)
+                    else:
+                        new_extras.append(extra)
+                if new_dict:
+                    dataset_dict[field_name] = [new_dict]
+                    dataset_dict['extras'] = new_extras
+
+        for schema_field in self._dataset_schema['resource_fields']:
+            if 'repeating_subfields' in schema_field:
+                # Check if value needs to be load from JSON
+                field_name = schema_field['field_name']
+                for resource_dict in dataset_dict.get('resources', []):
+                    if resource_dict.get(field_name) and isinstance(resource_dict[field_name], str):
+                        try:
+                            # TODO: load only subfields in schema?
+                            resource_dict[field_name] = json.loads(resource_dict[field_name])
+                        except ValueError:
+                            pass
+
+        return dataset_dict
