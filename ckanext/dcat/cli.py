@@ -6,7 +6,12 @@ import click
 import ckan.plugins.toolkit as tk
 
 import ckanext.dcat.utils as utils
-from ckanext.dcat.processors import RDFParser, RDFSerializer, DEFAULT_RDF_PROFILES
+from ckanext.dcat.processors import (
+    RDFParser,
+    RDFSerializer,
+    DEFAULT_RDF_PROFILES,
+    RDF_PROFILES_CONFIG_OPTION,
+)
 
 
 @click.group()
@@ -40,8 +45,8 @@ def generate_static(output):
 @click.option(
     "-p",
     "--profiles",
-    default=" ".join(DEFAULT_RDF_PROFILES),
-    help="RDF profiles to use",
+    help=f"RDF profiles to use. If not provided will be read from config, "
+    "if not present there the default will be used: {DEFAULT_RDF_PROFILES}",
 )
 @click.option(
     "-P", "--pretty", is_flag=True, help="Make the output more human readable"
@@ -65,6 +70,11 @@ def consume(input, output, format, profiles, pretty, compat_mode):
 
     if profiles:
         profiles = profiles.split()
+    elif tk.config.get(RDF_PROFILES_CONFIG_OPTION):
+        profiles = tk.aslist(tk.config[RDF_PROFILES_CONFIG_OPTION])
+    else:
+        profiles = None
+
     parser = RDFParser(profiles=profiles, compatibility_mode=compat_mode)
     parser.parse(contents, _format=format)
 
@@ -92,8 +102,8 @@ def consume(input, output, format, profiles, pretty, compat_mode):
 @click.option(
     "-p",
     "--profiles",
-    default=" ".join(DEFAULT_RDF_PROFILES),
-    help="RDF profiles to use",
+    help=f"RDF profiles to use. If not provided will be read from config, "
+    "if not present there the default will be used: {DEFAULT_RDF_PROFILES}",
 )
 @click.option(
     "-m", "--compat_mode", is_flag=True, help="Compatibility mode (deprecated)"
@@ -114,10 +124,12 @@ def produce(input, output, format, profiles, compat_mode):
 
     if profiles:
         profiles = profiles.split()
-    serializer = RDFSerializer(
-        profiles=profiles,
-        compatibility_mode=compat_mode
-    )
+    elif tk.config.get(RDF_PROFILES_CONFIG_OPTION):
+        profiles = tk.aslist(tk.config[RDF_PROFILES_CONFIG_OPTION])
+    else:
+        profiles = None
+
+    serializer = RDFSerializer(profiles=profiles, compatibility_mode=compat_mode)
 
     dataset = json.loads(contents)
     if isinstance(dataset, list):
