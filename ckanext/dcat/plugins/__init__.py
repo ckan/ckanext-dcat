@@ -107,6 +107,9 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     def after_show(self, context, data_dict):
         return self.after_dataset_show(context, data_dict)
 
+    def before_index(self, dataset_dict):
+        return self.before_dataset_index(dataset_dict)
+
     # CKAN >= 2.10 hooks
     def after_dataset_show(self, context, data_dict):
 
