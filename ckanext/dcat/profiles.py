@@ -34,6 +34,7 @@ LOCN = Namespace('http://www.w3.org/ns/locn#')
 GSP = Namespace('http://www.opengis.net/ont/geosparql#')
 OWL = Namespace('http://www.w3.org/2002/07/owl#')
 SPDX = Namespace('http://spdx.org/rdf/terms#')
+ELI= Namespace('http://data.europa.eu/eli/ontology#')
 
 GEOJSON_IMT = 'https://www.iana.org/assignments/media-types/application/vnd.geo+json'
 
@@ -908,6 +909,22 @@ class RDFProfile(object):
         self.g.add((dataset_ref, DCT.spatial, spatial_ref))
         return spatial_ref
 
+
+    def _add_with_class(self, dataset_dict, dataset_ref, key, predicate, _type, _class, list_value=False):
+        value = self._get_dataset_value(dataset_dict, key)
+
+        def _add(v):
+            ref = _type(v)
+            self.g.add((ref, RDF.type, _class))
+            self.g.add((dataset_ref, predicate, ref))
+
+        if value:
+            if list_value:
+                for v in self._read_list_value(value):
+                    _add(v)
+            else:
+                _add(value)
+    
     # Public methods for profiles to implement
 
     def parse_dataset(self, dataset_dict, dataset_ref):
@@ -1354,8 +1371,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 resource_license_fallback = dataset_dict['license_url']
 
         # Resources
-        for resource_dict in dataset_dict.get('resources', []):
-
+        for resource_dict in dataset_dict.get('resources', []):                
             distribution = CleanedURIRef(resource_uri(resource_dict))
 
             g.add((dataset_ref, DCAT.distribution, distribution))
@@ -1368,12 +1384,14 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('description', DCT.description, None, Literal),
                 ('status', ADMS.status, None, URIRefOrLiteral),
                 ('rights', DCT.rights, None, URIRefOrLiteral),
-                ('license', DCT.license, None, URIRefOrLiteral),
+#                ('license', DCT.license, None, URIRefOrLiteral),
                 ('access_url', DCAT.accessURL, None, URIRef),
                 ('download_url', DCAT.downloadURL, None, URIRef),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
+
+            self._add_with_class(resource_dict, distribution, 'license', DCT.license, URIRefOrLiteral, DCT.LicenseDocument)
 
             #  Lists
             items = [
@@ -1385,7 +1403,9 @@ class EuropeanDCATAPProfile(RDFProfile):
 
             # Set default license for distribution if needed and available
             if resource_license_fallback and not (distribution, DCT.license, None) in g:
-                g.add((distribution, DCT.license, URIRefOrLiteral(resource_license_fallback)))
+                _ref = URIRefOrLiteral(resource_license_fallback)
+                g.add((_ref, RDF.type, DCT.LicenseDocument))
+                g.add((distribution, DCT.license, _ref))
 
             # Format
             mimetype = resource_dict.get('mimetype')
@@ -1596,6 +1616,17 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
         return dataset_dict
 
+    def _add_hvd(self, value, ref):
+        for uri in self._read_list_value(value):
+            hvd_ref = URIRefOrLiteral(uri)
+            self.g.add((hvd_ref, RDF.type, SKOS.Concept))
+            self.g.add((hvd_ref, SKOS.inScheme, URIRef('http://data.europa.eu/bna/asd487ae75')))
+            self.g.add((ref, DCATAP.hvdCategory, hvd_ref))
+            # UNDONE -- add the codelists to the DCAT extension.
+            # add the prefLabels corresponding to the configured languages for the site. 
+
+    
+    
     def graph_from_dataset(self, dataset_dict, dataset_ref):
 
         # call super method
@@ -1605,12 +1636,17 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         for key, predicate, fallbacks, type, datatype in (
             ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration),
             ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None),
-            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None),
-            ('hvd_category', DCATAP.hvdCategory, None, URIRefOrLiteral, None),
+#            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None),
         ):
             self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
                                        fallbacks=fallbacks, _type=type, _datatype=datatype)
 
+        self._add_with_class(dataset_dict, dataset_ref, 'applicable_legislation', DCATAP.applicableLegislation, URIRefOrLiteral, ELI.LegalResource, list_value=True)
+        
+        hvd_category = self._get_dataset_value(dataset_dict, 'hvd_category')
+        if hvd_category:
+            self._add_hvd(hvd_category, dataset_ref)
+            
         # Temporal
         start = self._get_dataset_value(dataset_dict, 'temporal_start')
         end = self._get_dataset_value(dataset_dict, 'temporal_end')
