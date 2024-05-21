@@ -134,12 +134,14 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     def before_dataset_index(self, dataset_dict):
         schema = None
-        schema_show = p.toolkit.get_action("scheming_dataset_schema_show")
-        if schema_show:
+        try:
+            schema_show = p.toolkit.get_action("scheming_dataset_schema_show")
             try:
                 schema = schema_show({}, {"type": dataset_dict["type"]})
             except p.toolkit.ObjectNotFound:
                 pass
+        except KeyError:
+            pass
 
         if schema:
             for field in schema['dataset_fields']:

@@ -145,14 +145,17 @@ class RDFProfile(object):
         # _license().
         self._licenceregister_cache = None
 
-        schema_show = toolkit.get_action("scheming_dataset_schema_show")
-        if schema_show:
+        try:
+            schema_show = toolkit.get_action("scheming_dataset_schema_show")
             try:
                 schema = schema_show({}, {"type": dataset_schema})
             except toolkit.ObjectNotFound:
                 raise toolkit.ObjectNotFound(f"Unknown dataset schema: {dataset_schema}")
 
             self._dataset_schema = schema
+
+        except KeyError:
+            pass
 
     def _datasets(self):
         '''
@@ -1132,7 +1135,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             contact = self._contact_details(dataset_ref, ADMS.contactPoint)
 
         if contact:
-           for key in ('uri', 'name', 'email'):
+            for key in ('uri', 'name', 'email'):
                 if contact.get(key):
                     dataset_dict['extras'].append(
                         {'key': 'contact_{0}'.format(key),
@@ -1357,32 +1360,6 @@ class EuropeanDCATAPProfile(RDFProfile):
                                                   'author_email'],
                 _type=URIRef, value_modifier=self._add_mailto
             )
-
-        # TODO: this will go into a separate profile
-        contact = dataset_dict.get("contact")
-        if isinstance(contact, list) and len(contact):
-            for item in contact:
-                contact_uri = item.get('uri')
-                if contact_uri:
-                    contact_details = CleanedURIRef(contact_uri)
-                else:
-                    contact_details = BNode()
-
-                g.add((contact_details, RDF.type, VCARD.Organization))
-                g.add((dataset_ref, DCAT.contactPoint, contact_details))
-
-                self._add_triple_from_dict(
-                    item, contact_details,
-                    VCARD.fn, 'name'
-                )
-                # Add mail address as URIRef, and ensure it has a mailto: prefix
-                self._add_triple_from_dict(
-                    item, contact_details,
-                    VCARD.hasEmail, 'email',
-                    _type=URIRef, value_modifier=self._add_mailto
-                )
-
-
 
         # Publisher
         if any([
@@ -1774,6 +1751,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
+            # Access services
             access_service_list = resource_dict.get('access_services', [])
             if isinstance(access_service_list, str):
                 try:
@@ -1781,7 +1759,6 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                 except ValueError:
                     access_service_list = []
 
-            # Access service
             for access_service_dict in access_service_list:
 
                 access_service_uri = access_service_dict.get('uri')
@@ -1817,7 +1794,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                 self._add_list_triples_from_dict(access_service_dict, access_service_node, items)
 
             if access_service_list:
-               resource_dict['access_services'] = json.dumps(access_service_list)
+                resource_dict['access_services'] = json.dumps(access_service_list)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
@@ -2201,3 +2178,37 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                             pass
 
         return dataset_dict
+
+    def graph_from_dataset(self, dataset_dict, dataset_ref):
+
+        contact = dataset_dict.get("contact")
+        if isinstance(contact, list) and len(contact):
+            for item in contact:
+                contact_uri = item.get('uri')
+                if contact_uri:
+                    contact_details = CleanedURIRef(contact_uri)
+                else:
+                    contact_details = BNode()
+
+                self.g.add((contact_details, RDF.type, VCARD.Organization))
+                self.g.add((dataset_ref, DCAT.contactPoint, contact_details))
+
+                self._add_triple_from_dict(
+                    item, contact_details,
+                    VCARD.fn, 'name'
+                )
+                # Add mail address as URIRef, and ensure it has a mailto: prefix
+                self._add_triple_from_dict(
+                    item, contact_details,
+                    VCARD.hasEmail, 'email',
+                    _type=URIRef, value_modifier=self._add_mailto
+                )
+
+        resources = dataset_dict.get('resources', [])
+        for resource in resources:
+            if resource.get('access_services'):
+                if isinstance(resource['access_services'], str):
+                    try:
+                        resource['access_services'] = json.loads(resource['access_services'])
+                    except ValueError:
+                        pass
