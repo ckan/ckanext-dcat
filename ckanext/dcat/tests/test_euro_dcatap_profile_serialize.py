@@ -16,9 +16,11 @@ from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer, HYDRA
-from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
-                                   SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT, 
-                                   DISTRIBUTION_LICENSE_FALLBACK_CONFIG)
+from ckanext.dcat.profiles import (
+    DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
+    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT,
+)
+from ckanext.dcat.profiles.euro_dcat_ap import DISTRIBUTION_LICENSE_FALLBACK_CONFIG
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.tests.utils import BaseSerializeTest
 
