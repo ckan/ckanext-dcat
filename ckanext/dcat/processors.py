@@ -33,11 +33,14 @@ DEFAULT_RDF_PROFILES = ['euro_dcat_ap_2']
 
 class RDFProcessor(object):
 
-    def __init__(self, profiles=None, dataset_schema='dataset', compatibility_mode=False):
+    def __init__(self, profiles=None, dataset_type='dataset', compatibility_mode=False):
         '''
         Creates a parser or serializer instance
 
         You can optionally pass a list of profiles to be used.
+
+        A scheming dataset type can be provided, in which case the scheming schema
+        will be loaded by the base profile so it can be used by other profiles.
 
         In compatibility mode, some fields are modified to maintain
         compatibility with previous versions of the ckanext-dcat parsers
@@ -56,7 +59,7 @@ class RDFProcessor(object):
             raise RDFProfileException(
                 'No suitable RDF profiles could be loaded')
 
-        self.dataset_schema = dataset_schema
+        self.dataset_type = dataset_type
 
         if not compatibility_mode:
             compatibility_mode = p.toolkit.asbool(
@@ -181,7 +184,7 @@ class RDFParser(RDFProcessor):
             for profile_class in self._profiles:
                 profile = profile_class(
                     self.g,
-                    dataset_schema=self.dataset_schema,
+                    dataset_type=self.dataset_type,
                     compatibility_mode=self.compatibility_mode
                 )
                 profile.parse_dataset(dataset_dict, dataset_ref)

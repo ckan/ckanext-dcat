@@ -126,10 +126,13 @@ class RDFProfile(object):
 
     _dataset_schema = None
 
-    def __init__(self, graph, dataset_schema='dataset', compatibility_mode=False):
+    def __init__(self, graph, dataset_type='dataset', compatibility_mode=False):
         '''Class constructor
 
         Graph is an rdflib.Graph instance.
+
+        A scheming dataset type can be provided, in which case the scheming schema
+        will be loaded so it can be used by profiles.
 
         In compatibility mode, some fields are modified to maintain
         compatibility with previous versions of the ckanext-dcat parsers
@@ -148,9 +151,9 @@ class RDFProfile(object):
         try:
             schema_show = toolkit.get_action("scheming_dataset_schema_show")
             try:
-                schema = schema_show({}, {"type": dataset_schema})
+                schema = schema_show({}, {"type": dataset_type})
             except toolkit.ObjectNotFound:
-                raise toolkit.ObjectNotFound(f"Unknown dataset schema: {dataset_schema}")
+                raise toolkit.ObjectNotFound(f"Unknown dataset schema: {dataset_type}")
 
             self._dataset_schema = schema
 
