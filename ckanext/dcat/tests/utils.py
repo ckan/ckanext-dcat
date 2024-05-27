@@ -41,6 +41,9 @@ class BaseSerializeTest(object):
         triples = self._triples(graph, subject, predicate, _object, data_type)
         return triples[0] if triples else None
 
+    def _triples_list_values(self, graph, subject, predicate):
+        return  [str(t[2]) for t in graph.triples((subject, predicate, None))]
+
     def _get_typed_list(self, list, datatype):
         """ returns the list with the given rdf type """
         return [datatype(x) for x in list]

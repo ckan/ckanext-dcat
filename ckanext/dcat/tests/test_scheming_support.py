@@ -1,6 +1,7 @@
 import pytest
 
 from rdflib.namespace import RDF
+from rdflib.term import URIRef
 
 from ckan.tests.helpers import call_action
 
@@ -50,8 +51,23 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             "version": "1.0b",
             "tags": [{"name": "Tag 1"}, {"name": "Tag 2"}],
             # Standard fields
+            "issued": "2024-05-01",
+            "modified": "2024-05-05",
+            "identifier": "xx-some-dataset-id-yy",
+            "frequency": "monthly",
+            "provenance": "Statement about provenance",
+            "dcat_type": "test-type",
             "version_notes": "Some version notes",
+            "access_rights": "Statement about access rights",
             # List fields (lists)
+            "alternate_identifier": ["alt-id-1", "alt-id-2"],
+            "theme": [
+                "https://example.org/uri/theme1",
+                "https://example.org/uri/theme2",
+                "https://example.org/uri/theme3",
+            ],
+            "language": ["en", "ca", "es"],
+            "documentation": ["https://example.org/some-doc.html"],
             "conforms_to": ["Standard 1", "Standard 2"],
             # Repeating subfields
             "contact": [
@@ -63,6 +79,12 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "name": "Resource 1",
                     "url": "https://example.com/data.csv",
                     "format": "CSV",
+                    "status": "published",
+                    "access_url": "https://example.com/data.csv",
+                    "download_url": "https://example.com/data.csv",
+                    "issued": "2024-05-01T01:20:33",
+                    "modified": "2024-05-05T09:33:20",
+                    "license": "http://creativecommons.org/licenses/by/3.0/",
                     "rights": "Some stament about rights",
                     "language": ["en", "ca", "es"],
                     "access_services": [
@@ -95,16 +117,53 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(g, dataset_ref, RDF.type, DCAT.Dataset)
         assert self._triple(g, dataset_ref, DCT.title, dataset["title"])
         assert self._triple(g, dataset_ref, DCT.description, dataset["notes"])
+        assert self._triple(g, dataset_ref, OWL.versionInfo, dataset["version"])
 
         # Standard fields
+        assert self._triple(g, dataset_ref, DCT.identifier, dataset["identifier"])
+        assert self._triple(
+            g, dataset_ref, DCT.accrualPeriodicity, dataset["frequency"]
+        )
+        assert self._triple(g, dataset_ref, DCT.provenance, dataset["provenance"])
+        assert self._triple(g, dataset_ref, DCT.type, dataset["dcat_type"])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, dataset["version_notes"])
+        assert self._triple(g, dataset_ref, DCT.accessRights, dataset["access_rights"])
+
+        # Dates
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCT.issued,
+            dataset["issued"] + "T00:00:00",
+            data_type=XSD.dateTime,
+        )
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCT.modified,
+            dataset["modified"] + "T00:00:00",
+            data_type=XSD.dateTime,
+        )
 
         # List fields
-        # TODO helper function
-        conforms_to = [
-            str(t[2]) for t in g.triples((dataset_ref, DCT.conformsTo, None))
-        ]
-        assert conforms_to == dataset["conforms_to"]
+
+        assert (
+            self._triples_list_values(g, dataset_ref, DCT.conformsTo)
+            == dataset["conforms_to"]
+        )
+        assert (
+            self._triples_list_values(g, dataset_ref, ADMS.identifier)
+            == dataset["alternate_identifier"]
+        )
+        assert self._triples_list_values(g, dataset_ref, DCAT.theme) == dataset["theme"]
+        assert (
+            self._triples_list_values(g, dataset_ref, DCT.language)
+            == dataset["language"]
+        )
+        assert (
+            self._triples_list_values(g, dataset_ref, FOAF.page)
+            == dataset["documentation"]
+        )
 
         # Repeating subfields
 
@@ -136,6 +195,37 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 
         assert self._triple(
             g, distribution_ref, DCT.rights, dataset_dict["resources"][0]["rights"]
+        )
+        assert self._triple(
+            g, distribution_ref, DCT.status, dataset_dict["resources"][0]["status"]
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.accessURL,
+            dataset_dict["resources"][0]["access_url"],
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.downloadURL,
+            dataset_dict["resources"][0]["download_url"],
+        )
+
+        # Resources: dates
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCT.issued,
+            dataset["resources"][0]["issued"],
+            data_type=XSD.dateTime,
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCT.modified,
+            dataset["resources"][0]["modified"],
+            data_type=XSD.dateTime,
         )
 
         # Resources: list fields
@@ -216,9 +306,31 @@ class TestSchemingParseSupport(BaseParseTest):
 
         # Standard fields
         assert dataset["version_notes"] == "New schema added"
+        assert dataset["identifier"] == u"9df8df51-63db-37a8-e044-0003ba9b0d98"
+        assert dataset["frequency"] == "http://purl.org/cld/freq/daily"
+        assert dataset["access_rights"] == "public"
+        assert dataset["provenance"] == "Some statement about provenance"
+        assert dataset["dcat_type"] == "test-type"
+
+        assert dataset["issued"] == u"2012-05-10"
+        assert dataset["modified"] == u"2012-05-10T21:04:00"
 
         # List fields
-        assert dataset["conforms_to"] == ["Standard 1", "Standard 2"]
+        assert sorted(dataset["conforms_to"]) == ["Standard 1", "Standard 2"]
+        assert sorted(dataset["language"]) == ["ca", "en", "es"]
+        assert sorted(dataset["theme"]) == [
+            "Earth Sciences",
+            "http://eurovoc.europa.eu/100142",
+            "http://eurovoc.europa.eu/209065",
+        ]
+        assert sorted(dataset["alternate_identifier"]) == [
+            "alternate-identifier-1",
+            "alternate-identifier-2",
+        ]
+        assert sorted(dataset["documentation"]) == [
+            "http://dataset.info.org/doc1",
+            "http://dataset.info.org/doc2",
+        ]
 
         # Repeating subfields
 
@@ -226,11 +338,31 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["contact"][0]["email"] == "contact@some.org"
 
         resource = dataset["resources"][0]
+
+        # Resources: core fields
+        assert resource["url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
+
         # Resources: standard fields
+        assert resource["license"] == "http://creativecommons.org/licenses/by-nc/2.0/"
         assert resource["rights"] == "Some statement about rights"
+        assert resource["issued"] == "2012-05-11"
+        assert resource["modified"] == "2012-05-01T00:04:06"
+        assert resource["status"] == "http://purl.org/adms/status/Completed"
+        assert resource["size"] == 12323
+
+        # assert resource['hash'] == u'4304cf2e751e6053c90b1804c89c0ebb758f395a'
+        # assert resource['hash_algorithm'] == u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1'
+
+        assert resource["access_url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
+        assert "download_url" not in resource
 
         # Resources: list fields
         assert sorted(resource["language"]) == ["ca", "en", "es"]
+        assert sorted(resource["documentation"]) == [
+            "http://dataset.info.org/distribution1/doc1",
+            "http://dataset.info.org/distribution1/doc2",
+        ]
+        assert sorted(resource["conforms_to"]) == ["Standard 1", "Standard 2"]
 
         # Resources: repeating subfields
         assert resource["access_services"][0]["title"] == "Sparql-end Point"
