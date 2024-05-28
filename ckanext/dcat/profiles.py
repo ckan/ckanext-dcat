@@ -728,12 +728,17 @@ class RDFProfile(object):
                                list_value=False,
                                date_value=False):
         for item in items:
-            key, predicate, fallbacks, _type = item
+            try:
+                key, predicate, fallbacks, _type, _class = item
+            except ValueError:
+                key, predicate, fallbacks, _type = item
+                _class=None
             self._add_triple_from_dict(_dict, subject, predicate, key,
                                        fallbacks=fallbacks,
                                        list_value=list_value,
                                        date_value=date_value,
-                                       _type=_type)
+                                       _type=_type,
+                                       _class=_class)
 
     def _add_triple_from_dict(self, _dict, subject, predicate, key,
                               fallbacks=None,
@@ -741,7 +746,8 @@ class RDFProfile(object):
                               date_value=False,
                               _type=Literal,
                               _datatype=None,
-                              value_modifier=None):
+                              value_modifier=None,
+                              _class=None):
         '''
         Adds a new triple to the graph with the provided parameters
 
@@ -757,6 +763,8 @@ class RDFProfile(object):
         If `list_value` or `date_value` are True, then the value is treated as
         a list or a date respectively (see `_add_list_triple` and
         `_add_date_triple` for details.
+
+        `_class` is the optional RDF class of the entity being added. 
         '''
         value = self._get_dict_value(_dict, key)
         if not value and fallbacks:
@@ -770,7 +778,7 @@ class RDFProfile(object):
             value = value_modifier(value)
 
         if value and list_value:
-            self._add_list_triple(subject, predicate, value, _type, _datatype)
+            self._add_list_triple(subject, predicate, value, _type, _datatype, _class=_class)
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
@@ -783,8 +791,10 @@ class RDFProfile(object):
             else:
                 object = _type(value)
             self.g.add((subject, predicate, object))
+            if _class:
+                self.g.add((object, RDF.type, _class))
 
-    def _add_list_triple(self, subject, predicate, value, _type=Literal, _datatype=None):
+    def _add_list_triple(self, subject, predicate, value, _type=Literal, _datatype=None, _class=None):
         '''
         Adds as many triples to the graph as values
 
@@ -803,8 +813,10 @@ class RDFProfile(object):
             else:
                 object = _type(item)
             self.g.add((subject, predicate, object))
+            if _class:
+                self.g.add((object, RDF.type, _class))
 
-    def _add_date_triple(self, subject, predicate, value, _type=Literal):
+    def _add_date_triple(self, subject, predicate, value, _type=Literal): #UNDONE -- add class here??, looks like we're already possibly tagging?
         '''
         Adds a new triple with a date object
 
@@ -909,21 +921,6 @@ class RDFProfile(object):
         self.g.add((dataset_ref, DCT.spatial, spatial_ref))
         return spatial_ref
 
-
-    def _add_with_class(self, dataset_dict, dataset_ref, key, predicate, _type, _class, list_value=False):
-        value = self._get_dataset_value(dataset_dict, key)
-
-        def _add(v):
-            ref = _type(v)
-            self.g.add((ref, RDF.type, _class))
-            self.g.add((dataset_ref, predicate, ref))
-
-        if value:
-            if list_value:
-                for v in self._read_list_value(value):
-                    _add(v)
-            else:
-                _add(value)
     
     # Public methods for profiles to implement
 
@@ -1384,14 +1381,12 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ('description', DCT.description, None, Literal),
                 ('status', ADMS.status, None, URIRefOrLiteral),
                 ('rights', DCT.rights, None, URIRefOrLiteral),
-#                ('license', DCT.license, None, URIRefOrLiteral),
+                ('license', DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
                 ('access_url', DCAT.accessURL, None, URIRef),
                 ('download_url', DCAT.downloadURL, None, URIRef),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
-
-            self._add_with_class(resource_dict, distribution, 'license', DCT.license, URIRefOrLiteral, DCT.LicenseDocument)
 
             #  Lists
             items = [
@@ -1633,15 +1628,13 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         super(EuropeanDCATAP2Profile, self).graph_from_dataset(dataset_dict, dataset_ref)
 
         # Lists
-        for key, predicate, fallbacks, type, datatype in (
-            ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration),
-            ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None),
-#            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None),
+        for key, predicate, fallbacks, _type, datatype, _class in (
+            ('temporal_resolution', DCAT.temporalResolution, None, Literal, XSD.duration, None),
+            ('is_referenced_by', DCT.isReferencedBy, None, URIRefOrLiteral, None, None),
+            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral, None, ELI.LegalResource),
         ):
             self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
-                                       fallbacks=fallbacks, _type=type, _datatype=datatype)
-
-        self._add_with_class(dataset_dict, dataset_ref, 'applicable_legislation', DCATAP.applicableLegislation, URIRefOrLiteral, ELI.LegalResource, list_value=True)
+                                       fallbacks=fallbacks, _type=_type, _datatype=datatype, _class=_class)
         
         hvd_category = self._get_dataset_value(dataset_dict, 'hvd_category')
         if hvd_category:
