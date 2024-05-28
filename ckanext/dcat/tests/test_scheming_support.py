@@ -77,6 +77,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             "resources": [
                 {
                     "name": "Resource 1",
+                    "description": "Some description",
                     "url": "https://example.com/data.csv",
                     "format": "CSV",
                     "status": "published",
@@ -170,19 +171,19 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         contact_details = [t for t in g.triples((dataset_ref, DCAT.contactPoint, None))]
 
         assert len(contact_details) == len(dataset["contact"])
-        self._triple(
+        assert self._triple(
             g, contact_details[0][2], VCARD.fn, dataset_dict["contact"][0]["name"]
         )
-        self._triple(
+        assert self._triple(
             g,
             contact_details[0][2],
             VCARD.hasEmail,
-            dataset_dict["contact"][0]["email"],
+            URIRef("mailto:" + dataset_dict["contact"][0]["email"]),
         )
-        self._triple(
+        assert self._triple(
             g, contact_details[1][2], VCARD.fn, dataset_dict["contact"][1]["name"]
         )
-        self._triple(
+        assert self._triple(
             g,
             contact_details[1][2],
             VCARD.hasEmail,
@@ -191,25 +192,37 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
+        # Resources: core fields
+
+        assert self._triple(
+            g, distribution_ref, DCT.title, dataset_dict["resources"][0]["name"]
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCT.description,
+            dataset_dict["resources"][0]["description"],
+        )
+
         # Resources: standard fields
 
         assert self._triple(
             g, distribution_ref, DCT.rights, dataset_dict["resources"][0]["rights"]
         )
         assert self._triple(
-            g, distribution_ref, DCT.status, dataset_dict["resources"][0]["status"]
+            g, distribution_ref, ADMS.status, dataset_dict["resources"][0]["status"]
         )
         assert self._triple(
             g,
             distribution_ref,
             DCAT.accessURL,
-            dataset_dict["resources"][0]["access_url"],
+            URIRef(dataset_dict["resources"][0]["access_url"]),
         )
         assert self._triple(
             g,
             distribution_ref,
             DCAT.downloadURL,
-            dataset_dict["resources"][0]["download_url"],
+            URIRef(dataset_dict["resources"][0]["download_url"]),
         )
 
         # Resources: dates
@@ -241,7 +254,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         ]
 
         assert len(access_services) == len(dataset["resources"][0]["access_services"])
-        self._triple(
+        assert self._triple(
             g,
             access_services[0][2],
             DCT.title,
@@ -353,7 +366,9 @@ class TestSchemingParseSupport(BaseParseTest):
         # assert resource['hash'] == u'4304cf2e751e6053c90b1804c89c0ebb758f395a'
         # assert resource['hash_algorithm'] == u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1'
 
-        assert resource["access_url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
+        assert (
+            resource["access_url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
+        )
         assert "download_url" not in resource
 
         # Resources: list fields
