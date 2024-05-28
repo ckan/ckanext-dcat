@@ -21,6 +21,7 @@ from ckan.model.license import LicenseRegister
 from ckan.plugins import toolkit
 from ckan.lib.munge import munge_tag
 from ckanext.dcat.utils import resource_uri, publisher_uri_organization_fallback, DCAT_EXPOSE_SUBCATALOGS, DCAT_CLEAN_TAGS
+from . import codelists
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -921,6 +922,39 @@ class RDFProfile(object):
         self.g.add((dataset_ref, DCT.spatial, spatial_ref))
         return spatial_ref
 
+    def _add_from_codelist(self, _dict, subject, predicate, key,
+                           codelist,
+                           _type=URIRefOrLiteral,
+                           list_value=False,
+                           fallbacks=False,
+                           value_modifier=False):
+        ''' Add an item from a codelist, stored in rdf in the codelists directory '''
+        
+        value = self._get_dict_value(_dict, key)
+        if not value and fallbacks:
+            for fallback in fallbacks:
+                value = self._get_dict_value(_dict, fallback)
+                if value:
+                    break
+
+        if value and callable(value_modifier):
+            value = value_modifier(value)
+
+        def add(item):
+            ref = _type(item)
+            self.g.add((ref, RDF.type, SKOS.Concept))
+            self.g.add((ref, SKOS.inScheme, URIRef(codelist.scheme)))
+            self.g.add((subject, predicate, ref))
+            for lang, label in codelist.labels(item).items():
+                _label_ref = Literal(label, lang=lang)
+                self.g.add((ref, SKOS.prefLabel, _label_ref))
+
+        if list_value:
+            items = self._read_list_value(value)
+            for item in items:
+                add(item)
+        else:
+            add(value)
     
     # Public methods for profiles to implement
 
@@ -1610,18 +1644,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                             resource_dict['access_services'] = json.dumps(access_service_list)
 
         return dataset_dict
-
-    def _add_hvd(self, value, ref):
-        for uri in self._read_list_value(value):
-            hvd_ref = URIRefOrLiteral(uri)
-            self.g.add((hvd_ref, RDF.type, SKOS.Concept))
-            self.g.add((hvd_ref, SKOS.inScheme, URIRef('http://data.europa.eu/bna/asd487ae75')))
-            self.g.add((ref, DCATAP.hvdCategory, hvd_ref))
-            # UNDONE -- add the codelists to the DCAT extension.
-            # add the prefLabels corresponding to the configured languages for the site. 
-
-    
-    
+        
     def graph_from_dataset(self, dataset_dict, dataset_ref):
 
         # call super method
@@ -1636,9 +1659,9 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             self._add_triple_from_dict(dataset_dict, dataset_ref, predicate, key, list_value=True,
                                        fallbacks=fallbacks, _type=_type, _datatype=datatype, _class=_class)
         
-        hvd_category = self._get_dataset_value(dataset_dict, 'hvd_category')
-        if hvd_category:
-            self._add_hvd(hvd_category, dataset_ref)
+        self._add_from_codelist(dataset_dict, dataset_ref, DCATAP.hvdCategory, 'hvd_category',
+                                codelists.high_value_dataset_category,
+                                list_value=True)
             
         # Temporal
         start = self._get_dataset_value(dataset_dict, 'temporal_start')
