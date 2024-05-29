@@ -1402,105 +1402,111 @@ class EuropeanDCATAPProfile(RDFProfile):
                 resource_license_fallback = dataset_dict['license_url']
 
         # Resources
-        for resource_dict in dataset_dict.get('resources', []):                
+        for resource_dict in dataset_dict.get('resources', []):
+            self.graph_from_resource(g, dataset_ref, resource_dict, resource_license_fallback)
+
+    def graph_from_resource(self, g, dataset_ref, resource_dict, resource_license_fallback, distribution=None):
+        if distribution is None:
             distribution = CleanedURIRef(resource_uri(resource_dict))
 
-            g.add((dataset_ref, DCAT.distribution, distribution))
+        g.add((dataset_ref, DCAT.distribution, distribution))
 
-            g.add((distribution, RDF.type, DCAT.Distribution))
+        g.add((distribution, RDF.type, DCAT.Distribution))
 
-            #  Simple values
-            items = [
-                ('name', DCT.title, None, Literal),
-                ('description', DCT.description, None, Literal),
-                ('status', ADMS.status, None, URIRefOrLiteral),
-                ('rights', DCT.rights, None, URIRefOrLiteral),
-                ('license', DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
-                ('access_url', DCAT.accessURL, None, URIRef),
-                ('download_url', DCAT.downloadURL, None, URIRef),
-            ]
+        #  Simple values
+        items = [
+            ('name', DCT.title, None, Literal),
+            ('description', DCT.description, None, Literal),
+            ('status', ADMS.status, None, URIRefOrLiteral),
+            ('rights', DCT.rights, None, URIRefOrLiteral),
+            ('license', DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
+            ('access_url', DCAT.accessURL, None, URIRef),
+            ('download_url', DCAT.downloadURL, None, URIRef),
+        ]
 
-            self._add_triples_from_dict(resource_dict, distribution, items)
+        self._add_triples_from_dict(resource_dict, distribution, items)
 
-            #  Lists
-            items = [
-                ('documentation', FOAF.page, None, URIRefOrLiteral),
-                ('language', DCT.language, None, URIRefOrLiteral),
-                ('conforms_to', DCT.conformsTo, None, Literal),
-            ]
-            self._add_list_triples_from_dict(resource_dict, distribution, items)
+        #  Lists
+        items = [
+            ('documentation', FOAF.page, None, URIRefOrLiteral),
+            ('language', DCT.language, None, URIRefOrLiteral),
+            ('conforms_to', DCT.conformsTo, None, Literal),
+        ]
+        self._add_list_triples_from_dict(resource_dict, distribution, items)
 
-            # Set default license for distribution if needed and available
-            if resource_license_fallback and not (distribution, DCT.license, None) in g:
-                _ref = URIRefOrLiteral(resource_license_fallback)
-                g.add((_ref, RDF.type, DCT.LicenseDocument))
-                g.add((distribution, DCT.license, _ref))
+        # Set default license for distribution if needed and available
+        if resource_license_fallback and not (distribution, DCT.license, None) in g:
+            _ref = URIRefOrLiteral(resource_license_fallback)
+            g.add((_ref, RDF.type, DCT.LicenseDocument))
+            g.add((distribution, DCT.license, _ref))
 
-            # Format
-            mimetype = resource_dict.get('mimetype')
-            fmt = resource_dict.get('format')
+        # Format
+        mimetype = resource_dict.get('mimetype')
+        fmt = resource_dict.get('format')
 
-            # IANA media types (either URI or Literal) should be mapped as mediaType.
-            # In case format is available and mimetype is not set or identical to format,
-            # check which type is appropriate.
-            if fmt and (not mimetype or mimetype == fmt):
-                if ('iana.org/assignments/media-types' in fmt
-                        or not fmt.startswith('http') and '/' in fmt):
-                    # output format value as dcat:mediaType instead of dct:format
-                    mimetype = fmt
-                    fmt = None
-                else:
-                    # Use dct:format
-                    mimetype = None
+        # IANA media types (either URI or Literal) should be mapped as mediaType.
+        # In case format is available and mimetype is not set or identical to format,
+        # check which type is appropriate.
+        if fmt and (not mimetype or mimetype == fmt):
+            if ('iana.org/assignments/media-types' in fmt
+                    or not fmt.startswith('http') and '/' in fmt):
+                # output format value as dcat:mediaType instead of dct:format
+                mimetype = fmt
+                fmt = None
+            else:
+                # Use dct:format
+                mimetype = None
 
-            if mimetype:
-                g.add((distribution, DCAT.mediaType,
-                       URIRefOrLiteral(mimetype)))
+        if mimetype:
+            g.add((distribution, DCAT.mediaType,
+                   URIRefOrLiteral(mimetype)))
 
-            if fmt:
-                g.add((distribution, DCT['format'],
-                       URIRefOrLiteral(fmt)))
+        if fmt:
+            g.add((distribution, DCT['format'],
+                   URIRefOrLiteral(fmt)))
 
 
-            # URL fallback and old behavior
-            url = resource_dict.get('url')
-            download_url = resource_dict.get('download_url')
-            access_url = resource_dict.get('access_url')
-            # Use url as fallback for access_url if access_url is not set and download_url is not equal
-            if url and not access_url:
-                if (not download_url) or (download_url and url != download_url):
-                  self._add_triple_from_dict(resource_dict, distribution, DCAT.accessURL, 'url', _type=URIRef)
+        # URL fallback and old behavior
+        url = resource_dict.get('url')
+        download_url = resource_dict.get('download_url')
+        access_url = resource_dict.get('access_url')
+        # Use url as fallback for access_url if access_url is not set and download_url is not equal
+        if url and not access_url:
+            if (not download_url) or (download_url and url != download_url):
+              self._add_triple_from_dict(resource_dict, distribution, DCAT.accessURL, 'url', _type=URIRef)
 
-            # Dates
-            items = [
-                ('issued', DCT.issued, ['created'], Literal),
-                ('modified', DCT.modified, ['metadata_modified'], Literal),
-            ]
+        # Dates
+        items = [
+            ('issued', DCT.issued, ['created'], Literal),
+            ('modified', DCT.modified, ['metadata_modified'], Literal),
+        ]
 
-            self._add_date_triples_from_dict(resource_dict, distribution, items)
+        self._add_date_triples_from_dict(resource_dict, distribution, items)
 
-            # Numbers
-            if resource_dict.get('size'):
-                try:
-                    g.add((distribution, DCAT.byteSize,
-                           Literal(float(resource_dict['size']),
-                                   datatype=XSD.decimal)))
-                except (ValueError, TypeError):
-                    g.add((distribution, DCAT.byteSize,
-                           Literal(resource_dict['size'])))
-            # Checksum
-            if resource_dict.get('hash'):
-                checksum = BNode()
-                g.add((checksum, RDF.type, SPDX.Checksum))
-                g.add((checksum, SPDX.checksumValue,
-                       Literal(resource_dict['hash'],
-                               datatype=XSD.hexBinary)))
+        # Numbers
+        if resource_dict.get('size'):
+            try:
+                g.add((distribution, DCAT.byteSize,
+                       Literal(float(resource_dict['size']),
+                               datatype=XSD.decimal)))
+            except (ValueError, TypeError):
+                g.add((distribution, DCAT.byteSize,
+                       Literal(resource_dict['size'])))
+        # Checksum
+        if resource_dict.get('hash'):
+            checksum = BNode()
+            g.add((checksum, RDF.type, SPDX.Checksum))
+            g.add((checksum, SPDX.checksumValue,
+                   Literal(resource_dict['hash'],
+                           datatype=XSD.hexBinary)))
 
-                if resource_dict.get('hash_algorithm'):
-                    g.add((checksum, SPDX.algorithm,
-                           URIRefOrLiteral(resource_dict['hash_algorithm'])))
+            if resource_dict.get('hash_algorithm'):
+                g.add((checksum, SPDX.algorithm,
+                       URIRefOrLiteral(resource_dict['hash_algorithm'])))
 
-                g.add((distribution, SPDX.checksum, checksum))
+            g.add((distribution, SPDX.checksum, checksum))
+
+        return distribution
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
@@ -1700,67 +1706,67 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                 except (ValueError, TypeError):
                     self.g.add((dataset_ref, DCAT.spatialResolutionInMeters, Literal(value)))
 
-        # Resources
-        for resource_dict in dataset_dict.get('resources', []):
 
-            distribution = CleanedURIRef(resource_uri(resource_dict))
+    def graph_from_resource(self, g, dataset_ref, resource_dict, resource_license_fallback, distribution=None):
+        distribution = super().graph_from_resource(g, dataset_ref, resource_dict, resource_license_fallback, distribution)
 
-            #  Simple values
-            items = [
-                ('availability', DCATAP.availability, None, URIRefOrLiteral),
-                ('compress_format', DCAT.compressFormat, None, URIRefOrLiteral),
-                ('package_format', DCAT.packageFormat, None, URIRefOrLiteral)
-            ]
+        #  Simple values
+        items = [
+            ('availability', DCATAP.availability, None, URIRefOrLiteral),
+            ('compress_format', DCAT.compressFormat, None, URIRefOrLiteral),
+            ('package_format', DCAT.packageFormat, None, URIRefOrLiteral)
+        ]
 
-            self._add_triples_from_dict(resource_dict, distribution, items)
+        self._add_triples_from_dict(resource_dict, distribution, items)
 
-            #  Lists
-            items = [
-                ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral),
-            ]
-            self._add_list_triples_from_dict(resource_dict, distribution, items)
+        #  Lists
+        items = [
+            ('applicable_legislation', DCATAP.applicableLegislation, None, URIRefOrLiteral),
+        ]
+        self._add_list_triples_from_dict(resource_dict, distribution, items)
 
-            try:
-                access_service_list = json.loads(resource_dict.get('access_services', '[]'))
-                # Access service
-                for access_service_dict in access_service_list:
+        try:
+            access_service_list = json.loads(resource_dict.get('access_services', '[]'))
+            # Access service
+            for access_service_dict in access_service_list:
 
-                    access_service_uri = access_service_dict.get('uri')
-                    if access_service_uri:
-                        access_service_node = CleanedURIRef(access_service_uri)
-                    else:
-                        access_service_node = BNode()
-                        # Remember the (internal) access service reference for referencing in
-                        # further profiles
-                        access_service_dict['access_service_ref'] = str(access_service_node)
+                access_service_uri = access_service_dict.get('uri')
+                if access_service_uri:
+                    access_service_node = CleanedURIRef(access_service_uri)
+                else:
+                    access_service_node = BNode()
+                    # Remember the (internal) access service reference for referencing in
+                    # further profiles
+                    access_service_dict['access_service_ref'] = str(access_service_node)
 
-                    self.g.add((distribution, DCAT.accessService, access_service_node))
+                self.g.add((distribution, DCAT.accessService, access_service_node))
 
-                    self.g.add((access_service_node, RDF.type, DCAT.DataService))
+                self.g.add((access_service_node, RDF.type, DCAT.DataService))
 
-                     #  Simple values
-                    items = [
-                        ('availability', DCATAP.availability, None, URIRefOrLiteral),
-                        ('license', DCT.license, None, URIRefOrLiteral),
-                        ('access_rights', DCT.accessRights, None, URIRefOrLiteral),
-                        ('title', DCT.title, None, Literal),
-                        ('endpoint_description', DCAT.endpointDescription, None, Literal),
-                        ('description', DCT.description, None, Literal),
-                    ]
+                 #  Simple values
+                items = [
+                    ('availability', DCATAP.availability, None, URIRefOrLiteral),
+                    ('license', DCT.license, None, URIRefOrLiteral),
+                    ('access_rights', DCT.accessRights, None, URIRefOrLiteral),
+                    ('title', DCT.title, None, Literal),
+                    ('endpoint_description', DCAT.endpointDescription, None, Literal),
+                    ('description', DCT.description, None, Literal),
+                ]
 
-                    self._add_triples_from_dict(access_service_dict, access_service_node, items)
+                self._add_triples_from_dict(access_service_dict, access_service_node, items)
 
-                    #  Lists
-                    items = [
-                        ('endpoint_url', DCAT.endpointURL, None, URIRefOrLiteral),
-                        ('serves_dataset', DCAT.servesDataset, None, URIRefOrLiteral),
-                    ]
-                    self._add_list_triples_from_dict(access_service_dict, access_service_node, items)
+                #  Lists
+                items = [
+                    ('endpoint_url', DCAT.endpointURL, None, URIRefOrLiteral),
+                    ('serves_dataset', DCAT.servesDataset, None, URIRefOrLiteral),
+                ]
+                self._add_list_triples_from_dict(access_service_dict, access_service_node, items)
 
-                if access_service_list:
-                    resource_dict['access_services'] = json.dumps(access_service_list)
-            except ValueError:
-                pass
+            if access_service_list:
+                resource_dict['access_services'] = json.dumps(access_service_list)
+        except ValueError:
+            pass
+        return distribution
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
