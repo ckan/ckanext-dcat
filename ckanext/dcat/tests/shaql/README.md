@@ -1,0 +1,1 @@
+These directories have SHAQL shapes to validate the DCAT compliance.

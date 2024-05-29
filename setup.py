@@ -21,6 +21,13 @@ setup(
     install_requires=[
         # -*- Extra requirements: -*-
     ],
+    extras_require={
+        'dev': [
+            # ttll shaql validation of dcat schemas,
+            'pyshacl==0.19.1',  # version pinned for rdflib
+        ]
+    },
+
     entry_points='''
 
     [ckan.plugins]
