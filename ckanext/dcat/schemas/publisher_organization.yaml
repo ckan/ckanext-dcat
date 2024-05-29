@@ -1,0 +1,35 @@
+scheming_version: 2
+about_url: http://github.com/ckan/ckanext-dcat
+description: >
+  An organization schema that implements the properties supported
+  by default in the dct:publisher property of a dcat:Dataset
+
+fields:
+    
+- field_name: title
+  label: Name
+  validators: ignore_missing unicode_safe
+  form_snippet: large_text.html
+  form_attrs: {data-module: slug-preview-target}
+  
+- field_name: name
+  label: URL
+  validators: not_empty unicode_safe name_validator group_name_validator
+  form_snippet: slug.html
+  form_placeholder: my-theme
+  
+- field_name: notes
+  label: Description
+  form_snippet: markdown.html
+  form_placeholder: A little information about this organization.
+  
+- field_name: email
+  label: Email
+  display_snippet: email.html
+  
+- field_name: url
+  label: URL
+  display_snippet: link.html
+  
+- field_name: dcat_type
+  label: Type

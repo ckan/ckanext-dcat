@@ -3,6 +3,7 @@ import pytest
 from rdflib.namespace import RDF
 from rdflib.term import URIRef
 
+from ckan.tests import factories
 from ckan.tests.helpers import call_action
 
 from ckanext.dcat import utils
@@ -73,6 +74,14 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             "contact": [
                 {"name": "Contact 1", "email": "contact1@example.org"},
                 {"name": "Contact 2", "email": "contact2@example.org"},
+            ],
+            "publisher": [
+                {
+                    "name": "Test Publisher",
+                    "email": "publisher@example.org",
+                    "url": "https://example.org",
+                    "type": "public_body",
+                },
             ],
             "resources": [
                 {
@@ -187,7 +196,32 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             contact_details[1][2],
             VCARD.hasEmail,
-            dataset_dict["contact"][1]["email"],
+            URIRef("mailto:" + dataset_dict["contact"][1]["email"]),
+        )
+
+        publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
+
+        assert len(publisher) == 1
+        assert self._triple(
+            g, publisher[0][2], FOAF.name, dataset_dict["publisher"][0]["name"]
+        )
+        assert self._triple(
+            g,
+            publisher[0][2],
+            VCARD.hasEmail,
+            URIRef("mailto:" + dataset_dict["publisher"][0]["email"]),
+        )
+        assert self._triple(
+            g,
+            publisher[0][2],
+            FOAF.homepage,
+            dataset_dict["publisher"][0]["url"],
+        )
+        assert self._triple(
+            g,
+            publisher[0][2],
+            DCT.type,
+            dataset_dict["publisher"][0]["type"],
         )
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -270,6 +304,60 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             == dataset_dict["resources"][0]["access_services"][0]["endpoint_url"]
         )
 
+    def test_publisher_fallback_org(self):
+
+        org = factories.Organization(
+            title="Some publisher org",
+        )
+        dataset_dict = {
+            "name": "test-dataset-2",
+            "title": "Test DCAT dataset 2",
+            "notes": "Lorem ipsum",
+            "owner_org": org["id"],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
+
+        assert len(publisher) == 1
+        assert self._triple(g, publisher[0][2], FOAF.name, org["title"])
+
+    def test_publisher_fallback_org_ignored_if_publisher_field_present(self):
+
+        org = factories.Organization()
+        dataset_dict = {
+            "name": "test-dataset-2",
+            "title": "Test DCAT dataset 2",
+            "notes": "Lorem ipsum",
+            "publisher": [
+                {
+                    "name": "Test Publisher",
+                    "email": "publisher@example.org",
+                    "url": "https://example.org",
+                    "type": "public_body",
+                },
+            ],
+            "owner_org": org["id"],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
+
+        assert len(publisher) == 1
+        assert self._triple(
+            g, publisher[0][2], FOAF.name, dataset_dict["publisher"][0]["name"]
+        )
+
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
@@ -349,6 +437,16 @@ class TestSchemingParseSupport(BaseParseTest):
 
         assert dataset["contact"][0]["name"] == "Point of Contact"
         assert dataset["contact"][0]["email"] == "contact@some.org"
+
+        assert (
+            dataset["publisher"][0]["name"] == "Publishing Organization for dataset 1"
+        )
+        assert dataset["publisher"][0]["email"] == "contact@some.org"
+        assert dataset["publisher"][0]["url"] == "http://some.org"
+        assert (
+            dataset["publisher"][0]["type"]
+            == "http://purl.org/adms/publishertype/NonProfitOrganisation"
+        )
 
         resource = dataset["resources"][0]
 

@@ -1,6 +1,7 @@
 from builtins import str
 from builtins import object
 import json
+import uuid
 
 import pytest
 
@@ -17,7 +18,7 @@ from ckantoolkit.tests import helpers, factories
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer, HYDRA
 from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
-                                   SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT, 
+                                   SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT,
                                    DISTRIBUTION_LICENSE_FALLBACK_CONFIG)
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.tests.utils import BaseSerializeTest
@@ -398,11 +399,17 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, DCT.type, URIRef(extras['publisher_type']))
 
     def test_publisher_org(self):
+        org_id = str(uuid.uuid4())
+        factories.Organization(
+            id=org_id,
+            name='publisher1',
+            title='Example Publisher from Org'
+        )
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
             'organization': {
-                'id': '',
+                'id': org_id,
                 'name': 'publisher1',
                 'title': 'Example Publisher from Org',
             }
