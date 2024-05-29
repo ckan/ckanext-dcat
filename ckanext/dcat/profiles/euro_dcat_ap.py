@@ -20,11 +20,9 @@ from .base import (
     DCAT,
     DCT,
     ADMS,
-    XSD,
     VCARD,
     FOAF,
     SCHEMA,
-    SKOS,
     LOCN,
     GSP,
     OWL,
@@ -354,51 +352,66 @@ class EuropeanDCATAPProfile(RDFProfile):
             )
 
         # Publisher
-        if any(
+        publisher_ref = None
+
+        if dataset_dict.get("publisher"):
+            # Scheming publisher field: will be handled in a separate profile
+            pass
+        elif any(
             [
                 self._get_dataset_value(dataset_dict, "publisher_uri"),
                 self._get_dataset_value(dataset_dict, "publisher_name"),
-                dataset_dict.get("organization"),
             ]
         ):
-
+            # Legacy publisher_* extras
             publisher_uri = self._get_dataset_value(dataset_dict, "publisher_uri")
-            publisher_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
             publisher_name = self._get_dataset_value(dataset_dict, "publisher_name")
             if publisher_uri:
-                publisher_details = CleanedURIRef(publisher_uri)
-            elif not publisher_name and publisher_uri_fallback:
-                # neither URI nor name are available, use organization as fallback
-                publisher_details = CleanedURIRef(publisher_uri_fallback)
+                publisher_ref = CleanedURIRef(publisher_uri)
             else:
                 # No publisher_uri
-                publisher_details = BNode()
-
-            g.add((publisher_details, RDF.type, FOAF.Organization))
-            g.add((dataset_ref, DCT.publisher, publisher_details))
-
-            # In case no name and URI are available, again fall back to organization.
-            # If no name but an URI is available, the name literal remains empty to
-            # avoid mixing organization and dataset values.
-            if (
-                not publisher_name
-                and not publisher_uri
-                and dataset_dict.get("organization")
-            ):
-                publisher_name = dataset_dict["organization"]["title"]
-
-            g.add((publisher_details, FOAF.name, Literal(publisher_name)))
-            # TODO: It would make sense to fallback these to organization
-            # fields but they are not in the default schema and the
-            # `organization` object in the dataset_dict does not include
-            # custom fields
+                publisher_ref = BNode()
+            publisher_details = {
+                "name": publisher_name,
+                "email": self._get_dataset_value(dataset_dict, "publisher_email"),
+                "url": self._get_dataset_value(dataset_dict, "publisher_url"),
+                "type": self._get_dataset_value(dataset_dict, "publisher_type"),
+            }
+        elif dataset_dict.get("organization"):
+            # Fall back to dataset org
+            org_id = dataset_dict["organization"]["id"]
+            org_dict = None
+            if org_id in self._org_cache:
+                org_dict = self._org_cache[org_id]
+            else:
+                try:
+                    org_dict = toolkit.get_action("organization_show")(
+                        {"ignore_auth": True}, {"id": org_id}
+                    )
+                    self._org_cache[org_id] = org_dict
+                except toolkit.ObjectNotFound:
+                    pass
+            if org_dict:
+                publisher_ref = CleanedURIRef(
+                    publisher_uri_organization_fallback(dataset_dict)
+                )
+                publisher_details = {
+                    "name": org_dict.get("title"),
+                    "email": org_dict.get("email"),
+                    "url": org_dict.get("url"),
+                    "type": org_dict.get("dcat_type"),
+                }
+        # Add to graph
+        if publisher_ref:
+            g.add((publisher_ref, RDF.type, FOAF.Organization))
+            g.add((dataset_ref, DCT.publisher, publisher_ref))
             items = [
-                ("publisher_email", FOAF.mbox, None, Literal),
-                ("publisher_url", FOAF.homepage, None, URIRef),
-                ("publisher_type", DCT.type, None, URIRefOrLiteral),
+                ("name", FOAF.name, None, Literal),
+                ("email", FOAF.mbox, None, Literal),
+                ("url", FOAF.homepage, None, URIRef),
+                ("type", DCT.type, None, URIRefOrLiteral),
             ]
-
-            self._add_triples_from_dict(dataset_dict, publisher_details, items)
+            self._add_triples_from_dict(publisher_details, publisher_ref, items)
 
         # Temporal
         start = self._get_dataset_value(dataset_dict, "temporal_start")

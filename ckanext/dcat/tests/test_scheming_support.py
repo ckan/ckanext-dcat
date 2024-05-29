@@ -20,9 +20,6 @@ from ckanext.dcat.profiles import (
     LOCN,
     GSP,
     OWL,
-    SPDX,
-    GEOJSON_IMT,
-    DISTRIBUTION_LICENSE_FALLBACK_CONFIG,
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 

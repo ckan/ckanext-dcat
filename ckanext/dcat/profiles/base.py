@@ -7,7 +7,7 @@ from rdflib import term, URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 from geomet import wkt, InvalidGeoJSONException
 
-from ckantoolkit import config, url_for, asbool, get_action
+from ckantoolkit import config, url_for, asbool, get_action, ObjectNotFound
 from ckan.model.license import LicenseRegister
 from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
@@ -41,7 +41,7 @@ namespaces = {
     "spdx": SPDX,
 }
 
-PREFIX_MAILTO = u"mailto:"
+PREFIX_MAILTO = "mailto:"
 
 GEOJSON_IMT = "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
 
@@ -105,11 +105,20 @@ class RDFProfile(object):
     custom profiles
     """
 
-    def __init__(self, graph, compatibility_mode=False):
+    _dataset_schema = None
+
+    # Cache for mappings of licenses URL/title to ID built when needed in
+    # _license().
+    _licenceregister_cache = None
+
+    # Cache for organization_show details (used for publisher fallback)
+    _org_cache: dict = {}
+
+    def __init__(self, graph, dataset_type="dataset", compatibility_mode=False):
         """Class constructor
-
         Graph is an rdflib.Graph instance.
-
+        A scheming dataset type can be provided, in which case the scheming schema
+        will be loaded so it can be used by profiles.
         In compatibility mode, some fields are modified to maintain
         compatibility with previous versions of the ckanext-dcat parsers
         (eg adding the `dcat_` prefix or storing comma separated lists instead
@@ -120,9 +129,17 @@ class RDFProfile(object):
 
         self.compatibility_mode = compatibility_mode
 
-        # Cache for mappings of licenses URL/title to ID built when needed in
-        # _license().
-        self._licenceregister_cache = None
+        try:
+            schema_show = get_action("scheming_dataset_schema_show")
+            try:
+                schema = schema_show({}, {"type": dataset_type})
+            except ObjectNotFound:
+                raise ObjectNotFound(f"Unknown dataset schema: {dataset_type}")
+
+            self._dataset_schema = schema
+
+        except KeyError:
+            pass
 
     def _datasets(self):
         """
@@ -707,6 +724,64 @@ class RDFProfile(object):
                 }
             )
 
+    def _schema_field(self, key):
+        """
+        Returns the schema field information if the provided key exists as a field in
+        the dataset schema (if one was provided)
+        """
+        if not self._dataset_schema:
+            return None
+
+        for field in self._dataset_schema["dataset_fields"]:
+            if field["field_name"] == key:
+                return field
+
+    def _schema_resource_field(self, key):
+        """
+        Returns the schema field information if the provided key exists as a field in
+        the resources fields of the dataset schema (if one was provided)
+        """
+        if not self._dataset_schema:
+            return None
+
+        for field in self._dataset_schema["resource_fields"]:
+            if field["field_name"] == key:
+                return field
+
+    def _set_dataset_value(self, dataset_dict, key, value):
+        """
+        Sets the value for a given key in a CKAN dataset dict
+        If a dataset schema was provided, the schema will be checked to see if
+        a custom field is present for the key. If so the key will be stored at
+        the dict root level, otherwise it will be stored as an extra.
+        Standard CKAN fields (defined in ROOT_DATASET_FIELDS) are always stored
+        at the root level.
+        """
+        if self._schema_field(key) or key in ROOT_DATASET_FIELDS:
+            dataset_dict[key] = value
+        else:
+            if not dataset_dict.get("extras"):
+                dataset_dict["extras"] = []
+            dataset_dict["extras"].append({"key": key, "value": value})
+
+        return dataset_dict
+
+    def _set_list_dataset_value(self, dataset_dict, key, value):
+        schema_field = self._schema_field(key)
+        if schema_field and "scheming_multiple_text" in schema_field["validators"]:
+            return self._set_dataset_value(dataset_dict, key, value)
+        else:
+            return self._set_dataset_value(dataset_dict, key, json.dumps(value))
+
+    def _set_list_resource_value(self, resource_dict, key, value):
+        schema_field = self._schema_resource_field(key)
+        if schema_field and "scheming_multiple_text" in schema_field["validators"]:
+            resource_dict[key] = value
+        else:
+            resource_dict[key] = json.dumps(value)
+
+        return resource_dict
+
     def _get_dataset_value(self, dataset_dict, key, default=None):
         """
         Returns the value for the given key on a CKAN dict
@@ -880,7 +955,7 @@ class RDFProfile(object):
         Ensures that the mail address string has no mailto: prefix.
         """
         if mail_addr:
-            return str(mail_addr).replace(PREFIX_MAILTO, u"")
+            return str(mail_addr).replace(PREFIX_MAILTO, "")
         else:
             return mail_addr
 
