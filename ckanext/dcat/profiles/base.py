@@ -45,6 +45,19 @@ PREFIX_MAILTO = "mailto:"
 
 GEOJSON_IMT = "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
 
+ROOT_DATASET_FIELDS = [
+    'name',
+    'title',
+    'url',
+    'version',
+    'tags',
+    'license_id',
+    'maintainer',
+    'maintainer_email',
+    'author',
+    'author_email',
+]
+
 
 class URIRefOrLiteral(object):
     """Helper which creates an URIRef if the value appears to be an http URL,
