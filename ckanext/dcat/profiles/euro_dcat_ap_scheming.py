@@ -1,6 +1,6 @@
 import json
 
-from rdflib import URIRef, BNode
+from rdflib import URIRef, BNode, Literal
 from .base import RDFProfile, CleanedURIRef, URIRefOrLiteral
 from .base import (
     RDF,
@@ -74,7 +74,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 field_name = schema_field["field_name"]
                 new_extras = []
                 new_dict = {}
-                check_name = new_fields_mappings.get(field_name, field_name)
+                check_name = new_fields_mapping.get(field_name, field_name)
                 for extra in dataset_dict.get("extras", []):
                     if extra["key"].startswith(f"{check_name}_"):
                         subfield = extra["key"][extra["key"].index("_") + 1 :]
@@ -172,6 +172,29 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 if item.get("end"):
                     self._add_date_triple(temporal_ref, SCHEMA.endDate, item["end"])
                 self.g.add((dataset_ref, DCT.temporal, temporal_ref))
+
+        spatial = dataset_dict.get("spatial_coverage")
+        if isinstance(spatial, list) and len(spatial):
+            for item in spatial:
+                if item.get("uri"):
+                    spatial_ref = CleanedURIRef(item["uri"])
+                else:
+                    spatial_ref = BNode()
+                self.g.add((spatial_ref, RDF.type, DCT.Location))
+                self.g.add((dataset_ref, DCT.spatial, spatial_ref))
+
+                if item.get("text"):
+                    self.g.add((spatial_ref, SKOS.prefLabel, Literal(item["text"])))
+
+                for field in [
+                    ("geom", LOCN.geometry),
+                    ("bbox", DCAT.bbox),
+                    ("centroid", DCAT.centroid),
+                ]:
+                    if item.get(field[0]):
+                        self._add_spatial_value_to_graph(
+                            spatial_ref, field[1], item[field[0]]
+                        )
 
         resources = dataset_dict.get("resources", [])
         for resource in resources:

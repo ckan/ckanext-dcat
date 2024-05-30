@@ -147,14 +147,16 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             pass
 
         if schema:
+            # TODO: https://github.com/ckan/ckanext-dcat/pull/281#discussion_r1610549936
             for field in schema['dataset_fields']:
                 if field['field_name'] in dataset_dict and 'repeating_subfields' in field:
                     for index, item in enumerate(dataset_dict[field['field_name']]):
                         for key in item:
-                            # Index a flattened version
-                            new_key = f'{field["field_name"]}_{index}_{key}'
-
-                            dataset_dict[new_key] = dataset_dict[field['field_name']][index][key]
+                            value = dataset_dict[field['field_name']][index][key]
+                            if not isinstance(value, dict):
+                                # Index a flattened version
+                                new_key = f'{field["field_name"]}_{index}_{key}'
+                                dataset_dict[new_key] = value
                     dataset_dict.pop(field['field_name'], None)
 
         return dataset_dict

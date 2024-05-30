@@ -120,6 +120,25 @@ dataset_fields:
       label: End
       # TODO: dcat_date preset
 
+- field_name: spatial_coverage
+  label: Spatial coverage
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: text
+      label: Label
+
+    - field_name: geom
+      label: Geometry
+
+    - field_name: bbox
+      label: Bounding Box
+
+    - field_name: centroid
+      label: Centroid
+
 - field_name: access_rights
   label: Access rights
   validators: ignore_missing unicode_safe

@@ -1,7 +1,7 @@
 import pytest
-
 from rdflib.namespace import RDF
 from rdflib.term import URIRef
+from geomet import wkt
 
 from ckan.tests import factories
 from ckan.tests.helpers import call_action
@@ -20,8 +20,13 @@ from ckanext.dcat.profiles import (
     LOCN,
     GSP,
     OWL,
+    GEOJSON_IMT,
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
+
+
+# TODO: tests for spatial coverage
+# TODO: index "spatial" extra
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
@@ -83,6 +88,37 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             "temporal_coverage": [
                 {"start": "1905-03-01", "end": "2013-01-05"},
                 {"start": "2024-04-10", "end": "2024-05-29"},
+            ],
+            "spatial_coverage": [
+                {
+                    "geom": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [11.9936, 54.0486],
+                                [11.9936, 54.2466],
+                                [12.3045, 54.2466],
+                                [12.3045, 54.0486],
+                                [11.9936, 54.0486],
+                            ]
+                        ],
+                    },
+                    "text": "Tarragona",
+                    "uri": "https://sws.geonames.org/6361390/",
+                    "bbox": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [-2.1604, 42.7611],
+                                [-2.0938, 42.7611],
+                                [-2.0938, 42.7931],
+                                [-2.1604, 42.7931],
+                                [-2.1604, 42.7611],
+                            ]
+                        ],
+                    },
+                    "centroid": {"type": "Point", "coordinates": [1.26639, 41.12386]},
+                }
             ],
             "resources": [
                 {
@@ -256,6 +292,29 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             dataset_dict["temporal_coverage"][1]["end"] + "T00:00:00",
             data_type=XSD.dateTime,
         )
+
+        spatial = [t for t in g.triples((dataset_ref, DCT.spatial, None))]
+        assert len(spatial) == len(dataset["spatial_coverage"])
+        assert str(spatial[0][2]) == dataset["spatial_coverage"][0]["uri"]
+        assert self._triple(g, spatial[0][2], RDF.type, DCT.Location)
+        assert self._triple(
+            g, spatial[0][2], SKOS.prefLabel, dataset["spatial_coverage"][0]["text"]
+        )
+
+        assert len([t for t in g.triples((spatial[0][2], LOCN.geometry, None))]) == 2
+        # Geometry in GeoJSON
+        assert self._triple(
+            g,
+            spatial[0][2],
+            LOCN.geometry,
+            dataset["spatial_coverage"][0]["geom"],
+            GEOJSON_IMT,
+        )
+        # Geometry in WKT
+        wkt_geom = wkt.dumps(
+            dataset["spatial_coverage"][0]["geom"], decimals=4
+        )
+        assert self._triple(g, spatial[0][2], LOCN.geometry, wkt_geom, GSP.wktLiteral)
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 

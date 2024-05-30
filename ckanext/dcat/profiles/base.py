@@ -702,17 +702,19 @@ class RDFProfile(object):
         self.g.add((spatial_ref, predicate, Literal(value, datatype=GEOJSON_IMT)))
         # WKT, because GeoDCAT-AP says so
         try:
+            if isinstance(value, str):
+                value = json.loads(value)
             self.g.add(
                 (
                     spatial_ref,
                     predicate,
                     Literal(
-                        wkt.dumps(json.loads(value), decimals=4),
+                        wkt.dumps(value, decimals=4),
                         datatype=GSP.wktLiteral,
                     ),
                 )
             )
-        except (TypeError, ValueError, InvalidGeoJSONException):
+        except (TypeError, ValueError, InvalidGeoJSONException) as e:
             pass
 
     def _add_spatial_to_dict(self, dataset_dict, key, spatial):
