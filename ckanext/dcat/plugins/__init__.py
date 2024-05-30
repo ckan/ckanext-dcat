@@ -2,6 +2,7 @@
 
 from builtins import object
 import os
+import json
 
 from ckantoolkit import config
 
@@ -146,6 +147,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
         except KeyError:
             pass
 
+        spatial = None
         if schema:
             for field in schema['dataset_fields']:
                 if field['field_name'] in dataset_dict and 'repeating_subfields' in field:
@@ -156,10 +158,36 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                                 # Index a flattened version
                                 new_key = f'{field["field_name"]}__{key}'
                                 if not dataset_dict.get(new_key):
-                                    dataset_dict[new_key] = ""
-                                dataset_dict[new_key] += " " + value
+                                    dataset_dict[new_key] = value
+                                else:
+                                    dataset_dict[new_key] += ' ' + value
 
-                    dataset_dict.pop(field['field_name'], None)
+                    subfields = dataset_dict.pop(field['field_name'], None)
+                    if field['field_name'] == 'spatial_coverage':
+                        spatial = subfields
+
+        # Store the first geometry found so ckanext-spatial can pick it up for indexing
+        def _check_for_a_geom(spatial_dict):
+            value = None
+
+            for field in ('geom', 'bbox', 'centroid'):
+                if spatial_dict.get(field):
+                    value = spatial_dict[field]
+                    if isinstance(value, dict):
+                        try:
+                            value = json.dumps(value)
+                            break
+                        except ValueError:
+                            pass
+            return value
+
+        if spatial and not dataset_dict.get('spatial'):
+            for item in spatial:
+                value = _check_for_a_geom(item)
+                if value:
+                    dataset_dict['spatial'] = value
+                    dataset_dict['extras_spatial'] = value
+                    break
 
         return dataset_dict
 

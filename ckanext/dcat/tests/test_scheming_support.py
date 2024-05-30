@@ -1,3 +1,6 @@
+from unittest import mock
+import json
+
 import pytest
 from rdflib.namespace import RDF
 from rdflib.term import URIRef
@@ -311,9 +314,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             GEOJSON_IMT,
         )
         # Geometry in WKT
-        wkt_geom = wkt.dumps(
-            dataset["spatial_coverage"][0]["geom"], decimals=4
-        )
+        wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
         assert self._triple(g, spatial[0][2], LOCN.geometry, wkt_geom, GSP.wktLiteral)
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
@@ -606,3 +607,78 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["access_services"][0]["endpoint_url"] == [
             "http://publications.europa.eu/webapi/rdf/sparql"
         ]
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+)
+@pytest.mark.ckan_config("scheming.presets", "ckanext.scheming:presets.json")
+@pytest.mark.ckan_config(
+    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
+)
+class TestSchemingIndexFields:
+    def test_repeating_subfields_index(self):
+
+        dataset_dict = {
+            # Core fields
+            "name": "test-dataset",
+            "title": "Test DCAT dataset",
+            "notes": "Some notes",
+            # Repeating subfields
+            "contact": [
+                {"name": "Contact 1", "email": "contact1@example.org"},
+                {"name": "Contact 2", "email": "contact2@example.org"},
+            ],
+        }
+
+        with mock.patch("ckan.lib.search.index.make_connection") as m:
+            call_action("package_create", **dataset_dict)
+
+            # Dict sent to Solr
+            search_dict = m.mock_calls[1].kwargs["docs"][0]
+            assert search_dict["contact__name"] == "Contact 1 Contact 2"
+            assert (
+                search_dict["contact__email"]
+                == "contact1@example.org contact2@example.org"
+            )
+
+    def test_spatial_field(self):
+
+        dataset_dict = {
+            # Core fields
+            "name": "test-dataset",
+            "title": "Test DCAT dataset",
+            "notes": "Some notes",
+            "spatial_coverage": [
+                {
+                    "uri": "https://sws.geonames.org/6361390/",
+                    "centroid": {"type": "Point", "coordinates": [1.26639, 41.12386]},
+                },
+                {
+                    "geom": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [11.9936, 54.0486],
+                                [11.9936, 54.2466],
+                                [12.3045, 54.2466],
+                                [12.3045, 54.0486],
+                                [11.9936, 54.0486],
+                            ]
+                        ],
+                    },
+                    "text": "Tarragona",
+                },
+            ],
+        }
+
+        with mock.patch("ckan.lib.search.index.make_connection") as m:
+            call_action("package_create", **dataset_dict)
+
+            # Dict sent to Solr
+            search_dict = m.mock_calls[1].kwargs["docs"][0]
+            assert search_dict["spatial"] == json.dumps(
+                dataset_dict["spatial_coverage"][0]["centroid"]
+            )
