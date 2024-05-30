@@ -107,7 +107,19 @@ dataset_fields:
 - field_name: dcat_type
   label: Type
   # TODO: controlled vocabulary?
-  #
+
+- field_name: temporal_coverage
+  label: Temporal coverage
+  repeating_subfields:
+
+    - field_name: start
+      label: Start
+      # TODO: dcat_date preset
+
+    - field_name: end
+      label: End
+      # TODO: dcat_date preset
+
 - field_name: access_rights
   label: Access rights
   validators: ignore_missing unicode_safe

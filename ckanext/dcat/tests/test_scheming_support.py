@@ -80,6 +80,10 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "type": "public_body",
                 },
             ],
+            "temporal_coverage": [
+                {"start": "1905-03-01", "end": "2013-01-05"},
+                {"start": "2024-04-10", "end": "2024-05-29"},
+            ],
             "resources": [
                 {
                     "name": "Resource 1",
@@ -221,6 +225,38 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             dataset_dict["publisher"][0]["type"],
         )
 
+        temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
+
+        assert len(temporal) == len(dataset["temporal_coverage"])
+        assert self._triple(
+            g,
+            temporal[0][2],
+            SCHEMA.startDate,
+            dataset_dict["temporal_coverage"][0]["start"] + "T00:00:00",
+            data_type=XSD.dateTime,
+        )
+        assert self._triple(
+            g,
+            temporal[0][2],
+            SCHEMA.endDate,
+            dataset_dict["temporal_coverage"][0]["end"] + "T00:00:00",
+            data_type=XSD.dateTime,
+        )
+        assert self._triple(
+            g,
+            temporal[1][2],
+            SCHEMA.startDate,
+            dataset_dict["temporal_coverage"][1]["start"] + "T00:00:00",
+            data_type=XSD.dateTime,
+        )
+        assert self._triple(
+            g,
+            temporal[1][2],
+            SCHEMA.endDate,
+            dataset_dict["temporal_coverage"][1]["end"] + "T00:00:00",
+            data_type=XSD.dateTime,
+        )
+
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
 
         # Resources: core fields
@@ -355,6 +391,36 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g, publisher[0][2], FOAF.name, dataset_dict["publisher"][0]["name"]
         )
 
+    def test_legacy_fields(self):
+
+        dataset_dict = {
+            "name": "test-dataset-2",
+            "title": "Test DCAT dataset 2",
+            "notes": "Lorem ipsum",
+            "extras": [
+                {"key": "contact_name", "value": "Test Contact"},
+                {"key": "contact_email", "value": "contact@example.org"},
+                {"key": "publisher_name", "value": "Test Publisher"},
+                {"key": "publisher_email", "value": "publisher@example.org"},
+                {"key": "publisher_url", "value": "https://example.org"},
+                {"key": "publisher_type", "value": "public_body"},
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        contact_details = [t for t in g.triples((dataset_ref, DCAT.contactPoint, None))]
+        assert len(contact_details) == 1
+        assert self._triple(g, contact_details[0][2], VCARD.fn, "Test Contact")
+
+        publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
+        assert len(publisher) == 1
+        assert self._triple(g, publisher[0][2], FOAF.name, "Test Publisher")
+
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
@@ -444,6 +510,8 @@ class TestSchemingParseSupport(BaseParseTest):
             dataset["publisher"][0]["type"]
             == "http://purl.org/adms/publishertype/NonProfitOrganisation"
         )
+        assert dataset["temporal_coverage"][0]["start"] == "1905-03-01"
+        assert dataset["temporal_coverage"][0]["end"] == "2013-01-05"
 
         resource = dataset["resources"][0]
 

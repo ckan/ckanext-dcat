@@ -9,6 +9,9 @@ from .base import (
     DCT,
     VCARD,
     FOAF,
+    SCHEMA,
+    SKOS,
+    LOCN,
 )
 
 
@@ -62,14 +65,18 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 _parse_list_value(resource_dict, field_name)
 
         # Repeating subfields
+        new_fields_mapping = {
+            "temporal_coverage": "temporal"
+        }
         for schema_field in self._dataset_schema["dataset_fields"]:
             if "repeating_subfields" in schema_field:
                 # Check if existing extras need to be migrated
                 field_name = schema_field["field_name"]
                 new_extras = []
                 new_dict = {}
+                check_name = new_fields_mappings.get(field_name, field_name)
                 for extra in dataset_dict.get("extras", []):
-                    if extra["key"].startswith(f"{field_name}_"):
+                    if extra["key"].startswith(f"{check_name}_"):
                         subfield = extra["key"][extra["key"].index("_") + 1 :]
                         if subfield in [
                             f["field_name"] for f in schema_field["repeating_subfields"]
@@ -83,6 +90,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     dataset_dict[field_name] = [new_dict]
                     dataset_dict["extras"] = new_extras
 
+        # Repeating subfields: resources
         for schema_field in self._dataset_schema["resource_fields"]:
             if "repeating_subfields" in schema_field:
                 # Check if value needs to be load from JSON
@@ -153,6 +161,17 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 _type=URIRef,
                 value_modifier=self._add_mailto,
             )
+
+        temporal = dataset_dict.get("temporal_coverage")
+        if isinstance(temporal, list) and len(temporal):
+            for item in temporal:
+                temporal_ref = BNode()
+                self.g.add((temporal_ref, RDF.type, DCT.PeriodOfTime))
+                if item.get("start"):
+                    self._add_date_triple(temporal_ref, SCHEMA.startDate, item["start"])
+                if item.get("end"):
+                    self._add_date_triple(temporal_ref, SCHEMA.endDate, item["end"])
+                self.g.add((dataset_ref, DCT.temporal, temporal_ref))
 
         resources = dataset_dict.get("resources", [])
         for resource in resources:
