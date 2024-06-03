@@ -13,6 +13,7 @@ from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer, RDFParser
 from ckanext.dcat.profiles import (
     DCAT,
+    DCATAP,
     DCT,
     ADMS,
     XSD,
@@ -24,6 +25,7 @@ from ckanext.dcat.profiles import (
     GSP,
     OWL,
     GEOJSON_IMT,
+    SPDX,
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 
@@ -75,6 +77,14 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             "language": ["en", "ca", "es"],
             "documentation": ["https://example.org/some-doc.html"],
             "conforms_to": ["Standard 1", "Standard 2"],
+            "is_referenced_by": [
+                "https://doi.org/10.1038/sdata.2018.22",
+                "test_isreferencedby",
+            ],
+            "applicable_legislation": [
+                "http://data.europa.eu/eli/reg_impl/2023/138/oj",
+                "http://data.europa.eu/eli/reg_impl/2023/138/oj_alt",
+            ],
             # Repeating subfields
             "contact": [
                 {"name": "Contact 1", "email": "contact1@example.org"},
@@ -92,6 +102,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                 {"start": "1905-03-01", "end": "2013-01-05"},
                 {"start": "2024-04-10", "end": "2024-05-29"},
             ],
+            "temporal_resolution": ["PT15M", "P1D"],
             "spatial_coverage": [
                 {
                     "geom": {
@@ -123,12 +134,19 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "centroid": {"type": "Point", "coordinates": [1.26639, 41.12386]},
                 }
             ],
+            "spatial_resolution_in_meters": [1.5, 2.0],
             "resources": [
                 {
                     "name": "Resource 1",
                     "description": "Some description",
                     "url": "https://example.com/data.csv",
                     "format": "CSV",
+                    "availability": "http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL",
+                    "compress_format": "http://www.iana.org/assignments/media-types/application/gzip",
+                    "package_format": "http://publications.europa.eu/resource/authority/file-type/TAR",
+                    "size": 12323,
+                    "hash": "4304cf2e751e6053c90b1804c89c0ebb758f395a",
+                    "hash_algorithm": "http://spdx.org/rdf/terms#checksumAlgorithm_sha1",
                     "status": "published",
                     "access_url": "https://example.com/data.csv",
                     "download_url": "https://example.com/data.csv",
@@ -214,6 +232,24 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             self._triples_list_values(g, dataset_ref, FOAF.page)
             == dataset["documentation"]
         )
+        assert (
+            self._triples_list_values(g, dataset_ref, DCAT.temporalResolution)
+            == dataset["temporal_resolution"]
+        )
+        assert (
+            self._triples_list_values(g, dataset_ref, DCT.isReferencedBy)
+            == dataset["is_referenced_by"]
+        )
+        assert (
+            self._triples_list_values(g, dataset_ref, DCATAP.applicableLegislation)
+            == dataset["applicable_legislation"]
+        )
+
+        # TODO: enable after validator
+        #        assert (
+        #            self._triples_list_values(g, dataset_ref, DCAT.spatialResolutionInMeters)
+        #            == dataset["spatial_resolution_in_meters"]
+        #        )
 
         # Repeating subfields
 
@@ -318,38 +354,67 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(g, spatial[0][2], LOCN.geometry, wkt_geom, GSP.wktLiteral)
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        resource = dataset_dict["resources"][0]
 
         # Resources: core fields
 
-        assert self._triple(
-            g, distribution_ref, DCT.title, dataset_dict["resources"][0]["name"]
-        )
+        assert self._triple(g, distribution_ref, DCT.title, resource["name"])
         assert self._triple(
             g,
             distribution_ref,
             DCT.description,
-            dataset_dict["resources"][0]["description"],
+            resource["description"],
         )
 
         # Resources: standard fields
 
-        assert self._triple(
-            g, distribution_ref, DCT.rights, dataset_dict["resources"][0]["rights"]
-        )
-        assert self._triple(
-            g, distribution_ref, ADMS.status, dataset_dict["resources"][0]["status"]
-        )
+        assert self._triple(g, distribution_ref, DCT.rights, resource["rights"])
+        assert self._triple(g, distribution_ref, ADMS.status, resource["status"])
         assert self._triple(
             g,
             distribution_ref,
             DCAT.accessURL,
-            URIRef(dataset_dict["resources"][0]["access_url"]),
+            URIRef(resource["access_url"]),
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCATAP.availability,
+            URIRef(resource["availability"]),
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.compressFormat,
+            URIRef(resource["compress_format"]),
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.packageFormat,
+            URIRef(resource["package_format"]),
         )
         assert self._triple(
             g,
             distribution_ref,
             DCAT.downloadURL,
-            URIRef(dataset_dict["resources"][0]["download_url"]),
+            URIRef(resource["download_url"]),
+        )
+
+        assert self._triple(g, distribution_ref, DCAT.byteSize, float(resource['size']), XSD.decimal)
+        # Checksum
+        checksum = self._triple(g, distribution_ref, SPDX.checksum, None)[2]
+        assert checksum
+        assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
+        assert self._triple(
+            g,
+            checksum,
+            SPDX.checksumValue,
+            resource["hash"],
+            data_type="http://www.w3.org/2001/XMLSchema#hexBinary",
+        )
+        assert self._triple(
+            g, checksum, SPDX.algorithm, URIRef(resource["hash_algorithm"])
         )
 
         # Resources: dates
@@ -369,11 +434,10 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         )
 
         # Resources: list fields
-
-        language = [
-            str(t[2]) for t in g.triples((distribution_ref, DCT.language, None))
-        ]
-        assert language == dataset_dict["resources"][0]["language"]
+        assert (
+            self._triples_list_values(g, distribution_ref, DCT.language)
+            == resource["language"]
+        )
 
         # Resource: repeating subfields
         access_services = [
@@ -385,17 +449,14 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             access_services[0][2],
             DCT.title,
-            dataset_dict["resources"][0]["access_services"][0]["title"],
+            resource["access_services"][0]["title"],
         )
 
         endpoint_urls = [
             str(t[2])
             for t in g.triples((access_services[0][2], DCAT.endpointURL, None))
         ]
-        assert (
-            endpoint_urls
-            == dataset_dict["resources"][0]["access_services"][0]["endpoint_url"]
-        )
+        assert endpoint_urls == resource["access_services"][0]["endpoint_url"]
 
     def test_publisher_fallback_org(self):
 
@@ -555,7 +616,18 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://dataset.info.org/doc1",
             "http://dataset.info.org/doc2",
         ]
-
+        assert sorted(dataset["temporal_resolution"]) == [
+            "P1D",
+            "PT15M",
+        ]
+        assert sorted(dataset["is_referenced_by"]) == [
+            "https://doi.org/10.1038/sdata.2018.22",
+            "test_isreferencedby",
+        ]
+        assert sorted(dataset["applicable_legislation"]) == [
+            "http://data.europa.eu/eli/reg_impl/2023/138/oj",
+            "http://data.europa.eu/eli/reg_impl/2023/138/oj_alt",
+        ]
         # Repeating subfields
 
         assert dataset["contact"][0]["name"] == "Point of Contact"
@@ -585,9 +657,24 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["modified"] == "2012-05-01T00:04:06"
         assert resource["status"] == "http://purl.org/adms/status/Completed"
         assert resource["size"] == 12323
+        assert (
+            resource["availability"]
+            == "http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL"
+        )
+        assert (
+            resource["compress_format"]
+            == "http://www.iana.org/assignments/media-types/application/gzip"
+        )
+        assert (
+            resource["package_format"]
+            == "http://publications.europa.eu/resource/authority/file-type/TAR"
+        )
 
-        # assert resource['hash'] == u'4304cf2e751e6053c90b1804c89c0ebb758f395a'
-        # assert resource['hash_algorithm'] == u'http://spdx.org/rdf/terms#checksumAlgorithm_sha1'
+        assert resource["hash"] == "4304cf2e751e6053c90b1804c89c0ebb758f395a"
+        assert (
+            resource["hash_algorithm"]
+            == "http://spdx.org/rdf/terms#checksumAlgorithm_sha1"
+        )
 
         assert (
             resource["access_url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
