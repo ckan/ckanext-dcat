@@ -30,10 +30,6 @@ from ckanext.dcat.profiles import (
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 
 
-# TODO: tests for spatial coverage
-# TODO: index "spatial" extra
-
-
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(

@@ -20,6 +20,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_auth,
                                 )
 from ckanext.dcat import utils
+from ckanext.dcat.validators import dcat_validators
 
 
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
@@ -39,6 +40,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     p.implements(p.ITranslation, inherit=True)
     p.implements(p.IClick)
     p.implements(p.IBlueprint)
+    p.implements(p.IValidators)
 
     # IClick
 
@@ -101,6 +103,10 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             'dcat_catalog_show': dcat_auth,
             'dcat_catalog_search': dcat_auth,
         }
+
+    # IValidators
+    def get_validators(self):
+        return dcat_validators
 
     # IPackageController
 

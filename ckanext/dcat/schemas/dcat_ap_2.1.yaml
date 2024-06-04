@@ -144,11 +144,10 @@ dataset_fields:
     - field_name: centroid
       label: Centroid
 
-#- field_name: spatial_resolution_in_meters
-#  label: Spatial resolution in meters
-#  preset: multiple_text
-#  validators: ignore_missing scheming_multiple_text
-# TODO: scheming_multiple_decimal
+- field_name: spatial_resolution_in_meters
+  label: Spatial resolution in meters
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_number
 
 - field_name: access_rights
   label: Access rights
