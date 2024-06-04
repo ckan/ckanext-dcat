@@ -54,7 +54,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             self._add_spatial_to_dict(dataset_dict, key, spatial)
 
         # Spatial resolution in meters
-        spatial_resolution_in_meters = self._object_value_int_list(
+        spatial_resolution_in_meters = self._object_value_float_list(
             dataset_ref, DCAT.spatialResolutionInMeters
         )
         if spatial_resolution_in_meters:

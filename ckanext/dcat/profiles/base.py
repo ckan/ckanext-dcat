@@ -260,13 +260,31 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
-        If the value can not be parsed as intger, returns an empty list
+        If the value can not be parsed as integer, returns an empty list
         """
         object_values = []
         for object in self.g.objects(subject, predicate):
             if object:
                 try:
                     object_values.append(int(float(object)))
+                except ValueError:
+                    pass
+        return object_values
+
+    def _object_value_float_list(self, subject, predicate):
+        """
+        Given a subject and a predicate, returns the value of the object as a
+        list of floats
+
+        Both subject and predicate must be rdflib URIRef or BNode objects
+
+        If the value can not be parsed as a float, returns an empty list
+        """
+        object_values = []
+        for object in self.g.objects(subject, predicate):
+            if object:
+                try:
+                    object_values.append(float(object))
                 except ValueError:
                     pass
         return object_values
