@@ -241,11 +241,12 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             == dataset["applicable_legislation"]
         )
 
-        # TODO: enable after validator
-        #        assert (
-        #            self._triples_list_values(g, dataset_ref, DCAT.spatialResolutionInMeters)
-        #            == dataset["spatial_resolution_in_meters"]
-        #        )
+        assert (
+            self._triples_list_python_values(
+                g, dataset_ref, DCAT.spatialResolutionInMeters
+            )
+            == dataset["spatial_resolution_in_meters"]
+        )
 
         # Repeating subfields
 
@@ -646,6 +647,10 @@ class TestSchemingParseSupport(BaseParseTest):
         assert sorted(dataset["temporal_resolution"]) == [
             "P1D",
             "PT15M",
+        ]
+        assert sorted(dataset["spatial_resolution_in_meters"]) == [
+            1.5,
+            2.0,
         ]
         assert sorted(dataset["is_referenced_by"]) == [
             "https://doi.org/10.1038/sdata.2018.22",

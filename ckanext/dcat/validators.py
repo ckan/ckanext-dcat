@@ -1,4 +1,3 @@
-import numbers
 import json
 
 from ckantoolkit import (
@@ -34,14 +33,21 @@ def scheming_multiple_number(field, schema):
             return
 
         value = data[key]
-        # 1. list of strings or 2. single string
         if value is not missing:
+
             if not isinstance(value, list):
-                try:
-                    value = [float(value)]
-                except ValueError:
-                    errors[key].append(_("expecting list of numbers"))
-                    raise StopOnError
+                if isinstance(value, str) and value.startswith("["):
+                    try:
+                        value = json.loads(value)
+                    except ValueError:
+                        errors[key].append(_("Could not parse value"))
+                        raise StopOnError
+                else:
+                    try:
+                        value = [float(value)]
+                    except ValueError:
+                        errors[key].append(_("expecting list of numbers"))
+                        raise StopOnError
 
             out = []
             for element in value:
