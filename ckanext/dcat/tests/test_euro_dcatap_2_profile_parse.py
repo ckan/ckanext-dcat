@@ -353,7 +353,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         dataset = URIRef('http://example.org/datasets/1')
         g.add((dataset, RDF.type, DCAT.Dataset))
 
-        spatial_resolution_in_meters = 30
+        spatial_resolution_in_meters = 30.5
         g.add((dataset, DCAT.spatialResolutionInMeters, Literal(spatial_resolution_in_meters, datatype=XSD.decimal)))
 
         spatial_resolution_in_meters_2 = 20
@@ -368,9 +368,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         extras = self._extras(datasets[0])
 
         spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
-        assert len(spatial_resolution_list) == 2
-        assert  spatial_resolution_in_meters in spatial_resolution_list
-        assert  spatial_resolution_in_meters_2 in spatial_resolution_list
+        assert sorted(spatial_resolution_list) == [20.0, 30.5]
 
     def test_isreferencedby_multiple(self):
         g = Graph()
