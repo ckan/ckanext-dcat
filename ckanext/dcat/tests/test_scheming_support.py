@@ -397,7 +397,9 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             URIRef(resource["download_url"]),
         )
 
-        assert self._triple(g, distribution_ref, DCAT.byteSize, float(resource['size']), XSD.decimal)
+        assert self._triple(
+            g, distribution_ref, DCAT.byteSize, float(resource["size"]), XSD.decimal
+        )
         # Checksum
         checksum = self._triple(g, distribution_ref, SPDX.checksum, None)[2]
         assert checksum
@@ -537,6 +539,35 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
         assert len(publisher) == 1
         assert self._triple(g, publisher[0][2], FOAF.name, "Test Publisher")
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+)
+@pytest.mark.ckan_config("scheming.presets", "ckanext.scheming:presets.json")
+@pytest.mark.ckan_config(
+    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
+)
+class TestSchemingValidators:
+    def test_mimetype_is_guessed(self):
+        dataset_dict = {
+            "name": "test-dataset-2",
+            "title": "Test DCAT dataset 2",
+            "notes": "Lorem ipsum",
+            "resources": [
+                {"url": "https://example.org/data.csv"},
+                {"url": "https://example.org/report.pdf"},
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        assert sorted([r["mimetype"] for r in dataset["resources"]]) == [
+            "application/pdf",
+            "text/csv",
+        ]
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")

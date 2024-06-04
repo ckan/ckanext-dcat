@@ -228,23 +228,21 @@ resource_fields:
 
 - field_name: mimetype
   label: Media type
-  # TODO: get from format
+  validators: if_empty_guess_format ignore_missing unicode_safe
 
 - field_name: compress_format
   label: Compress format
-  # TODO: media type validator
 
 - field_name: package_format
   label: Package format
-  # TODO: media type validator
 
 - field_name: size
   label: Size
-  # TODO: number validator / snippet
+  validators: ignore_missing int_validator
+  form_snippet: number.html
 
 - field_name: hash
   label: Hash
-  # TODO: generate for uploads?
 
 - field_name: hash_algorithm
   label: Hash Algorithm
