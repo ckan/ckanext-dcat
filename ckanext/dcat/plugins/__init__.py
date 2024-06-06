@@ -30,6 +30,19 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 I18N_DIR = os.path.join(HERE, u"../i18n")
 
 
+def _get_dataset_schema(dataset_type="dataset"):
+    schema = None
+    try:
+        schema_show = p.toolkit.get_action("scheming_dataset_schema_show")
+        try:
+            schema = schema_show({}, {"type": dataset_type})
+        except p.toolkit.ObjectNotFound:
+            pass
+    except KeyError:
+        pass
+    return schema
+
+
 class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     p.implements(p.IConfigurer, inherit=True)
@@ -120,8 +133,15 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     # CKAN >= 2.10 hooks
     def after_dataset_show(self, context, data_dict):
 
+        schema = _get_dataset_schema(data_dict["type"])
         # check if config is enabled to translate keys (default: True)
-        if not p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG, True)):
+        # skip if scheming is enabled, as this will be handled there
+        translate_keys = (
+            p.toolkit.asbool(config.get(TRANSLATE_KEYS_CONFIG, True))
+            and not schema
+        )
+
+        if not translate_keys:
             return data_dict
 
         if context.get('for_view'):
@@ -143,16 +163,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
         return data_dict
 
     def before_dataset_index(self, dataset_dict):
-        schema = None
-        try:
-            schema_show = p.toolkit.get_action("scheming_dataset_schema_show")
-            try:
-                schema = schema_show({}, {"type": dataset_dict["type"]})
-            except p.toolkit.ObjectNotFound:
-                pass
-        except KeyError:
-            pass
-
+        schema = _get_dataset_schema(dataset_dict["type"])
         spatial = None
         if schema:
             for field in schema['dataset_fields']:
