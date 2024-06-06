@@ -153,11 +153,13 @@ dataset_fields:
   label: Access rights
   validators: ignore_missing unicode_safe
   form_snippet: markdown.html
+  display_snippet: markdown.html
 
 - field_name: version_notes
   label: Version notes
   validators: ignore_missing unicode_safe
   form_snippet: markdown.html
+  display_snippet: markdown.html
 
 - field_name: alternate_identifier
   label: Alternate identifier
@@ -240,6 +242,7 @@ resource_fields:
   label: Size
   validators: ignore_missing int_validator
   form_snippet: number.html
+  display_snippet: file_size.html
 
 - field_name: hash
   label: Hash
@@ -250,6 +253,7 @@ resource_fields:
 - field_name: rights
   label: Rights
   form_snippet: markdown.html
+  display_snippet: markdown.html
   form_placeholder: Some statement about the rights associated with the resource
 
 - field_name: availability
