@@ -201,15 +201,15 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             dataset_ref,
             DCT.issued,
-            dataset["issued"] + "T00:00:00",
-            data_type=XSD.dateTime,
+            dataset["issued"],
+            data_type=XSD.date,
         )
         assert self._triple(
             g,
             dataset_ref,
             DCT.modified,
-            dataset["modified"] + "T00:00:00",
-            data_type=XSD.dateTime,
+            dataset["modified"],
+            data_type=XSD.date,
         )
 
         # List fields
@@ -307,29 +307,29 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             temporal[0][2],
             SCHEMA.startDate,
-            dataset_dict["temporal_coverage"][0]["start"] + "T00:00:00",
-            data_type=XSD.dateTime,
+            dataset_dict["temporal_coverage"][0]["start"],
+            data_type=XSD.date,
         )
         assert self._triple(
             g,
             temporal[0][2],
             SCHEMA.endDate,
-            dataset_dict["temporal_coverage"][0]["end"] + "T00:00:00",
-            data_type=XSD.dateTime,
+            dataset_dict["temporal_coverage"][0]["end"],
+            data_type=XSD.date,
         )
         assert self._triple(
             g,
             temporal[1][2],
             SCHEMA.startDate,
-            dataset_dict["temporal_coverage"][1]["start"] + "T00:00:00",
-            data_type=XSD.dateTime,
+            dataset_dict["temporal_coverage"][1]["start"],
+            data_type=XSD.date,
         )
         assert self._triple(
             g,
             temporal[1][2],
             SCHEMA.endDate,
-            dataset_dict["temporal_coverage"][1]["end"] + "T00:00:00",
-            data_type=XSD.dateTime,
+            dataset_dict["temporal_coverage"][1]["end"],
+            data_type=XSD.date,
         )
 
         spatial = [t for t in g.triples((dataset_ref, DCT.spatial, None))]

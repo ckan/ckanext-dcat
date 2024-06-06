@@ -298,13 +298,13 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         for predicate in [SCHEMA.startDate, DCAT.startDate]:
             triples = []
             for temporal_obj in temporal_obj_list:
-                triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime))
+                triples.extend(self._triples(g, temporal_obj, predicate, extras['temporal_start'], XSD.dateTime))
             assert len(triples) == 1
 
         for predicate in [SCHEMA.endDate, DCAT.endDate]:
             triples = []
             for temporal_obj in temporal_obj_list:
-                triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime))
+                triples.extend(self._triples(g, temporal_obj, predicate, extras['temporal_end'], XSD.date))
             assert len(triples) == 1
 
     def test_high_value_datasets(self):

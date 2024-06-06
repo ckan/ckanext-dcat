@@ -503,8 +503,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert temporal
 
         assert self._triple(g, temporal, RDF.type, DCT.PeriodOfTime)
-        assert self._triple(g, temporal, SCHEMA.startDate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime)
-        assert self._triple(g, temporal, SCHEMA.endDate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime)
+        assert self._triple(g, temporal, SCHEMA.startDate, extras['temporal_start'], XSD.dateTime)
+        assert self._triple(g, temporal, SCHEMA.endDate, extras['temporal_end'], XSD.date)
 
     def test_spatial(self):
         dataset = {
