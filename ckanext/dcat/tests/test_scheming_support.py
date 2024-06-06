@@ -146,7 +146,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "size": 12323,
                     "hash": "4304cf2e751e6053c90b1804c89c0ebb758f395a",
                     "hash_algorithm": "http://spdx.org/rdf/terms#checksumAlgorithm_sha1",
-                    "status": "published",
+                    "status": "http://purl.org/adms/status/Completed",
                     "access_url": "https://example.com/data.csv",
                     "download_url": "https://example.com/data.csv",
                     "issued": "2024-05-01T01:20:33",
@@ -369,7 +369,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         # Resources: standard fields
 
         assert self._triple(g, distribution_ref, DCT.rights, resource["rights"])
-        assert self._triple(g, distribution_ref, ADMS.status, resource["status"])
+        assert self._triple(g, distribution_ref, ADMS.status, URIRef(resource["status"]))
         assert self._triple(
             g,
             distribution_ref,

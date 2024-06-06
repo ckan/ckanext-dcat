@@ -295,8 +295,17 @@ resource_fields:
 
 - field_name: status
   label: Status
-  help_text: The status of the distribution in the context of maturity lifecycle.
-  # TODO: choices
+  preset: select
+  choices:
+    - value: http://purl.org/adms/status/Completed
+      label: Completed
+    - value: http://purl.org/adms/status/UnderDevelopment
+      label: Under Development
+    - value: http://purl.org/adms/status/Deprecated
+      label: Deprecated
+    - value: http://purl.org/adms/status/Withdrawn
+      label: Withdrawn
+  help_text: The status of the resource in the context of maturity lifecycle.
 
 - field_name: license
   label: License
