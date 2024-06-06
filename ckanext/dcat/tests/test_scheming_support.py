@@ -35,7 +35,10 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
 )
-@pytest.mark.ckan_config("scheming.presets", "ckanext.scheming:presets.json")
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
@@ -547,7 +550,10 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
 )
-@pytest.mark.ckan_config("scheming.presets", "ckanext.scheming:presets.json")
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
@@ -576,7 +582,10 @@ class TestSchemingValidators:
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
 )
-@pytest.mark.ckan_config("scheming.presets", "ckanext.scheming:presets.json")
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
@@ -733,7 +742,10 @@ class TestSchemingParseSupport(BaseParseTest):
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
 )
-@pytest.mark.ckan_config("scheming.presets", "ckanext.scheming:presets.json")
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
@@ -801,3 +813,55 @@ class TestSchemingIndexFields:
             assert search_dict["spatial"] == json.dumps(
                 dataset_dict["spatial_coverage"][0]["centroid"]
             )
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config(
+    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
+)
+class TestSchemingPresets:
+    def test_dcat_date(self):
+        dataset_dict = {
+            # Core fields
+            "name": "test-dataset",
+            "title": "Test DCAT dataset",
+            "notes": "Some notes",
+            "issued": "2024",
+            "modified": "2024-10",
+            "temporal_coverage": [
+                {"start": "1905-03-01T10:07:31.182680", "end": "2013-01-05"},
+                {"start": "2024-04-10T10:07:31", "end": "2024-05-29"},
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        # Year
+        assert dataset["issued"] == dataset_dict["issued"]
+
+        # Year-month
+        assert dataset["modified"] == dataset_dict["modified"]
+
+        # Date
+        assert (
+            dataset["temporal_coverage"][0]["end"]
+            == dataset_dict["temporal_coverage"][0]["end"]
+        )
+
+        # Datetime
+        assert (
+            dataset["temporal_coverage"][0]["start"]
+            == dataset_dict["temporal_coverage"][0]["start"]
+        )
+        assert (
+            dataset["temporal_coverage"][1]["start"]
+            == dataset_dict["temporal_coverage"][1]["start"]
+        )

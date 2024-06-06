@@ -88,12 +88,13 @@ dataset_fields:
 # Note: this will fall back to metadata_created if not present
 - field_name: issued
   label: Release date
-  # TODO: dcat_date preset
+  preset: dcat_date
+
 
 # Note: this will fall back to metadata_modified if not present
 - field_name: modified
   label: Modification date
-  # TODO: dcat_date preset
+  preset: dcat_date
 
 - field_name: identifier
   label: Identifier
@@ -114,11 +115,11 @@ dataset_fields:
 
     - field_name: start
       label: Start
-      # TODO: dcat_date preset
+      preset: dcat_date
 
     - field_name: end
       label: End
-      # TODO: dcat_date preset
+      preset: dcat_date
 
 - field_name: temporal_resolution
   label: Temporal resolution
@@ -275,11 +276,11 @@ resource_fields:
 
 - field_name: issued
   label: Release date
-  # TODO: dcat_date preset
+  preset: dcat_date
 
 - field_name: modified
   label: Modification date
-  # TODO: dcat_date preset
+  preset: dcat_date
 
 - field_name: language
   label: Language

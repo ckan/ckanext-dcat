@@ -1128,6 +1128,30 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
+    @pytest.mark.parametrize("value,data_type", [
+        ("2024", XSD.gYear),
+        ("2024-05", XSD.gYearMonth),
+        ("2024-05-31", XSD.date),
+        ("2024-05-31T00:00:00", XSD.dateTime),
+        ("2024-05-31T12:30:01", XSD.dateTime),
+        ("2024-05-31T12:30:01.451243", XSD.dateTime),
+    ])
+    def test_dates_data_types(self, value, data_type):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'issued': value,
+        }
+
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert str(self._triple(g, dataset_ref, DCT.issued, None)[2]) == value
+        assert self._triple(g, dataset_ref, DCT.issued, None)[2].datatype == data_type
+
 
 class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 

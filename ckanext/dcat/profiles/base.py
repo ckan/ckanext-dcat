@@ -11,6 +11,7 @@ from ckantoolkit import config, url_for, asbool, get_action, ObjectNotFound
 from ckan.model.license import LicenseRegister
 from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.validators import is_year, is_year_month, is_date
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -934,22 +935,31 @@ class RDFProfile(object):
         """
         Adds a new triple with a date object
 
-        Dates are parsed using dateutil, and if the date obtained is correct,
-        added to the graph as an XSD.dateTime value.
+        If the value is one of xsd:gYear, xsd:gYearMonth or xsd:date. If not
+        the value will be parsed using dateutil, and if the date obtained is correct,
+        added to the graph as an xsd:dateTime value.
 
         If there are parsing errors, the literal string value is added.
         """
         if not value:
             return
-        try:
-            default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
-            _date = parse_date(value, default=default_datetime)
 
-            self.g.add(
-                (subject, predicate, _type(_date.isoformat(), datatype=XSD.dateTime))
-            )
-        except ValueError:
-            self.g.add((subject, predicate, _type(value)))
+        if is_year(value):
+            self.g.add((subject, predicate, _type(value, datatype=XSD.gYear)))
+        elif is_year_month(value):
+            self.g.add((subject, predicate, _type(value, datatype=XSD.gYearMonth)))
+        elif is_date(value):
+            self.g.add((subject, predicate, _type(value, datatype=XSD.date)))
+        else:
+            try:
+                default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
+                _date = parse_date(value, default=default_datetime)
+
+                self.g.add(
+                    (subject, predicate, _type(_date.isoformat(), datatype=XSD.dateTime))
+                )
+            except ValueError:
+                self.g.add((subject, predicate, _type(value)))
 
     def _last_catalog_modification(self):
         """

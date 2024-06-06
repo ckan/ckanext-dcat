@@ -1,11 +1,64 @@
+import datetime
 import json
+import re
 
 from ckantoolkit import (
     missing,
     StopOnError,
+    get_validator,
+    Invalid,
     _,
 )
 from ckanext.scheming.validation import scheming_validator
+
+# https://www.w3.org/TR/xmlschema11-2/#gYear
+regexp_xsd_year = re.compile(
+    "-?([1-9][0-9]{3,}|0[0-9]{3})(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?"
+)
+
+# https://www.w3.org/TR/xmlschema11-2/#gYearMonth
+regexp_xsd_year_month = re.compile(
+    "-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?"
+)
+
+regexp_xsd_date = re.compile(
+    "-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?"
+)
+
+
+def is_year(value):
+    return regexp_xsd_year.fullmatch(value)
+
+
+def is_year_month(value):
+    return regexp_xsd_year_month.fullmatch(value)
+
+
+def is_date(value):
+    return regexp_xsd_date.fullmatch(value)
+
+
+def dcat_date(key, data, errors, context):
+    value = data[key]
+
+    scheming_isodatetime = get_validator("scheming_isodatetime")
+
+    if isinstance(value, datetime.datetime):
+        return
+
+    if is_year(value) or is_year_month(value) or is_date(value):
+        return
+
+    try:
+        scheming_isodatetime({}, {})(key, data, errors, context)
+    except Invalid:
+        raise Invalid(
+            _(
+                "Date format incorrect. Supported formats are YYYY, YYYY-MM, YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS"
+            )
+        )
+
+    return value
 
 
 @scheming_validator
@@ -77,4 +130,5 @@ def scheming_multiple_number(field, schema):
 
 dcat_validators = {
     "scheming_multiple_number": scheming_multiple_number,
+    "dcat_date": dcat_date,
 }
