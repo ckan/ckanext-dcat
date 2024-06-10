@@ -40,9 +40,7 @@ def reset_calls_counter():
     return wrapper
 
 
-class TestRDFHarvester(p.SingletonPlugin):
-
-    p.implements(IDCATRDFHarvester)
+class BaseTestRDFHarvester(object):
 
     calls = defaultdict(int)
     # change return values of after_parsing via this parameter
@@ -111,8 +109,14 @@ class TestRDFHarvester(p.SingletonPlugin):
         return package_schema
 
 
-class TestRDFNullHarvester(TestRDFHarvester):
+class TestRDFHarvester(p.SingletonPlugin, BaseTestRDFHarvester):
+
     p.implements(IDCATRDFHarvester)
+
+
+class TestRDFNullHarvester(p.SingletonPlugin, BaseTestRDFHarvester):
+    p.implements(IDCATRDFHarvester)
+
     def before_update(self, harvest_object, dataset_dict, temp_dict):
         super(TestRDFNullHarvester, self).before_update(harvest_object, dataset_dict, temp_dict)
         dataset_dict.clear()
@@ -122,7 +126,7 @@ class TestRDFNullHarvester(TestRDFHarvester):
         dataset_dict.clear()
 
 
-class TestRDFExceptionHarvester(TestRDFHarvester):
+class TestRDFExceptionHarvester(p.SingletonPlugin, BaseTestRDFHarvester):
     p.implements(IDCATRDFHarvester)
 
     raised_exception = False
@@ -1498,7 +1502,6 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
-
         # First run, will create two datasets as previously tested
         self._run_full_job(harvest_source['id'], num_objects=2)
 
