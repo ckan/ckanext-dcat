@@ -33,7 +33,7 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -548,7 +548,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -580,7 +580,7 @@ class TestSchemingValidators:
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -740,7 +740,7 @@ class TestSchemingParseSupport(BaseParseTest):
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -818,7 +818,7 @@ class TestSchemingIndexFields:
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
