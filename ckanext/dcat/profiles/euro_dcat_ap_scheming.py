@@ -157,10 +157,10 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
 
             self._add_triple_from_dict(publisher, publisher_ref, FOAF.name, "name")
             self._add_triple_from_dict(
-                publisher, publisher_ref, FOAF.homepage, "url", URIRef
+                publisher, publisher_ref, FOAF.homepage, "url", _type=URIRef
             )
             self._add_triple_from_dict(
-                publisher, publisher_ref, DCT.type, "type", URIRefOrLiteral
+                publisher, publisher_ref, DCT.type, "type", _type=URIRefOrLiteral
             )
             self._add_triple_from_dict(
                 publisher,

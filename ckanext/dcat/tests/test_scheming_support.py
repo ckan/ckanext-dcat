@@ -291,7 +291,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             publisher[0][2],
             FOAF.homepage,
-            dataset_dict["publisher"][0]["url"],
+            URIRef(dataset_dict["publisher"][0]["url"]),
         )
         assert self._triple(
             g,
