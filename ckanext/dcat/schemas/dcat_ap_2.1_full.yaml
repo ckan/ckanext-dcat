@@ -1,6 +1,6 @@
 scheming_version: 2
 dataset_type: dataset
-about: A reimplementation of the default CKAN dataset schema
+about: Full DCAT AP 2.1 schema
 about_url: http://github.com/ckan/ckanext-dcat
 
 dataset_fields:
