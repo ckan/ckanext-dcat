@@ -173,7 +173,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                             value = item[key]
                             if not isinstance(value, dict):
                                 # Index a flattened version
-                                new_key = f'{field["field_name"]}__{key}'
+                                new_key = f'extras_{field["field_name"]}__{key}'
                                 if not dataset_dict.get(new_key):
                                     dataset_dict[new_key] = value
                                 else:

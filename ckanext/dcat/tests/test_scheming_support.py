@@ -769,11 +769,35 @@ class TestSchemingIndexFields:
 
             # Dict sent to Solr
             search_dict = m.mock_calls[1].kwargs["docs"][0]
-            assert search_dict["contact__name"] == "Contact 1 Contact 2"
+            assert search_dict["extras_contact__name"] == "Contact 1 Contact 2"
             assert (
-                search_dict["contact__email"]
+                search_dict["extras_contact__email"]
                 == "contact1@example.org contact2@example.org"
             )
+
+    def test_repeating_subfields_search(self):
+
+        dataset_dict = {
+            # Core fields
+            "name": "test-dataset",
+            "title": "Test DCAT dataset",
+            "notes": "Some notes",
+            # Repeating subfields
+            "contact": [
+                {"name": "Contact 1", "email": "contact1@example.org"},
+                {"name": "Contact 2", "email": "contact2@example.org"},
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        result = call_action("package_search", q="Contact 2")
+
+        assert result["results"][0]["id"] == dataset["id"]
+
+        result = call_action("package_search", q="Contact 3")
+
+        assert result["count"] == 0
 
     def test_spatial_field(self):
 
