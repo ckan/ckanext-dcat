@@ -31,9 +31,13 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         # call super method
         super(EuropeanDCATAP2Profile, self).parse_dataset(dataset_dict, dataset_ref)
 
+        # Standard values
+        value = self._object_value(dataset_ref, DCAT.temporalResolution)
+        if value:
+            dataset_dict["extras"].append({"key": "temporal_resolution", "value": value})
+
         # Lists
         for key, predicate in (
-            ("temporal_resolution", DCAT.temporalResolution),
             ("is_referenced_by", DCT.isReferencedBy),
             ("applicable_legislation", DCATAP.applicableLegislation),
             ("hvd_category", DCATAP.hvdCategory),
@@ -147,15 +151,17 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             dataset_dict, dataset_ref
         )
 
+        # Standard values
+        self._add_triple_from_dict(
+            dataset_dict,
+            dataset_ref,
+            DCAT.temporalResolution,
+            "temporal_resolution",
+            _datatype=XSD.duration,
+        )
+
         # Lists
         for key, predicate, fallbacks, type, datatype in (
-            (
-                "temporal_resolution",
-                DCAT.temporalResolution,
-                None,
-                Literal,
-                XSD.duration,
-            ),
             ("is_referenced_by", DCT.isReferencedBy, None, URIRefOrLiteral, None),
             (
                 "applicable_legislation",

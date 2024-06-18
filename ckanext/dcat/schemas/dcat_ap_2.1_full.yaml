@@ -141,8 +141,6 @@ dataset_fields:
 
 - field_name: temporal_resolution
   label: Temporal resolution
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_text
   help_text: Minimum time period resolvable in the dataset.
 
 - field_name: spatial_coverage

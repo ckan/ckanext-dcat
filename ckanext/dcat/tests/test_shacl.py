@@ -72,9 +72,8 @@ def test_validate_dcat_ap_2():
         ],
         "temporal_coverage": [
             {"start": "1905-03-01", "end": "2013-01-05"},
-            {"start": "2024-04-10", "end": "2024-05-29"},
         ],
-        "temporal_resolution": ["PT15M", "P1D"],
+        "temporal_resolution": "PT15M",
         "spatial_coverage": [
             {
                 "geom": {
@@ -151,5 +150,4 @@ def test_validate_dcat_ap_2():
     )
     r = validate(g, shacl_graph=path)
     conforms, results_graph, results_text = r
-
     assert conforms, results_text

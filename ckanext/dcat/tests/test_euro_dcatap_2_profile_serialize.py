@@ -42,7 +42,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'metadata_created': '2021-06-21T15:21:09.034694',
             'metadata_modified': '2021-06-21T15:21:09.075774',
             'extras': [
-                {'key': 'temporal_resolution', 'value': '[\"PT15M\", \"P1D\"]'},
+                {'key': 'temporal_resolution', 'value': 'PT15M'},
                 {'key': 'spatial_resolution_in_meters', 'value': '[30,20]'},
                 {'key': 'is_referenced_by', 'value': '[\"https://doi.org/10.1038/sdata.2018.22\", \"test_isreferencedby\"]'},
             ]
@@ -55,9 +55,14 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
+        # Standard values
+        assert self._triple(
+            g, dataset_ref, DCAT.temporalResolution, extras["temporal_resolution"],
+            data_type=XSD.duration
+        )
+
         # List
         for item in [
-            ('temporal_resolution', DCAT.temporalResolution, [Literal, Literal], [XSD.duration, XSD.duration]),
             ('is_referenced_by', DCT.isReferencedBy, [URIRef, Literal], [None, None]),
         ]:
             values = json.loads(extras[item[0]])

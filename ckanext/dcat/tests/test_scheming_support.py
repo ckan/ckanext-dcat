@@ -1,5 +1,6 @@
 from unittest import mock
 import json
+from decimal import Decimal
 
 import pytest
 from rdflib.namespace import RDF
@@ -101,7 +102,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                 {"start": "1905-03-01", "end": "2013-01-05"},
                 {"start": "2024-04-10", "end": "2024-05-29"},
             ],
-            "temporal_resolution": ["PT15M", "P1D"],
+            "temporal_resolution": "PT15M",
             "spatial_coverage": [
                 {
                     "geom": {
@@ -211,6 +212,13 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             dataset["modified"],
             data_type=XSD.date,
         )
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
 
         # List fields
 
@@ -230,10 +238,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert (
             self._triples_list_values(g, dataset_ref, FOAF.page)
             == dataset["documentation"]
-        )
-        assert (
-            self._triples_list_values(g, dataset_ref, DCAT.temporalResolution)
-            == dataset["temporal_resolution"]
         )
         assert (
             self._triples_list_values(g, dataset_ref, DCT.isReferencedBy)
@@ -402,7 +406,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         )
 
         assert self._triple(
-            g, distribution_ref, DCAT.byteSize, float(resource["size"]), XSD.decimal
+            g, distribution_ref, DCAT.byteSize, Decimal(resource["size"]), XSD.decimal
         )
         # Checksum
         checksum = self._triple(g, distribution_ref, SPDX.checksum, None)[2]
@@ -636,6 +640,7 @@ class TestSchemingParseSupport(BaseParseTest):
 
         assert dataset["issued"] == u"2012-05-10"
         assert dataset["modified"] == u"2012-05-10T21:04:00"
+        assert dataset["temporal_resolution"] == "PT15M"
 
         # List fields
         assert sorted(dataset["conforms_to"]) == ["Standard 1", "Standard 2"]
@@ -652,10 +657,6 @@ class TestSchemingParseSupport(BaseParseTest):
         assert sorted(dataset["documentation"]) == [
             "http://dataset.info.org/doc1",
             "http://dataset.info.org/doc2",
-        ]
-        assert sorted(dataset["temporal_resolution"]) == [
-            "P1D",
-            "PT15M",
         ]
         assert sorted(dataset["spatial_resolution_in_meters"]) == [
             1.5,

@@ -64,7 +64,6 @@
         </dct:PeriodOfTime>
     </dct:temporal>
     <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
-    <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">P1D</dcat:temporalResolution>
     <dcat:contactPoint>
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>
