@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 from rdflib import URIRef, BNode, Literal
 from ckanext.dcat.utils import resource_uri
@@ -222,7 +223,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         (
                             dataset_ref,
                             DCAT.spatialResolutionInMeters,
-                            Literal(float(value), datatype=XSD.decimal),
+                            Literal(Decimal(value), datatype=XSD.decimal),
                         )
                     )
                 except (ValueError, TypeError):
