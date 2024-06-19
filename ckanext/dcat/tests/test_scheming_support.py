@@ -514,6 +514,28 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g, publisher[0][2], FOAF.name, dataset_dict["publisher"][0]["name"]
         )
 
+    def test_empty_repeating_subfields_not_serialized(self):
+
+        dataset_dict = {
+            "name": "test-dataset-3",
+            "title": "Test DCAT dataset 3",
+            "notes": "Lorem ipsum",
+            "spatial_coverage": [
+                {
+                    "uri": "",
+                    "geom": "",
+                },
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        assert not [t for t in g.triples((dataset_ref, DCT.spatial, None))]
+
     def test_legacy_fields(self):
 
         dataset_dict = {
