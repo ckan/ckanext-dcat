@@ -3,6 +3,7 @@
     xmlns:time="http://www.w3.org/2006/time#"
 	xmlns:dct="http://purl.org/dc/terms/"
 	xmlns:dcat="http://www.w3.org/ns/dcat#"
+    xmlns:dcatap="http://data.europa.eu/r5r/"
 	xmlns:foaf="http://xmlns.com/foaf/0.1/"
     xmlns:adms="http://www.w3.org/ns/adms#"
     xmlns:schema="http://schema.org/"
@@ -36,6 +37,7 @@
     <dct:conformsTo>Standard 2</dct:conformsTo>
     <dct:license rdf:resource="https://data.some.org/link/to/license"/>
     <dct:spatial rdf:resource="http://publications.europa.eu/mdr/authority/country/ZWE"/>
+    <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.5</dcat:spatialResolutionInMeters>
     <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
     <dct:accessRights>public</dct:accessRights>
     <foaf:page rdf:resource="http://dataset.info.org/doc1"/>
@@ -49,6 +51,10 @@
     <dct:isVersionOf rdf:resource="https://data.some.org/catalog/datasets/original-dataset"/>
     <dct:source rdf:resource="https://data.some.org/catalog/datasets/source-dataset-1"/>
     <dct:source rdf:resource="https://data.some.org/catalog/datasets/source-dataset-2"/>
+    <dct:isReferencedBy>https://doi.org/10.1038/sdata.2018.22</dct:isReferencedBy>
+    <dct:isReferencedBy>test_isreferencedby</dct:isReferencedBy>
+    <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj" />
+    <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj_alt" />
     <adms:sample rdf:resource="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample"/>
     <dct:temporal>
         <dct:PeriodOfTime>
@@ -56,6 +62,7 @@
             <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-01-05</schema:endDate>
         </dct:PeriodOfTime>
     </dct:temporal>
+    <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
     <dcat:contactPoint>
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>
@@ -79,9 +86,12 @@
             <dct:license rdf:resource="http://creativecommons.org/licenses/by-nc/2.0/"/>
             <dct:rights>Some statement about rights</dct:rights>
             <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+            <dcatap:availability>http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL</dcatap:availability>
             <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>
             <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
+            <dcat:compressFormat>http://www.iana.org/assignments/media-types/application/gzip</dcat:compressFormat>
+            <dcat:packageFormat>http://publications.europa.eu/resource/authority/file-type/TAR</dcat:packageFormat>
             <dcat:byteSize>12323</dcat:byteSize>
             <foaf:page rdf:resource="http://dataset.info.org/distribution1/doc1"/>
             <foaf:page rdf:resource="http://dataset.info.org/distribution1/doc2"/>
@@ -96,7 +106,19 @@
                     <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
                 </spdx:Checksum>
             </spdx:checksum>
-        </dcat:Distribution>
+            <dcat:accessService>
+                <dcat:DataService>
+                    <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"/>
+                    <dct:title>Sparql-end Point</dct:title>
+                    <dcat:endpointURL rdf:resource="http://publications.europa.eu/webapi/rdf/sparql"/>
+                    <dct:description>This SPARQL end point allow to directly query the EU Whoiswho content (organization / membership / person)</dct:description>
+                    <dcat:endpointDescription>SPARQL url description</dcat:endpointDescription>
+                    <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/COM_REUSE"/>
+                    <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+                </dcat:DataService>
+            </dcat:accessService>
+
+</dcat:Distribution>
     </dcat:distribution>
 </dcat:Dataset>
 </rdf:RDF>
