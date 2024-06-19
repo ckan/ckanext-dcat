@@ -3,6 +3,7 @@
 from builtins import str
 from builtins import object
 import json
+from decimal import Decimal
 import six
 
 import pytest
@@ -43,7 +44,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'metadata_modified': '2021-06-21T15:21:09.075774',
             'extras': [
                 {'key': 'temporal_resolution', 'value': 'PT15M'},
-                {'key': 'spatial_resolution_in_meters', 'value': '[30,20]'},
+                {'key': 'spatial_resolution_in_meters', 'value': '30'},
                 {'key': 'is_referenced_by', 'value': '[\"https://doi.org/10.1038/sdata.2018.22\", \"test_isreferencedby\"]'},
             ]
         }
@@ -77,11 +78,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                 assert self._triple(g, dataset_ref, item[1], _type(value), _datatype)
 
         # Spatial Resolution in Meters
-        values = json.loads(extras['spatial_resolution_in_meters'])
-        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == len(values)
-
-        for value in values:
-            assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(float(value),
+        value = extras['spatial_resolution_in_meters']
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(Decimal(value),
                                 datatype=XSD.decimal))
 
     def test_spatial_resolution_in_meters_single_value(self):
@@ -109,7 +107,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == 1
         assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
-                            Literal(float(extras['spatial_resolution_in_meters']), datatype=XSD.decimal))
+                            Literal(Decimal(extras['spatial_resolution_in_meters']), datatype=XSD.decimal))
 
     def test_spatial_resolution_in_meters_a_value_is_not_a_number(self):
 
@@ -123,7 +121,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'metadata_created': '2021-06-21T15:21:09.034694',
             'metadata_modified': '2021-06-21T15:21:09.075774',
             'extras': [
-                {'key': 'spatial_resolution_in_meters', 'value': '[\"foo\",20]'}
+                {'key': 'spatial_resolution_in_meters', 'value': 'foo'}
             ]
         }
 
@@ -134,11 +132,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        values = json.loads(extras['spatial_resolution_in_meters'])
-        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == len(values)
-        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(values[0]))
-        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
-                            Literal(float(values[1]), datatype=XSD.decimal))
+        value = extras['spatial_resolution_in_meters']
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(value))
 
     def test_spatial_resolution_value_is_invalid_json(self):
 

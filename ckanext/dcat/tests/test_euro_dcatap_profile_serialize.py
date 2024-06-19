@@ -2,6 +2,7 @@ from builtins import str
 from builtins import object
 import json
 import uuid
+from decimal import Decimal
 
 import pytest
 
@@ -702,7 +703,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.modified, resource['modified'], XSD.dateTime)
 
         # Numbers
-        assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
+        assert self._triple(g, distribution, DCAT.byteSize, Decimal(resource['size']), XSD.decimal)
 
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]

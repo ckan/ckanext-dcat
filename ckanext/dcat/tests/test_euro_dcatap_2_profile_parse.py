@@ -108,9 +108,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         assert extras['temporal_resolution'] == temporal_resolution
 
-        spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
-        assert len(spatial_resolution_list) == 1
-        assert spatial_resolution_in_meters in spatial_resolution_list
+        assert extras['spatial_resolution_in_meters'] == spatial_resolution_in_meters
 
         isreferencedby_list = json.loads(extras['is_referenced_by'])
         assert len(isreferencedby_list) == 1

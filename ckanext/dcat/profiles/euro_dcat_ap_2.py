@@ -1,5 +1,5 @@
 import json
-from decimal import Decimal
+from decimal import Decimal, DecimalException
 
 from rdflib import URIRef, BNode, Literal
 from ckanext.dcat.utils import resource_uri
@@ -59,14 +59,20 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             self._add_spatial_to_dict(dataset_dict, key, spatial)
 
         # Spatial resolution in meters
-        spatial_resolution_in_meters = self._object_value_float_list(
+        spatial_resolution = self._object_value_float_list(
             dataset_ref, DCAT.spatialResolutionInMeters
         )
-        if spatial_resolution_in_meters:
+        if spatial_resolution:
+            # For some reason we incorrectly allowed lists in this property at some point
+            # keep support for it but default to single value
+            value = (
+                spatial_resolution[0] if len(spatial_resolution) == 1
+                else json.dumps(spatial_resolution)
+            )
             dataset_dict["extras"].append(
                 {
                     "key": "spatial_resolution_in_meters",
-                    "value": json.dumps(spatial_resolution_in_meters),
+                    "value": value,
                 }
             )
 
@@ -226,7 +232,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                             Literal(Decimal(value), datatype=XSD.decimal),
                         )
                     )
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, DecimalException):
                     self.g.add(
                         (dataset_ref, DCAT.spatialResolutionInMeters, Literal(value))
                     )

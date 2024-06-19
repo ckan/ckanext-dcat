@@ -105,7 +105,7 @@ def test_validate_dcat_ap_2():
                 "centroid": {"type": "Point", "coordinates": [1.26639, 41.12386]},
             }
         ],
-        "spatial_resolution_in_meters": [1.5, 2.0],
+        "spatial_resolution_in_meters": 1.5,
         "resources": [
             {
                 "name": "Resource 1",

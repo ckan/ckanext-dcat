@@ -134,7 +134,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "centroid": {"type": "Point", "coordinates": [1.26639, 41.12386]},
                 }
             ],
-            "spatial_resolution_in_meters": [1.5, 2.0],
+            "spatial_resolution_in_meters": 1.5,
             "resources": [
                 {
                     "name": "Resource 1",
@@ -196,6 +196,13 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(g, dataset_ref, DCT.type, dataset["dcat_type"])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, dataset["version_notes"])
         assert self._triple(g, dataset_ref, DCT.accessRights, dataset["access_rights"])
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCAT.spatialResolutionInMeters,
+            dataset["spatial_resolution_in_meters"],
+            data_type=XSD.decimal,
+        )
 
         # Dates
         assert self._triple(
@@ -246,13 +253,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert (
             self._triples_list_values(g, dataset_ref, DCATAP.applicableLegislation)
             == dataset["applicable_legislation"]
-        )
-
-        assert (
-            self._triples_list_python_values(
-                g, dataset_ref, DCAT.spatialResolutionInMeters
-            )
-            == dataset["spatial_resolution_in_meters"]
         )
 
         # Repeating subfields
@@ -373,7 +373,9 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         # Resources: standard fields
 
         assert self._triple(g, distribution_ref, DCT.rights, resource["rights"])
-        assert self._triple(g, distribution_ref, ADMS.status, URIRef(resource["status"]))
+        assert self._triple(
+            g, distribution_ref, ADMS.status, URIRef(resource["status"])
+        )
         assert self._triple(
             g,
             distribution_ref,
@@ -641,6 +643,7 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["issued"] == u"2012-05-10"
         assert dataset["modified"] == u"2012-05-10T21:04:00"
         assert dataset["temporal_resolution"] == "PT15M"
+        assert dataset["spatial_resolution_in_meters"] == "1.5"
 
         # List fields
         assert sorted(dataset["conforms_to"]) == ["Standard 1", "Standard 2"]
@@ -658,10 +661,7 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://dataset.info.org/doc1",
             "http://dataset.info.org/doc2",
         ]
-        assert sorted(dataset["spatial_resolution_in_meters"]) == [
-            1.5,
-            2.0,
-        ]
+
         assert sorted(dataset["is_referenced_by"]) == [
             "https://doi.org/10.1038/sdata.2018.22",
             "test_isreferencedby",

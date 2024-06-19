@@ -165,8 +165,6 @@ dataset_fields:
 
 - field_name: spatial_resolution_in_meters
   label: Spatial resolution in meters
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_number
   help_text: Minimum spatial separation resolvable in a dataset, measured in meters.
 
 - field_name: access_rights
