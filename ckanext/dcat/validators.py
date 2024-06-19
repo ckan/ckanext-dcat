@@ -86,7 +86,7 @@ def scheming_multiple_number(field, schema):
             return
 
         value = data[key]
-        if value is not missing:
+        if value and value is not missing:
 
             if not isinstance(value, list):
                 if isinstance(value, str) and value.startswith("["):
