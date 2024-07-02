@@ -1,8 +1,10 @@
+import datetime
 import json
+
 import pytest
 
 from ckantoolkit import StopOnError
-from ckanext.dcat.validators import scheming_multiple_number
+from ckanext.dcat.validators import scheming_multiple_number, dcat_date
 
 
 def test_scheming_multiple_number():
@@ -60,3 +62,26 @@ def test_scheming_multiple_number_wrong_value():
         assert errors[key][0].startswith("invalid type for repeating number")
 
         errors = {key: []}
+
+
+@pytest.mark.usefixtures(
+    "with_plugins",
+)
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+def test_dcat_date_valid():
+
+    key = ("some_date",)
+    errors = {key: []}
+    valid_values = [
+        datetime.datetime.now(),
+        "2024",
+        "2024-07",
+        "2024-07-01",
+        "1905-03-01T10:07:31.182680",
+        "2024-04-10T10:07:31",
+        "2024-04-10T10:07:31.000Z",
+    ]
+
+    for value in valid_values:
+        data = {key: value}
+        dcat_date(key, data, errors, {}), value
