@@ -1,0 +1,22 @@
+version: 1
+groups:
+- annotation: ckanext-dcat configuration options
+  options:
+  - key: ckanext.dcat.enable_rdf_endpoints
+    default: True
+    description: |
+      Whether to expose the catalog and dataset endpoints with the RDF DCAT
+      serializations.
+    type: bool
+  - key: ckanext.dcat.catalog_endpoint
+    default: '/catalog.{_format}'
+    type: str
+    description: |
+      Custom route for the catalog endpoint. It should start with `/` and include the
+      `{_format}` placeholder.
+    example: '/dcat/catalog/{_format}'
+   - key: ckanext.dcat.dataset_per_page
+    default: 100
+    type: int
+    description: |
+      Default number of datasets returned by the catalog endpoint.
