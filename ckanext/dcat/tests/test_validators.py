@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from ckantoolkit import StopOnError
+from ckantoolkit import StopOnError, Invalid
 from ckanext.dcat.validators import scheming_multiple_number, dcat_date
 
 
@@ -64,10 +64,6 @@ def test_scheming_multiple_number_wrong_value():
         errors = {key: []}
 
 
-@pytest.mark.usefixtures(
-    "with_plugins",
-)
-@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 def test_dcat_date_valid():
 
     key = ("some_date",)
@@ -85,3 +81,18 @@ def test_dcat_date_valid():
     for value in valid_values:
         data = {key: value}
         dcat_date(key, data, errors, {}), value
+
+
+def test_dcat_date_invalid():
+
+    key = ("some_date",)
+    errors = {key: []}
+    invalid_values = [
+        "2024+07",
+        "not_a_date",
+    ]
+
+    for value in invalid_values:
+        data = {key: value}
+        with pytest.raises(Invalid):
+            dcat_date(key, data, errors, {}), value

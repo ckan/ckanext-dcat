@@ -579,6 +579,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             "temporal_coverage": [
                 {"start": "1905-03-01T10:07:31.182680", "end": "2013-01-05"},
                 {"start": "2024-04-10T10:07:31", "end": "2024-05-29"},
+                {"start": "11/24/24", "end": "06/12/12"},
             ],
         }
 
@@ -647,6 +648,30 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             temporal[1][2],
             SCHEMA.startDate,
             dataset_dict["temporal_coverage"][1]["start"],
+            data_type=XSD.dateTime,
+        )
+
+        # Ambiguous Datetime
+        assert (
+            dataset["temporal_coverage"][2]["start"]
+            == dataset_dict["temporal_coverage"][2]["start"]
+        )
+        assert self._triple(
+            g,
+            temporal[2][2],
+            SCHEMA.startDate,
+            "2024-11-24T00:00:00",
+            data_type=XSD.dateTime,
+        )
+        assert (
+            dataset["temporal_coverage"][2]["end"]
+            == dataset_dict["temporal_coverage"][2]["end"]
+        )
+        assert self._triple(
+            g,
+            temporal[2][2],
+            SCHEMA.endDate,
+            "2012-06-12T00:00:00",
             data_type=XSD.dateTime,
         )
 
