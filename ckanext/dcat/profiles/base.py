@@ -7,7 +7,7 @@ from rdflib import term, URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
 from geomet import wkt, InvalidGeoJSONException
 
-from ckantoolkit import config, url_for, asbool, get_action, ObjectNotFound
+from ckantoolkit import config, url_for, asbool, aslist, get_action, ObjectNotFound
 from ckan.model.license import LicenseRegister
 from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
@@ -45,6 +45,8 @@ namespaces = {
 PREFIX_MAILTO = "mailto:"
 
 GEOJSON_IMT = "https://www.iana.org/assignments/media-types/application/vnd.geo+json"
+
+DEFAULT_SPATIAL_FORMATS = ["wkt"]
 
 ROOT_DATASET_FIELDS = [
     'name',
@@ -728,26 +730,41 @@ class RDFProfile(object):
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
         """
-        Adds spatial triples to the graph.
+        Adds spatial triples to the graph. Assumes that value is a GeoJSON string
+        or object.
         """
-        # GeoJSON
-        self.g.add((spatial_ref, predicate, Literal(value, datatype=GEOJSON_IMT)))
-        # WKT, because GeoDCAT-AP says so
-        try:
-            if isinstance(value, str):
-                value = json.loads(value)
-            self.g.add(
-                (
-                    spatial_ref,
-                    predicate,
-                    Literal(
-                        wkt.dumps(value, decimals=4),
-                        datatype=GSP.wktLiteral,
-                    ),
-                )
+        spatial_formats = aslist(
+            config.get(
+                "ckanext.dcat.output_spatial_format", DEFAULT_SPATIAL_FORMATS
             )
-        except (TypeError, ValueError, InvalidGeoJSONException) as e:
-            pass
+        )
+
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except (TypeError, ValueError):
+                return
+
+        if "wkt" in spatial_formats:
+            # WKT, because GeoDCAT-AP says so
+            try:
+                self.g.add(
+                    (
+                        spatial_ref,
+                        predicate,
+                        Literal(
+                            wkt.dumps(value, decimals=4),
+                            datatype=GSP.wktLiteral,
+                        ),
+                    )
+                )
+            except (TypeError, ValueError, InvalidGeoJSONException):
+                pass
+
+        if "geojson" in spatial_formats:
+            # GeoJSON
+            self.g.add((spatial_ref, predicate, Literal(json.dumps(value), datatype=GEOJSON_IMT)))
+
 
     def _add_spatial_to_dict(self, dataset_dict, key, spatial):
         if spatial.get(key):

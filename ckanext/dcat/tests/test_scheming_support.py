@@ -344,15 +344,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g, spatial[0][2], SKOS.prefLabel, dataset["spatial_coverage"][0]["text"]
         )
 
-        assert len([t for t in g.triples((spatial[0][2], LOCN.geometry, None))]) == 2
-        # Geometry in GeoJSON
-        assert self._triple(
-            g,
-            spatial[0][2],
-            LOCN.geometry,
-            dataset["spatial_coverage"][0]["geom"],
-            GEOJSON_IMT,
-        )
+        assert len([t for t in g.triples((spatial[0][2], LOCN.geometry, None))]) == 1
         # Geometry in WKT
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
         assert self._triple(g, spatial[0][2], LOCN.geometry, wkt_geom, GSP.wktLiteral)

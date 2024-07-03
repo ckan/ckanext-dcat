@@ -531,9 +531,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
 
         # Geometry in WKT
         wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
@@ -558,11 +556,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_spatial_bad_json_no_wkt(self):
         dataset = {
@@ -583,11 +577,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_distributions(self):
 
