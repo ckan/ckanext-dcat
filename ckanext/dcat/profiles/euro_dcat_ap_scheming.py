@@ -120,8 +120,11 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
         Add triples to the graph from new repeating subfields
         """
 
+        def _not_empty_dict(data_dict):
+            return any(data_dict.values())
+
         contact = dataset_dict.get("contact")
-        if isinstance(contact, list) and len(contact):
+        if isinstance(contact, list) and len(contact) and _not_empty_dict(contact[0]):
             for item in contact:
                 contact_uri = item.get("uri")
                 if contact_uri:
@@ -144,7 +147,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 )
 
         publisher = dataset_dict.get("publisher")
-        if isinstance(publisher, list) and len(publisher):
+        if isinstance(publisher, list) and len(publisher) and _not_empty_dict(publisher[0]):
             publisher = publisher[0]
             publisher_uri = publisher.get("uri")
             if publisher_uri:
@@ -172,7 +175,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
             )
 
         temporal = dataset_dict.get("temporal_coverage")
-        if isinstance(temporal, list) and len(temporal):
+        if isinstance(temporal, list) and len(temporal) and _not_empty_dict(temporal[0]):
             for item in temporal:
                 temporal_ref = BNode()
                 self.g.add((temporal_ref, RDF.type, DCT.PeriodOfTime))
@@ -183,7 +186,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 self.g.add((dataset_ref, DCT.temporal, temporal_ref))
 
         spatial = dataset_dict.get("spatial_coverage")
-        if isinstance(spatial, list) and len(spatial):
+        if isinstance(spatial, list) and len(spatial) and _not_empty_dict(spatial[0]):
             for item in spatial:
                 if item.get("uri"):
                     spatial_ref = CleanedURIRef(item["uri"])

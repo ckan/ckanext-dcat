@@ -520,6 +520,28 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g, publisher[0][2], FOAF.name, dataset_dict["publisher"][0]["name"]
         )
 
+    def test_empty_repeating_subfields_not_serialized(self):
+
+        dataset_dict = {
+            "name": "test-dataset-3",
+            "title": "Test DCAT dataset 3",
+            "notes": "Lorem ipsum",
+            "spatial_coverage": [
+                {
+                    "uri": "",
+                    "geom": "",
+                },
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+        assert not [t for t in g.triples((dataset_ref, DCT.spatial, None))]
+
     def test_legacy_fields(self):
 
         dataset_dict = {
@@ -549,6 +571,113 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
         assert len(publisher) == 1
         assert self._triple(g, publisher[0][2], FOAF.name, "Test Publisher")
+
+    def test_dcat_date(self):
+        dataset_dict = {
+            # Core fields
+            "name": "test-dataset",
+            "title": "Test DCAT dataset",
+            "notes": "Some notes",
+            "issued": "2024",
+            "modified": "2024-10",
+            "temporal_coverage": [
+                {"start": "1905-03-01T10:07:31.182680", "end": "2013-01-05"},
+                {"start": "2024-04-10T10:07:31", "end": "2024-05-29"},
+                {"start": "11/24/24", "end": "06/12/12"},
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        # Year
+        assert dataset["issued"] == dataset_dict["issued"]
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCT.issued,
+            dataset_dict["issued"],
+            data_type=XSD.gYear,
+        )
+
+        # Year-month
+        assert dataset["modified"] == dataset_dict["modified"]
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCT.modified,
+            dataset_dict["modified"],
+            data_type=XSD.gYearMonth,
+        )
+
+        temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
+
+        # Date
+        assert (
+            dataset["temporal_coverage"][0]["end"]
+            == dataset_dict["temporal_coverage"][0]["end"]
+        )
+
+        assert self._triple(
+            g,
+            temporal[0][2],
+            SCHEMA.endDate,
+            dataset_dict["temporal_coverage"][0]["end"],
+            data_type=XSD.date,
+        )
+
+        # Datetime
+        assert (
+            dataset["temporal_coverage"][0]["start"]
+            == dataset_dict["temporal_coverage"][0]["start"]
+        )
+        assert self._triple(
+            g,
+            temporal[0][2],
+            SCHEMA.startDate,
+            dataset_dict["temporal_coverage"][0]["start"],
+            data_type=XSD.dateTime,
+        )
+
+        assert (
+            dataset["temporal_coverage"][1]["start"]
+            == dataset_dict["temporal_coverage"][1]["start"]
+        )
+        assert self._triple(
+            g,
+            temporal[1][2],
+            SCHEMA.startDate,
+            dataset_dict["temporal_coverage"][1]["start"],
+            data_type=XSD.dateTime,
+        )
+
+        # Ambiguous Datetime
+        assert (
+            dataset["temporal_coverage"][2]["start"]
+            == dataset_dict["temporal_coverage"][2]["start"]
+        )
+        assert self._triple(
+            g,
+            temporal[2][2],
+            SCHEMA.startDate,
+            "2024-11-24T00:00:00",
+            data_type=XSD.dateTime,
+        )
+        assert (
+            dataset["temporal_coverage"][2]["end"]
+            == dataset_dict["temporal_coverage"][2]["end"]
+        )
+        assert self._triple(
+            g,
+            temporal[2][2],
+            SCHEMA.endDate,
+            "2012-06-12T00:00:00",
+            data_type=XSD.dateTime,
+        )
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
@@ -838,55 +967,3 @@ class TestSchemingIndexFields:
             assert search_dict["spatial"] == json.dumps(
                 dataset_dict["spatial_coverage"][0]["centroid"]
             )
-
-
-@pytest.mark.usefixtures("with_plugins", "clean_db")
-@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
-@pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
-)
-@pytest.mark.ckan_config(
-    "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
-)
-@pytest.mark.ckan_config(
-    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
-)
-class TestSchemingPresets:
-    def test_dcat_date(self):
-        dataset_dict = {
-            # Core fields
-            "name": "test-dataset",
-            "title": "Test DCAT dataset",
-            "notes": "Some notes",
-            "issued": "2024",
-            "modified": "2024-10",
-            "temporal_coverage": [
-                {"start": "1905-03-01T10:07:31.182680", "end": "2013-01-05"},
-                {"start": "2024-04-10T10:07:31", "end": "2024-05-29"},
-            ],
-        }
-
-        dataset = call_action("package_create", **dataset_dict)
-
-        # Year
-        assert dataset["issued"] == dataset_dict["issued"]
-
-        # Year-month
-        assert dataset["modified"] == dataset_dict["modified"]
-
-        # Date
-        assert (
-            dataset["temporal_coverage"][0]["end"]
-            == dataset_dict["temporal_coverage"][0]["end"]
-        )
-
-        # Datetime
-        assert (
-            dataset["temporal_coverage"][0]["start"]
-            == dataset_dict["temporal_coverage"][0]["start"]
-        )
-        assert (
-            dataset["temporal_coverage"][1]["start"]
-            == dataset_dict["temporal_coverage"][1]["start"]
-        )

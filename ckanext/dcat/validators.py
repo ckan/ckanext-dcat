@@ -2,10 +2,10 @@ import datetime
 import json
 import re
 
+from dateutil.parser import parse as parse_date
 from ckantoolkit import (
     missing,
     StopOnError,
-    get_validator,
     Invalid,
     _,
 )
@@ -41,8 +41,6 @@ def is_date(value):
 def dcat_date(key, data, errors, context):
     value = data[key]
 
-    scheming_isodatetime = get_validator("scheming_isodatetime")
-
     if isinstance(value, datetime.datetime):
         return
 
@@ -50,8 +48,8 @@ def dcat_date(key, data, errors, context):
         return
 
     try:
-        scheming_isodatetime({}, {})(key, data, errors, context)
-    except Invalid:
+        parse_date(value)
+    except ValueError:
         raise Invalid(
             _(
                 "Date format incorrect. Supported formats are YYYY, YYYY-MM, YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS"
@@ -86,7 +84,7 @@ def scheming_multiple_number(field, schema):
             return
 
         value = data[key]
-        if value is not missing:
+        if value and value is not missing:
 
             if not isinstance(value, list):
                 if isinstance(value, str) and value.startswith("["):

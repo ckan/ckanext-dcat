@@ -713,7 +713,7 @@ class RDFProfile(object):
         # List of values
         if isinstance(value, list):
             items = value
-        elif isinstance(value, str):
+        elif value and isinstance(value, str):
             try:
                 items = json.loads(value)
                 if isinstance(items, ((int, float, complex))):

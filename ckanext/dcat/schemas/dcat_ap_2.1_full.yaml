@@ -119,6 +119,8 @@ dataset_fields:
 
 - field_name: provenance
   label: Provenance
+  form_snippet: markdown.html
+  display_snippet: markdown.html
   help_text: A statement about the lineage of the dataset.
 
 - field_name: dcat_type
