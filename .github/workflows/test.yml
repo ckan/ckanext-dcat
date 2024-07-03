@@ -17,7 +17,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        ckan-version: ["master", "2.10", 2.9]
+        ckan-version: ["2.11", "2.10", 2.9]
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
@@ -26,7 +26,7 @@ jobs:
       image: ckan/ckan-dev:${{ matrix.ckan-version }}
     services:
       solr:
-        image: ckan/ckan-solr:${{ matrix.ckan-version }}
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
       postgres:
         image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:
