@@ -129,10 +129,15 @@ def test_validate_dcat_ap_2():
                 "access_services": [
                     {
                         "title": "Access Service 1",
+                        "endpoint_description": "https://example.org/endpoint_description",
                         "endpoint_url": [
                             "https://example.org/access_service/1",
                             "https://example.org/access_service/2",
                         ],
+                        "serves_dataset": [
+                            "https://example.org/dataset/1",
+                            "https://example.org/dataset/2",
+                        ]
                     }
                 ],
             }
@@ -146,7 +151,9 @@ def test_validate_dcat_ap_2():
 
     s.graph_from_dataset(dataset)
     path = os.path.join(
-        os.path.dirname(__file__), "shacl", "dcat-ap_2.1.1_shacl_shapes.ttl"
+        #os.path.dirname(__file__), "shacl", "dcat-ap_2.1.1_shacl_range.ttl"
+
+        os.path.dirname(__file__), "shacl", "dcat-ap_2.1.1_shacl_shapes_recommended.ttl"
     )
     r = validate(g, shacl_graph=path)
     conforms, results_graph, results_text = r

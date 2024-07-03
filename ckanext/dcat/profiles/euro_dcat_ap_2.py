@@ -291,7 +291,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                     ("license", DCT.license, None, URIRefOrLiteral),
                     ("access_rights", DCT.accessRights, None, URIRefOrLiteral),
                     ("title", DCT.title, None, Literal),
-                    ("endpoint_description", DCAT.endpointDescription, None, Literal),
+                    ("endpoint_description", DCAT.endpointDescription, None, URIRefOrLiteral),
                     ("description", DCT.description, None, Literal),
                 ]
 
