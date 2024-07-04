@@ -20,7 +20,6 @@ from ckanext.dcat.profiles import (
     XSD,
     VCARD,
     FOAF,
-    SCHEMA,
     SKOS,
     LOCN,
     GSP,
@@ -310,28 +309,28 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             temporal[0][2],
-            SCHEMA.startDate,
+            DCAT.startDate,
             dataset_dict["temporal_coverage"][0]["start"],
             data_type=XSD.date,
         )
         assert self._triple(
             g,
             temporal[0][2],
-            SCHEMA.endDate,
+            DCAT.endDate,
             dataset_dict["temporal_coverage"][0]["end"],
             data_type=XSD.date,
         )
         assert self._triple(
             g,
             temporal[1][2],
-            SCHEMA.startDate,
+            DCAT.startDate,
             dataset_dict["temporal_coverage"][1]["start"],
             data_type=XSD.date,
         )
         assert self._triple(
             g,
             temporal[1][2],
-            SCHEMA.endDate,
+            DCAT.endDate,
             dataset_dict["temporal_coverage"][1]["end"],
             data_type=XSD.date,
         )
@@ -617,7 +616,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             temporal[0][2],
-            SCHEMA.endDate,
+            DCAT.endDate,
             dataset_dict["temporal_coverage"][0]["end"],
             data_type=XSD.date,
         )
@@ -630,7 +629,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             temporal[0][2],
-            SCHEMA.startDate,
+            DCAT.startDate,
             dataset_dict["temporal_coverage"][0]["start"],
             data_type=XSD.dateTime,
         )
@@ -642,7 +641,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             temporal[1][2],
-            SCHEMA.startDate,
+            DCAT.startDate,
             dataset_dict["temporal_coverage"][1]["start"],
             data_type=XSD.dateTime,
         )
@@ -655,7 +654,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             temporal[2][2],
-            SCHEMA.startDate,
+            DCAT.startDate,
             "2024-11-24T00:00:00",
             data_type=XSD.dateTime,
         )
@@ -666,7 +665,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             temporal[2][2],
-            SCHEMA.endDate,
+            DCAT.endDate,
             "2012-06-12T00:00:00",
             data_type=XSD.dateTime,
         )

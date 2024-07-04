@@ -374,6 +374,7 @@ resource_fields:
     - field_name: serves_dataset
       label: Serves dataset
       preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
 
   help_text: A data service that gives access to the resource.
 
