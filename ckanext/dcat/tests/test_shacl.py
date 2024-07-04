@@ -10,7 +10,7 @@ from ckanext.dcat.processors import RDFSerializer
 
 dataset_dict = {
     # Core fields
-    "name": "test-dataset",
+    "name": "test-dataset-shacl",
     "title": "Test DCAT dataset",
     "notes": "Lorem ipsum",
     "url": "http://example.org/ds1",
