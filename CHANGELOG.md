@@ -2,6 +2,27 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...HEAD)
 
+* Support for standard CKAN [ckanext-scheming](https://github.com/ckan/ckanext-scheming) schemas.
+  The DCAT profiles now seamlessly integrate with fields defined via the YAML or JSON scheming files.
+  Sites willing to migrate to a scheming based metadata schema can do
+  so by adding the `euro_dcat_ap_scheming` profile at the end of their profile chain (e.g.
+  `ckanext.dcat.rdf.profiles = euro_dcat_ap_2 euro_dcat_ap_scheming`), which will modify the existing profile
+  outputs to the expected format by the scheming validators. Sample schemas are provided
+  in the `ckanext/dcat/schemas` folder. See the [documentation](https://github.com/ckan/ckanext-dcat?tab=readme-ov-file#schemas)
+  for all details. Some highlights of the new scheming based profiles:
+
+    * Actual list support in the API ooutput for list properties like `dct:language`
+    * Multiple objects now allowed for properties like `dcat:ContactPoint`, `dct:spatial` or `dct:temporal`
+    * Custom validators for date values that allow `xsd:gYear`, `xsd:gYearMonth`, `xsd:date` and `xsd:dateTime`
+
+  (#281)
+* New `ckan dcat consume` and `ckan dcat produce` CLI commands (#279)
+* Parse dcat:spatialResolutionInMeters as float (#285)
+* Split profile classes into their own separate files (#282)
+* Catch Not Authorized in View (#280)
+* CKAN 2.11 support and requirements updates (#270)
+
+
 ## [v1.7.0](https://github.com/ckan/ckanext-dcat/compare/v1.6.0...v1.7.0) - 2024-04-04
 
 * Adds support for the latest Hydra vocabulary. For backward compatibility, the old properties are still supported but marked as deprecated. (#267)
