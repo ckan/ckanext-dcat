@@ -46,7 +46,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install requirements (2.9)
-      run: pip install --ignore-installed packaging>=21.3
+      run: |
+        pip install --ignore-installed packaging>=21.3
+        pip show packaging
       if: ${{ matrix.ckan-version == '2.9' }}
     - name: Install requirements
       run: |
