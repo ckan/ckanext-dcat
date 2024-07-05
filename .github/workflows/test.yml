@@ -17,7 +17,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        ckan-version: ["2.11", "2.10", 2.9]
+        ckan-version: ["2.11", "2.10", "2.9"]
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
@@ -45,6 +45,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install requirements (2.9)
+      run: pip install --ignore-installed packaging>=21.3
+      if: ${{ matrix.ckan-version == '2.9' }}
     - name: Install requirements
       run: |
         pip install -r requirements.txt
@@ -66,10 +69,4 @@ jobs:
         ckan -c test.ini db init
         ckan -c test.ini db pending-migrations --apply
     - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=xml --cov-append --disable-warnings ckanext/dcat/tests
-    - name: Upload coverage report to codecov
-      uses: codecov/codecov-action@v4
-      with:
-        files: ./coverage.xml
-      env:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=term-missing --cov-append --disable-warnings ckanext/dcat/tests
