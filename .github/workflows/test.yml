@@ -1,5 +1,7 @@
 name: Tests
 on: [push, pull_request]
+env:
+    COLUMNS: 120
 jobs:
   lint:
     runs-on: ubuntu-latest
