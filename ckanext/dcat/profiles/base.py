@@ -858,8 +858,13 @@ class RDFProfile(object):
     def _add_triples_from_dict(
         self, _dict, subject, items, list_value=False, date_value=False
     ):
+
         for item in items:
-            key, predicate, fallbacks, _type = item
+            try:
+                key, predicate, fallbacks, _type, _class = item
+            except ValueError:
+                key, predicate, fallbacks, _type = item
+                _class = None
             self._add_triple_from_dict(
                 _dict,
                 subject,
@@ -869,6 +874,7 @@ class RDFProfile(object):
                 list_value=list_value,
                 date_value=date_value,
                 _type=_type,
+                _class=_class,
             )
 
     def _add_triple_from_dict(
@@ -882,6 +888,7 @@ class RDFProfile(object):
         date_value=False,
         _type=Literal,
         _datatype=None,
+        _class=None,
         value_modifier=None,
     ):
         """
@@ -895,6 +902,8 @@ class RDFProfile(object):
         Using `value_modifier`, a function taking the extracted value and
         returning a modified value can be passed.
         If a value was found, the modifier is applied before adding the value.
+
+        `_class` is the optional RDF class of the entity being added.
 
         If `list_value` or `date_value` are True, then the value is treated as
         a list or a date respectively (see `_add_list_triple` and
@@ -912,7 +921,7 @@ class RDFProfile(object):
             value = value_modifier(value)
 
         if value and list_value:
-            self._add_list_triple(subject, predicate, value, _type, _datatype)
+            self._add_list_triple(subject, predicate, value, _type, _datatype, _class)
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
@@ -925,9 +934,11 @@ class RDFProfile(object):
             else:
                 object = _type(value)
             self.g.add((subject, predicate, object))
+            if _class:
+                self.g.add((object, RDF.type, _class))
 
     def _add_list_triple(
-        self, subject, predicate, value, _type=Literal, _datatype=None
+        self, subject, predicate, value, _type=Literal, _datatype=None, _class=None
     ):
         """
         Adds as many triples to the graph as values
@@ -947,6 +958,8 @@ class RDFProfile(object):
             else:
                 object = _type(item)
             self.g.add((subject, predicate, object))
+            if _class:
+                self.g.add((object, RDF.type, _class))
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
         """

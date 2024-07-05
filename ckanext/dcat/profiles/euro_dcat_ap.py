@@ -275,7 +275,7 @@ class EuropeanDCATAPProfile(RDFProfile):
         items = [
             ("title", DCT.title, None, Literal),
             ("notes", DCT.description, None, Literal),
-            ("url", DCAT.landingPage, None, URIRef),
+            ("url", DCAT.landingPage, None, URIRef, FOAF.Document),
             ("identifier", DCT.identifier, ["guid", "id"], URIRefOrLiteral),
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
@@ -299,11 +299,11 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         #  Lists
         items = [
-            ("language", DCT.language, None, URIRefOrLiteral),
+            ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
             ("theme", DCAT.theme, None, URIRef),
             ("conforms_to", DCT.conformsTo, None, Literal),
             ("alternate_identifier", ADMS.identifier, None, URIRefOrLiteral),
-            ("documentation", FOAF.page, None, URIRefOrLiteral),
+            ("documentation", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
             ("related_resource", DCT.relation, None, URIRefOrLiteral),
             ("has_version", DCT.hasVersion, None, URIRefOrLiteral),
             ("is_version_of", DCT.isVersionOf, None, URIRefOrLiteral),
