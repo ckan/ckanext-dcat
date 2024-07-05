@@ -1,0 +1,52 @@
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+@prefix locn: <http://www.w3.org/ns/locn#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares> a dcat:Dataset ;
+    dct:accrualPeriodicity <https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/Frequency> ;
+    dct:description "Estudio de satisfacción de las personas directivas de los centros educativos con las escuelas municipales de promoción deportiva en horario extraescolar, organizadas desde la Dirección General de Deporte en colaboración con las diferentes federaciones deportivas de las diferentes modalidades deportivas, mediante el análisis de los resultados obtenidos al realizar una encuesta enviada al personal directivo de cada centro escolar a su correo electrónico invitándoles a participar.   Las Escuelas Municipales de Promoción Deportiva en centros escolares tienen como finalidad fomentar una práctica deportiva estable y continuada entre los escolares de diferentes modalidades deportivas y la posterior iniciación a la competición con la participación de las escuelas en los Juegos Deportivos Municipales.   El objeto de este estudio es conocer el grado de satisfacción del personal directivo con las Escuelas Municipales de Promoción Deportiva (EMPD) impartidas en los centros escolares de la ciudad de Madrid, mediante la realización de diversas preguntas relacionadas con los servicios ofrecidos (organización, instalaciones y profesorado). De esta manera se pueden detectar ámbitos o actuaciones que precisen intervenciones de mejora para alcanzar el objetivo general del Plan de Calidad establecido en el Ayuntamiento de Madrid: garantizar la calidad de los servicios prestados a la ciudadanía y su mejora continua, logrando la satisfacción ciudadana y alcanzando una gestión pública cada vez más eficaz y eficiente, participativa y transparente."@es ;
+    dct:identifier "https://datos.madrid.es/egob/catalogo/300676-0-deporte-encuesta-escuelas" ;
+    dct:issued "2024-04-15T09:08:02+02:00"^^xsd:dateTime ;
+    dct:language "es" ;
+    dct:license <https://datos.madrid.es/egob/catalogo/aviso-legal> ;
+    dct:modified "2024-04-15T09:08:10+02:00"^^xsd:dateTime ;
+    dct:publisher <http://datos.gob.es/recurso/sector-publico/org/Organismo/L01280796> ;
+    dct:title "Estudio de Satisfacción con el Programa de Escuelas Municipales de Promoción Deportiva en centros escolares"@es ;
+    dcat:distribution <https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/resource/8d3c2ada-a6dc-4dc5-a0cb-bcda4c1b4935> ;
+    dcat:keyword "deporte escolar"@es,
+        "escuelas"@es,
+        "promoción"@es ;
+    dcat:theme <http://datos.gob.es/kos/sector-publico/sector/deporte> .
+
+<http://datos.gob.es/recurso/sector-publico/org/Organismo/L01280796> a skos:Concept ;
+    skos:notation "L01280796" ;
+    skos:prefLabel "Ayuntamiento de Madrid" .
+
+<https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/DurationDescription> a time:DurationDescription ;
+    time:years 1.0 .
+
+<https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/Frequency> a dct:Frequency ;
+    rdf:value <https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/DurationDescription> .
+
+<https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/resource/8d3c2ada-a6dc-4dc5-a0cb-bcda4c1b4935> a dcat:Distribution ;
+    dct:format <https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/resource/8d3c2ada-a6dc-4dc5-a0cb-bcda4c1b4935/format> ;
+    dct:title "Estudio de satisfacción temporada 2023-2024"@es ;
+    dcat:accessURL "https://datos.madrid.es/egob/catalogo/300676-0-deporte-encuesta-escuelas.xlsx" ;
+    dcat:byteSize 43008.0 .
+
+<https://datos.gob.es/catalogo/l01280796-estudio-de-satisfaccion-con-el-programa-de-escuelas-municipales-de-promocion-deportiva-en-centros-escolares/resource/8d3c2ada-a6dc-4dc5-a0cb-bcda4c1b4935/format> a dct:IMT ;
+    rdfs:label "XLS" ;
+    rdf:value "application/vnd.ms-excel" .
+
