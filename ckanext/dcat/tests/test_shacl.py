@@ -1,4 +1,5 @@
 import os
+from random import randrange
 
 from pyshacl import validate
 import pytest
@@ -143,6 +144,7 @@ def graph():
     global generated_graph
 
     if not generated_graph:
+        dataset_dict["name"] += "-" + str(randrange(0, 1000))
         dataset = call_action("package_create", **dataset_dict)
 
         s = RDFSerializer()
