@@ -1,4 +1,6 @@
 name: Tests
+env:
+    COLUMNS: 120
 on: [push, pull_request]
 jobs:
   lint:
@@ -17,13 +19,19 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        ckan-version: ["2.11", "2.10", "2.9"]
+        include:
+          - ckan-version: "2.11"
+            ckan-image: "ckan/ckan-dev:2.11-py3.10"
+          - ckan-version: "2.10"
+            ckan-image: "ckan/ckan-dev:2.10-py3.10"
+          - ckan-version: "2.9"
+            ckan-image: "ckan/ckan-dev:2.9-py3.9"
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     container:
-      image: ckan/ckan-dev:${{ matrix.ckan-version }}
+      image: ${{ matrix.ckan-image }}
     services:
       solr:
         image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
@@ -45,19 +53,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install requirements (2.9)
-      run: pip install --ignore-installed packaging>=21.3
-      if: ${{ matrix.ckan-version == '2.9' }}
-    - name: Install requirements
+    - name: Install requirements (common)
       run: |
         pip install -r requirements.txt
         pip install -r dev-requirements.txt
-    - name: Install requirements (common)
-      run: |
         pip install -e .
         # Replace default path to CKAN core config file with the one on the container
         sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
-    - name: Setup other extension
+    - name: Install requirements (2.9)
+      run: |
+        pip install -U pytest-rerunfailures
+      if: ${{ matrix.ckan-version == '2.9' }}
+    - name: Setup other extensions
       run: |
         git clone https://github.com/ckan/ckanext-harvest
         pip install -e ckanext-harvest
