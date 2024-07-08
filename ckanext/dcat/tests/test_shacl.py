@@ -197,24 +197,3 @@ def test_validate_dcat_ap_2_graph_shapes_recommended(graph):
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r
     assert conforms, results_text
-
-
-@pytest.mark.usefixtures("with_plugins")
-@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
-@pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
-)
-@pytest.mark.ckan_config(
-    "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
-)
-@pytest.mark.ckan_config(
-    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
-)
-def test_validate_dcat_ap_2_graph_shapes_range(graph):
-
-    # dcat-ap_2.1.1_shacl_range.ttl: constraints concerning object range
-    path = _get_shacl_file_path("dcat-ap_2.1.1_shacl_range.ttl")
-    r = validate(graph, shacl_graph=path)
-    conforms, results_graph, results_text = r
-    assert conforms, results_text

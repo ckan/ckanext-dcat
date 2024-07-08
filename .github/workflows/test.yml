@@ -54,16 +54,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install requirements
+
+    - name: Install requirements (common)
       run: |
         pip install -r requirements.txt
         pip install -r dev-requirements.txt
-    - name: Install requirements (common)
-      run: |
         pip install -e .
         # Replace default path to CKAN core config file with the one on the container
         sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
-    - name: Setup other extension
+    - name: Install requirements (2.9)
+      run: |
+        pip install -U pytest-rerunfailures
+      if: ${{ matrix.ckan-version == '2.9' }}
+    - name: Setup other extensions
       run: |
         git clone https://github.com/ckan/ckanext-harvest
         pip install -e ckanext-harvest
