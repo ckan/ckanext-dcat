@@ -3,6 +3,14 @@ import os
 from rdflib import URIRef, BNode, Literal
 
 
+def get_file_contents(file_name):
+    path = os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "examples", file_name
+    )
+    with open(path, "r") as f:
+        return f.read()
+
+
 class BaseParseTest(object):
     def _extras(self, dataset):
         extras = {}
@@ -11,11 +19,7 @@ class BaseParseTest(object):
         return extras
 
     def _get_file_contents(self, file_name):
-        path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "..", "examples", file_name
-        )
-        with open(path, "r") as f:
-            return f.read()
+        return get_file_contents(file_name)
 
 
 class BaseSerializeTest(object):
