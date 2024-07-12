@@ -726,7 +726,7 @@ class TestSchemingParseSupport(BaseParseTest):
         Parse a DCAT RDF graph into a CKAN dataset dict, create a dataset with package_create
         and check that all expected fields are there
         """
-        contents = self._get_file_contents("dataset.rdf")
+        contents = self._get_file_contents("dcat/dataset.rdf")
 
         p = RDFParser()
 

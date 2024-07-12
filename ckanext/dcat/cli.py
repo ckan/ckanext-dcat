@@ -71,7 +71,7 @@ def consume(input, output, format, profiles, pretty, compat_mode):
 
     The input serializations can be provided as a path to a file, e.g.:
 
-        ckan dcat consume examples/dataset.ttl
+        ckan dcat consume examples/dcat/dataset.ttl
 
     Or be read from stdin:
 
@@ -120,7 +120,7 @@ def produce(input, output, format, profiles, compat_mode):
 
     The input datasets can be provided as a path to a file, e.g.:
 
-        ckan dcat consume examples/ckan_dataset.json
+        ckan dcat consume examples/ckan/ckan_dataset.json
 
     Or be read from stdin:
 
