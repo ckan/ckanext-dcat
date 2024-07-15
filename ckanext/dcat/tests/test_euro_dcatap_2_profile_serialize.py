@@ -333,7 +333,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
     def test_temporal(self):
         """
-        Tests that the DCAT date properties are included in the graph in addition to schema.org dates.
+        Tests that the DCAT date properties are included in the graph
         """
 
         dataset = {
@@ -351,24 +351,13 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        temporals = self._triples(g, dataset_ref, DCT.temporal, None)
-        assert temporals
-        assert len(temporals) == 2
-
-        assert len([self._triple(g, temporal[2] , RDF.type, DCT.PeriodOfTime) for temporal in temporals]) == 2
-
-        temporal_obj_list = [temporal[2] for temporal in temporals]
-        for predicate in [SCHEMA.startDate, DCAT.startDate]:
-            triples = []
-            for temporal_obj in temporal_obj_list:
-                triples.extend(self._triples(g, temporal_obj, predicate, extras['temporal_start'], XSD.dateTime))
-            assert len(triples) == 1
-
-        for predicate in [SCHEMA.endDate, DCAT.endDate]:
-            triples = []
-            for temporal_obj in temporal_obj_list:
-                triples.extend(self._triples(g, temporal_obj, predicate, extras['temporal_end'], XSD.date))
-            assert len(triples) == 1
+        temporal = self._triples(g, dataset_ref, DCT.temporal, None)
+        assert temporal
+        assert len(temporal) == 1
+        temporal_ref = temporal[0][2]
+        assert self._triple(g, temporal_ref, RDF.type, DCT.PeriodOfTime)
+        assert self._triple(g, temporal_ref, DCAT.startDate, extras['temporal_start'], XSD.dateTime)
+        assert self._triple(g, temporal_ref, DCAT.endDate, extras['temporal_end'], XSD.date)
 
     def test_high_value_datasets(self):
         """
