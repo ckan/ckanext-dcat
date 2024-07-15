@@ -38,7 +38,6 @@
     <dct:license rdf:resource="https://data.some.org/link/to/license"/>
     <dct:spatial rdf:resource="http://publications.europa.eu/mdr/authority/country/ZWE"/>
     <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.5</dcat:spatialResolutionInMeters>
-    <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.0</dcat:spatialResolutionInMeters>
     <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
     <dct:accessRights>public</dct:accessRights>
     <foaf:page rdf:resource="http://dataset.info.org/doc1"/>
@@ -64,7 +63,6 @@
         </dct:PeriodOfTime>
     </dct:temporal>
     <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
-    <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">P1D</dcat:temporalResolution>
     <dcat:contactPoint>
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>

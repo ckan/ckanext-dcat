@@ -11,11 +11,21 @@
   in the `ckanext/dcat/schemas` folder. See the [documentation](https://github.com/ckan/ckanext-dcat?tab=readme-ov-file#schemas)
   for all details. Some highlights of the new scheming based profiles:
 
-    * Actual list support in the API ooutput for list properties like `dct:language`
+    * Actual list support in the API output for list properties like `dct:language`
     * Multiple objects now allowed for properties like `dcat:ContactPoint`, `dct:spatial` or `dct:temporal`
     * Custom validators for date values that allow `xsd:gYear`, `xsd:gYearMonth`, `xsd:date` and `xsd:dateTime`
 
   (#281)
+* [SHACL validation](https://github.com/SEMICeu/DCAT-AP/tree/master/releases/2.1.1) for DCAT-AP 2.1.1 profile (scheming and legacy).
+  SHACL validation made surface the following issues in the existing profiles, which are now fixed:
+  * Cast `dcat:byteSize` and `dcat:spatialResolutionInMeters` as Decimal, not float
+  * Allow only one value of `dcat:spatialResolutionInMeters` and  `dcat:temporalResolution`
+  * Only output the WKT version of geometries in `locn:geometry`, `dcat:bbox` and `dcat:centroid`. Sites that for some reason
+    require GeoJSON (or both) can use the `ckanext.dcat.output_spatial_format` config option
+    to choose which format to use
+  * When using the `euro_dcat_ap_2` profile, don't output temporal extent namespaced
+    both with `schema` and `dcat`, just with the latter (`dcat:startDate` and `dcat:endDate`)
+  (#288)
 * New `ckan dcat consume` and `ckan dcat produce` CLI commands (#279)
 * Parse dcat:spatialResolutionInMeters as float (#285)
 * Split profile classes into their own separate files (#282)

@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal, DecimalException
 
 from rdflib import term, URIRef, BNode, Literal
 import ckantoolkit as toolkit
@@ -545,10 +546,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                         (
                             distribution,
                             DCAT.byteSize,
-                            Literal(float(resource_dict["size"]), datatype=XSD.decimal),
+                            Literal(Decimal(resource_dict["size"]), datatype=XSD.decimal),
                         )
                     )
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, DecimalException):
                     g.add((distribution, DCAT.byteSize, Literal(resource_dict["size"])))
             # Checksum
             if resource_dict.get("hash"):

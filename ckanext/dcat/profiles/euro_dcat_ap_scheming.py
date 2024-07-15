@@ -180,9 +180,9 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 temporal_ref = BNode()
                 self.g.add((temporal_ref, RDF.type, DCT.PeriodOfTime))
                 if item.get("start"):
-                    self._add_date_triple(temporal_ref, SCHEMA.startDate, item["start"])
+                    self._add_date_triple(temporal_ref, DCAT.startDate, item["start"])
                 if item.get("end"):
-                    self._add_date_triple(temporal_ref, SCHEMA.endDate, item["end"])
+                    self._add_date_triple(temporal_ref, DCAT.endDate, item["end"])
                 self.g.add((dataset_ref, DCT.temporal, temporal_ref))
 
         spatial = dataset_dict.get("spatial_coverage")

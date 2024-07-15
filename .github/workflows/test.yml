@@ -77,4 +77,3 @@ jobs:
         ckan -c test.ini db pending-migrations --apply
     - name: Run tests
       run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=term-missing --cov-append --disable-warnings ckanext/dcat/tests
-

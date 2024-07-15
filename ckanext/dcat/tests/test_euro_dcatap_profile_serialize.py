@@ -2,6 +2,7 @@ from builtins import str
 from builtins import object
 import json
 import uuid
+from decimal import Decimal
 
 import pytest
 
@@ -530,9 +531,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
 
         # Geometry in WKT
         wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
@@ -557,11 +556,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_spatial_bad_json_no_wkt(self):
         dataset = {
@@ -582,11 +577,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_distributions(self):
 
@@ -702,7 +694,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.modified, resource['modified'], XSD.dateTime)
 
         # Numbers
-        assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
+        assert self._triple(g, distribution, DCAT.byteSize, Decimal(resource['size']), XSD.decimal)
 
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
