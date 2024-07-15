@@ -1128,9 +1128,9 @@ Example output of structured data in JSON-LD:
 The `ckan dcat` command offers utilites to transform between DCAT RDF Serializations and CKAN datasets (`ckan dcat consume`) and
 viceversa (`ckan dcat produce`). In both cases the input can be provided as a path to a file:
 
-    ckan dcat consume -f ttl examples/dataset.ttl
+    ckan dcat consume -f ttl examples/dcat/dataset.ttl
 
-    ckan dcat produce -f jsonld examples/ckan_datasets.json
+    ckan dcat produce -f jsonld examples/ckan/ckan_datasets.json
 
 or be read from stdin:
 

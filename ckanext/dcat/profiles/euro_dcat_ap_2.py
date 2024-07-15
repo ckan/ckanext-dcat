@@ -12,6 +12,7 @@ from .base import (
     DCATAP,
     DCT,
     XSD,
+    SCHEMA,
 )
 
 from .euro_dcat_ap import EuropeanDCATAPProfile
@@ -191,6 +192,14 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             )
 
         # Temporal
+
+        # The profile for DCAT-AP 1 stored triples using schema:startDate,
+        # remove them to avoid duplication
+        for temporal in self.g.objects(dataset_ref, DCT.temporal):
+            if SCHEMA.startDate in [t for t in self.g.predicates(temporal, None)]:
+                self.g.remove((temporal, None, None))
+                self.g.remove((dataset_ref, DCT.temporal, temporal))
+
         start = self._get_dataset_value(dataset_dict, "temporal_start")
         end = self._get_dataset_value(dataset_dict, "temporal_end")
         if start or end:

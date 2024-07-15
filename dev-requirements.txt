@@ -3,3 +3,4 @@ pyshacl
 mock
 pytest-ckan
 pytest-cov
+pytest-pretty
