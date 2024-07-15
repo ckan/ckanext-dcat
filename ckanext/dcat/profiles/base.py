@@ -934,7 +934,8 @@ class RDFProfile(object):
             else:
                 object = _type(value)
             self.g.add((subject, predicate, object))
-            if _class and isinstance(value, URIRef):
+
+            if _class and isinstance(object, URIRef):
                 self.g.add((object, RDF.type, _class))
 
     def _add_list_triple(
@@ -959,7 +960,7 @@ class RDFProfile(object):
                 object = _type(item)
             self.g.add((subject, predicate, object))
 
-            if _class and isinstance(value, URIRef):
+            if _class and isinstance(object, URIRef):
                 self.g.add((object, RDF.type, _class))
 
     def _add_date_triple(self, subject, predicate, value, _type=Literal):
