@@ -485,12 +485,22 @@ class EuropeanDCATAPProfile(RDFProfile):
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
             # Set default license for distribution if needed and available
+
             if resource_license_fallback and not (distribution, DCT.license, None) in g:
                 g.add(
                     (
                         distribution,
                         DCT.license,
                         URIRefOrLiteral(resource_license_fallback),
+                    )
+                )
+            # TODO: add an actual field to manage this
+            if (distribution, DCT.license, None) in g:
+                g.add(
+                    (
+                        list(g.objects(distribution, DCT.license))[0],
+                        DCT.type,
+                        URIRef("http://purl.org/adms/licencetype/UnknownIPR")
                     )
                 )
 
