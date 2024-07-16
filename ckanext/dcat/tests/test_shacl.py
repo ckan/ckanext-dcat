@@ -2,6 +2,7 @@ import json
 import os
 from random import randrange
 
+from rdflib import URIRef
 from pyshacl import validate
 import pytest
 
@@ -34,6 +35,17 @@ def graph_from_dataset(file_name):
         generated_graphs[file_name] = s.g
 
     return generated_graphs[file_name]
+
+
+def _results_count(results_graph):
+    return len(
+        [
+            t
+            for t in results_graph.triples(
+                (None, URIRef("http://www.w3.org/ns/shacl#result"), None)
+            )
+        ]
+    )
 
 
 @pytest.mark.usefixtures("with_plugins")

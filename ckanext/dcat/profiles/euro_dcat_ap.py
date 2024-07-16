@@ -469,16 +469,16 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ("description", DCT.description, None, Literal),
                 ("status", ADMS.status, None, URIRefOrLiteral),
                 ("rights", DCT.rights, None, URIRefOrLiteral, DCT.RightsStatement),
-                ("license", DCT.license, None, URIRefOrLiteral),
-                ("access_url", DCAT.accessURL, None, URIRef),
-                ("download_url", DCAT.downloadURL, None, URIRef),
+                ("license", DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
+                ("access_url", DCAT.accessURL, None, URIRef, RDFS.Resource),
+                ("download_url", DCAT.downloadURL, None, URIRef, RDFS.Resource),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
 
             #  Lists
             items = [
-                ("documentation", FOAF.page, None, URIRefOrLiteral),
+                ("documentation", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
                 ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
                 ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
             ]
