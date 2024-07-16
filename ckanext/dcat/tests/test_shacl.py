@@ -1,7 +1,7 @@
 import json
 import os
-from random import randrange
 
+from rdflib import URIRef
 from pyshacl import validate
 import pytest
 
@@ -25,7 +25,6 @@ def graph_from_dataset(file_name):
         if not file_name.startswith("ckan/"):
             file_name = "ckan/" + file_name
         dataset_dict = json.loads(get_file_contents(file_name))
-        dataset_dict["name"] += "-" + str(randrange(0, 1000))
         dataset = call_action("package_create", **dataset_dict)
 
         s = RDFSerializer()
@@ -36,7 +35,18 @@ def graph_from_dataset(file_name):
     return generated_graphs[file_name]
 
 
-@pytest.mark.usefixtures("with_plugins")
+def _results_count(results_graph):
+    return len(
+        [
+            t
+            for t in results_graph.triples(
+                (None, URIRef("http://www.w3.org/ns/shacl#result"), None)
+            )
+        ]
+    )
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
@@ -60,7 +70,7 @@ def test_validate_dcat_ap_2_graph_shapes():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
@@ -84,7 +94,7 @@ def test_validate_dcat_ap_2_graph_shapes_recommended():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat")
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_2")
 def test_validate_dcat_ap_2_legacy_graph_shapes():
@@ -99,7 +109,7 @@ def test_validate_dcat_ap_2_legacy_graph_shapes():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat")
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_2")
 def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
@@ -112,3 +122,43 @@ def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r
     assert conforms, results_text
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config(
+    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
+)
+def test_validate_dcat_ap_2_graph_shapes_range():
+
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_vocabularies.json")
+
+    # dcat-ap_2.1.1_shacl_range.ttl: constraints concerning object range
+    path = _get_shacl_file_path("dcat-ap_2.1.1_shacl_range.ttl")
+    r = validate(graph, shacl_graph=path)
+    conforms, results_graph, results_text = r
+
+    failures = [
+        str(t[2])
+        for t in results_graph.triples(
+            (
+                None,
+                URIRef("http://www.w3.org/ns/shacl#resultMessage"),
+                None,
+            )
+        )
+    ]
+
+    known_failures = [
+        "Value does not have class skos:Concept",
+        "Value does not have class dcat:Dataset",
+    ]
+
+    assert set(failures) - set(known_failures) == set(), results_text

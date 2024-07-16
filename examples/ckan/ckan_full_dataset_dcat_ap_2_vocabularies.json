@@ -1,0 +1,190 @@
+{
+    "name": "test-dataset-shacl",
+    "title": "Test DCAT dataset",
+    "notes": "Lorem ipsum",
+    "url": "http://example.org/ds1",
+    "version": "1.0b",
+    "tags": [
+        {
+            "name": "Tag 1"
+        },
+        {
+            "name": "Tag 2"
+        }
+    ],
+    "issued": "2024-05-01",
+    "modified": "2024-05-05",
+    "identifier": "xx-some-dataset-id-yy",
+    "frequency": "http://publications.europa.eu/resource/authority/frequency/MONTHLY",
+    "provenance": "https://example.org/some-provenance-statement.html",
+    "dcat_type": "http://purl.org/dc/dcmitype/Dataset",
+    "version_notes": "Some version notes",
+    "access_rights": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
+    "alternate_identifier": [
+        "https://org1.example.org/datasets/alt-id-1",
+        "https://org2.example.org/datasets/alt-id-2"
+    ],
+    "theme": [
+        "https://example.org/uri/theme1",
+        "https://example.org/uri/theme2",
+        "https://example.org/uri/theme3"
+    ],
+    "language": [
+        "http://publications.europa.eu/resource/authority/language/ENG",
+        "http://publications.europa.eu/resource/authority/language/SPA",
+        "http://publications.europa.eu/resource/authority/language/CAT"
+    ],
+    "documentation": [
+        "https://example.org/some-doc.html"
+    ],
+    "conforms_to": [
+        "https://joinup.ec.europa.eu/collection/semic-support-centre/solution/dcat-application-profile-data-portals-europe/release/211",
+        "https://joinup.ec.europa.eu/collection/semic-support-centre/solution/dcat-application-profile-data-portals-europe/release/210"
+    ],
+    "is_referenced_by": [
+        "https://doi.org/10.1038/sdata.2018.22",
+        "test_isreferencedby"
+    ],
+    "applicable_legislation": [
+        "http://data.europa.eu/eli/reg_impl/2023/138/oj",
+        "http://data.europa.eu/eli/reg_impl/2023/138/oj_alt"
+    ],
+    "contact": [
+        {
+            "name": "Contact 1",
+            "email": "contact1@example.org"
+        },
+        {
+            "name": "Contact 2",
+            "email": "contact2@example.org"
+        }
+    ],
+    "publisher": [
+        {
+            "name": "Test Publisher",
+            "email": "publisher@example.org",
+            "url": "https://example.org",
+            "type": "http://publications.europa.eu/resource/authority/corporate-body-classification/CB_INT"
+        }
+    ],
+    "temporal_coverage": [
+        {
+            "start": "1905-03-01",
+            "end": "2013-01-05"
+        }
+    ],
+    "temporal_resolution": "PT15M",
+    "spatial_coverage": [
+        {
+            "geom": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            11.9936,
+                            54.0486
+                        ],
+                        [
+                            11.9936,
+                            54.2466
+                        ],
+                        [
+                            12.3045,
+                            54.2466
+                        ],
+                        [
+                            12.3045,
+                            54.0486
+                        ],
+                        [
+                            11.9936,
+                            54.0486
+                        ]
+                    ]
+                ]
+            },
+            "text": "Tarragona",
+            "uri": "https://sws.geonames.org/6361390/",
+            "bbox": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -2.1604,
+                            42.7611
+                        ],
+                        [
+                            -2.0938,
+                            42.7611
+                        ],
+                        [
+                            -2.0938,
+                            42.7931
+                        ],
+                        [
+                            -2.1604,
+                            42.7931
+                        ],
+                        [
+                            -2.1604,
+                            42.7611
+                        ]
+                    ]
+                ]
+            },
+            "centroid": {
+                "type": "Point",
+                "coordinates": [
+                    1.26639,
+                    41.12386
+                ]
+            }
+        }
+    ],
+    "spatial_resolution_in_meters": 1.5,
+    "resources": [
+        {
+            "name": "Resource 1",
+            "description": "Some description",
+            "url": "https://example.com/data.csv",
+            "format": "http://publications.europa.eu/resource/authority/file-type/CSV",
+            "mimetype": "http://www.iana.org/assignments/media-types/text/csv",
+            "availability": "http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL",
+            "compress_format": "http://www.iana.org/assignments/media-types/application/gzip",
+            "package_format": "http://publications.europa.eu/resource/authority/file-type/TAR",
+            "size": 12323,
+            "hash": "4304cf2e751e6053c90b1804c89c0ebb758f395a",
+            "hash_algorithm": "http://spdx.org/rdf/terms#checksumAlgorithm_sha1",
+            "status": "http://purl.org/adms/status/Completed",
+            "access_url": "https://example.com/data.csv",
+            "download_url": "https://example.com/data.csv",
+            "issued": "2024-05-01T01:20:33",
+            "modified": "2024-05-05T09:33:20",
+            "license": "http://publications.europa.eu/resource/authority/licence/CC_BYNC_4_0",
+            "rights": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
+            "conforms_to": [
+                "https://joinup.ec.europa.eu/collection/semic-support-centre/solution/dcat-application-profile-data-portals-europe/release/211",
+                "https://joinup.ec.europa.eu/collection/semic-support-centre/solution/dcat-application-profile-data-portals-europe/release/210"
+            ],
+            "language": [
+                "http://publications.europa.eu/resource/authority/language/ENG",
+                "http://publications.europa.eu/resource/authority/language/SPA",
+                "http://publications.europa.eu/resource/authority/language/CAT"
+            ],
+            "access_services": [
+                {
+                    "title": "Access Service 1",
+                    "endpoint_description": "https://example.org/endpoint_description",
+                    "endpoint_url": [
+                        "https://example.org/access_service/1",
+                        "https://example.org/access_service/2"
+                    ],
+                    "serves_dataset": [
+                        "https://example.org/dataset/1",
+                        "https://example.org/dataset/2"
+                    ]
+                }
+            ]
+        }
+    ]
+}

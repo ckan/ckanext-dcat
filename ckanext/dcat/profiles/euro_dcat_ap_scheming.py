@@ -71,9 +71,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 _parse_list_value(resource_dict, field_name)
 
         # Repeating subfields
-        new_fields_mapping = {
-            "temporal_coverage": "temporal"
-        }
+        new_fields_mapping = {"temporal_coverage": "temporal"}
         for schema_field in self._dataset_schema["dataset_fields"]:
             if "repeating_subfields" in schema_field:
                 # Check if existing extras need to be migrated
@@ -132,7 +130,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 else:
                     contact_details = BNode()
 
-                self.g.add((contact_details, RDF.type, VCARD.Organization))
+                self.g.add((contact_details, RDF.type, VCARD.Kind))
                 self.g.add((dataset_ref, DCAT.contactPoint, contact_details))
 
                 self._add_triple_from_dict(item, contact_details, VCARD.fn, "name")
@@ -147,7 +145,11 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 )
 
         publisher = dataset_dict.get("publisher")
-        if isinstance(publisher, list) and len(publisher) and _not_empty_dict(publisher[0]):
+        if (
+            isinstance(publisher, list)
+            and len(publisher)
+            and _not_empty_dict(publisher[0])
+        ):
             publisher = publisher[0]
             publisher_uri = publisher.get("uri")
             if publisher_uri:
@@ -155,7 +157,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
             else:
                 publisher_ref = BNode()
 
-            self.g.add((publisher_ref, RDF.type, FOAF.Organization))
+            self.g.add((publisher_ref, RDF.type, FOAF.Agent))
             self.g.add((dataset_ref, DCT.publisher, publisher_ref))
 
             self._add_triple_from_dict(publisher, publisher_ref, FOAF.name, "name")
@@ -163,7 +165,12 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 publisher, publisher_ref, FOAF.homepage, "url", _type=URIRef
             )
             self._add_triple_from_dict(
-                publisher, publisher_ref, DCT.type, "type", _type=URIRefOrLiteral
+                publisher,
+                publisher_ref,
+                DCT.type,
+                "type",
+                _type=URIRefOrLiteral,
+                _class=SKOS.Concept,
             )
             self._add_triple_from_dict(
                 publisher,
@@ -175,7 +182,11 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
             )
 
         temporal = dataset_dict.get("temporal_coverage")
-        if isinstance(temporal, list) and len(temporal) and _not_empty_dict(temporal[0]):
+        if (
+            isinstance(temporal, list)
+            and len(temporal)
+            and _not_empty_dict(temporal[0])
+        ):
             for item in temporal:
                 temporal_ref = BNode()
                 self.g.add((temporal_ref, RDF.type, DCT.PeriodOfTime))
