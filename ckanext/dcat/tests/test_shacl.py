@@ -126,7 +126,9 @@ def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
-def test_validate_dcat_ap_2_graph_shapes_range(graph):
+def test_validate_dcat_ap_2_graph_shapes_range():
+
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_vocabularies.json")
 
     # dcat-ap_2.1.1_shacl_range.ttl: constraints concerning object range
     path = _get_shacl_file_path("dcat-ap_2.1.1_shacl_range.ttl")
