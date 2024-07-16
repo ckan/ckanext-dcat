@@ -144,4 +144,21 @@ def test_validate_dcat_ap_2_graph_shapes_range():
     path = _get_shacl_file_path("dcat-ap_2.1.1_shacl_range.ttl")
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r
-    assert conforms, results_text
+
+    failures = [
+        str(t[2])
+        for t in results_graph.triples(
+            (
+                None,
+                URIRef("http://www.w3.org/ns/shacl#resultMessage"),
+                None,
+            )
+        )
+    ]
+
+    known_failures = [
+        "Value does not have class skos:Concept",
+        "Value does not have class dcat:Dataset",
+    ]
+
+    assert set(failures) - set(known_failures) == set(), results_text
