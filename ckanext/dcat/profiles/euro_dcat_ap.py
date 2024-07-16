@@ -279,10 +279,10 @@ class EuropeanDCATAPProfile(RDFProfile):
             ("identifier", DCT.identifier, ["guid", "id"], URIRefOrLiteral),
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
-            ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral),
-            ("access_rights", DCT.accessRights, None, URIRefOrLiteral),
-            ("dcat_type", DCT.type, None, Literal),
-            ("provenance", DCT.provenance, None, Literal),
+            ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral, DCT.Frequency),
+            ("access_rights", DCT.accessRights, None, URIRefOrLiteral, DCT.AccessRights),
+            ("dcat_type", DCT.type, None, URIRefOrLiteral),
+            ("provenance", DCT.provenance, None, URIRefOrLiteral, DCT.ProvenanceStatement),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -301,14 +301,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         items = [
             ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
             ("theme", DCAT.theme, None, URIRef),
-            ("conforms_to", DCT.conformsTo, None, Literal),
-            ("alternate_identifier", ADMS.identifier, None, URIRefOrLiteral),
+            ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
+            ("alternate_identifier", ADMS.identifier, None, URIRefOrLiteral, ADMS.Identifier),
             ("documentation", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
-            ("related_resource", DCT.relation, None, URIRefOrLiteral),
+            ("related_resource", DCT.relation, None, URIRefOrLiteral, RDFS.Resource),
             ("has_version", DCT.hasVersion, None, URIRefOrLiteral),
             ("is_version_of", DCT.isVersionOf, None, URIRefOrLiteral),
             ("source", DCT.source, None, URIRefOrLiteral),
-            ("sample", ADMS.sample, None, URIRefOrLiteral),
+            ("sample", ADMS.sample, None, URIRefOrLiteral, DCAT.Distribution),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -404,7 +404,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 }
         # Add to graph
         if publisher_ref:
-            g.add((publisher_ref, RDF.type, FOAF.Organization))
+            g.add((publisher_ref, RDF.type, FOAF.Agent))
             g.add((dataset_ref, DCT.publisher, publisher_ref))
             items = [
                 ("name", FOAF.name, None, Literal),
@@ -468,7 +468,7 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ("name", DCT.title, None, Literal),
                 ("description", DCT.description, None, Literal),
                 ("status", ADMS.status, None, URIRefOrLiteral),
-                ("rights", DCT.rights, None, URIRefOrLiteral),
+                ("rights", DCT.rights, None, URIRefOrLiteral, DCT.RightsStatement),
                 ("license", DCT.license, None, URIRefOrLiteral),
                 ("access_url", DCAT.accessURL, None, URIRef),
                 ("download_url", DCAT.downloadURL, None, URIRef),
@@ -479,8 +479,8 @@ class EuropeanDCATAPProfile(RDFProfile):
             #  Lists
             items = [
                 ("documentation", FOAF.page, None, URIRefOrLiteral),
-                ("language", DCT.language, None, URIRefOrLiteral),
-                ("conforms_to", DCT.conformsTo, None, Literal),
+                ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
+                ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
@@ -515,10 +515,16 @@ class EuropeanDCATAPProfile(RDFProfile):
                     mimetype = None
 
             if mimetype:
-                g.add((distribution, DCAT.mediaType, URIRefOrLiteral(mimetype)))
+                mimetype = URIRefOrLiteral(mimetype)
+                g.add((distribution, DCAT.mediaType, mimetype))
+                if isinstance(mimetype, URIRef):
+                    g.add((mimetype, RDF.type, DCT.MediaType))
 
             if fmt:
-                g.add((distribution, DCT["format"], URIRefOrLiteral(fmt)))
+                fmt = URIRefOrLiteral(fmt)
+                g.add((distribution, DCT["format"], fmt))
+                if isinstance(fmt, URIRef):
+                    g.add((fmt, RDF.type, DCT.MediaTypeOrExtent))
 
             # URL fallback and old behavior
             url = resource_dict.get("url")

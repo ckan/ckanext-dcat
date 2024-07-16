@@ -395,7 +395,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert str(publisher) == extras['publisher_uri']
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
@@ -426,7 +426,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
         assert publisher
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, dataset['organization']['title'])
 
     def test_publisher_no_uri(self):
@@ -448,7 +448,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert isinstance(publisher, BNode)
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
 
     def test_publisher_org_no_uri(self):
@@ -478,7 +478,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert isinstance(publisher, BNode)
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))

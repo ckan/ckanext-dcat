@@ -13,6 +13,7 @@ from .base import (
     DCT,
     XSD,
     SCHEMA,
+    RDFS,
 )
 
 from .euro_dcat_ap import EuropeanDCATAPProfile
@@ -254,8 +255,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             #  Simple values
             items = [
                 ("availability", DCATAP.availability, None, URIRefOrLiteral),
-                ("compress_format", DCAT.compressFormat, None, URIRefOrLiteral),
-                ("package_format", DCAT.packageFormat, None, URIRefOrLiteral),
+                ("compress_format", DCAT.compressFormat, None, URIRefOrLiteral, DCT.MediaType),
+                ("package_format", DCAT.packageFormat, None, URIRefOrLiteral, DCT.MediaType),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
@@ -310,7 +311,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
                 #  Lists
                 items = [
-                    ("endpoint_url", DCAT.endpointURL, None, URIRefOrLiteral),
+                    ("endpoint_url", DCAT.endpointURL, None, URIRefOrLiteral, RDFS.Resource),
                     ("serves_dataset", DCAT.servesDataset, None, URIRefOrLiteral),
                 ]
                 self._add_list_triples_from_dict(
