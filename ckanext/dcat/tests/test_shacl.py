@@ -1,6 +1,5 @@
 import json
 import os
-from random import randrange
 
 from rdflib import URIRef
 from pyshacl import validate
@@ -26,7 +25,6 @@ def graph_from_dataset(file_name):
         if not file_name.startswith("ckan/"):
             file_name = "ckan/" + file_name
         dataset_dict = json.loads(get_file_contents(file_name))
-        dataset_dict["name"] += "-" + str(randrange(0, 1000))
         dataset = call_action("package_create", **dataset_dict)
 
         s = RDFSerializer()
@@ -48,7 +46,7 @@ def _results_count(results_graph):
     )
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
@@ -72,7 +70,7 @@ def test_validate_dcat_ap_2_graph_shapes():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
@@ -96,7 +94,7 @@ def test_validate_dcat_ap_2_graph_shapes_recommended():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat")
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_2")
 def test_validate_dcat_ap_2_legacy_graph_shapes():
@@ -111,7 +109,7 @@ def test_validate_dcat_ap_2_legacy_graph_shapes():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat")
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_2")
 def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
@@ -126,7 +124,7 @@ def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
     assert conforms, results_text
 
 
-@pytest.mark.usefixtures("with_plugins")
+@pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
