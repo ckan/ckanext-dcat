@@ -42,9 +42,12 @@ def dcat_catalog_show(context, data_dict):
 
     serializer = RDFSerializer(profiles=data_dict.get('profiles'))
 
-    output = serializer.serialize_catalog({}, dataset_dicts,
+    overwrite_values = data_dict.get('overwrite_values', None)
+    output = serializer.serialize_catalog({},
+                                          dataset_dicts=dataset_dicts,
                                           _format=data_dict.get('format'),
-                                          pagination_info=pagination_info)
+                                          pagination_info=pagination_info,
+                                          overwrite_values=overwrite_values)
 
     return output
 
@@ -92,6 +95,7 @@ def _search_ckan_datasets(context, data_dict):
         raise wrong_page_exception
 
     modified_since = data_dict.get('modified_since')
+    organization = data_dict.get('organization')
     if modified_since:
         try:
             modified_since = dateutil_parse(modified_since).isoformat() + 'Z'
@@ -106,6 +110,9 @@ def _search_ckan_datasets(context, data_dict):
     }
 
     search_data_dict['q'] = data_dict.get('q', '*:*')
+    if organization:
+        search_data_dict['fq'] = 'organization: {}'.format(organization)
+
     search_data_dict['fq'] = data_dict.get('fq')
     search_data_dict['fq_list'] = []
 

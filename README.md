@@ -183,13 +183,18 @@ The default number of datasets returned (100) can be modified by CKAN site maint
 
     ckanext.dcat.datasets_per_page = 20
 
-The catalog endpoint also supports a `modified_since` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date:
+The catalog endpoint also supports:
 
-http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
+* `modified_since` parameter to restrict datasets to those modified from a certain date. The parameter value should be a valid ISO-8601 date: http://demo.ckan.org/catalog.xml?modified_since=2015-07-24
 
-It's possible to specify the profile(s) to use for the serialization using the `profiles` parameter:
+* `profiles` specify the profile(s) to use for the serialization: http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
 
-http://demo.ckan.org/catalog.xml?profiles=euro_dcat_ap,sweden_dcat_ap
+* `organization` specify the organization to export instead of the full catalog: http://demo.ckan.org/catalog.xml?organization=<*ckan_organization_name*>
+
+* `overwrite` set a custom value to overwrite an existing value for a specific RDF object. Currently supporting key 'publisher' to replace the original 'FOAF.organization' card: http://demo.ckan.org/catalog.xml?overwrite=publisher:<*your_organization_id_or_organization_name*>
+
+    *Warning: Internal server error is caused in case of a non-existent organization id/name provided as publisher parameter.
+
 
 To filter the output, the catalog endpoint supports the `q` and `fq` parameters to specify a [search query](https://lucene.apache.org/solr/guide/6_6/the-dismax-query-parser.html#TheDisMaxQueryParser-TheqParameter) or [filter query](https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-Thefq_FilterQuery_Parameter):
 

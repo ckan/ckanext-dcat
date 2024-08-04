@@ -3,6 +3,14 @@
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.5.1...HEAD)
 
 
+## [v1.5.1-civity](https://github.com/ckan/ckanext-dcat/compare/v1.5.1...v1.5.1-civity) - 2024-06-20
+
+* Fix tests to work with `ckanext-harvest >= 1.5.4`. 
+* Implement 'overwrite_values' that currently supports: (CIVDEV-193) 
+  * 'publisher': provide organization 'name' or 'id' to be picked up by the serializer and replace the 'FOAF.organization' card for all datasets
+* 
+
+
 ## [v1.5.1](https://github.com/ckan/ckanext-dcat/compare/v1.5.0...v1.5.1) - 2023-06-20
 
 * Fix tests to work with `ckanext-harvest >= 1.5.4`. (#250)

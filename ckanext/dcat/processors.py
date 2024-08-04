@@ -20,6 +20,7 @@ import ckan.plugins as p
 from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.profiles import DCAT, DCT, FOAF
 from ckanext.dcat.exceptions import RDFProfileException, RDFParserException
+import helpers as h
 
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -285,7 +286,7 @@ class RDFSerializer(RDFProcessor):
         return output
 
     def serialize_catalog(self, catalog_dict=None, dataset_dicts=None,
-                          _format='xml', pagination_info=None):
+                          _format='xml', pagination_info=None, overwrite_values=None):
         '''
         Returns an RDF serialization of the whole catalog
 
@@ -308,11 +309,19 @@ class RDFSerializer(RDFProcessor):
         '''
 
         catalog_ref = self.graph_from_catalog(catalog_dict)
+
+        # Validate overwrite param, if exists
+        overwrite_dict = h.validate_overwrite_param(overwrite_values) if overwrite_values else None
+
         if dataset_dicts:
             for dataset_dict in dataset_dicts:
-                dataset_ref = self.graph_from_dataset(dataset_dict)
+                # If there is an overwrite_dict, update dataset_dict object before serializing
+                if overwrite_dict:
+                    self.update_dataset_dict(dataset_dict, overwrite_dict)
 
+                dataset_ref = self.graph_from_dataset(dataset_dict)
                 cat_ref = self._add_source_catalog(catalog_ref, dataset_dict, dataset_ref)
+
                 if not cat_ref:
                     self.g.add((catalog_ref, DCAT.dataset, dataset_ref))
 
@@ -325,6 +334,25 @@ class RDFSerializer(RDFProcessor):
         output = self.g.serialize(format=_format)
 
         return output
+
+    def update_dataset_organization(self, dataset_dict, selected_organization):
+        """
+        Updates organization entity of the dataset. No actual package_update, only for serializing purposes
+        """
+        dataset_dict.update({
+            'organization': selected_organization
+        })
+
+    def update_dataset_dict(self, dataset_dict, overwrite_dict):
+        """
+        Updates/overwrites metadata based on available 'overwrite' parameters defined in the catalog serializer endpoint
+        """
+        if 'publisher' in overwrite_dict and overwrite_dict['publisher'] is not None:
+            # acquire organization object from organization_name or organization_id provided.
+            # TODO: Handle internal server error if wrong/non-existant organization name/id provided
+            selected_organization= p.toolkit.get_action('organization_show')({}, {'id': overwrite_dict['publisher']})
+            self.update_dataset_organization(dataset_dict, selected_organization)
+
 
     def _add_source_catalog(self, root_catalog_ref, dataset_dict, dataset_ref):
         if not p.toolkit.asbool(config.get(DCAT_EXPOSE_SUBCATALOGS, False)):
