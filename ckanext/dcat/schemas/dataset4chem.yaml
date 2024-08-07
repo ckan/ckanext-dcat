@@ -1,0 +1,193 @@
+scheming_version: 2
+dataset_type: dataset
+about: A reimplementation of the default CKAN dataset schema based on BioSchema.org
+about_url: https://bioschemas.org/profiles/Dataset/1.0-RELEASE
+
+dataset_fields:
+
+- field_name: title
+  label: Title
+  preset: title
+  form_placeholder: eg. A descriptive title
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder: eg. my-dataset
+
+- field_name: notes
+  label: Description
+  form_snippet: markdown.html
+  form_placeholder: eg. Some useful notes about the data
+
+- field_name: doi
+  label: DOI
+  form_placeholder: ex. '10:xxx-xxx'
+  form_snippet: text.html   # a DOI based snippet can be added where '10:xxx' becomes a 'required' field.
+
+
+- field_name: tag_string
+  label: Tags
+  preset: tag_string_autocomplete
+  form_placeholder: eg. economy, mental health, government
+
+- field_name: license_id
+  label: License
+  form_snippet: license.html
+  display_snippet: text.html
+  help_text: License definitions and additional information can be found at http://opendefinition.org/
+
+- field_name: license_url
+  label: License URL
+  display_snippet: link.html
+
+- field_name: owner_org
+  label: Organization
+  preset: dataset_organization
+
+- field_name: url
+  label: Source
+  form_placeholder: http://example.com/dataset.json
+  display_property: foaf:homepage
+  display_snippet: link.html
+
+- field_name: version
+  label: Version
+  validators: ignore_missing unicode_safe package_version_validator
+  form_placeholder: '1.0'
+
+- field_name: author
+  label: Author
+  form_placeholder: Joe Bloggs
+  display_property: dc:contributor
+
+
+#- field_name: author_email
+#  label: Author Email
+#  form_placeholder: joe@example.com
+#  display_property: dc:creator
+#  display_snippet: email.html
+#  display_email_name_field: author
+
+- field_name: maintainer
+  label: Maintainer
+  form_placeholder: Joe Bloggs
+  display_property: dc:contributor
+
+#- field_name: maintainer_email
+#  label: Maintainer Email
+#  form_placeholder: joe@example.com
+#  display_property: dc:contributor
+#  display_snippet: email.html
+#  display_email_name_field: maintainer
+
+- field_name: language
+  label : Language
+  form_placeholder: English
+  display_property: dc:language
+  display_snippet: text.html
+  #preset: based on mentioned languages if necessary
+
+# Chemistry Metadata included
+
+- field_name: exactmass
+  label: Molecular Weight
+  display_snippet: text.html
+  form_placeholder: ex. 230gms
+
+- field_name: inchi
+  label: InChI
+  display_snippet: text.html
+
+- field_name: inchi_key
+  label: InChIKey
+  display_snippet: text.html
+
+- field_name: smiles
+  label: SMILES
+  display_snippet: text.html
+
+- field_name: iupacName
+  label: IUPAC Name
+  display_snippet: text.html
+
+- field_name: mol_formula
+  label: Molecular Formula
+  display_snippet: text.html
+
+- field_name: measurement_technique
+  label: Measurement Technique
+  display_snippet: hyperlink_mT.html
+
+- field_name: measurement_technique_iri
+  label: Measurement Technique IRI
+
+
+- field_name: variableMeasured
+  label: Measurement Variables
+  repeating_label: Property
+  repeating_subfields:
+    - field_name: variableMeasured_name
+      label: Measured Variable Name
+      display_snippet: hyperlink.html
+
+    - field_name: variableMeasured_propertyID
+      label: IRI
+      display_snippet: null
+
+    - field_name: variableMeasured_value
+      label: Measured Value
+      display_snippet: null
+
+    - field_name: variableMeasured_tsurl
+      label: TS URL
+      display_snippet: null
+
+
+- field_name: metadata_created
+  label: MetadataCreated
+  form_placeholder: 1970-01-01
+  form_snippet: datetime_tz.html
+
+- field_name: metadata_modified
+  label: MetadataModified
+  form_placeholder: 1970-01-01
+  form_snippet: datetime_tz.html
+
+- field_name: metadata_published
+  label: MetadataPublished
+  form_placeholder: 1970-01-01
+  form_snippet: datetime_tz.html
+
+#relationship to study
+- field_name: related_study
+  label: Related Study
+  preset: related_entity
+  current_entity: package
+  current_entity_type: dataset
+  related_entity: package
+  related_entity_type: study
+  relation_type: child_of
+  multiple: true
+  updatable_only: false
+  required: false
+
+
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
+
+- field_name: name
+  label: Name
+  form_placeholder: eg. January 2011 Gold Prices
+
+- field_name: description
+  label: Description
+  form_snippet: markdown.html
+  form_placeholder: Some useful notes about the data
+
+- field_name: format
+  label: Format
+  preset: resource_format_autocomplete

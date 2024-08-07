@@ -290,6 +290,9 @@ class EuropeanDCATAPProfile(RDFProfile):
         for tag in dataset_dict.get("tags", []):
             g.add((dataset_ref, DCAT.keyword, Literal(tag["name"])))
 
+        #InChI
+        g.add((dataset_ref, DCAT.keyword, Literal(dataset_dict.get("inchi"))))
+
         # Dates
         items = [
             ("issued", DCT.issued, ["metadata_created"], Literal),

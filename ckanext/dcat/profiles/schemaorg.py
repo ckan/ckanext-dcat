@@ -46,6 +46,9 @@ class SchemaOrgProfile(RDFProfile):
         # Tags
         self._tags_graph(dataset_ref, dataset_dict)
 
+        # inchi
+        self._inchi_graph(dataset_ref, dataset_dict)
+
         #  Lists
         self._list_fields_graph(dataset_ref, dataset_dict)
 
@@ -149,6 +152,9 @@ class SchemaOrgProfile(RDFProfile):
     def _tags_graph(self, dataset_ref, dataset_dict):
         for tag in dataset_dict.get("tags", []):
             self.g.add((dataset_ref, SCHEMA.keywords, Literal(tag["name"])))
+
+    def _inchi_graph(self, dataset_ref, dataset_dict):
+        self.g.add((dataset_ref,SCHEMA.keywords,Literal(dataset_dict.get("inchi"))))
 
     def _list_fields_graph(self, dataset_ref, dataset_dict):
         items = [
