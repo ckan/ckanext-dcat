@@ -125,4 +125,3 @@ msgstr "Derechos"
 #: ckanext/dcat/utils.py:56
 msgid "Created"
 msgstr "Creado"
-
