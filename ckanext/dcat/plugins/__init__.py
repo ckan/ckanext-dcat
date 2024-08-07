@@ -67,8 +67,8 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     # ITranslation
 
-    def i18n_directory(self):
-        return I18N_DIR
+    #def i18n_directory(self):
+    #    return I18N_DIR
 
     # IConfigurer
 
