@@ -27,7 +27,7 @@ CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-#I18N_DIR = os.path.join(HERE, u"../i18n")
+I18N_DIR = os.path.join(HERE, u"../i18n")
 
 
 def _get_dataset_schema(dataset_type="dataset"):
@@ -67,8 +67,8 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     # ITranslation
 
-    #def i18n_directory(self):
-    #    return I18N_DIR
+    def i18n_directory(self):
+        return I18N_DIR
 
     # IConfigurer
 
