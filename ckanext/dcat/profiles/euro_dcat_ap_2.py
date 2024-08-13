@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal, DecimalException
 
-from rdflib import URIRef, BNode, Literal
+from rdflib import URIRef, BNode, Literal, Namespace
 from ckanext.dcat.utils import resource_uri
 
 from .base import URIRefOrLiteral, CleanedURIRef
@@ -13,9 +13,13 @@ from .base import (
     DCT,
     XSD,
     SCHEMA,
+    RDFS,
 )
 
 from .euro_dcat_ap import EuropeanDCATAPProfile
+
+
+ELI = Namespace("http://data.europa.eu/eli/ontology#")
 
 
 class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
@@ -36,7 +40,9 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         # Standard values
         value = self._object_value(dataset_ref, DCAT.temporalResolution)
         if value:
-            dataset_dict["extras"].append({"key": "temporal_resolution", "value": value})
+            dataset_dict["extras"].append(
+                {"key": "temporal_resolution", "value": value}
+            )
 
         # Lists
         for key, predicate in (
@@ -67,7 +73,8 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             # For some reason we incorrectly allowed lists in this property at some point
             # keep support for it but default to single value
             value = (
-                spatial_resolution[0] if len(spatial_resolution) == 1
+                spatial_resolution[0]
+                if len(spatial_resolution) == 1
                 else json.dumps(spatial_resolution)
             )
             dataset_dict["extras"].append(
@@ -169,16 +176,24 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         )
 
         # Lists
-        for key, predicate, fallbacks, type, datatype in (
-            ("is_referenced_by", DCT.isReferencedBy, None, URIRefOrLiteral, None),
+        for key, predicate, fallbacks, type, datatype, _class in (
+            (
+                "is_referenced_by",
+                DCT.isReferencedBy,
+                None,
+                URIRefOrLiteral,
+                None,
+                RDFS.Resource,
+            ),
             (
                 "applicable_legislation",
                 DCATAP.applicableLegislation,
                 None,
                 URIRefOrLiteral,
                 None,
+                ELI.LegalResource,
             ),
-            ("hvd_category", DCATAP.hvdCategory, None, URIRefOrLiteral, None),
+            ("hvd_category", DCATAP.hvdCategory, None, URIRefOrLiteral, None, None),
         ):
             self._add_triple_from_dict(
                 dataset_dict,
@@ -254,8 +269,20 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             #  Simple values
             items = [
                 ("availability", DCATAP.availability, None, URIRefOrLiteral),
-                ("compress_format", DCAT.compressFormat, None, URIRefOrLiteral),
-                ("package_format", DCAT.packageFormat, None, URIRefOrLiteral),
+                (
+                    "compress_format",
+                    DCAT.compressFormat,
+                    None,
+                    URIRefOrLiteral,
+                    DCT.MediaType,
+                ),
+                (
+                    "package_format",
+                    DCAT.packageFormat,
+                    None,
+                    URIRefOrLiteral,
+                    DCT.MediaType,
+                ),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
@@ -267,6 +294,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                     DCATAP.applicableLegislation,
                     None,
                     URIRefOrLiteral,
+                    ELI.LegalResource,
                 ),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
@@ -300,7 +328,12 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                     ("license", DCT.license, None, URIRefOrLiteral),
                     ("access_rights", DCT.accessRights, None, URIRefOrLiteral),
                     ("title", DCT.title, None, Literal),
-                    ("endpoint_description", DCAT.endpointDescription, None, URIRefOrLiteral),
+                    (
+                        "endpoint_description",
+                        DCAT.endpointDescription,
+                        None,
+                        URIRefOrLiteral,
+                    ),
                     ("description", DCT.description, None, Literal),
                 ]
 
@@ -310,7 +343,13 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
 
                 #  Lists
                 items = [
-                    ("endpoint_url", DCAT.endpointURL, None, URIRefOrLiteral),
+                    (
+                        "endpoint_url",
+                        DCAT.endpointURL,
+                        None,
+                        URIRefOrLiteral,
+                        RDFS.Resource,
+                    ),
                     ("serves_dataset", DCAT.servesDataset, None, URIRefOrLiteral),
                 ]
                 self._add_list_triples_from_dict(
