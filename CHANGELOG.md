@@ -2,6 +2,37 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...HEAD)
 
+* Support for standard CKAN [ckanext-scheming](https://github.com/ckan/ckanext-scheming) schemas.
+  The DCAT profiles now seamlessly integrate with fields defined via the YAML or JSON scheming files.
+  Sites willing to migrate to a scheming based metadata schema can do
+  so by adding the `euro_dcat_ap_scheming` profile at the end of their profile chain (e.g.
+  `ckanext.dcat.rdf.profiles = euro_dcat_ap_2 euro_dcat_ap_scheming`), which will modify the existing profile
+  outputs to the expected format by the scheming validators. Sample schemas are provided
+  in the `ckanext/dcat/schemas` folder. See the [documentation](https://github.com/ckan/ckanext-dcat?tab=readme-ov-file#schemas)
+  for all details. Some highlights of the new scheming based profiles:
+
+    * Actual list support in the API output for list properties like `dct:language`
+    * Multiple objects now allowed for properties like `dcat:ContactPoint`, `dct:spatial` or `dct:temporal`
+    * Custom validators for date values that allow `xsd:gYear`, `xsd:gYearMonth`, `xsd:date` and `xsd:dateTime`
+
+  (#281)
+* [SHACL validation](https://github.com/SEMICeu/DCAT-AP/tree/master/releases/2.1.1) for DCAT-AP 2.1.1 profile (scheming and legacy).
+  SHACL validation made surface the following issues in the existing profiles, which are now fixed:
+  * Cast `dcat:byteSize` and `dcat:spatialResolutionInMeters` as Decimal, not float
+  * Allow only one value of `dcat:spatialResolutionInMeters` and  `dcat:temporalResolution`
+  * Only output the WKT version of geometries in `locn:geometry`, `dcat:bbox` and `dcat:centroid`. Sites that for some reason
+    require GeoJSON (or both) can use the `ckanext.dcat.output_spatial_format` config option
+    to choose which format to use
+  * When using the `euro_dcat_ap_2` profile, don't output temporal extent namespaced
+    both with `schema` and `dcat`, just with the latter (`dcat:startDate` and `dcat:endDate`)
+  (#288)
+* New `ckan dcat consume` and `ckan dcat produce` CLI commands (#279)
+* Parse dcat:spatialResolutionInMeters as float (#285)
+* Split profile classes into their own separate files (#282)
+* Catch Not Authorized in View (#280)
+* CKAN 2.11 support and requirements updates (#270)
+
+
 ## [v1.7.0](https://github.com/ckan/ckanext-dcat/compare/v1.6.0...v1.7.0) - 2024-04-04
 
 * Adds support for the latest Hydra vocabulary. For backward compatibility, the old properties are still supported but marked as deprecated. (#267)

@@ -106,13 +106,9 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         # Dataset
         extras = self._extras(dataset)
 
-        temporal_resolution_list = json.loads(extras['temporal_resolution'])
-        assert len(temporal_resolution_list) == 1
-        assert temporal_resolution in temporal_resolution_list
+        assert extras['temporal_resolution'] == temporal_resolution
 
-        spatial_resolution_list = json.loads(extras['spatial_resolution_in_meters'])
-        assert len(spatial_resolution_list) == 1
-        assert spatial_resolution_in_meters in spatial_resolution_list
+        assert extras['spatial_resolution_in_meters'] == spatial_resolution_in_meters
 
         isreferencedby_list = json.loads(extras['is_referenced_by'])
         assert len(isreferencedby_list) == 1
@@ -329,10 +325,8 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         dataset = URIRef('http://example.org/datasets/1')
         g.add((dataset, RDF.type, DCAT.Dataset))
 
-        temporal_resolution = 'P1D'
+        temporal_resolution = 'PT15M'
         g.add((dataset, DCAT.temporalResolution, Literal(temporal_resolution, datatype=XSD.duration)))
-        temporal_resolution_2 = 'PT15M'
-        g.add((dataset, DCAT.temporalResolution, Literal(temporal_resolution_2, datatype=XSD.duration)))
 
         p = RDFParser(profiles=DCAT_AP_PROFILES)
 
@@ -342,10 +336,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         extras = self._extras(datasets[0])
 
-        temporal_resolution_list = json.loads(extras['temporal_resolution'])
-        assert len(temporal_resolution_list) == 2
-        assert  temporal_resolution in temporal_resolution_list
-        assert  temporal_resolution_2 in temporal_resolution_list
+        assert extras['temporal_resolution'] == temporal_resolution
 
     def test_spatial_resolution_in_meters_multiple(self):
         g = Graph()

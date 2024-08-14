@@ -1,6 +1,7 @@
 import json
+from decimal import Decimal, DecimalException
 
-from rdflib import URIRef, BNode, Literal
+from rdflib import URIRef, BNode, Literal, Namespace
 from ckanext.dcat.utils import resource_uri
 
 from .base import URIRefOrLiteral, CleanedURIRef
@@ -11,9 +12,14 @@ from .base import (
     DCATAP,
     DCT,
     XSD,
+    SCHEMA,
+    RDFS,
 )
 
 from .euro_dcat_ap import EuropeanDCATAPProfile
+
+
+ELI = Namespace("http://data.europa.eu/eli/ontology#")
 
 
 class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
@@ -31,9 +37,15 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
         # call super method
         super(EuropeanDCATAP2Profile, self).parse_dataset(dataset_dict, dataset_ref)
 
+        # Standard values
+        value = self._object_value(dataset_ref, DCAT.temporalResolution)
+        if value:
+            dataset_dict["extras"].append(
+                {"key": "temporal_resolution", "value": value}
+            )
+
         # Lists
         for key, predicate in (
-            ("temporal_resolution", DCAT.temporalResolution),
             ("is_referenced_by", DCT.isReferencedBy),
             ("applicable_legislation", DCATAP.applicableLegislation),
             ("hvd_category", DCATAP.hvdCategory),
@@ -54,14 +66,21 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             self._add_spatial_to_dict(dataset_dict, key, spatial)
 
         # Spatial resolution in meters
-        spatial_resolution_in_meters = self._object_value_float_list(
+        spatial_resolution = self._object_value_float_list(
             dataset_ref, DCAT.spatialResolutionInMeters
         )
-        if spatial_resolution_in_meters:
+        if spatial_resolution:
+            # For some reason we incorrectly allowed lists in this property at some point
+            # keep support for it but default to single value
+            value = (
+                spatial_resolution[0]
+                if len(spatial_resolution) == 1
+                else json.dumps(spatial_resolution)
+            )
             dataset_dict["extras"].append(
                 {
                     "key": "spatial_resolution_in_meters",
-                    "value": json.dumps(spatial_resolution_in_meters),
+                    "value": value,
                 }
             )
 
@@ -91,56 +110,52 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         if values:
                             resource_dict[key] = json.dumps(values)
 
-                        # Access services
-                        access_service_list = []
+                    # Access services
+                    access_service_list = []
 
-                        for access_service in self.g.objects(
-                            distribution, DCAT.accessService
+                    for access_service in self.g.objects(
+                        distribution, DCAT.accessService
+                    ):
+                        access_service_dict = {}
+
+                        #  Simple values
+                        for key, predicate in (
+                            ("availability", DCATAP.availability),
+                            ("title", DCT.title),
+                            ("endpoint_description", DCAT.endpointDescription),
+                            ("license", DCT.license),
+                            ("access_rights", DCT.accessRights),
+                            ("description", DCT.description),
                         ):
-                            access_service_dict = {}
+                            value = self._object_value(access_service, predicate)
+                            if value:
+                                access_service_dict[key] = value
+                        #  List
+                        for key, predicate in (
+                            ("endpoint_url", DCAT.endpointURL),
+                            ("serves_dataset", DCAT.servesDataset),
+                        ):
+                            values = self._object_value_list(access_service, predicate)
+                            if values:
+                                access_service_dict[key] = values
 
-                            #  Simple values
-                            for key, predicate in (
-                                ("availability", DCATAP.availability),
-                                ("title", DCT.title),
-                                ("endpoint_description", DCAT.endpointDescription),
-                                ("license", DCT.license),
-                                ("access_rights", DCT.accessRights),
-                                ("description", DCT.description),
-                            ):
-                                value = self._object_value(access_service, predicate)
-                                if value:
-                                    access_service_dict[key] = value
-                            #  List
-                            for key, predicate in (
-                                ("endpoint_url", DCAT.endpointURL),
-                                ("serves_dataset", DCAT.servesDataset),
-                            ):
-                                values = self._object_value_list(
-                                    access_service, predicate
-                                )
-                                if values:
-                                    access_service_dict[key] = values
+                        # Access service URI (explicitly show the missing ones)
+                        access_service_dict["uri"] = (
+                            str(access_service)
+                            if isinstance(access_service, URIRef)
+                            else ""
+                        )
 
-                            # Access service URI (explicitly show the missing ones)
-                            access_service_dict["uri"] = (
-                                str(access_service)
-                                if isinstance(access_service, URIRef)
-                                else ""
-                            )
+                        # Remember the (internal) access service reference for referencing in
+                        # further profiles, e.g. for adding more properties
+                        access_service_dict["access_service_ref"] = str(access_service)
 
-                            # Remember the (internal) access service reference for referencing in
-                            # further profiles, e.g. for adding more properties
-                            access_service_dict["access_service_ref"] = str(
-                                access_service
-                            )
+                        access_service_list.append(access_service_dict)
 
-                            access_service_list.append(access_service_dict)
-
-                        if access_service_list:
-                            resource_dict["access_services"] = json.dumps(
-                                access_service_list
-                            )
+                    if access_service_list:
+                        resource_dict["access_services"] = json.dumps(
+                            access_service_list
+                        )
 
         return dataset_dict
 
@@ -151,24 +166,34 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             dataset_dict, dataset_ref
         )
 
+        # Standard values
+        self._add_triple_from_dict(
+            dataset_dict,
+            dataset_ref,
+            DCAT.temporalResolution,
+            "temporal_resolution",
+            _datatype=XSD.duration,
+        )
+
         # Lists
-        for key, predicate, fallbacks, type, datatype in (
+        for key, predicate, fallbacks, type, datatype, _class in (
             (
-                "temporal_resolution",
-                DCAT.temporalResolution,
+                "is_referenced_by",
+                DCT.isReferencedBy,
                 None,
-                Literal,
-                XSD.duration,
+                URIRefOrLiteral,
+                None,
+                RDFS.Resource,
             ),
-            ("is_referenced_by", DCT.isReferencedBy, None, URIRefOrLiteral, None),
             (
                 "applicable_legislation",
                 DCATAP.applicableLegislation,
                 None,
                 URIRefOrLiteral,
                 None,
+                ELI.LegalResource,
             ),
-            ("hvd_category", DCATAP.hvdCategory, None, URIRefOrLiteral, None),
+            ("hvd_category", DCATAP.hvdCategory, None, URIRefOrLiteral, None, None),
         ):
             self._add_triple_from_dict(
                 dataset_dict,
@@ -182,6 +207,14 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             )
 
         # Temporal
+
+        # The profile for DCAT-AP 1 stored triples using schema:startDate,
+        # remove them to avoid duplication
+        for temporal in self.g.objects(dataset_ref, DCT.temporal):
+            if SCHEMA.startDate in [t for t in self.g.predicates(temporal, None)]:
+                self.g.remove((temporal, None, None))
+                self.g.remove((dataset_ref, DCT.temporal, temporal))
+
         start = self._get_dataset_value(dataset_dict, "temporal_start")
         end = self._get_dataset_value(dataset_dict, "temporal_end")
         if start or end:
@@ -220,10 +253,10 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         (
                             dataset_ref,
                             DCAT.spatialResolutionInMeters,
-                            Literal(float(value), datatype=XSD.decimal),
+                            Literal(Decimal(value), datatype=XSD.decimal),
                         )
                     )
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, DecimalException):
                     self.g.add(
                         (dataset_ref, DCAT.spatialResolutionInMeters, Literal(value))
                     )
@@ -236,8 +269,20 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
             #  Simple values
             items = [
                 ("availability", DCATAP.availability, None, URIRefOrLiteral),
-                ("compress_format", DCAT.compressFormat, None, URIRefOrLiteral),
-                ("package_format", DCAT.packageFormat, None, URIRefOrLiteral),
+                (
+                    "compress_format",
+                    DCAT.compressFormat,
+                    None,
+                    URIRefOrLiteral,
+                    DCT.MediaType,
+                ),
+                (
+                    "package_format",
+                    DCAT.packageFormat,
+                    None,
+                    URIRefOrLiteral,
+                    DCT.MediaType,
+                ),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
@@ -249,64 +294,70 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                     DCATAP.applicableLegislation,
                     None,
                     URIRefOrLiteral,
+                    ELI.LegalResource,
                 ),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
-            try:
-                access_service_list = json.loads(
-                    resource_dict.get("access_services", "[]")
+            # Access services
+            access_service_list = resource_dict.get("access_services", [])
+            if isinstance(access_service_list, str):
+                try:
+                    access_service_list = json.loads(access_service_list)
+                except ValueError:
+                    access_service_list = []
+
+            for access_service_dict in access_service_list:
+
+                access_service_uri = access_service_dict.get("uri")
+                if access_service_uri:
+                    access_service_node = CleanedURIRef(access_service_uri)
+                else:
+                    access_service_node = BNode()
+                    # Remember the (internal) access service reference for referencing in
+                    # further profiles
+                    access_service_dict["access_service_ref"] = str(access_service_node)
+
+                self.g.add((distribution, DCAT.accessService, access_service_node))
+
+                self.g.add((access_service_node, RDF.type, DCAT.DataService))
+
+                #  Simple values
+                items = [
+                    ("availability", DCATAP.availability, None, URIRefOrLiteral),
+                    ("license", DCT.license, None, URIRefOrLiteral),
+                    ("access_rights", DCT.accessRights, None, URIRefOrLiteral),
+                    ("title", DCT.title, None, Literal),
+                    (
+                        "endpoint_description",
+                        DCAT.endpointDescription,
+                        None,
+                        URIRefOrLiteral,
+                    ),
+                    ("description", DCT.description, None, Literal),
+                ]
+
+                self._add_triples_from_dict(
+                    access_service_dict, access_service_node, items
                 )
-                # Access service
-                for access_service_dict in access_service_list:
 
-                    access_service_uri = access_service_dict.get("uri")
-                    if access_service_uri:
-                        access_service_node = CleanedURIRef(access_service_uri)
-                    else:
-                        access_service_node = BNode()
-                        # Remember the (internal) access service reference for referencing in
-                        # further profiles
-                        access_service_dict["access_service_ref"] = str(
-                            access_service_node
-                        )
+                #  Lists
+                items = [
+                    (
+                        "endpoint_url",
+                        DCAT.endpointURL,
+                        None,
+                        URIRefOrLiteral,
+                        RDFS.Resource,
+                    ),
+                    ("serves_dataset", DCAT.servesDataset, None, URIRefOrLiteral),
+                ]
+                self._add_list_triples_from_dict(
+                    access_service_dict, access_service_node, items
+                )
 
-                    self.g.add((distribution, DCAT.accessService, access_service_node))
-
-                    self.g.add((access_service_node, RDF.type, DCAT.DataService))
-
-                    #  Simple values
-                    items = [
-                        ("availability", DCATAP.availability, None, URIRefOrLiteral),
-                        ("license", DCT.license, None, URIRefOrLiteral),
-                        ("access_rights", DCT.accessRights, None, URIRefOrLiteral),
-                        ("title", DCT.title, None, Literal),
-                        (
-                            "endpoint_description",
-                            DCAT.endpointDescription,
-                            None,
-                            Literal,
-                        ),
-                        ("description", DCT.description, None, Literal),
-                    ]
-
-                    self._add_triples_from_dict(
-                        access_service_dict, access_service_node, items
-                    )
-
-                    #  Lists
-                    items = [
-                        ("endpoint_url", DCAT.endpointURL, None, URIRefOrLiteral),
-                        ("serves_dataset", DCAT.servesDataset, None, URIRefOrLiteral),
-                    ]
-                    self._add_list_triples_from_dict(
-                        access_service_dict, access_service_node, items
-                    )
-
-                if access_service_list:
-                    resource_dict["access_services"] = json.dumps(access_service_list)
-            except ValueError:
-                pass
+            if access_service_list:
+                resource_dict["access_services"] = json.dumps(access_service_list)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 

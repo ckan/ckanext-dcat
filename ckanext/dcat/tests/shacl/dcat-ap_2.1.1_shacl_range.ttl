@@ -1,0 +1,417 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://data.europa.eu/r5r#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lcon: <http://www.w3.org/ns/locn#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix spdx: <http://spdx.org/rdf/terms#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+
+<http://data.europa.eu/r5r/shacl_range>
+    dcat:accessURL <https://joinup.ec.europa.eu/solution/dcat-application-profile-data-portals-europe/distribution/dcat-ap-200-shacl-shapes>;
+    dcat:downloadURL <https://github.com/SEMICeu/DCAT-AP> ;
+    dcatap:availability <http://data.europa.eu/r5r/stable> ;
+    dct:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> ;
+    dct:conformsTo <https://www.w3.org/TR/shacl> ;
+    dct:creator [
+        rdfs:seeAlso <https://www.linkedin.com/in/bert-van-nuffelen-a349634/> ;
+        org:memberOf <https://tenforce.com> ;
+        foaf:homepage <https://www.linkedin.com/in/bert-van-nuffelen-a349634/> ;
+        foaf:name "Bert Van Nuffelen"
+    ], [
+        rdfs:seeAlso <https://www.ails.ece.ntua.gr/people/natasa> ;
+        org:memberOf <https://www.ails.ece.ntua.gr/> ;
+        foaf:homepage <https://www.ails.ece.ntua.gr/people/natasa> ;
+        foaf:name "Natasa Sofou"
+    ], [
+        rdfs:seeAlso <http://eugeniu.costezki.ro#me> ;
+        org:memberOf <http://publications.europa.eu/resource/authority/corporate-body/PUBL> ;
+        foaf:homepage <http://costezki.ro> ;
+        foaf:name "Eugeniu Costetchi"
+    ], [
+        rdfs:seeAlso <http://makxdekkers.com/#me> ;
+        org:memberOf <http://ami-consult.com/#id> ;
+        foaf:homepage <http://makxdekkers.com/> ;
+        foaf:name "Makx Dekkers"
+    ], [
+        rdfs:seeAlso <http://nikosloutas.com/> ;
+        org:memberOf <http://www.pwc.com/gx/en/eu-institutions-services> ;
+        foaf:homepage <http://nikosloutas.com/> ;
+        foaf:name "Nikolaos Loutas"
+    ], [
+        rdfs:seeAlso <http://www.deri.ie/users/vassilios-peristeras/> ;
+        org:memberOf <http://publications.europa.eu/resource/authority/corporate-body/COM> ;
+        foaf:homepage <http://www.deri.ie/users/vassilios-peristeras/> ;
+        foaf:name "Vassilios Peristeras"
+    ] ;
+    dct:license <https://creativecommons.org/licenses/by/4.0> ;
+    cc:attributionURL <http://ec.europa.eu/> ;
+    dct:modified "2021-12-01"^^xsd:date ;
+    dct:publisher <http://publications.europa.eu/resource/authority/corporate-body/DIGIT> ;
+    dct:relation <https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210> ;
+    dct:description "This document specifies the range constraints for object properties by DCAT-AP in SHACL."@en ;
+    dct:title "The range constraints for object properties of DCAT Application Profile for Data Portals in Europe"@en ;
+    owl:versionInfo "2.1.1" ;
+    foaf:homepage <https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210> ;
+    foaf:maker [
+        foaf:mbox <mailto:contact@semic.eu> ;
+        foaf:name "DCAT-AP Working Group" ;
+        foaf:page <https://github.com/SEMICeu/DCAT-AP>, <https://joinup.ec.europa.eu/node/64331>
+    ] .
+
+
+
+#-------------------------------------------------------------------------
+# The shapes in this file cover all range constraints in DCAT-AP
+#
+# 
+#-------------------------------------------------------------------------
+
+:Agent_Shape
+    a sh:NodeShape ;
+    sh:name "Agent"@en ;
+    sh:property [
+        sh:class skos:Concept ;
+        sh:path dct:type ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass foaf:Agent .
+
+:CatalogRecord_Shape
+    a sh:NodeShape ;
+    sh:name "Catalog Record"@en ;
+    sh:property [
+        sh:node :DcatResource_Shape ;
+        sh:path foaf:primaryTopic ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:Standard ;
+        sh:path dct:conformsTo ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path adms:status ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:LinguisticSystem ;
+        sh:path dct:language ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:CatalogRecord ;
+        sh:path dct:source ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:CatalogRecord .
+
+:Catalog_Shape
+    a sh:NodeShape ;
+    sh:name "Catalog"@en ;
+    sh:property [
+        sh:class dct:LinguisticSystem ;
+        sh:path dct:language ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:LicenseDocument ;
+        sh:path dct:license ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:Location ;
+        sh:path dct:spatial ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Catalog ;
+        sh:path dct:hasPart ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Catalog ;
+        sh:path dct:isPartOf ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:RightsStatement ;
+        sh:path dct:rights ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:CatalogRecord ;
+        sh:path dcat:record ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:ConceptScheme ;
+        sh:path dcat:themeTaxonomy ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:DataService ;
+        sh:path dcat:service ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Catalog ;
+        sh:path dcat:catalog ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path dct:creator ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Dataset ;
+        sh:path dcat:dataset ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path dct:publisher ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Document ;
+        sh:path foaf:homepage ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:Catalog .
+
+
+:DataService_Shape
+    a sh:NodeShape ;
+    sh:name "Data Service"@en ;
+    sh:property [
+        sh:class dcat:Dataset ;
+        sh:path dcat:servesDataset ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:LicenseDocument ;
+        sh:path dct:license ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:RightsStatement ;
+        sh:path dct:accessRights ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:DataService .
+
+:Dataset_Shape
+    a sh:NodeShape ;
+    sh:name "Dataset"@en ;
+    sh:property [
+        sh:class vcard:Kind ;
+        sh:path dcat:contactPoint ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Distribution ;
+        sh:path dcat:distribution ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path dct:publisher ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:Location ;
+        sh:path dct:spatial ;
+        sh:severity sh:Violation
+    ], [
+	sh:class dct:PeriodOfTime ;
+        sh:path dct:temporal ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path dcat:theme ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:RightsStatement ;
+        sh:path dct:accessRights ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:Frequency ;
+        sh:path dct:accrualPeriodicity ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:Standard ;
+        sh:path dct:conformsTo ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Dataset ;
+        sh:path dct:hasVersion ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Dataset ;
+        sh:path dct:isVersionOf ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:LinguisticSystem ;
+        sh:path dct:language ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:ProvenanceStatement ;
+        sh:path dct:provenance ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Dataset ;
+        sh:path dct:source ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path dct:type ;
+        sh:severity sh:Violation
+    ], [
+        sh:class adms:Identifier ;
+        sh:path adms:identifier ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Distribution ;
+        sh:path adms:sample ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Document ;
+        sh:path dcat:landingPage ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Document ;
+        sh:path foaf:page ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Relationship ;
+        sh:path dcat:qualifiedRelation ;
+        sh:severity sh:Violation
+    ], [
+        sh:class prov:Attribution ;
+        sh:path prov:qualifiedAttribution ;
+        sh:severity sh:Violation
+    ], [
+        sh:class prov:Activity ;
+        sh:path prov:wasGeneratedBy ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path dct:creator ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:Dataset .
+
+
+:DcatResource_Shape
+    a sh:NodeShape ;
+    rdfs:comment "the union of Catalog, Dataset and DataService" ;
+    rdfs:label "dcat:Resource" ;
+    sh:message "The node is either a Catalog, Dataset or a DataService" ;
+    sh:or ([
+            sh:class dcat:Catalog
+        ]
+        [
+            sh:class dcat:Dataset
+        ]
+        [
+            sh:class dcat:DataService
+        ]
+    ) .
+
+:Distribution_Shape
+    a sh:NodeShape ;
+    sh:name "Distribution"@en ;
+    sh:property [
+        sh:class dct:Standard ;
+        sh:path dct:conformsTo ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:LinguisticSystem ;
+        sh:path dct:language ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:RightsStatement ;
+        sh:path dct:rights ;
+        sh:severity sh:Violation
+    ], [
+        sh:class spdx:Checksum ;
+        sh:path spdx:checksum ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path adms:status ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:MediaType ;
+        sh:path dcat:mediaType ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Document ;
+        sh:path foaf:page ;
+        sh:severity sh:Violation
+    ], [
+        sh:class odrl:Policy ;
+        sh:path odrl:hasPolicy ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:DataService ;
+        sh:path dcat:accessService ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:MediaType ;
+        sh:path dcat:compressFormat ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:MediaType ;
+        sh:path dcat:packageFormat ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path dcatap:availability ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:MediaTypeOrExtent ;
+        sh:path dct:format ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:LicenseDocument ;
+        sh:path dct:license ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:Distribution .
+
+
+:LicenceDocument_Shape
+    a sh:NodeShape ;
+    sh:name "Licence Document"@en ;
+    sh:property [
+        sh:class skos:Concept ;
+        sh:path dct:type ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dct:LicenseDocument .
+
+
+:PeriodOfTime_Shape
+    a sh:NodeShape ;
+    sh:name "PeriodOfTime"@en ;
+    sh:property [
+        sh:class time:Instant ;
+        sh:path time:hasBeginning ;
+        sh:severity sh:Violation
+    ], [
+        sh:class time:Instant ;
+        sh:path time:hasEnd ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dct:PeriodOfTime .
+
+:Relationship_Shape
+    a sh:NodeShape ;
+    sh:name "Relationship"@en ;
+    sh:property [
+        sh:node :DcatResource_Shape ;
+        sh:path dct:relation ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dcat:Role ;
+        sh:path dcat:hadRole ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:Relationship .
+

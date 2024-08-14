@@ -33,11 +33,14 @@ DEFAULT_RDF_PROFILES = ['euro_dcat_ap_2']
 
 class RDFProcessor(object):
 
-    def __init__(self, profiles=None, compatibility_mode=False):
+    def __init__(self, profiles=None, dataset_type='dataset', compatibility_mode=False):
         '''
         Creates a parser or serializer instance
 
         You can optionally pass a list of profiles to be used.
+
+        A scheming dataset type can be provided, in which case the scheming schema
+        will be loaded by the base profile so it can be used by other profiles.
 
         In compatibility mode, some fields are modified to maintain
         compatibility with previous versions of the ckanext-dcat parsers
@@ -55,6 +58,8 @@ class RDFProcessor(object):
         if not self._profiles:
             raise RDFProfileException(
                 'No suitable RDF profiles could be loaded')
+
+        self.dataset_type = dataset_type
 
         if not compatibility_mode:
             compatibility_mode = p.toolkit.asbool(
@@ -177,10 +182,15 @@ class RDFParser(RDFProcessor):
         for dataset_ref in self._datasets():
             dataset_dict = {}
             for profile_class in self._profiles:
-                profile = profile_class(self.g, self.compatibility_mode)
+                profile = profile_class(
+                    self.g,
+                    dataset_type=self.dataset_type,
+                    compatibility_mode=self.compatibility_mode
+                )
                 profile.parse_dataset(dataset_dict, dataset_ref)
 
             yield dataset_dict
+
 
 class RDFSerializer(RDFProcessor):
     '''
@@ -245,7 +255,7 @@ class RDFSerializer(RDFProcessor):
         dataset_ref = URIRef(dataset_uri(dataset_dict))
 
         for profile_class in self._profiles:
-            profile = profile_class(self.g, self.compatibility_mode)
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
             profile.graph_from_dataset(dataset_dict, dataset_ref)
 
         return dataset_ref
@@ -263,7 +273,7 @@ class RDFSerializer(RDFProcessor):
         catalog_ref = URIRef(catalog_uri())
 
         for profile_class in self._profiles:
-            profile = profile_class(self.g, self.compatibility_mode)
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
             profile.graph_from_catalog(catalog_dict, catalog_ref)
 
         return catalog_ref

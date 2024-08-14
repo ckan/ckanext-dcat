@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal, DecimalException
 
 from rdflib import term, URIRef, BNode, Literal
 import ckantoolkit as toolkit
@@ -20,11 +21,9 @@ from .base import (
     DCAT,
     DCT,
     ADMS,
-    XSD,
     VCARD,
     FOAF,
     SCHEMA,
-    SKOS,
     LOCN,
     GSP,
     OWL,
@@ -276,14 +275,14 @@ class EuropeanDCATAPProfile(RDFProfile):
         items = [
             ("title", DCT.title, None, Literal),
             ("notes", DCT.description, None, Literal),
-            ("url", DCAT.landingPage, None, URIRef),
+            ("url", DCAT.landingPage, None, URIRef, FOAF.Document),
             ("identifier", DCT.identifier, ["guid", "id"], URIRefOrLiteral),
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
-            ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral),
-            ("access_rights", DCT.accessRights, None, URIRefOrLiteral),
-            ("dcat_type", DCT.type, None, Literal),
-            ("provenance", DCT.provenance, None, Literal),
+            ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral, DCT.Frequency),
+            ("access_rights", DCT.accessRights, None, URIRefOrLiteral, DCT.AccessRights),
+            ("dcat_type", DCT.type, None, URIRefOrLiteral),
+            ("provenance", DCT.provenance, None, URIRefOrLiteral, DCT.ProvenanceStatement),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -300,16 +299,16 @@ class EuropeanDCATAPProfile(RDFProfile):
 
         #  Lists
         items = [
-            ("language", DCT.language, None, URIRefOrLiteral),
+            ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
             ("theme", DCAT.theme, None, URIRef),
-            ("conforms_to", DCT.conformsTo, None, Literal),
-            ("alternate_identifier", ADMS.identifier, None, URIRefOrLiteral),
-            ("documentation", FOAF.page, None, URIRefOrLiteral),
-            ("related_resource", DCT.relation, None, URIRefOrLiteral),
+            ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
+            ("alternate_identifier", ADMS.identifier, None, URIRefOrLiteral, ADMS.Identifier),
+            ("documentation", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
+            ("related_resource", DCT.relation, None, URIRefOrLiteral, RDFS.Resource),
             ("has_version", DCT.hasVersion, None, URIRefOrLiteral),
             ("is_version_of", DCT.isVersionOf, None, URIRefOrLiteral),
             ("source", DCT.source, None, URIRefOrLiteral),
-            ("sample", ADMS.sample, None, URIRefOrLiteral),
+            ("sample", ADMS.sample, None, URIRefOrLiteral, DCAT.Distribution),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -354,51 +353,66 @@ class EuropeanDCATAPProfile(RDFProfile):
             )
 
         # Publisher
-        if any(
+        publisher_ref = None
+
+        if dataset_dict.get("publisher"):
+            # Scheming publisher field: will be handled in a separate profile
+            pass
+        elif any(
             [
                 self._get_dataset_value(dataset_dict, "publisher_uri"),
                 self._get_dataset_value(dataset_dict, "publisher_name"),
-                dataset_dict.get("organization"),
             ]
         ):
-
+            # Legacy publisher_* extras
             publisher_uri = self._get_dataset_value(dataset_dict, "publisher_uri")
-            publisher_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
             publisher_name = self._get_dataset_value(dataset_dict, "publisher_name")
             if publisher_uri:
-                publisher_details = CleanedURIRef(publisher_uri)
-            elif not publisher_name and publisher_uri_fallback:
-                # neither URI nor name are available, use organization as fallback
-                publisher_details = CleanedURIRef(publisher_uri_fallback)
+                publisher_ref = CleanedURIRef(publisher_uri)
             else:
                 # No publisher_uri
-                publisher_details = BNode()
-
-            g.add((publisher_details, RDF.type, FOAF.Organization))
-            g.add((dataset_ref, DCT.publisher, publisher_details))
-
-            # In case no name and URI are available, again fall back to organization.
-            # If no name but an URI is available, the name literal remains empty to
-            # avoid mixing organization and dataset values.
-            if (
-                not publisher_name
-                and not publisher_uri
-                and dataset_dict.get("organization")
-            ):
-                publisher_name = dataset_dict["organization"]["title"]
-
-            g.add((publisher_details, FOAF.name, Literal(publisher_name)))
-            # TODO: It would make sense to fallback these to organization
-            # fields but they are not in the default schema and the
-            # `organization` object in the dataset_dict does not include
-            # custom fields
+                publisher_ref = BNode()
+            publisher_details = {
+                "name": publisher_name,
+                "email": self._get_dataset_value(dataset_dict, "publisher_email"),
+                "url": self._get_dataset_value(dataset_dict, "publisher_url"),
+                "type": self._get_dataset_value(dataset_dict, "publisher_type"),
+            }
+        elif dataset_dict.get("organization"):
+            # Fall back to dataset org
+            org_id = dataset_dict["organization"]["id"]
+            org_dict = None
+            if org_id in self._org_cache:
+                org_dict = self._org_cache[org_id]
+            else:
+                try:
+                    org_dict = toolkit.get_action("organization_show")(
+                        {"ignore_auth": True}, {"id": org_id}
+                    )
+                    self._org_cache[org_id] = org_dict
+                except toolkit.ObjectNotFound:
+                    pass
+            if org_dict:
+                publisher_ref = CleanedURIRef(
+                    publisher_uri_organization_fallback(dataset_dict)
+                )
+                publisher_details = {
+                    "name": org_dict.get("title"),
+                    "email": org_dict.get("email"),
+                    "url": org_dict.get("url"),
+                    "type": org_dict.get("dcat_type"),
+                }
+        # Add to graph
+        if publisher_ref:
+            g.add((publisher_ref, RDF.type, FOAF.Agent))
+            g.add((dataset_ref, DCT.publisher, publisher_ref))
             items = [
-                ("publisher_email", FOAF.mbox, None, Literal),
-                ("publisher_url", FOAF.homepage, None, URIRef),
-                ("publisher_type", DCT.type, None, URIRefOrLiteral),
+                ("name", FOAF.name, None, Literal),
+                ("email", FOAF.mbox, None, Literal),
+                ("url", FOAF.homepage, None, URIRef),
+                ("type", DCT.type, None, URIRefOrLiteral),
             ]
-
-            self._add_triples_from_dict(dataset_dict, publisher_details, items)
+            self._add_triples_from_dict(publisher_details, publisher_ref, items)
 
         # Temporal
         start = self._get_dataset_value(dataset_dict, "temporal_start")
@@ -454,29 +468,39 @@ class EuropeanDCATAPProfile(RDFProfile):
                 ("name", DCT.title, None, Literal),
                 ("description", DCT.description, None, Literal),
                 ("status", ADMS.status, None, URIRefOrLiteral),
-                ("rights", DCT.rights, None, URIRefOrLiteral),
-                ("license", DCT.license, None, URIRefOrLiteral),
-                ("access_url", DCAT.accessURL, None, URIRef),
-                ("download_url", DCAT.downloadURL, None, URIRef),
+                ("rights", DCT.rights, None, URIRefOrLiteral, DCT.RightsStatement),
+                ("license", DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
+                ("access_url", DCAT.accessURL, None, URIRef, RDFS.Resource),
+                ("download_url", DCAT.downloadURL, None, URIRef, RDFS.Resource),
             ]
 
             self._add_triples_from_dict(resource_dict, distribution, items)
 
             #  Lists
             items = [
-                ("documentation", FOAF.page, None, URIRefOrLiteral),
-                ("language", DCT.language, None, URIRefOrLiteral),
-                ("conforms_to", DCT.conformsTo, None, Literal),
+                ("documentation", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
+                ("language", DCT.language, None, URIRefOrLiteral, DCT.LinguisticSystem),
+                ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
 
             # Set default license for distribution if needed and available
+
             if resource_license_fallback and not (distribution, DCT.license, None) in g:
                 g.add(
                     (
                         distribution,
                         DCT.license,
                         URIRefOrLiteral(resource_license_fallback),
+                    )
+                )
+            # TODO: add an actual field to manage this
+            if (distribution, DCT.license, None) in g:
+                g.add(
+                    (
+                        list(g.objects(distribution, DCT.license))[0],
+                        DCT.type,
+                        URIRef("http://purl.org/adms/licencetype/UnknownIPR")
                     )
                 )
 
@@ -501,10 +525,16 @@ class EuropeanDCATAPProfile(RDFProfile):
                     mimetype = None
 
             if mimetype:
-                g.add((distribution, DCAT.mediaType, URIRefOrLiteral(mimetype)))
+                mimetype = URIRefOrLiteral(mimetype)
+                g.add((distribution, DCAT.mediaType, mimetype))
+                if isinstance(mimetype, URIRef):
+                    g.add((mimetype, RDF.type, DCT.MediaType))
 
             if fmt:
-                g.add((distribution, DCT["format"], URIRefOrLiteral(fmt)))
+                fmt = URIRefOrLiteral(fmt)
+                g.add((distribution, DCT["format"], fmt))
+                if isinstance(fmt, URIRef):
+                    g.add((fmt, RDF.type, DCT.MediaTypeOrExtent))
 
             # URL fallback and old behavior
             url = resource_dict.get("url")
@@ -532,10 +562,10 @@ class EuropeanDCATAPProfile(RDFProfile):
                         (
                             distribution,
                             DCAT.byteSize,
-                            Literal(float(resource_dict["size"]), datatype=XSD.decimal),
+                            Literal(Decimal(resource_dict["size"]), datatype=XSD.decimal),
                         )
                     )
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, DecimalException):
                     g.add((distribution, DCAT.byteSize, Literal(resource_dict["size"])))
             # Checksum
             if resource_dict.get("hash"):

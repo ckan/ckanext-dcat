@@ -1,4 +1,6 @@
 responses>=0.25.2
+pyshacl
 mock
 pytest-ckan
 pytest-cov
+pytest-pretty

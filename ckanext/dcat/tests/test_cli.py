@@ -7,7 +7,13 @@ from ckanext.dcat.cli import dcat as dcat_cli
 def test_consume(cli):
 
     path = os.path.join(
-        os.path.dirname(__file__), "..", "..", "..", "examples", "dataset_afs.ttl"
+        os.path.dirname(__file__),
+        "..",
+        "..",
+        "..",
+        "examples",
+        "dcat",
+        "dataset_afs.ttl",
     )
 
     result = cli.invoke(dcat_cli, ["consume", "-f", "ttl", path])
@@ -24,6 +30,7 @@ def test_produce(cli):
         "..",
         "..",
         "examples",
+        "ckan",
         "full_ckan_dataset.json",
     )
 

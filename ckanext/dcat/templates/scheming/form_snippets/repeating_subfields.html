@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block add_button %}
+  {# Hide the Add button if we only want one set of subfields #}
+  {% if not field.repeating_once %}
+     {{ super() }}
+  {% endif %}
+{% endblock %}

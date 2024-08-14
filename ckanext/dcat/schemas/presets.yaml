@@ -1,0 +1,12 @@
+scheming_presets_version: 1
+about: Presets for the ckanext-dcat extension
+about_url": "http://github.com/ckan/ckanext-dcat"
+
+presets:
+
+- preset_name: dcat_date
+  values:
+    # Note: use datetime.html or datetime_tz.html if you want to inclue an input for time
+    form_snippet: date.html
+    display_snippet: dcat_date.html
+    validators: ignore_missing dcat_date convert_to_json_if_datetime

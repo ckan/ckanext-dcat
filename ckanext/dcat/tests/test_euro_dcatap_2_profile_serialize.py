@@ -3,6 +3,7 @@
 from builtins import str
 from builtins import object
 import json
+from decimal import Decimal
 import six
 
 import pytest
@@ -42,8 +43,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'metadata_created': '2021-06-21T15:21:09.034694',
             'metadata_modified': '2021-06-21T15:21:09.075774',
             'extras': [
-                {'key': 'temporal_resolution', 'value': '[\"PT15M\", \"P1D\"]'},
-                {'key': 'spatial_resolution_in_meters', 'value': '[30,20]'},
+                {'key': 'temporal_resolution', 'value': 'PT15M'},
+                {'key': 'spatial_resolution_in_meters', 'value': '30'},
                 {'key': 'is_referenced_by', 'value': '[\"https://doi.org/10.1038/sdata.2018.22\", \"test_isreferencedby\"]'},
             ]
         }
@@ -55,9 +56,14 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
+        # Standard values
+        assert self._triple(
+            g, dataset_ref, DCAT.temporalResolution, extras["temporal_resolution"],
+            data_type=XSD.duration
+        )
+
         # List
         for item in [
-            ('temporal_resolution', DCAT.temporalResolution, [Literal, Literal], [XSD.duration, XSD.duration]),
             ('is_referenced_by', DCT.isReferencedBy, [URIRef, Literal], [None, None]),
         ]:
             values = json.loads(extras[item[0]])
@@ -72,11 +78,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                 assert self._triple(g, dataset_ref, item[1], _type(value), _datatype)
 
         # Spatial Resolution in Meters
-        values = json.loads(extras['spatial_resolution_in_meters'])
-        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == len(values)
-
-        for value in values:
-            assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(float(value),
+        value = extras['spatial_resolution_in_meters']
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(Decimal(value),
                                 datatype=XSD.decimal))
 
     def test_spatial_resolution_in_meters_single_value(self):
@@ -104,7 +107,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == 1
         assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
-                            Literal(float(extras['spatial_resolution_in_meters']), datatype=XSD.decimal))
+                            Literal(Decimal(extras['spatial_resolution_in_meters']), datatype=XSD.decimal))
 
     def test_spatial_resolution_in_meters_a_value_is_not_a_number(self):
 
@@ -118,7 +121,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'metadata_created': '2021-06-21T15:21:09.034694',
             'metadata_modified': '2021-06-21T15:21:09.075774',
             'extras': [
-                {'key': 'spatial_resolution_in_meters', 'value': '[\"foo\",20]'}
+                {'key': 'spatial_resolution_in_meters', 'value': 'foo'}
             ]
         }
 
@@ -129,11 +132,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        values = json.loads(extras['spatial_resolution_in_meters'])
-        assert len([t for t in g.triples((dataset_ref, DCAT.spatialResolutionInMeters, None))]) == len(values)
-        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(values[0]))
-        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters,
-                            Literal(float(values[1]), datatype=XSD.decimal))
+        value = extras['spatial_resolution_in_meters']
+        assert self._triple(g, dataset_ref, DCAT.spatialResolutionInMeters, Literal(value))
 
     def test_spatial_resolution_value_is_invalid_json(self):
 
@@ -188,13 +188,9 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
-        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 2
-        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 2
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-        assert self._triple(g, spatial, DCAT.bbox, extras['spatial_bbox'], GEOJSON_IMT)
-        assert self._triple(g, spatial, DCAT.centroid, extras['spatial_centroid'], GEOJSON_IMT)
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 1
+        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 1
 
         # Geometry in WKT
         wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
@@ -204,7 +200,87 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         wkt_cent = wkt.dumps(json.loads(extras['spatial_centroid']), decimals=4)
         assert self._triple(g, spatial, DCAT.centroid, wkt_cent, GSP.wktLiteral)
 
-    def test_spatial_bad_geojson_no_wkt(self):
+    @pytest.mark.ckan_config("ckanext.dcat.output_spatial_format", "geojson")
+    def test_spatial_geojson(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
+                {'key': 'spatial_text', 'value': 'Tarragona'},
+                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": [[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
+                {'key': 'spatial_bbox', 'value': '{"type": "Polygon", "coordinates": [[[2.1870606,42.0786393],[2.1870606,42.1655218],[2.3752339,42.1655218],[2.3752339,42.0786393],[2.1870606,42.0786393]]]}'},
+                {'key': 'spatial_centroid', 'value': '{"type": "Point", "coordinates": [2.28114725,42.12208055]}'},
+
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
+        assert spatial
+        assert str(spatial) == extras['spatial_uri']
+        assert self._triple(g, spatial, RDF.type, DCT.Location)
+        assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
+
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 1
+        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 1
+
+        # Geometry in GeoJSON (load and dump to match the formatting)
+        assert self._triple(g, spatial, LOCN.geometry, json.dumps(json.loads(extras['spatial'])), GEOJSON_IMT)
+        assert self._triple(g, spatial, DCAT.bbox, json.dumps(json.loads(extras['spatial_bbox'])), GEOJSON_IMT)
+        assert self._triple(g, spatial, DCAT.centroid, json.dumps(json.loads(extras['spatial_centroid'])), GEOJSON_IMT)
+
+    @pytest.mark.ckan_config("ckanext.dcat.output_spatial_format", "wkt geojson")
+    def test_spatial_two_formats_legacy(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'extras': [
+                {'key': 'spatial_uri', 'value': 'http://sws.geonames.org/6361390/'},
+                {'key': 'spatial_text', 'value': 'Tarragona'},
+                {'key': 'spatial', 'value': '{"type": "Polygon", "coordinates": [[[1.1870606,41.0786393],[1.1870606,41.1655218],[1.3752339,41.1655218],[1.3752339,41.0786393],[1.1870606,41.0786393]]]}'},
+                {'key': 'spatial_bbox', 'value': '{"type": "Polygon", "coordinates": [[[2.1870606,42.0786393],[2.1870606,42.1655218],[2.3752339,42.1655218],[2.3752339,42.0786393],[2.1870606,42.0786393]]]}'},
+                {'key': 'spatial_centroid', 'value': '{"type": "Point", "coordinates": [2.28114725,42.12208055]}'},
+
+            ]
+        }
+        extras = self._extras(dataset)
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
+        assert spatial
+        assert str(spatial) == extras['spatial_uri']
+        assert self._triple(g, spatial, RDF.type, DCT.Location)
+        assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
+
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
+        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 2
+        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 2
+
+        # Geometry in GeoJSON (load and dump to match the formatting)
+        assert self._triple(g, spatial, LOCN.geometry, json.dumps(json.loads(extras['spatial'])), GEOJSON_IMT)
+        assert self._triple(g, spatial, DCAT.bbox, json.dumps(json.loads(extras['spatial_bbox'])), GEOJSON_IMT)
+        assert self._triple(g, spatial, DCAT.centroid, json.dumps(json.loads(extras['spatial_centroid'])), GEOJSON_IMT)
+
+        # Geometry in WKT
+        wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
+        assert self._triple(g, spatial, LOCN.geometry, wkt_geom, GSP.wktLiteral)
+        wkt_bbox = wkt.dumps(json.loads(extras['spatial_bbox']), decimals=4)
+        assert self._triple(g, spatial, DCAT.bbox, wkt_bbox, GSP.wktLiteral)
+        wkt_cent = wkt.dumps(json.loads(extras['spatial_centroid']), decimals=4)
+        assert self._triple(g, spatial, DCAT.centroid, wkt_cent, GSP.wktLiteral)
+
+    def test_spatial_bad_geojson_no_location(self):
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
@@ -215,7 +291,6 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
             ]
         }
-        extras = self._extras(dataset)
 
         s = RDFSerializer(profiles=DCAT_AP_PROFILES)
         g = s.g
@@ -225,18 +300,13 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial_bbox'], GEOJSON_IMT)
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial_centroid'], GEOJSON_IMT)
-
 
         # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
-        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 1
-        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
+        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 0
+        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 0
 
-    def test_spatial_bad_json_no_wkt(self):
+    def test_spatial_bad_json_no_location(self):
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
@@ -247,7 +317,6 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
             ]
         }
-        extras = self._extras(dataset)
 
         s = RDFSerializer(profiles=DCAT_AP_PROFILES)
         g = s.g
@@ -257,20 +326,14 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial_bbox'], GEOJSON_IMT)
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial_centroid'], GEOJSON_IMT)
 
-        # No Geometry in WKT, only one single triple for GeoJSON
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
-        # Always only one single triple
-        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 1
-        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
+        assert len([t for t in g.triples((spatial, DCAT.bbox, None))]) == 0
+        assert len([t for t in g.triples((spatial, DCAT.centroid, None))]) == 0
 
     def test_temporal(self):
         """
-        Tests that the DCAT date properties are included in the graph in addition to schema.org dates.
+        Tests that the DCAT date properties are included in the graph
         """
 
         dataset = {
@@ -288,24 +351,13 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        temporals = self._triples(g, dataset_ref, DCT.temporal, None)
-        assert temporals
-        assert len(temporals) == 2
-
-        assert len([self._triple(g, temporal[2] , RDF.type, DCT.PeriodOfTime) for temporal in temporals]) == 2
-
-        temporal_obj_list = [temporal[2] for temporal in temporals]
-        for predicate in [SCHEMA.startDate, DCAT.startDate]:
-            triples = []
-            for temporal_obj in temporal_obj_list:
-                triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime))
-            assert len(triples) == 1
-
-        for predicate in [SCHEMA.endDate, DCAT.endDate]:
-            triples = []
-            for temporal_obj in temporal_obj_list:
-                triples.extend(self._triples(g, temporal_obj, predicate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime))
-            assert len(triples) == 1
+        temporal = self._triples(g, dataset_ref, DCT.temporal, None)
+        assert temporal
+        assert len(temporal) == 1
+        temporal_ref = temporal[0][2]
+        assert self._triple(g, temporal_ref, RDF.type, DCT.PeriodOfTime)
+        assert self._triple(g, temporal_ref, DCAT.startDate, extras['temporal_start'], XSD.dateTime)
+        assert self._triple(g, temporal_ref, DCAT.endDate, extras['temporal_end'], XSD.date)
 
     def test_high_value_datasets(self):
         """

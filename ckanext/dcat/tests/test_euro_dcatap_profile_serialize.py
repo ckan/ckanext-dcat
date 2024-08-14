@@ -1,6 +1,8 @@
 from builtins import str
 from builtins import object
 import json
+import uuid
+from decimal import Decimal
 
 import pytest
 
@@ -393,18 +395,24 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert str(publisher) == extras['publisher_uri']
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
         assert self._triple(g, publisher, DCT.type, URIRef(extras['publisher_type']))
 
     def test_publisher_org(self):
+        org_id = str(uuid.uuid4())
+        factories.Organization(
+            id=org_id,
+            name='publisher1',
+            title='Example Publisher from Org'
+        )
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
             'organization': {
-                'id': '',
+                'id': org_id,
                 'name': 'publisher1',
                 'title': 'Example Publisher from Org',
             }
@@ -418,7 +426,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
         assert publisher
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, dataset['organization']['title'])
 
     def test_publisher_no_uri(self):
@@ -440,7 +448,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert isinstance(publisher, BNode)
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
 
     def test_publisher_org_no_uri(self):
@@ -470,7 +478,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert isinstance(publisher, BNode)
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
@@ -496,8 +504,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert temporal
 
         assert self._triple(g, temporal, RDF.type, DCT.PeriodOfTime)
-        assert self._triple(g, temporal, SCHEMA.startDate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime)
-        assert self._triple(g, temporal, SCHEMA.endDate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime)
+        assert self._triple(g, temporal, SCHEMA.startDate, extras['temporal_start'], XSD.dateTime)
+        assert self._triple(g, temporal, SCHEMA.endDate, extras['temporal_end'], XSD.date)
 
     def test_spatial(self):
         dataset = {
@@ -523,9 +531,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
 
         # Geometry in WKT
         wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
@@ -550,11 +556,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_spatial_bad_json_no_wkt(self):
         dataset = {
@@ -575,11 +577,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_distributions(self):
 
@@ -695,7 +694,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.modified, resource['modified'], XSD.dateTime)
 
         # Numbers
-        assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
+        assert self._triple(g, distribution, DCAT.byteSize, Decimal(resource['size']), XSD.decimal)
 
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
@@ -1120,6 +1119,30 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
+
+    @pytest.mark.parametrize("value,data_type", [
+        ("2024", XSD.gYear),
+        ("2024-05", XSD.gYearMonth),
+        ("2024-05-31", XSD.date),
+        ("2024-05-31T00:00:00", XSD.dateTime),
+        ("2024-05-31T12:30:01", XSD.dateTime),
+        ("2024-05-31T12:30:01.451243", XSD.dateTime),
+    ])
+    def test_dates_data_types(self, value, data_type):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'issued': value,
+        }
+
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert str(self._triple(g, dataset_ref, DCT.issued, None)[2]) == value
+        assert self._triple(g, dataset_ref, DCT.issued, None)[2].datatype == data_type
 
 
 class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
