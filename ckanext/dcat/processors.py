@@ -31,6 +31,11 @@ COMPAT_MODE_CONFIG_OPTION = 'ckanext.dcat.compatibility_mode'
 DEFAULT_RDF_PROFILES = ['euro_dcat_ap_2']
 
 
+def _get_default_rdf_profiles():
+    """Helper function used fo documenting the rdf profiles config option"""
+    return " ".join(DEFAULT_RDF_PROFILES)
+
+
 class RDFProcessor(object):
 
     def __init__(self, profiles=None, dataset_type='dataset', compatibility_mode=False):
