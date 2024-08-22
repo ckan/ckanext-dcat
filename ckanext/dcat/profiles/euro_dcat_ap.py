@@ -580,13 +580,16 @@ class EuropeanDCATAPProfile(RDFProfile):
                 )
 
                 if resource_dict.get("hash_algorithm"):
+                    checksum_algo = URIRefOrLiteral(resource_dict["hash_algorithm"])
                     g.add(
                         (
                             checksum,
                             SPDX.algorithm,
-                            URIRefOrLiteral(resource_dict["hash_algorithm"]),
+                            checksum_algo,
                         )
                     )
+                    if isinstance(checksum_algo, URIRef):
+                        g.add((checksum_algo, RDF.type, SPDX.ChecksumAlgorithm))
 
                 g.add((distribution, SPDX.checksum, checksum))
 
