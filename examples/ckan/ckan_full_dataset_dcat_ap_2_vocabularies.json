@@ -42,8 +42,7 @@
         "https://joinup.ec.europa.eu/collection/semic-support-centre/solution/dcat-application-profile-data-portals-europe/release/210"
     ],
     "is_referenced_by": [
-        "https://doi.org/10.1038/sdata.2018.22",
-        "test_isreferencedby"
+        "https://doi.org/10.1038/sdata.2018.22"
     ],
     "applicable_legislation": [
         "http://data.europa.eu/eli/reg_impl/2023/138/oj",
