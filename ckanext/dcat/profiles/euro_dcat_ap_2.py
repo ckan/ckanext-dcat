@@ -333,6 +333,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                         DCAT.endpointDescription,
                         None,
                         URIRefOrLiteral,
+                        RDFS.Resource,
                     ),
                     ("description", DCT.description, None, Literal),
                 ]
