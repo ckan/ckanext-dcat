@@ -204,6 +204,7 @@ class EuropeanDCATAP2Profile(EuropeanDCATAPProfile):
                 fallbacks=fallbacks,
                 _type=type,
                 _datatype=datatype,
+                _class=_class,
             )
 
         # Temporal
