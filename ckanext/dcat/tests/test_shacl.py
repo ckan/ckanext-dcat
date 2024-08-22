@@ -162,3 +162,34 @@ def test_validate_dcat_ap_2_graph_shapes_range():
     ]
 
     assert set(failures) - set(known_failures) == set(), results_text
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_3_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config(
+    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_3"
+)
+def test_validate_dcat_ap_3_graph():
+
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_vocabularies.json")
+    graph.serialize(destination="graph.ttl")
+    path = _get_shacl_file_path("dcat-ap_3_shacl_shapes.ttl")
+    r = validate(graph, shacl_graph=path)
+    conforms, results_graph, results_text = r
+    with open("shacl_results.txt", "w") as f:
+        f.write(results_text)
+
+
+    assert conforms, results_text
+
+    with open("shacl_results.txt", "w") as f:
+        f.write(results_text)
+
+
