@@ -176,7 +176,8 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 DCT.type,
                 "type",
                 _type=URIRefOrLiteral,
-                _class=SKOS.Concept,
+                # TODO: fix prefLabel stuff
+                # _class=SKOS.Concept,
             )
             self._add_triple_from_dict(
                 publisher,
