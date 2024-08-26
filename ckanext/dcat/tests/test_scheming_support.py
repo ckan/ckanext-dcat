@@ -346,7 +346,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert len([t for t in g.triples((spatial[0][2], LOCN.geometry, None))]) == 1
         # Geometry in WKT
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
-        assert self._triple(g, spatial[0][2], LOCN.geometry, wkt_geom, GSP.wktLiteral)
+        assert self._triple(g, spatial[0][2], LOCN.Geometry, wkt_geom, GSP.wktLiteral)
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         resource = dataset_dict["resources"][0]

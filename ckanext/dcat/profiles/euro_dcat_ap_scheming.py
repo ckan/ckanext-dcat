@@ -216,7 +216,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     self.g.add((spatial_ref, SKOS.prefLabel, Literal(item["text"])))
 
                 for field in [
-                    ("geom", LOCN.geometry),
+                    ("geom", LOCN.Geometry),
                     ("bbox", DCAT.bbox),
                     ("centroid", DCAT.centroid),
                 ]:
