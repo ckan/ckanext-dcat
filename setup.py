@@ -36,9 +36,9 @@ setup(
     structured_data=ckanext.dcat.plugins:StructuredDataPlugin
 
     # Test plugins
-    test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
-    test_rdf_null_harvester=ckanext.dcat.tests.test_harvester:TestRDFNullHarvester
-    test_rdf_exception_harvester=ckanext.dcat.tests.test_harvester:TestRDFExceptionHarvester
+    test_rdf_harvester=ckanext.dcat.tests.harvester.test_harvester:TestRDFHarvester
+    test_rdf_null_harvester=ckanext.dcat.tests.harvester.test_harvester:TestRDFNullHarvester
+    test_rdf_exception_harvester=ckanext.dcat.tests.harvester.test_harvester:TestRDFExceptionHarvester
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
