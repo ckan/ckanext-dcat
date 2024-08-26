@@ -159,13 +159,18 @@ class DCATHarvester(HarvesterBase):
         '''
         Returns a database result of datasets matching the given guid.
         '''
+        if toolkit.check_ckan_version(max_version="2.11"):
+            datasets = model.Session.query(model.Package.id) \
+                                    .join(model.PackageExtra) \
+                                    .filter(model.PackageExtra.key == 'guid') \
+                                    .filter(model.PackageExtra.value == guid) \
+                                    .filter(model.Package.state == 'active') \
+                                    .all()
+        else:
+            datasets = model.Session.query(model.Package.id) \
+                                    .filter(model.Package.extras['guid'] == f'"{guid}"') \
+                                    .all()
 
-        datasets = model.Session.query(model.Package.id) \
-                                .join(model.PackageExtra) \
-                                .filter(model.PackageExtra.key == 'guid') \
-                                .filter(model.PackageExtra.value == guid) \
-                                .filter(model.Package.state == 'active') \
-                                .all()
         return datasets
 
     def _get_existing_dataset(self, guid):
