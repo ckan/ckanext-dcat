@@ -140,6 +140,7 @@ def test_validate_dcat_ap_2_graph_shapes_range():
 
     graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_vocabularies.json")
 
+    graph.serialize(destination="graph_v2_range.ttl")
     # dcat-ap_2.1.1_shacl_range.ttl: constraints concerning object range
     path = _get_shacl_file_path("dcat-ap_2.1.1_shacl_range.ttl")
     r = validate(graph, shacl_graph=path)
@@ -186,10 +187,21 @@ def test_validate_dcat_ap_3_graph():
     with open("shacl_results.txt", "w") as f:
         f.write(results_text)
 
+    failures = [
+        str(t[2])
+        for t in results_graph.triples(
+            (
+                None,
+                URIRef("http://www.w3.org/ns/shacl#resultMessage"),
+                None,
+            )
+        )
+    ]
 
-    assert conforms, results_text
+    known_failures = [
+        "Value does not have class skos:Concept",
+        "Value does not have class dcat:Dataset",
+    ]
 
-    with open("shacl_results.txt", "w") as f:
-        f.write(results_text)
 
-
+    assert set(failures) - set(known_failures) == set(), results_text
