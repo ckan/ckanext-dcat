@@ -960,64 +960,6 @@ Extensions define their available profiles using the `ckan.rdf.profiles` in the 
     euro_dcat_ap_2=ckanext.dcat.profiles:EuropeanDCATAP2Profile
     schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
-### Command line interface
-
-The parser and serializer can also be accessed from the command line via `python ckanext-dcat/ckanext/dcat/processors.py`.
-
-You can point to RDF files:
-
-    python ckanext-dcat/ckanext/dcat/processors.py consume catalog_pod_2.jsonld -P -f json-ld
-
-    python ckanext/dcat/processors.py produce examples/ckan_dataset.json
-
-or pipe them to the script:
-
-    http http://localhost/dcat/catalog.rdf | python ckanext-dcat/ckanext/dcat/processors.py consume -P > ckan_datasets.json
-
-    http http://demo.ckan.org/api/action/package_show id=afghanistan-election-data | jq .result | python ckanext/dcat/processors.py produce
-
-
-To see all available options, run the script with the `-h` argument:
-
-    python ckanext-dcat/ckanext/dcat/processors.py -h
-    usage: processors.py [-h] [-f FORMAT] [-P] [-p [PROFILE [PROFILE ...]]] [-m]
-                         mode [file]
-
-    DCAT RDF - CKAN operations
-
-    positional arguments:
-      mode                  Operation mode. `consume` parses DCAT RDF graphs to
-                            CKAN dataset JSON objects. `produce` serializes CKAN
-                            dataset JSON objects into DCAT RDF.
-      file                  Input file. If omitted will read from stdin
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      -f FORMAT, --format FORMAT
-                            Serialization format (as understood by rdflib) eg:
-                            xml, n3 ... Defaults to 'xml'.
-      -P, --pretty          Make the output more human readable
-      -p [PROFILE [PROFILE ...]], --profile [PROFILE [PROFILE ...]]
-                            RDF Profiles to use, defaults to euro_dcat_ap_2
-      -m, --compat-mode     Enable compatibility mode
-
-
-### Compatibility mode
-
-In compatibility mode, some fields are modified to maintain compatibility with previous versions of the ckanext-dcat parsers
-(eg adding the `dcat_` prefix or storing comma separated lists instead
-of JSON blobs).
-
-CKAN instances that were using the legacy XML and JSON harvesters (`dcat_json_harvester` and `dcat_xml_harvester`)
-and want to move to the RDF based one may want to turn compatibility mode on to ensure that CKAN dataset fields are created as before.
-Users are encouraged to migrate their applications to support the new DCAT to CKAN mapping.
-
-To turn compatibility mode on add this to the CKAN configuration file:
-
-    ckanext.dcat.compatibility_mode = True
-
-
-
 ## XML DCAT harvester (deprecated)
 
 The old DCAT XML harvester (`dcat_xml_harvester`) is now deprecated, in favour of the [RDF harvester](#rdf-dcat-harvester).

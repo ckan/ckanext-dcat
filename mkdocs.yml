@@ -1,0 +1,20 @@
+site_name: ckanext-dcat
+site_url: https://docs.ckan.org/projects/ckanext-dcat
+theme: readthedocs
+  #theme: material
+  #theme:
+  #  name: material
+markdown_extensions:
+    - admonition
+
+
+nav:
+  - 'index.md'
+  - 'getting-started.md'
+  - 'endpoints.md'
+  - DCAT CKAN mapping: 'mapping.md'
+  - 'profiles.md'
+  - 'harvester.md'
+  - Google Dataset Search: 'google-dataset-search.md'
+  - CLI: 'cli.md'
+  - Configuration reference: 'configuration.md'
