@@ -117,8 +117,8 @@ The extension includes ready to use [ckanext-scheming](https://github.com/ckan/c
 
 There are the following schemas currently included with the extension:
 
-* *dcat_ap_2.1_recommended.yaml*: Includes the recommended properties for `dcat:Dataset` and `dcat:Distribution` according to the [DCAT 2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) specification.
-* *dcat_ap_2.1_full.yaml*: Includes most of the properties defined for `dcat:Dataset` and `dcat:Distribution` in the [DCAT 2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) specification.
+* *dcat_ap_recommended.yaml*: Includes the recommended properties for `dcat:Dataset` and `dcat:Distribution` according to the DCAT AP specification. You can use this schema with the `euro_dcat_ap_2` (+ `euro_dcat_scheming`) and `euro_dcat_ap_3` profiles.
+* *dcat_ap_full.yaml*: Includes most of the properties defined for `dcat:Dataset` and `dcat:Distribution` in the [DCAT AP 2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) and [DCAT AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) specification. You can use this schema with the `euro_dcat_ap_2` (+ `euro_dcat_scheming`) and `euro_dcat_ap_3` profiles.
 
 Most sites will want to use these as a base to create their own custom schema to address their own requirements, perhaps alongside a [custom profile](#writing-custom-profiles). Of course site maintainers can add or remove schema fields, as well as change the existing validators.
 
