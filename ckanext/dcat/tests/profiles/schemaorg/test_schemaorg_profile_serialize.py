@@ -15,7 +15,7 @@ from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles import SCHEMA
 
-from ckanext.dcat.tests.test_euro_dcatap_profile_serialize import BaseSerializeTest
+from ckanext.dcat.tests.profiles.dcat_ap.test_euro_dcatap_profile_serialize import BaseSerializeTest
 
 
 class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):

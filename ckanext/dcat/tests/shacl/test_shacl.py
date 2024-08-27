@@ -12,7 +12,7 @@ from ckanext.dcat.tests.utils import get_file_contents
 
 
 def _get_shacl_file_path(file_name):
-    return os.path.join(os.path.dirname(__file__), "shacl", file_name)
+    return os.path.join(os.path.dirname(__file__), file_name)
 
 
 generated_graphs = {}
