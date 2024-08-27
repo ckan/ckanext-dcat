@@ -24,7 +24,6 @@ from ckanext.dcat.profiles import (
     LOCN,
     GSP,
     OWL,
-    GEOJSON_IMT,
     SPDX,
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
