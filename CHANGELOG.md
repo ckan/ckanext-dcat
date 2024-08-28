@@ -2,6 +2,10 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...HEAD)
 
+* New profile for [DCAT-AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0), `euro_dcat_ap_3`, which is now
+  the default. Existing sites willing to stick with DCAT-AP v2.x can specify the profile in the configuration if they
+  are not doing so yet (`ckan.dcat.rdf.profiles = euro_dcat_ap_2`). The new `euro_dcat_ap_3` profile relies on 
+  ckanext-scheming metadata schemas (see below).
 * Support for standard CKAN [ckanext-scheming](https://github.com/ckan/ckanext-scheming) schemas.
   The DCAT profiles now seamlessly integrate with fields defined via the YAML or JSON scheming files.
   Sites willing to migrate to a scheming based metadata schema can do
