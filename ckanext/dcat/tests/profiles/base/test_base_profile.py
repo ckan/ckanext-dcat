@@ -8,7 +8,7 @@ from rdflib.namespace import Namespace
 
 from ckanext.dcat.profiles import RDFProfile, CleanedURIRef
 
-from ckanext.dcat.tests.test_base_parser import _default_graph
+from ckanext.dcat.tests.profiles.base.test_base_parser import _default_graph
 
 
 DCT = Namespace("http://purl.org/dc/terms/")

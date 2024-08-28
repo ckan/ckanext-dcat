@@ -24,7 +24,6 @@ from ckanext.dcat.profiles import (
     LOCN,
     GSP,
     OWL,
-    GEOJSON_IMT,
     SPDX,
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
@@ -33,7 +32,7 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -343,10 +342,10 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g, spatial[0][2], SKOS.prefLabel, dataset["spatial_coverage"][0]["text"]
         )
 
-        assert len([t for t in g.triples((spatial[0][2], LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial[0][2], LOCN.Geometry, None))]) == 1
         # Geometry in WKT
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
-        assert self._triple(g, spatial[0][2], LOCN.geometry, wkt_geom, GSP.wktLiteral)
+        assert self._triple(g, spatial[0][2], LOCN.Geometry, wkt_geom, GSP.wktLiteral)
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         resource = dataset_dict["resources"][0]
@@ -674,7 +673,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -706,7 +705,7 @@ class TestSchemingValidators:
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -861,7 +860,7 @@ class TestSchemingParseSupport(BaseParseTest):
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_2.1_full.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
