@@ -46,7 +46,7 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
-        self._graph_from_catalog_base(self, catalog_dict, catalog_ref)
+        self._graph_from_catalog_base(catalog_dict, catalog_ref)
 
     def _graph_from_dataset_v3(self, dataset_dict, dataset_ref):
 
