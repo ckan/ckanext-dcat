@@ -877,7 +877,7 @@ This plugin also contains a profile to serialize a CKAN dataset to a [schema.org
 
 To define which profiles to use you can:
 
-1. Set the `ckanext.dcat.rdf.profiles` configuration option on your CKAN configuration file:
+1. Set the [`ckanext.dcat.rdf.profiles`](configuration.md#ckanextdcatrdfprofiles) configuration option on your CKAN configuration file:
 
     ckanext.dcat.rdf.profiles = euro_dcat_ap sweden_dcat_ap
 
@@ -1166,6 +1166,15 @@ Default value: `True`
 Whether to expose the catalog and dataset endpoints with the RDF DCAT
 serializations.
 
+#### ckanext.dcat.base_uri
+
+Example:
+
+```
+https://my-site.org/uris/
+```
+
+Base URI to use when generating URIs for all entities. It needs to be a valid URI value.
 
 #### ckanext.dcat.catalog_endpoint
 
@@ -1181,7 +1190,7 @@ Custom route for the catalog endpoint. It should start with `/` and include the
 `{_format}` placeholder.
 
 
-#### ckanext.dcat.dataset_per_page
+#### ckanext.dcat.datasets_per_page
 
 Default value: `100`
 

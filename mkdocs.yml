@@ -38,12 +38,24 @@ theme:
     - search.suggest
     - search.highlight
     - toc.integrate
+    - content.code.copy
 
 plugins:
   - search
 
 markdown_extensions:
-    - admonition
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
 
 extra_css:
   - _css/extra.css
@@ -53,7 +65,7 @@ nav:
   - Getting started: 'getting-started.md'
   - DCAT support:
     - 'endpoints.md'
-    - DCAT CKAN mapping: 'mapping.md'
+    - DCAT ↔  CKAN mapping: 'mapping.md'
     - 'profiles.md'
   - Other features:
     - 'harvester.md'
