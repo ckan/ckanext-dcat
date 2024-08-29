@@ -103,7 +103,7 @@ Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data
 
 In terms of CKAN features, this extension offers:
 
-* [Pre-built CKAN schemas](getting-started.md#schemas) for common Application Profiles that can be adapted to each site requirement to provide out-of-the-box DCAT support in data portals (currently supporting DCAT AP v1, v2, and v3).
+* [Pre-built CKAN schemas](getting-started.md#schemas) for common Application Profiles that can be adapted to each site requirements to provide out-of-the-box DCAT support in data portals, including tailored form fields, validation etc. (currently supporting DCAT AP v1, v2, and v3).
 
 * [DCAT Endpoints](endpoints.md) that expose the catalog datasets in different RDF serializations (`dcat` plugin).
 
