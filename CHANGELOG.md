@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...HEAD)
+
+* ...
+
+## [v2.0.0](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...v2.0.0) - 2024-08-30
 
 * New profile for [DCAT-AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0), `euro_dcat_ap_3`, which is now
   the default. Existing sites willing to stick with DCAT-AP v2.x can specify the profile in the configuration if they
