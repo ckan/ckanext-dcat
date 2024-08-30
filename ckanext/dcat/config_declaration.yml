@@ -63,6 +63,11 @@ groups:
           serializations.
         type: bool
 
+      - key: ckanext.dcat.base_uri
+        description: |
+          Base URI to use when generating URIs for all entities. It needs to be a valid URI value.
+        example: 'https://my-site.org/uri/'
+
       - key: ckanext.dcat.catalog_endpoint
         default: '/catalog.{_format}'
         description: |
@@ -70,7 +75,7 @@ groups:
           `{_format}` placeholder.
         example: '/dcat/catalog/{_format}'
 
-      - key: ckanext.dcat.dataset_per_page
+      - key: ckanext.dcat.datasets_per_page
         default: 100
         type: int
         description: |

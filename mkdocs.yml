@@ -1,0 +1,78 @@
+site_name: ckanext-dcat
+#site_url: https://docs.ckan.org/projects/ckanext-dcat
+site_url: http://localhost:8000
+
+site_description: >-
+  The documentation of ckanext-dcat, a CKAN extension that allows to expose
+  and consume metadata semantically using the DCAT standard.
+
+
+repo_name: ckan/ckanext-dcat
+repo_url: https://github.com/ckan/ckanext-dcat
+
+theme:
+  name: material
+  palette:
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: ckan
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to light mode
+
+  logo: _assets/logo.png
+  favicon: _assets/ckan.ico
+  features:
+    - navigation.expand
+    - navigation.footer
+    - navigation.instant
+    - navigation.instant.progress
+    - search.suggest
+    - search.highlight
+    - toc.integrate
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+
+
+extra_css:
+  - _css/extra.css
+
+nav:
+  - Home: 'index.md'
+  - Getting started: 'getting-started.md'
+  - DCAT support:
+    - 'endpoints.md'
+    - DCAT ↔  CKAN mapping: 'mapping.md'
+    - 'profiles.md'
+  - Other features:
+    - 'harvester.md'
+    - Google Dataset Search: 'google-dataset-search.md'
+    - CLI: 'cli.md'
+    - Configuration reference: 'configuration.md'
+#  - CHANGELOG: 'https://github.com/ckan/ckanext-dcat/blob/master/CHANGELOG.md'
+
+  - CHANGELOG: 'changelog.md'
