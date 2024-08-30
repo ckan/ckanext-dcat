@@ -117,8 +117,8 @@ The extension includes ready to use [ckanext-scheming](https://github.com/ckan/c
 
 There are the following schemas currently included with the extension:
 
-* *dcat_ap_2.1_recommended.yaml*: Includes the recommended properties for `dcat:Dataset` and `dcat:Distribution` according to the [DCAT 2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) specification.
-* *dcat_ap_2.1_full.yaml*: Includes most of the properties defined for `dcat:Dataset` and `dcat:Distribution` in the [DCAT 2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) specification.
+* *dcat_ap_recommended.yaml*: Includes the recommended properties for `dcat:Dataset` and `dcat:Distribution` according to the DCAT AP specification. You can use this schema with the `euro_dcat_ap_2` (+ `euro_dcat_ap_scheming`) and `euro_dcat_ap_3` profiles.
+* *dcat_ap_full.yaml*: Includes most of the properties defined for `dcat:Dataset` and `dcat:Distribution` in the [DCAT AP 2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) and [DCAT AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) specification. You can use this schema with the `euro_dcat_ap_2` (+ `euro_dcat_ap_scheming`) and `euro_dcat_ap_3` profiles.
 
 Most sites will want to use these as a base to create their own custom schema to address their own requirements, perhaps alongside a [custom profile](#writing-custom-profiles). Of course site maintainers can add or remove schema fields, as well as change the existing validators.
 
@@ -864,13 +864,14 @@ They essentially define the mapping between DCAT and CKAN.
 In most cases the default profile will provide a good mapping that will cover most properties described in the DCAT standard. If you want to extract extra fields defined in the RDF, are using a custom schema or
 need custom logic, you can write a custom to profile that extends or replaces the default one.
 
-The default profile is mostly based in the
-[DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). It is actually fully-compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), and partially compatible with [DCAT-AP v2.1.0](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210). As mentioned before though, it should be generic enough for most DCAT based representations.
+The profiles currently shipped with the extension are mostly based in the
+[DCAT application profile for data portals in Europe](https://joinup.ec.europa.eu/asset/dcat_application_profile/description). As mentioned before though, they should be generic enough for most DCAT based representations.
 
-Sites that want to support a particular version of the DCAT-AP can enable a specific profile using one of the methods below:
+Sites that want to support a particular version of the DCAT-AP can enable a specific profile using one of the profiles below:
 
-* DCAT-AP v2.1.0 (default): `euro_dcat_ap_2`
-* DCAT-AP v1.1.1: `euro_dcat_ap`
+* [DCAT-AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0) (default): `euro_dcat_ap_3`
+* [DCAT-AP v2.1.0](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210): `euro_dcat_ap_2`
+* [DCAT-AP v1.1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11): `euro_dcat_ap`
 
 This plugin also contains a profile to serialize a CKAN dataset to a [schema.org Dataset](http://schema.org/Dataset) called `schemaorg`. This is especially useful to provide [JSON-LD structured data](#structured-data).
 
