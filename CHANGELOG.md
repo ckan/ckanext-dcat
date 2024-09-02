@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...HEAD)
 
-* ...
+* Fix DCAT date validator on empty values ([#297](https://github.com/ckan/ckanext-dcat/pull/297))
 
 ## [v2.0.0](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...v2.0.0) - 2024-08-30
 
