@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...HEAD)
 
-* ...
+* Add support for hydra collection type PartialCollectionView
 
 ## [v2.0.0](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...v2.0.0) - 2024-08-30
 
