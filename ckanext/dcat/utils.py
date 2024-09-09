@@ -78,6 +78,7 @@ def field_labels():
         'publisher_email': _('Publisher email'),
         'publisher_url': _('Publisher URL'),
         'publisher_type': _('Publisher type'),
+        'publisher_identifier': _('Publisher identifier'),
         'contact_name': _('Contact name'),
         'contact_email': _('Contact email'),
         'contact_uri': _('Contact URI'),
