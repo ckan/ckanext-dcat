@@ -407,7 +407,8 @@ class RDFSerializer(RDFProcessor):
                                  ('name', Literal, FOAF.name, True,),
                                  ('email', Literal, FOAF.mbox, False,),
                                  ('url', URIRef, FOAF.homepage,False,),
-                                 ('type', Literal, DCT.type, False,))
+                                 ('type', Literal, DCT.type, False,),
+                                 ('identifier', URIRef, DCT.identifier, False,))
 
             _pub = _get_from_extra('source_catalog_publisher')
             if _pub:

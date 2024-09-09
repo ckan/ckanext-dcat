@@ -221,6 +221,10 @@ class SchemaOrgProfile(RDFProfile):
 
             self._add_triples_from_dict(dataset_dict, contact_point, items)
 
+            publisher_identifier = self._get_dataset_value(dataset_dict, "publisher_identifier")
+            if publisher_identifier:
+                self.g.add((publisher_details, SCHEMA.identifier, Literal(publisher_identifier)))
+
     def _temporal_graph(self, dataset_ref, dataset_dict):
         start = self._get_dataset_value(dataset_dict, "temporal_start")
         end = self._get_dataset_value(dataset_dict, "temporal_end")

@@ -75,6 +75,7 @@
             <foaf:mbox>contact@some.org</foaf:mbox>
             <foaf:homepage>http://some.org</foaf:homepage>
             <dct:type rdf:resource="http://purl.org/adms/publishertype/NonProfitOrganisation"/>
+            <dct:identifier rdf:resource="https://ror.org/05wg1m734"/>
         </foaf:Organization>
     </dct:publisher>
     <dcat:distribution>

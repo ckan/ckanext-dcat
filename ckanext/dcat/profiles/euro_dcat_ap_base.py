@@ -123,7 +123,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
         # Publisher
         publisher = self._publisher(dataset_ref, DCT.publisher)
-        for key in ("uri", "name", "email", "url", "type"):
+        for key in ("uri", "name", "email", "url", "type", "identifier"):
             if publisher.get(key):
                 dataset_dict["extras"].append(
                     {"key": "publisher_{0}".format(key), "value": publisher.get(key)}

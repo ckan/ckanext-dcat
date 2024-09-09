@@ -647,6 +647,7 @@ class TestBaseRDFProfile(object):
               <foaf:mbox>contact@some.org</foaf:mbox>
               <foaf:homepage>http://some.org</foaf:homepage>
               <dct:type rdf:resource="http://purl.org/adms/publishertype/NonProfitOrganisation"/>
+              <dct:identifier rdf:resource="https://ror.org/05wg1m734"/>
             </foaf:Organization>
           </dct:publisher>
         </rdfs:SomeClass>
@@ -666,6 +667,7 @@ class TestBaseRDFProfile(object):
         assert publisher['email'] == 'contact@some.org'
         assert publisher['url'] == 'http://some.org'
         assert publisher['type'] == 'http://purl.org/adms/publishertype/NonProfitOrganisation'
+        assert publisher['identifier'] == 'https://ror.org/05wg1m734'
 
     def test_publisher_ref(self):
 
