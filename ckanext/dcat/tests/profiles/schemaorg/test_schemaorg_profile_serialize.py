@@ -90,7 +90,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
             for value in values:
                 assert self._triple(g, dataset_ref, item[1], item[2](value))
 
-    def test_publisher_extras(self):
+    def test_publisher_and_creator_extras(self):
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
@@ -100,16 +100,24 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
                 'title': 'Example Publisher from Org',
             },
             'extras': [
+                # Publisher fields
                 {'key': 'publisher_uri', 'value': 'http://example.com/publisher'},
                 {'key': 'publisher_name', 'value': 'Example Publisher'},
                 {'key': 'publisher_email', 'value': 'publisher@example.com'},
                 {'key': 'publisher_url', 'value': 'http://example.com/publisher/home'},
                 {'key': 'publisher_type', 'value': 'http://purl.org/adms/publishertype/Company'},
                 {'key': 'publisher_identifier', 'value': 'https://ror.org/05wg1m734'},
+
+                # Creator fields
+                {'key': 'creator_uri', 'value': 'http://example.com/creator'},
+                {'key': 'creator_name', 'value': 'Example Creator'},
+                {'key': 'creator_email', 'value': 'creator@example.com'},
+                {'key': 'creator_url', 'value': 'http://example.com/creator/home'},
+                {'key': 'creator_type', 'value': 'http://purl.org/adms/publishertype/NonProfitOrganisation'},
+                {'key': 'creator_identifier', 'value': 'https://ror.org/05wg1m735'},
             ]
-
-
         }
+
         extras = self._extras(dataset)
 
         s = RDFSerializer(profiles=['schemaorg'])
@@ -117,6 +125,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
+        # Publisher validation
         publisher = self._triple(g, dataset_ref, SCHEMA.publisher, None)[2]
         assert publisher
         assert str(publisher) == extras['publisher_uri']
@@ -124,13 +133,29 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, publisher, SCHEMA.name, extras['publisher_name'])
         assert self._triple(g, publisher, SCHEMA.identifier, extras['publisher_identifier'])
 
-        contact_point = self._triple(g, publisher, SCHEMA.contactPoint, None)[2]
-        assert contact_point
-        assert self._triple(g, contact_point, RDF.type, SCHEMA.ContactPoint)
-        assert self._triple(g, contact_point, SCHEMA.name, extras['publisher_name'])
-        assert self._triple(g, contact_point, SCHEMA.email, extras['publisher_email'])
-        assert self._triple(g, contact_point, SCHEMA.url, extras['publisher_url'])
-        assert self._triple(g, contact_point, SCHEMA.contactType, 'customer service')
+        contact_point_publisher = self._triple(g, publisher, SCHEMA.contactPoint, None)[2]
+        assert contact_point_publisher
+        assert self._triple(g, contact_point_publisher, RDF.type, SCHEMA.ContactPoint)
+        assert self._triple(g, contact_point_publisher, SCHEMA.name, extras['publisher_name'])
+        assert self._triple(g, contact_point_publisher, SCHEMA.email, extras['publisher_email'])
+        assert self._triple(g, contact_point_publisher, SCHEMA.url, extras['publisher_url'])
+        assert self._triple(g, contact_point_publisher, SCHEMA.contactType, 'customer service')
+
+        # Creator validation
+        creator = self._triple(g, dataset_ref, SCHEMA.creator, None)[2]
+        assert creator
+        assert str(creator) == extras['creator_uri']
+        assert self._triple(g, creator, RDF.type, SCHEMA.Organization)
+        assert self._triple(g, creator, SCHEMA.name, extras['creator_name'])
+        assert self._triple(g, creator, SCHEMA.identifier, extras['creator_identifier'])
+
+        contact_point_creator = self._triple(g, creator, SCHEMA.contactPoint, None)[2]
+        assert contact_point_creator
+        assert self._triple(g, contact_point_creator, RDF.type, SCHEMA.ContactPoint)
+        assert self._triple(g, contact_point_creator, SCHEMA.name, extras['creator_name'])
+        assert self._triple(g, contact_point_creator, SCHEMA.email, extras['creator_email'])
+        assert self._triple(g, contact_point_creator, SCHEMA.url, extras['creator_url'])
+        assert self._triple(g, contact_point_creator, SCHEMA.contactType, 'customer service')
 
     def test_publisher_no_uri(self):
         dataset = {
