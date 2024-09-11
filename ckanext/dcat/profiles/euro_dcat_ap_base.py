@@ -380,6 +380,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 "email": self._get_dataset_value(dataset_dict, "publisher_email"),
                 "url": self._get_dataset_value(dataset_dict, "publisher_url"),
                 "type": self._get_dataset_value(dataset_dict, "publisher_type"),
+                "identifier": self._get_dataset_value(dataset_dict, "publisher_identifier"),
             }
         elif dataset_dict.get("organization"):
             # Fall back to dataset org
@@ -404,6 +405,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     "email": org_dict.get("email"),
                     "url": org_dict.get("url"),
                     "type": org_dict.get("dcat_type"),
+                    "identifier": org_dict.get("identifier"),
                 }
         # Add to graph
         if publisher_ref:
@@ -414,6 +416,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("email", FOAF.mbox, None, Literal),
                 ("url", FOAF.homepage, None, URIRef),
                 ("type", DCT.type, None, URIRefOrLiteral),
+                ("identifier", DCT.identifier, None, URIRefOrLiteral),
             ]
             self._add_triples_from_dict(publisher_details, publisher_ref, items)
 

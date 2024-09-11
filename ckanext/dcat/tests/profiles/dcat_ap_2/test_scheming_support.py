@@ -94,6 +94,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "email": "publisher@example.org",
                     "url": "https://example.org",
                     "type": "public_body",
+                    "identifier": "http://example.org/publisher-id",
                 },
             ],
             "temporal_coverage": [
@@ -300,6 +301,12 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             publisher[0][2],
             DCT.type,
             dataset_dict["publisher"][0]["type"],
+        )
+        assert self._triple(
+            g,
+            publisher[0][2],
+            DCT.identifier,
+            URIRef(dataset_dict["publisher"][0]["identifier"])
         )
 
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
