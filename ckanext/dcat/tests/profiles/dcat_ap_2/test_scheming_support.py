@@ -306,7 +306,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             publisher[0][2],
             DCT.identifier,
-            dataset_dict["publisher"][0]["identifier"]
+            URIRef(dataset_dict["publisher"][0]["identifier"])
         )
 
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
