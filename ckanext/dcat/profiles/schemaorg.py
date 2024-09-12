@@ -167,11 +167,11 @@ class SchemaOrgProfile(RDFProfile):
         identifier_key = f"{schema_property_prefix}_identifier"
 
         if any(
-                [
-                    self._get_dataset_value(dataset_dict, uri_key),
-                    self._get_dataset_value(dataset_dict, name_key),
-                    dataset_dict.get("organization"),
-                ]
+            [
+                self._get_dataset_value(dataset_dict, uri_key),
+                self._get_dataset_value(dataset_dict, name_key),
+                dataset_dict.get("organization"),
+            ]
         ):
             agent_uri = self._get_dataset_value(dataset_dict, uri_key)
             agent_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
@@ -188,9 +188,9 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((dataset_ref, agent_type, agent_details))
 
             if (
-                    not agent_name
-                    and not agent_uri
-                    and dataset_dict.get("organization")
+                not agent_name
+                and not agent_uri
+                and dataset_dict.get("organization")
             ):
                 agent_name = dataset_dict["organization"]["title"]
             self.g.add((agent_details, SCHEMA.name, Literal(agent_name)))

@@ -50,10 +50,10 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
         # Basic fields
         for key, predicate in (
-                ("title", DCT.title),
-                ("notes", DCT.description),
-                ("url", DCAT.landingPage),
-                ("version", OWL.versionInfo),
+            ("title", DCT.title),
+            ("notes", DCT.description),
+            ("url", DCAT.landingPage),
+            ("version", OWL.versionInfo),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -78,13 +78,13 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
         #  Simple values
         for key, predicate in (
-                ("issued", DCT.issued),
-                ("modified", DCT.modified),
-                ("identifier", DCT.identifier),
-                ("version_notes", ADMS.versionNotes),
-                ("frequency", DCT.accrualPeriodicity),
-                ("provenance", DCT.provenance),
-                ("dcat_type", DCT.type),
+            ("issued", DCT.issued),
+            ("modified", DCT.modified),
+            ("identifier", DCT.identifier),
+            ("version_notes", ADMS.versionNotes),
+            ("frequency", DCT.accrualPeriodicity),
+            ("provenance", DCT.provenance),
+            ("dcat_type", DCT.type),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -92,16 +92,16 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
         #  Lists
         for key, predicate, in (
-                ("language", DCT.language),
-                ("theme", DCAT.theme),
-                ("alternate_identifier", ADMS.identifier),
-                ("conforms_to", DCT.conformsTo),
-                ("documentation", FOAF.page),
-                ("related_resource", DCT.relation),
-                ("has_version", DCT.hasVersion),
-                ("is_version_of", DCT.isVersionOf),
-                ("source", DCT.source),
-                ("sample", ADMS.sample),
+            ("language", DCT.language),
+            ("theme", DCAT.theme),
+            ("alternate_identifier", ADMS.identifier),
+            ("conforms_to", DCT.conformsTo),
+            ("documentation", FOAF.page),
+            ("related_resource", DCT.relation),
+            ("has_version", DCT.hasVersion),
+            ("is_version_of", DCT.isVersionOf),
+            ("source", DCT.source),
+            ("sample", ADMS.sample),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -177,14 +177,14 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
             #  Simple values
             for key, predicate in (
-                    ("name", DCT.title),
-                    ("description", DCT.description),
-                    ("access_url", DCAT.accessURL),
-                    ("download_url", DCAT.downloadURL),
-                    ("issued", DCT.issued),
-                    ("modified", DCT.modified),
-                    ("status", ADMS.status),
-                    ("license", DCT.license),
+                ("name", DCT.title),
+                ("description", DCT.description),
+                ("access_url", DCAT.accessURL),
+                ("download_url", DCAT.downloadURL),
+                ("issued", DCT.issued),
+                ("modified", DCT.modified),
+                ("status", ADMS.status),
+                ("license", DCT.license),
             ):
                 value = self._object_value(distribution, predicate)
                 if value:
@@ -195,9 +195,9 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ) or self._object_value(distribution, DCAT.accessURL)
             #  Lists
             for key, predicate in (
-                    ("language", DCT.language),
-                    ("documentation", FOAF.page),
-                    ("conforms_to", DCT.conformsTo),
+                ("language", DCT.language),
+                ("documentation", FOAF.page),
+                ("conforms_to", DCT.conformsTo),
             ):
                 values = self._object_value_list(distribution, predicate)
                 if values:
@@ -252,10 +252,10 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             # versions of the ckanext-dcat parsers
             for extra in dataset_dict["extras"]:
                 if extra["key"] in (
-                        "issued",
-                        "modified",
-                        "publisher_name",
-                        "publisher_email",
+                    "issued",
+                    "modified",
+                    "publisher_name",
+                    "publisher_email",
                 ):
                     extra["key"] = "dcat_" + extra["key"]
 
@@ -315,15 +315,15 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
         # Contact details
         if any(
-                [
-                    self._get_dataset_value(dataset_dict, "contact_uri"),
-                    self._get_dataset_value(dataset_dict, "contact_name"),
-                    self._get_dataset_value(dataset_dict, "contact_email"),
-                    self._get_dataset_value(dataset_dict, "maintainer"),
-                    self._get_dataset_value(dataset_dict, "maintainer_email"),
-                    self._get_dataset_value(dataset_dict, "author"),
-                    self._get_dataset_value(dataset_dict, "author_email"),
-                ]
+            [
+                self._get_dataset_value(dataset_dict, "contact_uri"),
+                self._get_dataset_value(dataset_dict, "contact_name"),
+                self._get_dataset_value(dataset_dict, "contact_email"),
+                self._get_dataset_value(dataset_dict, "maintainer"),
+                self._get_dataset_value(dataset_dict, "maintainer_email"),
+                self._get_dataset_value(dataset_dict, "author"),
+                self._get_dataset_value(dataset_dict, "author_email"),
+            ]
         ):
 
             contact_uri = self._get_dataset_value(dataset_dict, "contact_uri")
@@ -360,10 +360,10 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             # Scheming publisher field: will be handled in a separate profile
             pass
         elif any(
-                [
-                    self._get_dataset_value(dataset_dict, "publisher_uri"),
-                    self._get_dataset_value(dataset_dict, "publisher_name"),
-                ]
+            [
+                self._get_dataset_value(dataset_dict, "publisher_uri"),
+                self._get_dataset_value(dataset_dict, "publisher_name"),
+            ]
         ):
             # Legacy publisher_* extras
             publisher_uri = self._get_dataset_value(dataset_dict, "publisher_uri")
@@ -425,10 +425,10 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             # Scheming publisher field: will be handled in a separate profile
             pass
         elif any(
-                [
-                    self._get_dataset_value(dataset_dict, "creator_uri"),
-                    self._get_dataset_value(dataset_dict, "creator_name"),
-                ]
+            [
+                self._get_dataset_value(dataset_dict, "creator_uri"),
+                self._get_dataset_value(dataset_dict, "creator_name"),
+            ]
         ):
             # Legacy creator_* extras
             creator_uri = self._get_dataset_value(dataset_dict, "creator_uri")
@@ -492,11 +492,11 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         resource_license_fallback = None
         if toolkit.asbool(config.get(DISTRIBUTION_LICENSE_FALLBACK_CONFIG, False)):
             if "license_id" in dataset_dict and isinstance(
-                    URIRefOrLiteral(dataset_dict["license_id"]), URIRef
+                URIRefOrLiteral(dataset_dict["license_id"]), URIRef
             ):
                 resource_license_fallback = dataset_dict["license_id"]
             elif "license_url" in dataset_dict and isinstance(
-                    URIRefOrLiteral(dataset_dict["license_url"]), URIRef
+                URIRefOrLiteral(dataset_dict["license_url"]), URIRef
             ):
                 resource_license_fallback = dataset_dict["license_url"]
 
@@ -559,9 +559,9 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             # check which type is appropriate.
             if fmt and (not mimetype or mimetype == fmt):
                 if (
-                        "iana.org/assignments/media-types" in fmt
-                        or not fmt.startswith("http")
-                        and "/" in fmt
+                    "iana.org/assignments/media-types" in fmt
+                    or not fmt.startswith("http")
+                    and "/" in fmt
                 ):
                     # output format value as dcat:mediaType instead of dct:format
                     mimetype = fmt

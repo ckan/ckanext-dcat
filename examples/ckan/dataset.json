@@ -9,11 +9,17 @@
     "keyword" : ["exploration", "geochemical-exploration", "geochemical-maps", "geochemistry", "geology", "nercddc", "regional-geology"],
     "publisher": {
         "name": "Geological Society",
-        "mbox": "info@gs.org"
+        "email": "info@gs.org"
     },
-    "distribution": [{"accessURL": "http://www.bgs.ac.uk/gbase/geochemcd/home.html",
-                       "byteSize": null,
-                       "description": "Resource locator",
-                       "format": "text/html",
-                       "title": ""}]
+    "creator": {
+        "name": "John Doe",
+        "email": "johndoe@example.com"
+    },
+    "distribution": [{
+        "accessURL": "http://www.bgs.ac.uk/gbase/geochemcd/home.html",
+        "byteSize": null,
+        "description": "Resource locator",
+        "format": "text/html",
+        "title": ""
+    }]
 }

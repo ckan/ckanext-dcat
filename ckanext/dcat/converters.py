@@ -29,8 +29,8 @@ def dcat_to_ckan(dcat_dict):
     elif isinstance(dcat_publisher, dict) and dcat_publisher.get('name'):
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher.get('name')})
 
-        if dcat_publisher.get('mbox'):
-            package_dict['extras'].append({'key': 'dcat_publisher_email', 'value': dcat_publisher.get('mbox')})
+        if dcat_publisher.get('email'):
+            package_dict['extras'].append({'key': 'dcat_publisher_email', 'value': dcat_publisher.get('email')})
 
         if dcat_publisher.get('identifier'):
             package_dict['extras'].append({
@@ -45,8 +45,8 @@ def dcat_to_ckan(dcat_dict):
         if dcat_creator.get('name'):
             package_dict['extras'].append({'key': 'dcat_creator_name', 'value': dcat_creator.get('name')})
 
-        if dcat_creator.get('mbox'):
-            package_dict['extras'].append({'key': 'dcat_creator_email', 'value': dcat_creator.get('mbox')})
+        if dcat_creator.get('email'):
+            package_dict['extras'].append({'key': 'dcat_creator_email', 'value': dcat_creator.get('email')})
 
         if dcat_creator.get('identifier'):
             package_dict['extras'].append({
@@ -106,7 +106,7 @@ def ckan_to_dcat(package_dict):
             dcat_dict['publisher']['name'] = extra['value']
 
         elif extra['key'] == 'dcat_publisher_email':
-            dcat_dict['publisher']['mbox'] = extra['value']
+            dcat_dict['publisher']['email'] = extra['value']
 
         elif extra['key'] == 'dcat_publisher_id':
             dcat_dict['publisher']['identifier'] = extra['value']
@@ -116,7 +116,7 @@ def ckan_to_dcat(package_dict):
             dcat_dict['creator']['name'] = extra['value']
 
         elif extra['key'] == 'dcat_creator_email':
-            dcat_dict['creator']['mbox'] = extra['value']
+            dcat_dict['creator']['email'] = extra['value']
 
         elif extra['key'] == 'dcat_creator_id':
             dcat_dict['creator']['identifier'] = extra['value']
@@ -129,13 +129,13 @@ def ckan_to_dcat(package_dict):
     if not dcat_dict['publisher'].get('name') and package_dict.get('maintainer'):
         dcat_dict['publisher']['name'] = package_dict.get('maintainer')
         if package_dict.get('maintainer_email'):
-            dcat_dict['publisher']['mbox'] = package_dict.get('maintainer_email')
+            dcat_dict['publisher']['email'] = package_dict.get('maintainer_email')
 
     # Fallback for creator (if no name in extras, optionally use author)
     if not dcat_dict['creator'].get('name') and package_dict.get('author'):
         dcat_dict['creator']['name'] = package_dict.get('author')
         if package_dict.get('author_email'):
-            dcat_dict['creator']['mbox'] = package_dict.get('author_email')
+            dcat_dict['creator']['email'] = package_dict.get('author_email')
 
     dcat_dict['distribution'] = []
     for resource in package_dict.get('resources', []):
