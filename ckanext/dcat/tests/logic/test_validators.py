@@ -90,9 +90,27 @@ def test_dcat_date_invalid():
     invalid_values = [
         "2024+07",
         "not_a_date",
+        True
     ]
 
     for value in invalid_values:
         data = {key: value}
         with pytest.raises(Invalid):
             dcat_date(key, data, errors, {}), value
+
+
+def test_dcat_date_empty_values():
+
+    key = ("some_date",)
+    errors = {key: []}
+    valid_values = [
+        None,
+        False,
+        ""
+    ]
+
+    for value in valid_values:
+        data = {key: value}
+        dcat_date(key, data, errors, {}), value
+
+        assert data[key] is None
