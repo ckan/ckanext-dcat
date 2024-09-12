@@ -2,7 +2,8 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...HEAD)
 
-* Add support for hydra collection type PartialCollectionView
+* Fix DCAT date validator on empty values ([#297](https://github.com/ckan/ckanext-dcat/pull/297))
+* Add support for hydra collection type PartialCollectionView ([#299](https://github.com/ckan/ckanext-dcat/pull/299))
 
 ## [v2.0.0](https://github.com/ckan/ckanext-dcat/compare/v1.7.0...v2.0.0) - 2024-08-30
 
@@ -117,7 +118,7 @@
 
 ## [v1.1.0](https://github.com/ckan/ckanext-dcat/compare/v1.0.0...v1.1.0) - 2020-03-12
 
-* Python 3 support and new pytest based test suite ([#174](https://github.com/ckan/ckanext-dcat/pull/174))
+* Python 3 support and new pytest based test suite ([#174](https://github.com/ckan/ckanext-dcat/pull/174))painful
 * Fix `after_show - set_titles` in plugins.py ([#172](https://github.com/ckan/ckanext-dcat/pull/172))
 * Add support for DCT.rightsStatement in DCT.accessRights and DCT.rights ([#177](https://github.com/ckan/ckanext-dcat/pull/177))
 * Add support for additional vcard representations ([#178](https://github.com/ckan/ckanext-dcat/pull/178))
