@@ -468,6 +468,8 @@ class RDFProfile(object):
 
             publisher["type"] = self._object_value(agent, DCT.type)
 
+            publisher['identifier'] = self._object_value(agent, DCT.identifier)
+
         return publisher
 
     def _contact_details(self, subject, predicate):

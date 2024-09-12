@@ -113,6 +113,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert _get_extra_value('publisher_email') == 'contact@some.org'
         assert _get_extra_value('publisher_url') == 'http://some.org'
         assert _get_extra_value('publisher_type') == 'http://purl.org/adms/publishertype/NonProfitOrganisation'
+        assert _get_extra_value('publisher_identifier') == 'https://ror.org/05wg1m734'
         assert _get_extra_value('contact_name') == 'Point of Contact'
         # mailto gets removed for storage and is added again on output
         assert _get_extra_value('contact_email') == 'contact@some.org'

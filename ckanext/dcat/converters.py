@@ -28,7 +28,15 @@ def dcat_to_ckan(dcat_dict):
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher})
     elif isinstance(dcat_publisher, dict) and dcat_publisher.get('name'):
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher.get('name')})
-        package_dict['extras'].append({'key': 'dcat_publisher_email', 'value': dcat_publisher.get('mbox')})
+
+        if dcat_publisher.get('mbox'):
+            package_dict['extras'].append({'key': 'dcat_publisher_email', 'value': dcat_publisher.get('mbox')})
+
+        if dcat_publisher.get('identifier'):
+            package_dict['extras'].append({
+                'key': 'dcat_publisher_id',
+                'value': dcat_publisher.get('identifier')  # This could be a URI like https://ror.org/05wg1m734
+            })
 
     package_dict['extras'].append({
         'key': 'language',

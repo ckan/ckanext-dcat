@@ -66,6 +66,11 @@ dataset_fields:
 
     - field_name: type
       label: Type
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the publisher, such as a ROR ID.
+
   help_text: Entity responsible for making the dataset available.
 
 - field_name: license_id

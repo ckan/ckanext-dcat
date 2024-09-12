@@ -105,6 +105,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'publisher_email', 'value': 'publisher@example.com'},
                 {'key': 'publisher_url', 'value': 'http://example.com/publisher/home'},
                 {'key': 'publisher_type', 'value': 'http://purl.org/adms/publishertype/Company'},
+                {'key': 'publisher_identifier', 'value': 'https://ror.org/05wg1m734'},
             ]
 
 
@@ -121,6 +122,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert str(publisher) == extras['publisher_uri']
         assert self._triple(g, publisher, RDF.type, SCHEMA.Organization)
         assert self._triple(g, publisher, SCHEMA.name, extras['publisher_name'])
+        assert self._triple(g, publisher, SCHEMA.identifier, extras['publisher_identifier'])
 
         contact_point = self._triple(g, publisher, SCHEMA.contactPoint, None)[2]
         assert contact_point
@@ -144,6 +146,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'publisher_email', 'value': 'publisher@example.com'},
                 {'key': 'publisher_url', 'value': 'http://example.com/publisher/home'},
                 {'key': 'publisher_type', 'value': 'http://purl.org/adms/publishertype/Company'},
+                {'key': 'publisher_identifier', 'value': 'https://ror.org/05wg1m734'},
             ]
         }
         extras = self._extras(dataset)
@@ -158,6 +161,7 @@ class TestSchemaOrgProfileSerializeDataset(BaseSerializeTest):
         assert isinstance(publisher, BNode)
         assert self._triple(g, publisher, RDF.type, SCHEMA.Organization)
         assert self._triple(g, publisher, SCHEMA.name, extras['publisher_name'])
+        assert self._triple(g, publisher, SCHEMA.identifier, extras['publisher_identifier'])
 
         contact_point = self._triple(g, publisher, SCHEMA.contactPoint, None)[2]
         assert contact_point
