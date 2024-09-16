@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:dct="http://purl.org/dc/terms/"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:spdx="http://spdx.org/rdf/terms#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcatap="http://data.europa.eu/r5r/"
+  xmlns:dcatde="http://dcat-ap.de/def/dcatde/"
+  xmlns:locn="http://www.w3.org/ns/locn#"
+  xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+  xmlns:adms="http://www.w3.org/ns/adms#"
+>
+  <dcat:Dataset rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63">
+    <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+    <dct:description>Dieser Datensatz umfasst die Standorte der Liefer- und Abholservices (Gastronomie) in der Hanse- und Universitätsstadt Rostock mit Informationen zu Adresse, Art, Bezeichnung, Barrierefreiheit, Öffnungszeiten und Kontaktdaten. Die Ressourcen werden nur bei Bedarf aktualisiert.</dct:description>
+    <dcat:landingPage rdf:resource="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63"/>
+    <dct:identifier>c1be4007-d811-48fb-8818-2cb358b06a63</dct:identifier>
+    <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+    <dcat:keyword>gastronomiebetriebe</dcat:keyword>
+    <dcat:keyword>handel</dcat:keyword>
+    <dcat:keyword>handel-und-verbrauch</dcat:keyword>
+    <dcat:keyword>lebensmittel</dcat:keyword>
+    <dcat:keyword>nahrung</dcat:keyword>
+    <dcat:keyword>nahrungsmittelgewerbe</dcat:keyword>
+    <dcat:keyword>wirtschaft</dcat:keyword>
+    <dcat:keyword>ökonomie</dcat:keyword>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:39.642528</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-08T04:11:24.309486</dct:modified>
+    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+    <dcat:theme rdf:resource="http://publications.europa.eu/resource/authority/data-theme/ECON"/>
+    <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+    <dcat:contactPoint>
+      <vcard:Organization rdf:nodeID="N3347e837b0694aa3a61795f6309497e3">
+        <vcard:fn>Hanse- und Universitätsstadt Rostock – Kataster-, Vermessungs- und Liegenschaftsamt</vcard:fn>
+        <vcard:hasEmail rdf:resource="mailto:geodienste@rostock.de"/>
+      </vcard:Organization>
+    </dcat:contactPoint>
+    <dct:publisher>
+      <foaf:Organization rdf:about="https://www.opendata-hro.de/organization/b952e781-ab4c-456a-8e7a-2845f7efaf83">
+        <foaf:name>Hanse- und Universitätsstadt Rostock</foaf:name>
+      </foaf:Organization>
+    </dct:publisher>
+    <dct:spatial>
+      <dct:Location rdf:nodeID="Nb88c29ac9c6f477681f1f21455a6c631">
+        <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json">{"type":"Polygon","coordinates":[[[11.9936, 54.0486], [11.9936, 54.2466], [12.3045, 54.2466], [12.3045, 54.0486], [11.9936, 54.0486]]]}</locn:geometry>
+        <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POLYGON ((11.9936 54.0486, 11.9936 54.2466, 12.3045 54.2466, 12.3045 54.0486, 11.9936 54.0486))</locn:geometry>
+      </dct:Location>
+    </dct:spatial>
+    <dct:spatial>
+      <dct:Location rdf:nodeID="N6721f534b76f41e19a2e8e4bebbd7af3">
+        <locn:adminUnitL2 rdf:resource="http://dcat-ap.de/def/politicalGeocoding/regionalKey/130030000000"/>
+      </dct:Location>
+    </dct:spatial>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/8fccc5c3-a9cd-47bc-861d-8d32182c0729">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.json"/>
+        <dcat:downloadURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.json"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/geo+json"/>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/GEOJSON"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">147253.0</dcat:byteSize>
+        <spdx:checksum>
+          <spdx:Checksum rdf:nodeID="N3edaea9f63c546ef904b3dac84680357">
+            <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">1d5a3926327046c8fcd75652c6e44d3c74004c6727939f33fb05e16e324df241</spdx:checksumValue>
+            <spdx:algorithm rdf:resource="http://dcat-ap.de/def/hashAlgorithms/sha/256"/>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/339138d0-3ae9-4e79-8c7e-ab3ce8940bbb">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/geodienste/lieferservices/wms"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/WMS"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/16984156-24c6-4cf8-8f62-07b808d6185d">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/geodienste/lieferservices/wfs"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/WFS"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/4a6f51a2-51a1-40e3-b1cd-92c9dcc8a99c">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <dct:description>Diese Daten umfassen die Standorte der Liefer- und Abholservices (Gastronomie) in der Hanse- und Universitätsstadt Rostock mit Informationen zu Adresse, Art, Bezeichnung, Öffnungszeiten und Kontaktdaten.</dct:description>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/inspire/us-govserv-homedeliveryservices/download"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2023-02-08T12:25:41</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/e13d65b5-cae6-47cb-8432-ea5f5aa7c1c2">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <dct:description>Diese Karte umfasst die Standorte der Liefer- und Abholservices (Gastronomie) in der Hanse- und Universitätsstadt Rostock.</dct:description>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/inspire/us-govserv-homedeliveryservices/view"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2023-02-08T12:25:41</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/1b8abfa3-f8ba-4c16-9e6f-823fb838f439">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.xlsx"/>
+        <dcat:downloadURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.xlsx"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/XLSX"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">27256.0</dcat:byteSize>
+        <spdx:checksum>
+          <spdx:Checksum rdf:nodeID="N66d833a433fa4161b8ed421250b35ff8">
+            <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">f2f17b94406047f148bfa41fb5945eb9f2023d6661a3806031baba519de7ba73</spdx:checksumValue>
+            <spdx:algorithm rdf:resource="http://dcat-ap.de/def/hashAlgorithms/sha/256"/>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/ee7c9411-f35e-48a7-9129-843baf9e0393">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.csv"/>
+        <dcat:downloadURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.csv"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/text/csv"/>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/CSV"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">60744.0</dcat:byteSize>
+        <spdx:checksum>
+          <spdx:Checksum rdf:nodeID="N663489eeaae845c785e9744725496432">
+            <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">7cc6d258c20d5b5b507c8466900a381de8a349bb1a8118361c1a613e1b59fb14</spdx:checksumValue>
+            <spdx:algorithm rdf:resource="http://dcat-ap.de/def/hashAlgorithms/sha/256"/>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/01302e04-baf3-402f-8352-1ac780e46efe">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.gml"/>
+        <dcat:downloadURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.gml"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/gml+xml"/>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/GML"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">308724.0</dcat:byteSize>
+        <spdx:checksum>
+          <spdx:Checksum rdf:nodeID="N286bf246d9db4e5a8195bba8d34d0834">
+            <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">a407dd69e91861d98589ea9b14c39aa6972d56c2ce52d2dd3f0e0be8922fc6b7</spdx:checksumValue>
+            <spdx:algorithm rdf:resource="http://dcat-ap.de/def/hashAlgorithms/sha/256"/>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcat:distribution>
+      <dcat:Distribution rdf:about="https://www.opendata-hro.de/dataset/c1be4007-d811-48fb-8818-2cb358b06a63/resource/7badf4ff-8698-4bf3-9f82-70dc1458d31c">
+        <dct:title>Liefer- und Abholservices (Gastronomie)</dct:title>
+        <adms:status rdf:resource="http://purl.org/adms/status/Completed"/>
+        <dct:rights rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dct:license rdf:resource="http://dcat-ap.de/def/licenses/cc-zero"/>
+        <dcat:accessURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.kml"/>
+        <dcat:downloadURL rdf:resource="https://geo.sv.rostock.de/download/opendata/lieferservices/lieferservices.kml"/>
+        <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/DEU"/>
+        <dct:conformsTo>http://dcat-ap.de/def/dcatde/</dct:conformsTo>
+        <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/vnd.google-earth.kml+xml"/>
+        <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/KML"/>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2020-04-21T11:59:53</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-07T11:58:19</dct:modified>
+        <dcat:byteSize rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">241844.0</dcat:byteSize>
+        <spdx:checksum>
+          <spdx:Checksum rdf:nodeID="N92ed4e8483eb47cbb80aeef4d21e4795">
+            <spdx:checksumValue rdf:datatype="http://www.w3.org/2001/XMLSchema#hexBinary">788e8c33012ee44fbbfa1589277579fdc34211a6326962624789e182680307f2</spdx:checksumValue>
+            <spdx:algorithm rdf:resource="http://dcat-ap.de/def/hashAlgorithms/sha/256"/>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <dcatap:availability rdf:resource="http://publications.europa.eu/resource/authority/planned-availability/STABLE"/>
+        <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+      </dcat:Distribution>
+    </dcat:distribution>
+    <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+    <dcatap:hvdCategory rdf:resource="http://data.europa.eu/bna/c_e1da4e07"/>
+    <dcatde:politicalGeocodingLevelURI rdf:resource="http://dcat-ap.de/def/politicalGeocoding/Level/administrativeDistrict"/>
+    <dcatde:contributorID rdf:resource="http://dcat-ap.de/def/contributors/openDataHRO"/>
+    <dcatde:politicalGeocodingURI rdf:resource="http://dcat-ap.de/def/politicalGeocoding/regionalKey/130030000000"/>
+    <dcatde:geocodingDescription>Rostock</dcatde:geocodingDescription>
+    <dcatde:maintainer>
+      <foaf:Organization rdf:nodeID="N303eaac19d414fa18024a87867a1f2a8">
+        <foaf:name>Hanse- und Universitätsstadt Rostock – Kataster-, Vermessungs- und Liegenschaftsamt</foaf:name>
+        <foaf:mbox>geodienste@rostock.de</foaf:mbox>
+      </foaf:Organization>
+    </dcatde:maintainer>
+    <dct:creator>
+      <foaf:Organization rdf:nodeID="Nf63a77e9ee3d4043903b76e6733645d0">
+        <foaf:name>Hanse- und Universitätsstadt Rostock – Kataster-, Vermessungs- und Liegenschaftsamt</foaf:name>
+        <foaf:mbox>geodienste@rostock.de</foaf:mbox>
+      </foaf:Organization>
+    </dct:creator>
+  </dcat:Dataset>
+</rdf:RDF>

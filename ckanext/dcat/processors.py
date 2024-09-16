@@ -28,16 +28,26 @@ RDF_PROFILES_ENTRY_POINT_GROUP = 'ckan.rdf.profiles'
 RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
 COMPAT_MODE_CONFIG_OPTION = 'ckanext.dcat.compatibility_mode'
 
-DEFAULT_RDF_PROFILES = ['euro_dcat_ap_2']
+DEFAULT_RDF_PROFILES = ['euro_dcat_ap_3']
+
+
+def _get_default_rdf_profiles():
+    """Helper function used fo documenting the rdf profiles config option"""
+    return " ".join(DEFAULT_RDF_PROFILES)
+
+SUPPORTED_PAGINATION_COLLECTION_DESIGNS = [HYDRA.PartialCollectionView, HYDRA.PagedCollection]
 
 
 class RDFProcessor(object):
 
-    def __init__(self, profiles=None, compatibility_mode=False):
+    def __init__(self, profiles=None, dataset_type='dataset', compatibility_mode=False):
         '''
         Creates a parser or serializer instance
 
         You can optionally pass a list of profiles to be used.
+
+        A scheming dataset type can be provided, in which case the scheming schema
+        will be loaded by the base profile so it can be used by other profiles.
 
         In compatibility mode, some fields are modified to maintain
         compatibility with previous versions of the ckanext-dcat parsers
@@ -55,6 +65,8 @@ class RDFProcessor(object):
         if not self._profiles:
             raise RDFProfileException(
                 'No suitable RDF profiles could be loaded')
+
+        self.dataset_type = dataset_type
 
         if not compatibility_mode:
             compatibility_mode = p.toolkit.asbool(
@@ -115,11 +127,16 @@ class RDFParser(RDFProcessor):
         '''
         Returns the URL of the next page or None if there is no next page
         '''
-        for pagination_node in self.g.subjects(RDF.type, HYDRA.PagedCollection):
-            for o in self.g.objects(pagination_node, HYDRA.nextPage):
-                return str(o)
-        return None
+        for supported_collection_type in SUPPORTED_PAGINATION_COLLECTION_DESIGNS:
+            for pagination_node in self.g.subjects(RDF.type, supported_collection_type):
+                # Try to find HYDRA.next first
+                for o in self.g.objects(pagination_node, HYDRA.next):
+                    return str(o)
 
+                # If HYDRA.next is not found, try HYDRA.nextPage (deprecated)
+                for o in self.g.objects(pagination_node, HYDRA.nextPage):
+                    return str(o)
+        return None
 
     def parse(self, data, _format=None):
         '''
@@ -173,7 +190,11 @@ class RDFParser(RDFProcessor):
         for dataset_ref in self._datasets():
             dataset_dict = {}
             for profile_class in self._profiles:
-                profile = profile_class(self.g, self.compatibility_mode)
+                profile = profile_class(
+                    self.g,
+                    dataset_type=self.dataset_type,
+                    compatibility_mode=self.compatibility_mode
+                )
                 profile.parse_dataset(dataset_dict, dataset_ref)
 
             yield dataset_dict
@@ -209,19 +230,23 @@ class RDFSerializer(RDFProcessor):
             pagination_ref = BNode()
         self.g.add((pagination_ref, RDF.type, HYDRA.PagedCollection))
 
+        #  The predicates `nextPage`, `previousPage`, `firstPage`, `lastPage`
+        #  and `itemsPerPage` are deprecated and will be removed in the future
         items = [
-            ('next', HYDRA.nextPage),
-            ('previous', HYDRA.previousPage),
-            ('first', HYDRA.firstPage),
-            ('last', HYDRA.lastPage),
-            ('count', HYDRA.totalItems),
-            ('items_per_page', HYDRA.itemsPerPage),
+            ('next', [HYDRA.nextPage, HYDRA.next]),
+            ('previous', [HYDRA.previousPage, HYDRA.previous]),
+            ('first', [HYDRA.firstPage, HYDRA.first]),
+            ('last', [HYDRA.lastPage, HYDRA.last]),
+            ('count', [HYDRA.totalItems]),
+            ('items_per_page', [HYDRA.itemsPerPage]),
         ]
+
         for item in items:
-            key, predicate = item
+            key, predicates = item
             if paging_info.get(key):
-                self.g.add((pagination_ref, predicate,
-                            Literal(paging_info[key])))
+                for predicate in predicates:
+                    self.g.add((pagination_ref, predicate,
+                                Literal(paging_info[key])))
 
         return pagination_ref
 
@@ -238,7 +263,7 @@ class RDFSerializer(RDFProcessor):
         dataset_ref = URIRef(dataset_uri(dataset_dict))
 
         for profile_class in self._profiles:
-            profile = profile_class(self.g, self.compatibility_mode)
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
             profile.graph_from_dataset(dataset_dict, dataset_ref)
 
         return dataset_ref
@@ -256,7 +281,7 @@ class RDFSerializer(RDFProcessor):
         catalog_ref = URIRef(catalog_uri())
 
         for profile_class in self._profiles:
-            profile = profile_class(self.g, self.compatibility_mode)
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
             profile.graph_from_catalog(catalog_dict, catalog_ref)
 
         return catalog_ref
@@ -283,6 +308,22 @@ class RDFSerializer(RDFProcessor):
             output = self.g.serialize(format=_format)
 
         return output
+
+    def serialize_datasets(self, dataset_dicts, _format='xml'):
+        '''
+        Given a list of CKAN dataset dicts, returns an RDF serialization
+
+        The serialization format can be defined using the `_format` parameter.
+        It must be one of the ones supported by RDFLib, defaults to `xml`.
+
+        Returns a string with the serialized datasets
+        '''
+        out = []
+        for dataset_dict in dataset_dicts:
+            out.append(self.serialize_dataset(dataset_dict, _format))
+        return '\n'.join(out)
+
+
 
     def serialize_catalog(self, catalog_dict=None, dataset_dicts=None,
                           _format='xml', pagination_info=None):
@@ -366,7 +407,8 @@ class RDFSerializer(RDFProcessor):
                                  ('name', Literal, FOAF.name, True,),
                                  ('email', Literal, FOAF.mbox, False,),
                                  ('url', URIRef, FOAF.homepage,False,),
-                                 ('type', Literal, DCT.type, False,))
+                                 ('type', Literal, DCT.type, False,),
+                                 ('identifier', URIRef, DCT.identifier, False,))
 
             _pub = _get_from_extra('source_catalog_publisher')
             if _pub:
@@ -387,59 +429,3 @@ class RDFSerializer(RDFProcessor):
                     g.add((agent, predicate, _type(val)))
 
         return catalog_ref
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(
-        description='DCAT RDF - CKAN operations')
-    parser.add_argument('mode',
-                        default='consume',
-                        help='''
-Operation mode.
-`consume` parses DCAT RDF graphs to CKAN dataset JSON objects.
-`produce` serializes CKAN dataset JSON objects into DCAT RDF.
-                        ''')
-    parser.add_argument('file', nargs='?', type=argparse.FileType('r'),
-                        default=sys.stdin,
-                        help='Input file. If omitted will read from stdin')
-    parser.add_argument('-f', '--format',
-                        default='xml',
-                        help='''Serialization format (as understood by rdflib)
-                                eg: xml, n3 ... Defaults to \'xml\'.''')
-    parser.add_argument('-P', '--pretty',
-                        action='store_true',
-                        help='Make the output more human readable')
-    parser.add_argument('-p', '--profile', nargs='*',
-                        action='store',
-                        help='RDF Profiles to use, defaults to euro_dcat_ap_2')
-    parser.add_argument('-m', '--compat-mode',
-                        action='store_true',
-                        help='Enable compatibility mode')
-
-    parser.add_argument('-s', '--subcatalogs', action='store_true', dest='subcatalogs',
-                        default=False,
-                        help="Enable subcatalogs handling (dct:hasPart support)")
-    args = parser.parse_args()
-
-    contents = args.file.read()
-
-    config.update({DCAT_EXPOSE_SUBCATALOGS: args.subcatalogs})
-
-    if args.mode == 'produce':
-        serializer = RDFSerializer(profiles=args.profile,
-                                   compatibility_mode=args.compat_mode)
-
-        dataset = json.loads(contents)
-        out = serializer.serialize_dataset(dataset, _format=args.format)
-        print(out)
-    else:
-        parser = RDFParser(profiles=args.profile,
-                           compatibility_mode=args.compat_mode)
-
-        parser.parse(contents, _format=args.format)
-
-        ckan_datasets = [d for d in parser.datasets()]
-
-        indent = 4 if args.pretty else None
-        print(json.dumps(ckan_datasets, indent=indent))

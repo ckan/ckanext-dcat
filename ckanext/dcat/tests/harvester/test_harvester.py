@@ -27,13 +27,6 @@ import ckanext.dcat.harvesters.rdf
 
 
 
-
-# TODO move to ckanext-harvest
-@pytest.fixture
-def harvest_setup():
-    harvest_model.setup()
-
-
 @pytest.fixture
 def clean_queues():
     queue.purge_queues()
@@ -47,9 +40,7 @@ def reset_calls_counter():
     return wrapper
 
 
-class TestRDFHarvester(p.SingletonPlugin):
-
-    p.implements(IDCATRDFHarvester)
+class BaseTestRDFHarvester(object):
 
     calls = defaultdict(int)
     # change return values of after_parsing via this parameter
@@ -118,8 +109,14 @@ class TestRDFHarvester(p.SingletonPlugin):
         return package_schema
 
 
-class TestRDFNullHarvester(TestRDFHarvester):
+class TestRDFHarvester(p.SingletonPlugin, BaseTestRDFHarvester):
+
     p.implements(IDCATRDFHarvester)
+
+
+class TestRDFNullHarvester(p.SingletonPlugin, BaseTestRDFHarvester):
+    p.implements(IDCATRDFHarvester)
+
     def before_update(self, harvest_object, dataset_dict, temp_dict):
         super(TestRDFNullHarvester, self).before_update(harvest_object, dataset_dict, temp_dict)
         dataset_dict.clear()
@@ -129,7 +126,7 @@ class TestRDFNullHarvester(TestRDFHarvester):
         dataset_dict.clear()
 
 
-class TestRDFExceptionHarvester(TestRDFHarvester):
+class TestRDFExceptionHarvester(p.SingletonPlugin, BaseTestRDFHarvester):
     p.implements(IDCATRDFHarvester)
 
     raised_exception = False
@@ -624,7 +621,7 @@ class FunctionalHarvestTest(object):
         self._fetch_queue(num_objects)
 
 
-@pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index', 'harvest_setup', 'clean_queues')
+@pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index', 'clean_queues')
 @pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester')
 class TestDCATHarvestFunctional(FunctionalHarvestTest):
 
@@ -1118,7 +1115,6 @@ class TestDCATHarvestFunctional(FunctionalHarvestTest):
     'with_plugins',
     'clean_db',
     'clean_index',
-    'harvest_setup',
     'clean_queues',
 )
 @pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_harvester')
@@ -1506,7 +1502,6 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
                                status=405, content_type=content_type)
 
         harvest_source = self._create_harvest_source(url)
-
         # First run, will create two datasets as previously tested
         self._run_full_job(harvest_source['id'], num_objects=2)
 
@@ -1547,7 +1542,6 @@ class TestDCATHarvestFunctionalExtensionPoints(FunctionalHarvestTest):
     'with_plugins',
     'clean_db',
     'clean_index',
-    'harvest_setup',
     'clean_queues',
 )
 @pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_null_harvester')
@@ -1608,7 +1602,6 @@ class TestDCATHarvestFunctionalSetNull(FunctionalHarvestTest):
     'with_plugins',
     'clean_db',
     'clean_index',
-    'harvest_setup',
     'clean_queues',
 )
 @pytest.mark.ckan_config('ckan.plugins', 'dcat harvest dcat_rdf_harvester test_rdf_exception_harvester')

@@ -1,0 +1,27 @@
+[data-md-color-scheme="ckan"] {
+  --md-primary-fg-color:        #2980b9;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #90030C;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #2980b9;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #90030C;
+  --md-hue: 210;
+}
+
+
+[data-md-toggle="search"]:not(:checked) ~ .md-header .md-search__form::after {
+  position: absolute;
+  top: .3rem;
+  right: .3rem;
+  display: block;
+  padding: .1rem .4rem;
+  color: var(--md-default-bg-color);
+  font-weight: bold;
+  font-size: .8rem;
+  border: .05rem solid var(--md-default-bg-color--lighter);
+  border-radius: .1rem;
+  content: "/";
+}

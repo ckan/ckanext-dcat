@@ -1,0 +1,120 @@
+version: 1
+groups:
+  - annotation: General settings
+    options:
+
+      - key: ckanext.dcat.rdf.profiles
+        default_callable: 'ckanext.dcat.processors:_get_default_rdf_profiles'
+        description: |
+          RDF profiles to use when parsing and serializing. See https://github.com/ckan/ckanext-dcat#profiles
+          for more details.
+        example: 'euro_dcat_ap_2 my_local_ap'
+
+      - key: ckanext.dcat.translate_keys
+        type: bool
+        default: True
+        description: |
+          If set to True, the plugin will automatically translate the keys of the DCAT
+          fields used in the frontend (at least those present in the `ckanext/dcat/i18n`
+          po files).
+
+  - annotation: Parsers / Serializers settings
+    options:
+
+      - key: ckanext.dcat.output_spatial_format
+        type: list
+        default: 
+          - 'wkt'
+        description: |
+          Format to use for geometries when serializing RDF documents. The default is
+          recommended as is the format expected by GeoDCAT, alternatively you can
+          use `geojson` (or both, which will make SHACL validation fail)
+
+      - key: ckanext.dcat.resource.inherit.license
+        type: bool
+        default: False
+        description: |
+          If there is no license defined for a resource / distribution, inherit it from
+          the dataset.
+
+      - key: ckanext.dcat.normalize_ckan_format
+        type: bool
+        default: True
+        description: |
+          When true, the resource label will be tried to match against the standard
+          list of CKAN formats (https://github.com/ckan/ckan/blob/master/ckan/config/resource_formats.json)
+          This allows for instance to populate the CKAN resource format field
+          with a value that view plugins, etc will understand (`csv`, `xml`, etc.)
+
+      - key: ckanext.dcat.clean_tags
+        type: bool
+        default: False
+        description: |
+          Remove special characters from keywords (use the old munge_tag() CKAN function).
+          This is generally not needed.
+
+  - annotation: Endpoints settings
+    options:
+
+      - key: ckanext.dcat.enable_rdf_endpoints
+        default: True
+        description: |
+          Whether to expose the catalog and dataset endpoints with the RDF DCAT
+          serializations.
+        type: bool
+
+      - key: ckanext.dcat.base_uri
+        description: |
+          Base URI to use when generating URIs for all entities. It needs to be a valid URI value.
+        example: 'https://my-site.org/uri/'
+
+      - key: ckanext.dcat.catalog_endpoint
+        default: '/catalog.{_format}'
+        description: |
+          Custom route for the catalog endpoint. It should start with `/` and include the
+          `{_format}` placeholder.
+        example: '/dcat/catalog/{_format}'
+
+      - key: ckanext.dcat.datasets_per_page
+        default: 100
+        type: int
+        description: |
+          Default number of datasets returned by the catalog endpoint.
+
+      - key: ckanext.dcat.enable_content_negotiation
+        default: False
+        type: bool
+        description: |
+          Enable content negotiation in the main catalog and dataset endpoints. Note that
+          setting this to True overrides the core `home.index` and `dataset.read` endpoints.
+
+  - annotation: Harvester settings
+    options:
+
+      - key: ckanext.dcat.max_file_size
+        type: int
+        default: 50
+        description: |
+          Maximum file size that will be downloaded for parsing by the harvesters
+
+      - key: ckanext.dcat.expose_subcatalogs
+        type: bool
+        default: false
+        description: |
+          Store information about the origin catalog when harvesting datasets.
+          See https://github.com/ckan/ckanext-dcat#transitive-harvesting for more details.
+
+  - annotation: Deprecated options (will be removed in future versions)
+    options:
+
+      - key: ckanext.dcat.compatibility_mode
+        type: bool
+        default: False
+        description: |
+          Whether to modify some fields to maintain compatibility with previous versions
+          of the ckanext-dcat parsers.
+
+      - key: ckanext.dcat.json_endpoint
+        default: '/dcat.json'
+        description: |
+          Custom route to expose the legacy JSON endpoint

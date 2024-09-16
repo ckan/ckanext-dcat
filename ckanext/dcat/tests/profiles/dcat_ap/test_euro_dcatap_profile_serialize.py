@@ -1,6 +1,8 @@
 from builtins import str
 from builtins import object
 import json
+import uuid
+from decimal import Decimal
 
 import pytest
 
@@ -15,10 +17,12 @@ from geomet import wkt
 from ckantoolkit.tests import helpers, factories
 
 from ckanext.dcat import utils
-from ckanext.dcat.processors import RDFSerializer
-from ckanext.dcat.profiles import (DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
-                                   SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT, 
-                                   DISTRIBUTION_LICENSE_FALLBACK_CONFIG)
+from ckanext.dcat.processors import RDFSerializer, HYDRA
+from ckanext.dcat.profiles import (
+    DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
+    SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT,
+)
+from ckanext.dcat.profiles.euro_dcat_ap_base import DISTRIBUTION_LICENSE_FALLBACK_CONFIG
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.tests.utils import BaseSerializeTest
 
@@ -391,18 +395,24 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert str(publisher) == extras['publisher_uri']
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
         assert self._triple(g, publisher, DCT.type, URIRef(extras['publisher_type']))
 
     def test_publisher_org(self):
+        org_id = str(uuid.uuid4())
+        factories.Organization(
+            id=org_id,
+            name='publisher1',
+            title='Example Publisher from Org'
+        )
         dataset = {
             'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
             'name': 'test-dataset',
             'organization': {
-                'id': '',
+                'id': org_id,
                 'name': 'publisher1',
                 'title': 'Example Publisher from Org',
             }
@@ -416,7 +426,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         publisher = self._triple(g, dataset_ref, DCT.publisher, None)[2]
         assert publisher
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, dataset['organization']['title'])
 
     def test_publisher_no_uri(self):
@@ -438,7 +448,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert isinstance(publisher, BNode)
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
 
     def test_publisher_org_no_uri(self):
@@ -468,7 +478,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert publisher
         assert isinstance(publisher, BNode)
 
-        assert self._triple(g, publisher, RDF.type, FOAF.Organization)
+        assert self._triple(g, publisher, RDF.type, FOAF.Agent)
         assert self._triple(g, publisher, FOAF.name, extras['publisher_name'])
         assert self._triple(g, publisher, FOAF.mbox, extras['publisher_email'])
         assert self._triple(g, publisher, FOAF.homepage, URIRef(extras['publisher_url']))
@@ -494,8 +504,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert temporal
 
         assert self._triple(g, temporal, RDF.type, DCT.PeriodOfTime)
-        assert self._triple(g, temporal, SCHEMA.startDate, parse_date(extras['temporal_start']).isoformat(), XSD.dateTime)
-        assert self._triple(g, temporal, SCHEMA.endDate, parse_date(extras['temporal_end']).isoformat(), XSD.dateTime)
+        assert self._triple(g, temporal, SCHEMA.startDate, extras['temporal_start'], XSD.dateTime)
+        assert self._triple(g, temporal, SCHEMA.endDate, extras['temporal_end'], XSD.date)
 
     def test_spatial(self):
         dataset = {
@@ -521,9 +531,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, spatial, RDF.type, DCT.Location)
         assert self._triple(g, spatial, SKOS.prefLabel, extras['spatial_text'])
 
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 2
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
 
         # Geometry in WKT
         wkt_geom = wkt.dumps(json.loads(extras['spatial']), decimals=4)
@@ -548,11 +556,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
-
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_spatial_bad_json_no_wkt(self):
         dataset = {
@@ -573,11 +577,8 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         spatial = self._triple(g, dataset_ref, DCT.spatial, None)[2]
         assert spatial
         assert isinstance(spatial, BNode)
-        # Geometry in GeoJSON
-        assert self._triple(g, spatial, LOCN.geometry, extras['spatial'], GEOJSON_IMT)
 
-        # Geometry in WKT
-        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 1
+        assert len([t for t in g.triples((spatial, LOCN.geometry, None))]) == 0
 
     def test_distributions(self):
 
@@ -693,7 +694,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCT.modified, resource['modified'], XSD.dateTime)
 
         # Numbers
-        assert self._triple(g, distribution, DCAT.byteSize, float(resource['size']), XSD.decimal)
+        assert self._triple(g, distribution, DCAT.byteSize, Decimal(resource['size']), XSD.decimal)
 
         # Checksum
         checksum = self._triple(g, distribution, SPDX.checksum, None)[2]
@@ -1119,6 +1120,30 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, resource['hash_algorithm'])
 
+    @pytest.mark.parametrize("value,data_type", [
+        ("2024", XSD.gYear),
+        ("2024-05", XSD.gYearMonth),
+        ("2024-05-31", XSD.date),
+        ("2024-05-31T00:00:00", XSD.dateTime),
+        ("2024-05-31T12:30:01", XSD.dateTime),
+        ("2024-05-31T12:30:01.451243", XSD.dateTime),
+    ])
+    def test_dates_data_types(self, value, data_type):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'issued': value,
+        }
+
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        assert str(self._triple(g, dataset_ref, DCT.issued, None)[2]) == value
+        assert self._triple(g, dataset_ref, DCT.issued, None)[2].datatype == data_type
+
 
 class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
 
@@ -1249,6 +1274,77 @@ class TestEuroDCATAPProfileSerializeCatalog(BaseSerializeTest):
         dataset_title = list(g.objects(dataset_ref, DCT.title))
         assert len(dataset_title) == 1
         assert str(dataset_title[0]) == dataset['title']
+
+    def test_catalog_pagination(self):
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'test dataset',
+            'extras': [
+                {'key': 'source_catalog_title', 'value': 'Subcatalog example'},
+                {'key': 'source_catalog_homepage', 'value': 'http://subcatalog.example'},
+                {'key': 'source_catalog_description', 'value': 'Subcatalog example description'}
+            ]
+        }
+        catalog_dict = {
+            'title': 'My Catalog',
+            'description': 'An Open Data Catalog',
+            'homepage': 'http://example.com',
+            'language': 'de',
+        }
+
+        expected_first = 'http://subcatalog.example?page=1'
+        expected_next = 'http://subcatalog.example?page=2'
+        expected_last = 'http://subcatalog.example?page=3'
+
+        pagination = {
+            'count': 12,
+            'items_per_page': 5,
+            'current':expected_first,
+            'first':expected_first,
+            'last':expected_last,
+            'next':expected_next,
+        }
+
+        s = RDFSerializer(profiles=['euro_dcat_ap'])
+        g = s.g
+
+        s.serialize_catalog(catalog_dict, dataset_dicts=[dataset], pagination_info=pagination)
+
+        paged_collection = list(g.subjects(RDF.type, HYDRA.PagedCollection))
+        assert len(paged_collection) == 1
+
+        # Pagination item: next
+        next = list(g.objects(paged_collection[0], HYDRA.next))
+        assert len(next) == 1
+        assert str(next[0]) == expected_next
+        next_page = list(g.objects(paged_collection[0], HYDRA.nextPage))
+        assert len(next_page) == 1
+        assert str(next_page[0]) == expected_next
+
+        # Pagination item: previous
+        previous_page = list(g.objects(paged_collection[0], HYDRA.previousPage))
+        assert len(previous_page) == 0
+        previous = list(g.objects(paged_collection[0], HYDRA.previous))
+        assert len(previous) == 0
+
+        # Pagination item: last
+        last = list(g.objects(paged_collection[0], HYDRA.last))
+        assert len(last) == 1
+        assert str(last[0]) == expected_last
+        last_page = list(g.objects(paged_collection[0], HYDRA.lastPage))
+        assert len(last_page) == 1
+        assert str(last_page[0]) == expected_last
+
+        # Pagination item: count
+        total_items = list(g.objects(paged_collection[0], HYDRA.totalItems))
+        assert len(total_items) == 1
+        assert str(total_items[0]) == "12"
+
+        # Pagination item: items_per_page
+        items_per_page = list(g.objects(paged_collection[0], HYDRA.itemsPerPage))
+        assert len(items_per_page) == 1
+        assert str(items_per_page[0]) == "5"
 
     @pytest.mark.ckan_config(DISTRIBUTION_LICENSE_FALLBACK_CONFIG, 'true')
     def test_set_missing_license_for_resource(self):

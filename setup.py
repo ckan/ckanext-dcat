@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.5.1'
+version = '2.0.0'
 
 setup(
     name='ckanext-dcat',
@@ -36,13 +36,15 @@ setup(
     structured_data=ckanext.dcat.plugins:StructuredDataPlugin
 
     # Test plugins
-    test_rdf_harvester=ckanext.dcat.tests.test_harvester:TestRDFHarvester
-    test_rdf_null_harvester=ckanext.dcat.tests.test_harvester:TestRDFNullHarvester
-    test_rdf_exception_harvester=ckanext.dcat.tests.test_harvester:TestRDFExceptionHarvester
+    test_rdf_harvester=ckanext.dcat.tests.harvester.test_harvester:TestRDFHarvester
+    test_rdf_null_harvester=ckanext.dcat.tests.harvester.test_harvester:TestRDFNullHarvester
+    test_rdf_exception_harvester=ckanext.dcat.tests.harvester.test_harvester:TestRDFExceptionHarvester
 
     [ckan.rdf.profiles]
     euro_dcat_ap=ckanext.dcat.profiles:EuropeanDCATAPProfile
     euro_dcat_ap_2=ckanext.dcat.profiles:EuropeanDCATAP2Profile
+    euro_dcat_ap_3=ckanext.dcat.profiles:EuropeanDCATAP3Profile
+    euro_dcat_ap_scheming=ckanext.dcat.profiles:EuropeanDCATAPSchemingProfile
     schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
     [babel.extractors]

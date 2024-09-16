@@ -78,6 +78,7 @@ def field_labels():
         'publisher_email': _('Publisher email'),
         'publisher_url': _('Publisher URL'),
         'publisher_type': _('Publisher type'),
+        'publisher_identifier': _('Publisher identifier'),
         'contact_name': _('Contact name'),
         'contact_email': _('Contact email'),
         'contact_uri': _('Contact URI'),
@@ -409,6 +410,8 @@ def read_dataset_page(_id, _format):
     try:
         response = toolkit.get_action('dcat_dataset_show')({}, {'id': _id,
             'format': _format, 'profiles': _profiles})
+    except toolkit.NotAuthorized:
+        toolkit.abort(403)
     except toolkit.ObjectNotFound:
         toolkit.abort(404)
     except (toolkit.ValidationError, RDFProfileException) as e:

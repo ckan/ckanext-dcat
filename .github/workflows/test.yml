@@ -1,13 +1,15 @@
 name: Tests
+env:
+    COLUMNS: 120
 on: [push, pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.7'
+          python-version: '3.9'
       - name: Install requirements
         run: pip install flake8 pycodestyle
       - name: Check syntax
@@ -17,16 +19,22 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        ckan-version: ["2.10", 2.9]
+        include:
+          - ckan-version: "2.11"
+            ckan-image: "ckan/ckan-dev:2.11-py3.10"
+          - ckan-version: "2.10"
+            ckan-image: "ckan/ckan-dev:2.10-py3.10"
+          - ckan-version: "2.9"
+            ckan-image: "ckan/ckan-dev:2.9-py3.9"
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     container:
-      image: openknowledge/ckan-dev:${{ matrix.ckan-version }}
+      image: ${{ matrix.ckan-image }}
     services:
       solr:
-        image: ckan/ckan-solr:${{ matrix.ckan-version }}
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
       postgres:
         image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:
@@ -44,28 +52,28 @@ jobs:
       CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Install requirements
+    - uses: actions/checkout@v4
+    - name: Install requirements (common)
       run: |
         pip install -r requirements.txt
         pip install -r dev-requirements.txt
-    - name: Install requirements (common)
-      run: |
         pip install -e .
         # Replace default path to CKAN core config file with the one on the container
         sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
-    - name: Setup harvest extension
+    - name: Install requirements (2.9)
+      run: |
+        pip install -U pytest-rerunfailures
+      if: ${{ matrix.ckan-version == '2.9' }}
+    - name: Setup other extensions
       run: |
         git clone https://github.com/ckan/ckanext-harvest
         pip install -e ckanext-harvest
-        pip install -r ckanext-harvest/pip-requirements.txt
+        pip install -r ckanext-harvest/requirements.txt
+        git clone https://github.com/ckan/ckanext-scheming
+        pip install -e ckanext-scheming
     - name: Setup extension
       run: |
         ckan -c test.ini db init
-        ckan -c test.ini harvester initdb
+        ckan -c test.ini db pending-migrations --apply
     - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=xml --cov-append --disable-warnings ckanext/dcat/tests
-    - name: Upload coverage report to codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
+      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=term-missing --cov-append --disable-warnings ckanext/dcat/tests

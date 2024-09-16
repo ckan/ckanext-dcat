@@ -26,8 +26,8 @@ def _poor_mans_dict_diff(d1, d2):
                              if l.startswith(('-', '+'))])
 
 def test_ckan_to_dcat():
-    ckan_dict =_get_file_as_dict('full_ckan_dataset.json')
-    expected_dcat_dict =_get_file_as_dict('dataset.json')
+    ckan_dict =_get_file_as_dict('ckan/full_ckan_dataset.json')
+    expected_dcat_dict =_get_file_as_dict('ckan/dataset.json')
 
     dcat_dict = converters.ckan_to_dcat(ckan_dict)
 
@@ -35,8 +35,8 @@ def test_ckan_to_dcat():
         expected_dcat_dict, dcat_dict)
 
 def test_dcat_to_ckan():
-    dcat_dict =_get_file_as_dict('dataset.json')
-    expected_ckan_dict =_get_file_as_dict('ckan_dataset.json')
+    dcat_dict =_get_file_as_dict('ckan/dataset.json')
+    expected_ckan_dict =_get_file_as_dict('ckan/ckan_dataset.json')
 
     # Pop CKAN specific fields
     expected_ckan_dict.pop('id', None)
