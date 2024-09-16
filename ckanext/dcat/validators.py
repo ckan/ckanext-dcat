@@ -9,7 +9,13 @@ from ckantoolkit import (
     Invalid,
     _,
 )
-from ckanext.scheming.validation import scheming_validator
+
+try:
+    from ckanext.scheming.validation import scheming_validator
+except ImportError:
+    def scheming_validator(func):
+        return func
+
 
 # https://www.w3.org/TR/xmlschema11-2/#gYear
 regexp_xsd_year = re.compile(
