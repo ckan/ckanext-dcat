@@ -298,14 +298,14 @@ class EuropeanDCATAPProfile(RDFProfile):
             # Check if the value is an int and convert it to a string
             if isinstance(inchi, int):
                 inchi_str = str(inchi)
-                g.add((dataset_ref, DCAT.keywords, Literal(inchi_str)))
+                g.add((dataset_ref, DCAT.keyword, Literal(inchi_str)))
             elif isinstance(inchi, list):
                 # If it's a list, join elements into a single string
                 inchi_str = ", ".join([str(i) for i in inchi])  # Convert each item to string before joining
-                g.add((dataset_ref, DCAT.keywords, Literal(inchi_str)))
+                g.add((dataset_ref, DCAT.keyword, Literal(inchi_str)))
             else:
                 # If it's already a string, just add it
-                g.add((dataset_ref, DCAT.keywords, Literal(inchi)))
+                g.add((dataset_ref, DCAT.keyword, Literal(inchi)))
 
         # Dates
         items = [

@@ -166,7 +166,7 @@ class SchemaOrgProfile(RDFProfile):
                 inchi_str = ", ".join([str(i) for i in inchi])  # Convert each item to string before joining
                 self.g.add((dataset_ref, SCHEMA.keywords, Literal(inchi_str)))
             else:
-                # If it's already a string, just add it
+                # If it's already a string, just add it (handling as a single string)
                 self.g.add((dataset_ref, SCHEMA.keywords, Literal(inchi)))
 
     def _list_fields_graph(self, dataset_ref, dataset_dict):
