@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import logging
 from builtins import object
 import os
 import json
@@ -22,6 +22,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
 from ckanext.dcat import utils
 from ckanext.dcat.validators import dcat_validators
 
+logging = logging.getLogger(__name__)
 
 CUSTOM_ENDPOINT_CONFIG = 'ckanext.dcat.catalog_endpoint'
 TRANSLATE_KEYS_CONFIG = 'ckanext.dcat.translate_keys'
@@ -168,17 +169,24 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
         if schema:
             for field in schema['dataset_fields']:
                 if field['field_name'] in dataset_dict and 'repeating_subfields' in field:
-                    for item in dataset_dict[field['field_name']]:
-                        for key in item:
-                            value = item[key]
-                            if not isinstance(value, dict):
-                                # Index a flattened version
-                                new_key = f'extras_{field["field_name"]}__{key}'
-                                if not dataset_dict.get(new_key):
-                                    dataset_dict[new_key] = value
-                                else:
-                                    dataset_dict[new_key] += ' ' + value
+                    # Check if the field is a list before iterating
+                    if isinstance(dataset_dict[field['field_name']], list):
+                        for item in dataset_dict[field['field_name']]:
+                            if isinstance(item, dict):
+                                for key, value in item.items():
+                                    if not isinstance(value, dict):
+                                        # Index a flattened version
+                                        new_key = f'extras_{field["field_name"]}__{key}'
+                                        if not dataset_dict.get(new_key):
+                                            dataset_dict[new_key] = value
+                                        else:
+                                            dataset_dict[new_key] += ' ' + value
+                    else:
+                        # Log or handle the case where the field is not a list
+                        logging.debug(
+                            f"Expected list for field {field['field_name']}, but got {type(dataset_dict[field['field_name']])} for {dataset_dict['id']}")
 
+                    # Pop the field after processing
                     subfields = dataset_dict.pop(field['field_name'], None)
                     if field['field_name'] == 'spatial_coverage':
                         spatial = subfields

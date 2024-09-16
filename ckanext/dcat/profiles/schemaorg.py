@@ -154,7 +154,20 @@ class SchemaOrgProfile(RDFProfile):
             self.g.add((dataset_ref, SCHEMA.keywords, Literal(tag["name"])))
 
     def _inchi_graph(self, dataset_ref, dataset_dict):
-        self.g.add((dataset_ref,SCHEMA.keywords,Literal(dataset_dict.get("inchi"))))
+        inchi = dataset_dict.get("inchi")
+
+        if inchi is not None:
+            # Check if the value is an int and convert it to a string
+            if isinstance(inchi, int):
+                inchi_str = str(inchi)
+                self.g.add((dataset_ref, SCHEMA.keywords, Literal(inchi_str)))
+            elif isinstance(inchi, list):
+                # If it's a list, join elements into a single string
+                inchi_str = ", ".join([str(i) for i in inchi])  # Convert each item to string before joining
+                self.g.add((dataset_ref, SCHEMA.keywords, Literal(inchi_str)))
+            else:
+                # If it's already a string, just add it
+                self.g.add((dataset_ref, SCHEMA.keywords, Literal(inchi)))
 
     def _list_fields_graph(self, dataset_ref, dataset_dict):
         items = [
