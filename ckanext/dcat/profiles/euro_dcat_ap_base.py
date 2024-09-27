@@ -109,25 +109,30 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 dataset_dict["extras"].append({"key": key, "value": json.dumps(values)})
 
         # Contact details
-        contact = self._contact_details(dataset_ref, DCAT.contactPoint)
-        if not contact:
-            # adms:contactPoint was supported on the first version of DCAT-AP
-            contact = self._contact_details(dataset_ref, ADMS.contactPoint)
+        contacts = self._contact_details(dataset_ref, DCAT.contactPoint)
+        if not contacts:
+            # adms:contactPoint was supported in the first version of DCAT-AP
+            contacts = self._contact_details(dataset_ref, ADMS.contactPoint)
 
-        if contact:
-            for key in ("uri", "name", "email"):
-                if contact.get(key):
-                    dataset_dict["extras"].append(
-                        {"key": "contact_{0}".format(key), "value": contact.get(key)}
-                    )
+        # Ensure contacts is a list (even if it's None or a single contact for compatibility)
+        if contacts:
+            for index, contact in enumerate(contacts, start=1):
+                for key in ("uri", "name", "email"):
+                    if contact.get(key):
+                        dataset_dict["extras"].append(
+                            {"key": "contact_{0}_{1}".format(key, index), "value": contact.get(key)}
+                        )
 
         # Publisher
-        publisher = self._publisher(dataset_ref, DCT.publisher)
-        for key in ("uri", "name", "email", "url", "type", "identifier"):
-            if publisher.get(key):
-                dataset_dict["extras"].append(
-                    {"key": "publisher_{0}".format(key), "value": publisher.get(key)}
-                )
+        publishers = self._publisher(dataset_ref, DCT.publisher)
+
+        if publishers:
+            for index, publisher in enumerate(publishers, start=1):
+                for key in ("uri", "name", "email", "url", "type", "identifier"):
+                    if publisher.get(key):
+                        dataset_dict["extras"].append(
+                            {"key": "publisher_{0}_{1}".format(key, index), "value": publisher.get(key)}
+                        )
 
         # Temporal
         start, end = self._time_interval(dataset_ref, DCT.temporal)
