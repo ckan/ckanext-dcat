@@ -176,8 +176,6 @@ dataset_fields:
 - field_name: access_rights
   label: Access rights
   validators: ignore_missing unicode_safe
-  form_snippet: markdown.html
-  display_snippet: markdown.html
   help_text: Information that indicates whether the dataset is Open Data, has access restrictions or is not public.
 
 - field_name: alternate_identifier
@@ -321,6 +319,7 @@ resource_fields:
   # Note: this falls back to the standard resource url field
 - field_name: download_url
   label: Download URL
+  display_snippet: link.html
   help_text: URL that provides a direct link to a downloadable file (defaults to the standard resource URL).
 
 - field_name: issued
