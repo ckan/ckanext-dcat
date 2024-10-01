@@ -148,6 +148,7 @@ class RDFParser(RDFProcessor):
         # exceptions are not cached, add them here.
         # PluginException indicates that an unknown format was passed.
         except (SyntaxError, xml.sax.SAXParseException,
+                rdflib.exceptions.ParserError,
                 rdflib.plugin.PluginException, TypeError) as e:
 
             raise RDFParserException(e)
