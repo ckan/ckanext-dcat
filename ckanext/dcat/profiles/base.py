@@ -12,6 +12,7 @@ from ckan.model.license import LicenseRegister
 from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_year, is_year_month, is_date
+from typing import List
 
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
@@ -419,13 +420,13 @@ class RDFProfile(object):
         else:
             dataset_dict["extras"].append({"key": key, "value": value})
 
-    def _publisher(self, subject, predicate):
+    def _publisher(self, subject, predicate) -> List:
         """
-        Returns a dict with details about a dct:publisher entity, a foaf:Agent
+        Returns a list of dicts, each containing details about a dct:publisher entity, a foaf:Agent.
 
-        Both subject and predicate must be rdflib URIRef or BNode objects
+        Both subject and predicate must be rdflib URIRef or BNode objects.
 
-        Examples:
+        Examples of a single publisher entry:
 
         <dct:publisher>
             <foaf:Organization rdf:about="http://orgs.vocab.org/some-org">
@@ -436,43 +437,41 @@ class RDFProfile(object):
             </foaf:Organization>
         </dct:publisher>
 
-        {
-            'uri': 'http://orgs.vocab.org/some-org',
-            'name': 'Publishing Organization for dataset 1',
-            'email': 'contact@some.org',
-            'url': 'http://some.org',
-            'type': 'http://purl.org/adms/publishertype/NonProfitOrganisation',
-        }
+        The resulting list:
+        [
+            {
+                'uri': 'http://orgs.vocab.org/some-org',
+                'name': 'Publishing Organization for dataset 1',
+                'email': 'contact@some.org',
+                'url': 'http://some.org',
+                'type': 'http://purl.org/adms/publishertype/NonProfitOrganisation',
+                'identifier': ''
+            },
+            ...
+        ]
 
-        <dct:publisher rdf:resource="http://publications.europa.eu/resource/authority/corporate-body/EURCOU" />
-
-        {
-            'uri': 'http://publications.europa.eu/resource/authority/corporate-body/EURCOU'
-        }
-
-        Returns keys for uri, name, email, url and type with the values set to
-        an empty string if they could not be found
+        Returns keys for uri, name, email, url, type, and identifier with values
+        set to an empty string if they could not be found.
         """
 
-        publisher = {}
+        publishers = []  # Initialize an empty list to hold multiple publisher entries
 
+        # Iterate over all matching publisher agents
         for agent in self.g.objects(subject, predicate):
+            publisher = {
+                "uri": str(agent) if isinstance(agent, term.URIRef) else "",
+                "name": self._object_value(agent, FOAF.name),
+                "email": self._object_value(agent, FOAF.mbox),
+                "url": self._object_value(agent, FOAF.homepage),
+                "type": self._object_value(agent, DCT.type),
+                "identifier": self._object_value(agent, DCT.identifier)
+            }
 
-            publisher["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
+            publishers.append(publisher)
 
-            publisher["name"] = self._object_value(agent, FOAF.name)
+        return publishers  # Return the list of publisher dictionaries
 
-            publisher["email"] = self._object_value(agent, FOAF.mbox)
-
-            publisher["url"] = self._object_value(agent, FOAF.homepage)
-
-            publisher["type"] = self._object_value(agent, DCT.type)
-
-            publisher['identifier'] = self._object_value(agent, DCT.identifier)
-
-        return publisher
-
-    def _contact_details(self, subject, predicate):
+    def _contact_details(self, subject, predicate) -> List:
         """
         Returns a dict with details about a vcard expression
 
@@ -482,21 +481,18 @@ class RDFProfile(object):
         an empty string if they could not be found
         """
 
-        contact = {}
+        contact_list = []
 
         for agent in self.g.objects(subject, predicate):
+            contact = {
+                'uri': (str(agent) if isinstance(agent, URIRef)
+                        else self._get_vcard_property_value(agent, VCARD.hasUID)),
+                'name': self._get_vcard_property_value(agent, VCARD.hasFN, VCARD.fn),
+                'email': self._without_mailto(self._get_vcard_property_value(agent, VCARD.hasEmail))}
 
-            contact["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
+            contact_list.append(contact)
 
-            contact["name"] = self._get_vcard_property_value(
-                agent, VCARD.hasFN, VCARD.fn
-            )
-
-            contact["email"] = self._without_mailto(
-                self._get_vcard_property_value(agent, VCARD.hasEmail)
-            )
-
-        return contact
+        return contact_list
 
     def _parse_geodata(self, spatial, datatype, cur_value):
         """
