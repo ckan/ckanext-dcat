@@ -199,3 +199,40 @@ def test_validate_dcat_ap_3_graph():
     ]
 
     assert set(failures) - set(known_failures) == set(), results_text
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "dcat_us_3")
+def test_validate_dcat_us_3_graph():
+
+    graph = graph_from_dataset("ckan_full_dataset_dcat_us_vocabularies.json")
+
+    path = _get_shacl_file_path("dcat-us_3.0_shacl_shapes.ttl")
+    r = validate(graph, shacl_graph=path)
+    conforms, results_graph, results_text = r
+
+    failures = [
+        str(t[2])
+        for t in results_graph.triples(
+            (
+                None,
+                URIRef("http://www.w3.org/ns/shacl#resultMessage"),
+                None,
+            )
+        )
+    ]
+
+    known_failures = [
+        "Value does not have class skos:Concept",
+        "Value does not have class dcat:Dataset",
+    ]
+
+    assert set(failures) - set(known_failures) == set(), results_text
