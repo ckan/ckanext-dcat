@@ -60,7 +60,7 @@ def _results_count(results_graph):
 )
 def test_validate_dcat_ap_2_graph_shapes():
 
-    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2.json")
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap.json")
 
     # dcat-ap_2.1.1_shacl_shapes.ttl: constraints concerning existance, domain and
     # literal range, and cardinalities.
@@ -84,7 +84,7 @@ def test_validate_dcat_ap_2_graph_shapes():
 )
 def test_validate_dcat_ap_2_graph_shapes_recommended():
 
-    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2.json")
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap.json")
 
     # dcat-ap_2.1.1_shacl_shapes_recommended.ttl: constraints concerning existance
     # of recommended properties.
@@ -99,7 +99,7 @@ def test_validate_dcat_ap_2_graph_shapes_recommended():
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_2")
 def test_validate_dcat_ap_2_legacy_graph_shapes():
 
-    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_legacy.json")
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_legacy.json")
 
     # dcat-ap_2.1.1_shacl_shapes.ttl: constraints concerning existance, domain and
     # literal range, and cardinalities.
@@ -114,7 +114,7 @@ def test_validate_dcat_ap_2_legacy_graph_shapes():
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_2")
 def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
 
-    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_legacy.json")
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_legacy.json")
 
     # dcat-ap_2.1.1_shacl_shapes_recommended.ttl: constraints concerning existance
     # of recommended properties.
@@ -138,7 +138,7 @@ def test_validate_dcat_ap_2_legacy_graph_shapes_recommended():
 )
 def test_validate_dcat_ap_2_graph_shapes_range():
 
-    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_vocabularies.json")
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_vocabularies.json")
 
     # dcat-ap_2.1.1_shacl_range.ttl: constraints concerning object range
     path = _get_shacl_file_path("dcat-ap_2.1.1_shacl_range.ttl")
@@ -176,7 +176,7 @@ def test_validate_dcat_ap_2_graph_shapes_range():
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
 def test_validate_dcat_ap_3_graph():
 
-    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_2_vocabularies.json")
+    graph = graph_from_dataset("ckan_full_dataset_dcat_ap_vocabularies.json")
 
     path = _get_shacl_file_path("dcat-ap_3_shacl_shapes.ttl")
     r = validate(graph, shacl_graph=path)
