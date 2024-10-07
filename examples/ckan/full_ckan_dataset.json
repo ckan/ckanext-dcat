@@ -1,6 +1,6 @@
 {
-    "author": null,
-    "author_email": null,
+    "author": "John Doe",
+    "author_email": "johndoe@example.com",
     "extras": [
         {
             "__extras": {

@@ -97,6 +97,15 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
                     "identifier": "http://example.org/publisher-id",
                 },
             ],
+            "creator": [
+                {
+                    "name": "Test Creator",
+                    "email": "creator@example.org",
+                    "url": "https://example.org/creator",
+                    "type": "person",
+                    "identifier": "http://example.org/creator-id",
+                }
+            ],
             "temporal_coverage": [
                 {"start": "1905-03-01", "end": "2013-01-05"},
                 {"start": "2024-04-10", "end": "2024-05-29"},
@@ -308,6 +317,38 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             DCT.identifier,
             URIRef(dataset_dict["publisher"][0]["identifier"])
         )
+
+        creator = [t for t in g.triples((dataset_ref, DCT.creator, None))]
+
+        assert len(creator) == 1
+        assert self._triple(
+            g, creator[0][2], FOAF.name, dataset_dict["creator"][0]["name"]
+        )
+        assert self._triple(
+            g,
+            creator[0][2],
+            VCARD.hasEmail,
+            URIRef("mailto:" + dataset_dict["creator"][0]["email"]),
+        )
+        assert self._triple(
+            g,
+            creator[0][2],
+            FOAF.homepage,
+            URIRef(dataset_dict["creator"][0]["url"]),
+        )
+        assert self._triple(
+            g,
+            creator[0][2],
+            DCT.type,
+            dataset_dict["creator"][0]["type"],
+        )
+        assert self._triple(
+            g,
+            creator[0][2],
+            DCT.identifier,
+            URIRef(dataset_dict["creator"][0]["identifier"])
+        )
+
 
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
 

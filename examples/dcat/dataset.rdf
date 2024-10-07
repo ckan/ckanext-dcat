@@ -78,6 +78,15 @@
             <dct:identifier rdf:resource="https://ror.org/05wg1m734"/>
         </foaf:Organization>
     </dct:publisher>
+    <dct:creator>
+        <foaf:Organization rdf:about="http://example.org/creator-org">
+            <foaf:name>Creating Organization for dataset 1</foaf:name>
+            <foaf:mbox>creator@example.org</foaf:mbox>
+            <foaf:homepage>http://example.org</foaf:homepage>
+            <dct:type rdf:resource="http://purl.org/adms/publishertype/NonProfitOrganisation"/>
+            <dct:identifier rdf:resource="https://ror.org/05wg1m735"/>
+        </foaf:Organization>
+    </dct:creator>
     <dcat:distribution>
         <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
             <dct:title>Some website</dct:title>
