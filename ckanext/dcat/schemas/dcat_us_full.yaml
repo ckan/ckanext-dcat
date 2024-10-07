@@ -147,7 +147,7 @@ dataset_fields:
   # Note: CKAN will generate a unique identifier for each dataset
 - field_name: identifier
   label: Identifier
-  help_text: A unique identifier of the dataset.
+  help_text: A unique identifier of the dataset, if not provided it will fall back to CKAN's internal id.
 
 - field_name: frequency
   label: Frequency
@@ -353,6 +353,10 @@ resource_fields:
   label: Download URL
   display_snippet: link.html
   help_text: URL that provides a direct link to a downloadable file (defaults to the standard resource URL).
+
+- field_name: identifier
+  label: Identifier
+  help_text: A unique identifier of the dataset, if not provided it will fall back to CKAN's internal id.
 
 - field_name: issued
   label: Release date

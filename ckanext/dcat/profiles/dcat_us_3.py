@@ -49,27 +49,29 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
 
         self._graph_from_catalog_base(catalog_dict, catalog_ref)
 
-    def _graph_from_dataset_v3(self, dataset_dict, dataset_ref):
+    def _parse_dataset_v3_us(self, dataset_dict, dataset_ref):
 
-        # byteSize decimal -> nonNegativeInteger
-        for subject, predicate, object in self.g.triples((None, DCAT.byteSize, None)):
-            if object and object.datatype == XSD.decimal:
-                self.g.remove((subject, predicate, object))
+        for distribution_ref in self._distributions(dataset_ref):
 
-                self.g.add(
-                    (
-                        subject,
-                        predicate,
-                        Literal(int(object), datatype=XSD.nonNegativeInteger),
-                    )
-                )
+            # Distribution identifier
+            value = self._object_value(distribution_ref, DCT.identifier)
+            if value:
+                for resource_dict in dataset_dict.get("resources", []):
+                    if resource_dict["distribution_ref"] == str(distribution_ref):
+                        resource_dict["identifier"] = value
 
-        # Other identifiers
-        value = self._get_dict_value(dataset_dict, "alternate_identifier")
-        if value:
-            items = self._read_list_value(value)
-            for item in items:
-                identifier = BNode()
-                self.g.add((dataset_ref, ADMS.identifier, identifier))
-                self.g.add((identifier, RDF.type, ADMS.Identifier))
-                self.g.add((identifier, SKOS.notation, Literal(item)))
+    def _graph_from_dataset_v3_us(self, dataset_dict, dataset_ref):
+
+        for resource_dict in dataset_dict.get("resources", []):
+
+            distribution_ref = CleanedURIRef(resource_uri(resource_dict))
+
+            # Distribution identifier
+            self._add_triple_from_dict(
+                resource_dict,
+                distribution_ref,
+                DCT.identifier,
+                "identifier",
+                fallbacks=["guid", "id"],
+                _type=URIRefOrLiteral,
+            )

@@ -91,6 +91,7 @@
         <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
             <dct:title>Some website</dct:title>
             <dct:description>A longer description</dct:description>
+            <dct:identifier>https://example.org/distributions/1</dct:identifier>
             <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-11</dct:issued>
             <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-01T00:04:06</dct:modified>
             <dct:license rdf:resource="http://creativecommons.org/licenses/by-nc/2.0/"/>

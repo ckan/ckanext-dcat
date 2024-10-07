@@ -29,17 +29,17 @@ from ckanext.dcat.profiles import (
 DCAT_AP_PROFILES = ["dcat_us_3"]
 
 
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_us_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "dcat_us_3")
 class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
-    @pytest.mark.usefixtures("with_plugins", "clean_db")
-    @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
-    @pytest.mark.ckan_config(
-        "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_us_full.yaml"
-    )
-    @pytest.mark.ckan_config(
-        "scheming.presets",
-        "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
-    )
-    @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "dcat_us_3")
     def test_e2e_ckan_to_dcat(self):
         """
         Create a dataset using the scheming schema, check that fields
@@ -82,7 +82,9 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
         )
         assert self._triple(g, dataset_ref, DCT.type, URIRef(dataset["dcat_type"]))
         assert self._triple(g, dataset_ref, ADMS.versionNotes, dataset["version_notes"])
-        assert self._triple(g, dataset_ref, DCT.accessRights, URIRef(dataset["access_rights"]))
+        assert self._triple(
+            g, dataset_ref, DCT.accessRights, URIRef(dataset["access_rights"])
+        )
         assert self._triple(
             g,
             dataset_ref,
@@ -332,3 +334,53 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
         ]
         assert endpoint_urls == resource["access_services"][0]["endpoint_url"]
 
+    def test_distribution_identifier(self):
+
+        dataset_dict = {
+            "name": "test-dcat-us",
+            "description": "Test",
+            "resources": [
+                {
+                    "id": "89b67e5b-d0e1-4bc3-a75a-59f21c66ebc0",
+                    "name": "some data",
+                    "identifier": "https://example.org/distributions/1",
+                }
+            ],
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        resource = dataset_dict["resources"][0]
+
+        assert self._triple(
+            g, distribution_ref, DCT.identifier, URIRef(resource["identifier"])
+        )
+
+    def test_distribution_identifier_falls_back_to_id(self):
+
+        dataset_dict = {
+            "name": "test-dcat-us",
+            "description": "Test",
+            "resources": [
+                {
+                    "id": "89b67e5b-d0e1-4bc3-a75a-59f21c66ebc0",
+                    "name": "some data",
+                }
+            ],
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        resource = dataset_dict["resources"][0]
+
+        assert self._triple(
+            g, distribution_ref, DCT.identifier, resource["id"]
+        )

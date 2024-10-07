@@ -112,6 +112,7 @@ class TestSchemingParseSupport(BaseParseTest):
 
         # Resources: standard fields
         assert resource["license"] == "http://creativecommons.org/licenses/by-nc/2.0/"
+        assert resource["identifier"] == "https://example.org/distributions/1"
         assert resource["rights"] == "Some statement about rights"
         assert resource["issued"] == "2012-05-11"
         assert resource["modified"] == "2012-05-01T00:04:06"
