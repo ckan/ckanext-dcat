@@ -58,6 +58,13 @@
             "email": "contact2@example.org"
         }
     ],
+    "creator": [
+        {
+            "name": "Test Creator",
+            "email": "creator@example.org",
+            "url": "https://example.org"
+        }
+    ],
     "publisher": [
         {
             "name": "Test Publisher",
