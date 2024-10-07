@@ -1,18 +1,13 @@
-from rdflib import Literal, BNode
-
 from ckanext.dcat.profiles import (
-    DCAT,
-    XSD,
-    SKOS,
-    ADMS,
-    RDF,
+    DCT,
 )
+from ckanext.dcat.utils import resource_uri
 
-from .euro_dcat_ap_2 import EuropeanDCATAP2Profile
-from .euro_dcat_ap_scheming import EuropeanDCATAPSchemingProfile
+from .base import URIRefOrLiteral, CleanedURIRef
+from .euro_dcat_ap_3 import EuropeanDCATAP3Profile
 
 
-class DCATUS3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfile):
+class DCATUS3Profile(EuropeanDCATAP3Profile):
     """
     An RDF profile based on the DCAT-US 3 for data portals in the US
     """
@@ -27,6 +22,9 @@ class DCATUS3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfile):
 
         # DCAT AP v2 scheming fields
         dataset_dict = self._parse_dataset_v2_scheming(dataset_dict, dataset_ref)
+
+        # DCAT US v3 properties also applied to higher versions
+        self._parse_dataset_v3_us(dataset_dict, dataset_ref)
 
         return dataset_dict
 
@@ -43,6 +41,9 @@ class DCATUS3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfile):
 
         # DCAT AP v3 properties also applied to higher versions
         self._graph_from_dataset_v3(dataset_dict, dataset_ref)
+
+        # DCAT US v3 properties also applied to higher versions
+        self._graph_from_dataset_v3_us(dataset_dict, dataset_ref)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
