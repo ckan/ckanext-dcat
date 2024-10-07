@@ -59,18 +59,33 @@
             "email": "contact2@example.org"
         }
     ],
+    "creator": [
+        {
+            "name": "Test Creator",
+            "email": "creator@example.org",
+            "url": "https://example.org",
+            "identifier": "http://example.org/creator-id",
+            "type": "public_body"
+        }
+    ],
     "publisher": [
         {
             "name": "Test Publisher",
             "email": "publisher@example.org",
             "url": "https://example.org",
+            "identifier": "http://example.org/publisher-id",
             "type": "public_body"
         }
     ],
     "temporal_coverage": [
         {
+
             "start": "1905-03-01",
             "end": "2013-01-05"
+        },
+        {
+            "start": "2024-04-10",
+            "end": "2024-05-29"
         }
     ],
     "temporal_resolution": "PT15M",
