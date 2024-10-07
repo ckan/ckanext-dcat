@@ -204,7 +204,7 @@ def test_validate_dcat_ap_3_graph():
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_us_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
@@ -218,6 +218,9 @@ def test_validate_dcat_us_3_graph():
     path = _get_shacl_file_path("dcat-us_3.0_shacl_shapes.ttl")
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r
+
+    with open("shacl.txt", "w") as f:
+        f.write(results_text)
 
     failures = [
         str(t[2])
