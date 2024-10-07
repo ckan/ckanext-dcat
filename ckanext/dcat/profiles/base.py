@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 from rdflib import term, URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
+from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS, ORG
 from geomet import wkt, InvalidGeoJSONException
 
 from ckantoolkit import config, url_for, asbool, aslist, get_action, ObjectNotFound
@@ -39,6 +39,7 @@ namespaces = {
     "locn": LOCN,
     "gsp": GSP,
     "owl": OWL,
+    "org": ORG,
     "spdx": SPDX,
 }
 

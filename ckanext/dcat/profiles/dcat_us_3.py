@@ -1,9 +1,14 @@
+from rdflib import Literal
+
 from ckanext.dcat.profiles import (
     DCT,
+    FOAF,
+    RDF,
+    SKOS,
 )
 from ckanext.dcat.utils import resource_uri
 
-from .base import URIRefOrLiteral, CleanedURIRef
+from .base import URIRefOrLiteral, CleanedURIRef, ORG
 from .euro_dcat_ap_3 import EuropeanDCATAP3Profile
 
 
@@ -61,6 +66,19 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                         resource_dict["identifier"] = value
 
     def _graph_from_dataset_v3_us(self, dataset_dict, dataset_ref):
+
+        g = self.g
+
+        for publisher_ref in g.objects(dataset_ref, DCT.publisher):
+
+            # Use org:Organization instead of foaf:Agent
+            g.remove((publisher_ref, RDF.type, None))
+            g.add((publisher_ref, RDF.type, ORG.Organization))
+
+            # Add skos:prefLabel
+            name = self._object_value(publisher_ref, FOAF.name)
+            if name:
+                g.add((publisher_ref, SKOS.prefLabel, Literal(name)))
 
         for resource_dict in dataset_dict.get("resources", []):
 
