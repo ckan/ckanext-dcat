@@ -173,20 +173,6 @@
                 "http://id.loc.gov/vocabulary/iso639-1/en",
                 "http://id.loc.gov/vocabulary/iso639-1/es",
                 "http://id.loc.gov/vocabulary/iso639-1/ca"
-            ],
-            "access_services": [
-                {
-                    "title": "Access Service 1",
-                    "endpoint_description": "https://example.org/endpoint_description",
-                    "endpoint_url": [
-                        "https://example.org/access_service/1",
-                        "https://example.org/access_service/2"
-                    ],
-                    "serves_dataset": [
-                        "https://example.org/dataset/1",
-                        "https://example.org/dataset/2"
-                    ]
-                }
             ]
         }
     ]
