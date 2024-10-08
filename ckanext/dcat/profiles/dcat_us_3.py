@@ -1,6 +1,7 @@
 from rdflib import Literal
 
 from ckanext.dcat.profiles import (
+    DCAT,
     DCT,
     FOAF,
     RDF,
@@ -68,6 +69,16 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
     def _graph_from_dataset_v3_us(self, dataset_dict, dataset_ref):
 
         g = self.g
+
+        # Remove foaf:Document class from landing page and documentation if there
+        # is no title defined for them
+        # See Usage note in https://doi-do.github.io/dcat-us/#properties-for-document
+        for page_ref in g.objects(dataset_ref, DCAT.landingPage):
+            if not len([t for t in g.triples((page_ref, DCT.title, None))]):
+                g.remove((page_ref, RDF.type, None))
+        for doc_ref in g.objects(dataset_ref, FOAF.page):
+            if not len([t for t in g.triples((page_ref, DCT.title, None))]):
+                g.remove((doc_ref, RDF.type, None))
 
         for publisher_ref in g.objects(dataset_ref, DCT.publisher):
 
