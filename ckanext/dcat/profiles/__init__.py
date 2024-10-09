@@ -6,6 +6,7 @@ from .base import (
     RDFS,
     DCAT,
     DCATAP,
+    DCATUS,
     DCT,
     ADMS,
     VCARD,

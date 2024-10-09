@@ -76,9 +76,22 @@
             "start": "2024-04-10",
             "end": "2024-05-29"
         }
-
     ],
     "temporal_resolution": "PT15M",
+    "bbox": [
+        {
+            "west": -179.15,
+            "east": -129.98,
+            "north": 71.54,
+            "south": 51.21
+        },
+        {
+            "west": -125.0,
+            "east": -66.9,
+            "north": 49.4,
+            "south": 24.4
+        }
+    ],
     "spatial_coverage": [
         {
             "geom": {

@@ -11,9 +11,8 @@ from ckanext.dcat.tests.utils import BaseSerializeTest
 
 from ckanext.dcat import utils
 from ckanext.dcat.profiles import (
-    RDF,
     DCAT,
-    DCATAP,
+    DCATUS,
     DCT,
     ADMS,
     XSD,
@@ -317,7 +316,7 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
 
         # Resources: statements
         statement = [s for s in g.objects(distribution_ref, DCT.rights)][0]
-        assert self._triple(g, statement, RDFS.label, resource['rights'])
+        assert self._triple(g, statement, RDFS.label, resource["rights"])
 
     def test_distribution_identifier(self):
 
@@ -366,6 +365,48 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         resource = dataset_dict["resources"][0]
 
+        assert self._triple(g, distribution_ref, DCT.identifier, resource["id"])
+
+    def test_bbox(self):
+        dataset_dict = {
+            "name": "test-dcat-us",
+            "description": "Test",
+            "bbox": [
+                {"west": -179.15, "east": -129.98, "north": 71.54, "south": 51.21}
+            ],
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        bbox_ref = [s for s in g.objects(dataset_ref, DCATUS.geographicBoundingBox)][0]
         assert self._triple(
-            g, distribution_ref, DCT.identifier, resource["id"]
+            g,
+            bbox_ref,
+            DCATUS.westBoundingLongitude,
+            dataset_dict["bbox"][0]["west"],
+            data_type=XSD.decimal,
+        )
+        assert self._triple(
+            g,
+            bbox_ref,
+            DCATUS.eastBoundingLongitude,
+            dataset_dict["bbox"][0]["east"],
+            data_type=XSD.decimal,
+        )
+        assert self._triple(
+            g,
+            bbox_ref,
+            DCATUS.northBoundingLatitude,
+            dataset_dict["bbox"][0]["north"],
+            data_type=XSD.decimal,
+        )
+        assert self._triple(
+            g,
+            bbox_ref,
+            DCATUS.southBoundingLatitude,
+            dataset_dict["bbox"][0]["south"],
+            data_type=XSD.decimal,
         )

@@ -181,6 +181,23 @@ dataset_fields:
   label: Temporal resolution
   help_text: Minimum time period resolvable in the dataset.
 
+- field_name: bbox
+  label: Geographic Bounding Box
+  repeating_subfields:
+
+    - field_name: west
+      label: West Longitude
+
+    - field_name: east
+      label: East Longitude
+
+    - field_name: north
+      label: North Latitude
+
+    - field_name: south
+      label: South Latitude
+  help_text: A geographic bounding box in WGS84 coordinate system (Lat/Long) that describes the spatial extent of the dataset.
+
 - field_name: spatial_coverage
   label: Spatial coverage
   repeating_subfields:

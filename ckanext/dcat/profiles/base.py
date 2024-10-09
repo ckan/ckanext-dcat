@@ -16,6 +16,7 @@ from ckanext.dcat.validators import is_year, is_year_month, is_date
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
+DCATUS = Namespace("http://resources.data.gov/ontology/dcat-us#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -30,6 +31,7 @@ namespaces = {
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,
+    "dcatus": DCATUS,
     "adms": ADMS,
     "vcard": VCARD,
     "foaf": FOAF,

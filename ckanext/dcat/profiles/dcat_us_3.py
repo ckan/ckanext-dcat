@@ -1,11 +1,15 @@
-from rdflib import Literal
+from decimal import Decimal, DecimalException
+
+from rdflib import Literal, BNode
 
 from ckanext.dcat.profiles import (
     DCAT,
+    DCATUS,
     DCT,
     FOAF,
     RDF,
     SKOS,
+    XSD,
 )
 from ckanext.dcat.utils import resource_uri
 
@@ -57,6 +61,21 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
 
     def _parse_dataset_v3_us(self, dataset_dict, dataset_ref):
 
+        g = self.g
+
+        # Bounding box
+        for bbox_ref in g.objects(dataset_ref, DCATUS.geographicBoundingBox):
+            if not dataset_dict.get("bbox"):
+                dataset_dict["bbox"] = []
+            dataset_dict["bbox"].append(
+                {
+                    "west": self._object_value(bbox_ref, DCATUS.westBoundingLongitude),
+                    "east": self._object_value(bbox_ref, DCATUS.eastBoundingLongitude),
+                    "north": self._object_value(bbox_ref, DCATUS.northBoundingLatitude),
+                    "south": self._object_value(bbox_ref, DCATUS.southBoundingLatitude),
+                }
+            )
+
         for distribution_ref in self._distributions(dataset_ref):
 
             # Distribution identifier
@@ -90,6 +109,35 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
             name = self._object_value(publisher_ref, FOAF.name)
             if name:
                 g.add((publisher_ref, SKOS.prefLabel, Literal(name)))
+
+        # Bounding box
+        # TODO: we could fall back to spatial or spatial_coverage's bbox/geom
+        bboxes = self._get_dataset_value(dataset_dict, "bbox")
+        if bboxes:
+            for bbox in bboxes:
+                bbox_ref = BNode()
+                g.add((dataset_ref, DCATUS.geographicBoundingBox, bbox_ref))
+                g.add((bbox_ref, RDF.type, DCATUS.geographicBoundingBox))
+
+                def add_bounding(predicate, value):
+                    try:
+                        g.add(
+                            (
+                                bbox_ref,
+                                predicate,
+                                Literal(value, datatype=XSD.decimal),
+                            )
+                        )
+                    except (ValueError, TypeError, DecimalException):
+                        g.add((bbox_ref, predicate, Literal(value)))
+
+                for item in (
+                    (DCATUS.westBoundingLongitude, bbox["west"]),
+                    (DCATUS.eastBoundingLongitude, bbox["east"]),
+                    (DCATUS.northBoundingLatitude, bbox["north"]),
+                    (DCATUS.southBoundingLatitude, bbox["south"]),
+                ):
+                    add_bounding(item[0], item[1])
 
         for resource_dict in dataset_dict.get("resources", []):
 

@@ -215,6 +215,7 @@ def test_validate_dcat_us_3_graph():
 
     graph = graph_from_dataset("ckan_full_dataset_dcat_us_vocabularies.json")
 
+    graph.serialize(destination="graph.ttl")
     path = _get_shacl_file_path("dcat-us_3.0_shacl_shapes.ttl")
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r

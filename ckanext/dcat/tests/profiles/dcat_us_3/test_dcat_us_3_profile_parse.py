@@ -151,3 +151,39 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["access_services"][0]["endpoint_url"] == [
             "http://publications.europa.eu/webapi/rdf/sparql"
         ]
+
+    def test_bbox(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix locn: <http://www.w3.org/ns/locn#> .
+        @prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcterms:publisher <https://example.com/publisher1> ;
+          dcat-us:geographicBoundingBox [
+              a dcat-us:GeographicBoundingBox ;
+              dcat-us:westBoundingLongitude 22.3;
+              dcat-us:eastBoundingLongitude 10.3;
+              dcat-us:northBoundingLatitude 50.2;
+              dcat-us:southBoundingLatitude 20.2;
+          ]
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["bbox"][0]["west"] == "22.3"
+        assert dataset["bbox"][0]["east"] == "10.3"
+        assert dataset["bbox"][0]["north"] == "50.2"
+        assert dataset["bbox"][0]["south"] == "20.2"
