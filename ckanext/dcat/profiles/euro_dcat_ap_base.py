@@ -282,9 +282,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
             ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral, DCT.Frequency),
-            ("access_rights", DCT.accessRights, None, URIRefOrLiteral, DCT.AccessRights),
             ("dcat_type", DCT.type, None, URIRefOrLiteral),
-            ("provenance", DCT.provenance, None, URIRefOrLiteral, DCT.ProvenanceStatement),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -500,6 +498,23 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ):
                 resource_license_fallback = dataset_dict["license_url"]
 
+        # Statetements
+        self._add_statement_to_graph(
+            dataset_dict,
+            "access_rights",
+            dataset_ref,
+            DCT.accessRights,
+            DCT.RightsStatement
+        )
+
+        self._add_statement_to_graph(
+            dataset_dict,
+            "provenance",
+            dataset_ref,
+            DCT.provenance,
+            DCT.ProvenanceStatement
+        )
+
         # Resources
         for resource_dict in dataset_dict.get("resources", []):
 
@@ -514,7 +529,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("name", DCT.title, None, Literal),
                 ("description", DCT.description, None, Literal),
                 ("status", ADMS.status, None, URIRefOrLiteral),
-                ("rights", DCT.rights, None, URIRefOrLiteral, DCT.RightsStatement),
                 ("license", DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
                 ("access_url", DCAT.accessURL, None, URIRef, RDFS.Resource),
                 ("download_url", DCAT.downloadURL, None, URIRef, RDFS.Resource),
@@ -529,6 +543,15 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
+
+            # Statetements
+            self._add_statement_to_graph(
+                resource_dict,
+                "rights",
+                distribution,
+                DCT.rights,
+                DCT.RightsStatement
+            )
 
             # Set default license for distribution if needed and available
 

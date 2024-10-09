@@ -21,6 +21,7 @@ from ckanext.dcat.processors import RDFSerializer, HYDRA
 from ckanext.dcat.profiles import (
     DCAT, DCT, ADMS, XSD, VCARD, FOAF, SCHEMA,
     SKOS, LOCN, GSP, OWL, SPDX, GEOJSON_IMT,
+    RDFS,
 )
 from ckanext.dcat.profiles.euro_dcat_ap_base import DISTRIBUTION_LICENSE_FALLBACK_CONFIG
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
@@ -121,8 +122,6 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, OWL.versionInfo, dataset['version'])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, extras['version_notes'])
         assert self._triple(g, dataset_ref, DCT.accrualPeriodicity, extras['frequency'])
-        assert self._triple(g, dataset_ref, DCT.accessRights, extras['access_rights'])
-        assert self._triple(g, dataset_ref, DCT.provenance, extras['provenance'])
         assert self._triple(g, dataset_ref, DCT.type, extras['dcat_type'])
 
         # Tags
@@ -155,6 +154,14 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                     assert len(item[2]) == len(values)
                     _type = item[2][num]
                 assert self._triple(g, dataset_ref, item[1], _type(value))
+
+        # Statements
+        for item in [
+            ('access_rights', DCT.accessRights),
+            ('provenance', DCT.provenance),
+        ]:
+            statement = [s for s in g.objects(dataset_ref, item[1])][0]
+            assert self._triple(g, statement, RDFS.label, extras[item[0]])
 
     def test_identifier_extra(self):
         dataset = {
@@ -670,7 +677,6 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, RDF.type, DCAT.Distribution)
         assert self._triple(g, distribution, DCT.title, resource['name'])
         assert self._triple(g, distribution, DCT.description, resource['description'])
-        assert self._triple(g, distribution, DCT.rights, resource['rights'])
         assert self._triple(g, distribution, DCT.license, URIRef(resource['license']))
         assert self._triple(g, distribution, ADMS.status, URIRef(resource['status']))
 
@@ -702,6 +708,10 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, checksum, RDF.type, SPDX.Checksum)
         assert self._triple(g, checksum, SPDX.checksumValue, resource['hash'], data_type='http://www.w3.org/2001/XMLSchema#hexBinary')
         assert self._triple(g, checksum, SPDX.algorithm, URIRef(resource['hash_algorithm']))
+
+        # Statements
+        statement = [s for s in g.objects(distribution, DCT.rights)][0]
+        assert self._triple(g, statement, RDFS.label, resource['rights'])
 
     def test_distribution_size_not_number(self):
 
