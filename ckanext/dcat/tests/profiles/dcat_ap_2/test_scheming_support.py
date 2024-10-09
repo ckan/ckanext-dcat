@@ -25,6 +25,7 @@ from ckanext.dcat.profiles import (
     GSP,
     OWL,
     SPDX,
+    RDFS,
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 
@@ -76,10 +77,8 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g, dataset_ref, DCT.accrualPeriodicity, dataset["frequency"]
         )
-        assert self._triple(g, dataset_ref, DCT.provenance, dataset["provenance"])
         assert self._triple(g, dataset_ref, DCT.type, dataset["dcat_type"])
         assert self._triple(g, dataset_ref, ADMS.versionNotes, dataset["version_notes"])
-        assert self._triple(g, dataset_ref, DCT.accessRights, dataset["access_rights"])
         assert self._triple(
             g,
             dataset_ref,
@@ -274,6 +273,14 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
         resource = dataset_dict["resources"][0]
 
+        # Statements
+        for item in [
+            ('access_rights', DCT.accessRights),
+            ('provenance', DCT.provenance),
+        ]:
+            statement = [s for s in g.objects(dataset_ref, item[1])][0]
+            assert self._triple(g, statement, RDFS.label, dataset[item[0]])
+
         # Resources: core fields
 
         assert self._triple(g, distribution_ref, DCT.title, resource["name"])
@@ -286,7 +293,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 
         # Resources: standard fields
 
-        assert self._triple(g, distribution_ref, DCT.rights, resource["rights"])
         assert self._triple(
             g, distribution_ref, ADMS.status, URIRef(resource["status"])
         )
@@ -379,6 +385,10 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             for t in g.triples((access_services[0][2], DCAT.endpointURL, None))
         ]
         assert endpoint_urls == resource["access_services"][0]["endpoint_url"]
+
+        # Resources: statements
+        statement = [s for s in g.objects(distribution_ref, DCT.rights)][0]
+        assert self._triple(g, statement, RDFS.label, resource['rights'])
 
     def test_publisher_fallback_org(self):
 
