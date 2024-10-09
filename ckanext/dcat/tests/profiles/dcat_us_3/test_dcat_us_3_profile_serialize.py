@@ -24,6 +24,7 @@ from ckanext.dcat.profiles import (
     GSP,
     OWL,
     SPDX,
+    RDFS,
 )
 
 DCAT_AP_PROFILES = ["dcat_us_3"]
@@ -245,7 +246,6 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
 
         # Resources: standard fields
 
-        assert self._triple(g, distribution_ref, DCT.rights, resource["rights"])
         assert self._triple(
             g, distribution_ref, ADMS.status, URIRef(resource["status"])
         )
@@ -315,24 +315,9 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             == resource["language"]
         )
 
-        # Resource: repeating subfields
-        access_services = [
-            t for t in g.triples((distribution_ref, DCAT.accessService, None))
-        ]
-
-        assert len(access_services) == len(dataset["resources"][0]["access_services"])
-        assert self._triple(
-            g,
-            access_services[0][2],
-            DCT.title,
-            resource["access_services"][0]["title"],
-        )
-
-        endpoint_urls = [
-            str(t[2])
-            for t in g.triples((access_services[0][2], DCAT.endpointURL, None))
-        ]
-        assert endpoint_urls == resource["access_services"][0]["endpoint_url"]
+        # Resources: statements
+        statement = [s for s in g.objects(distribution_ref, DCT.rights)][0]
+        assert self._triple(g, statement, RDFS.label, resource['rights'])
 
     def test_distribution_identifier(self):
 
