@@ -497,6 +497,8 @@ class RDFProfile(object):
                 self._get_vcard_property_value(agent, VCARD.hasEmail)
             )
 
+            contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
+
         return contact
 
     def _parse_geodata(self, spatial, datatype, cur_value):

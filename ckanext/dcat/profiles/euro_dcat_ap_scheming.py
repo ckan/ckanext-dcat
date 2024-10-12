@@ -150,6 +150,14 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     value_modifier=self._add_mailto,
                 )
 
+                self._add_triple_from_dict(
+                    item,
+                    contact_details,
+                    VCARD.hasUID,
+                    "identifier",
+                    _type=URIRefOrLiteral
+                )
+
         publisher = dataset_dict.get("publisher")
         if (
             isinstance(publisher, list)
