@@ -85,6 +85,11 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                     if resource_dict["distribution_ref"] == str(distribution_ref):
                         resource_dict["identifier"] = value
 
+            # Temporal resolution
+            value = self._object_value(distribution_ref, DCAT.temporalResolution)
+            if value:
+                resource_dict["temporal_resolution"] = value
+
     def _graph_from_dataset_v3_us(self, dataset_dict, dataset_ref):
 
         g = self.g
@@ -151,4 +156,13 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                 "identifier",
                 fallbacks=["guid", "id"],
                 _type=URIRefOrLiteral,
+            )
+
+            # Temporal resolution
+            self._add_triple_from_dict(
+                resource_dict,
+                distribution_ref,
+                DCAT.temporalResolution,
+                "temporal_resolution",
+                _datatype=XSD.duration,
             )

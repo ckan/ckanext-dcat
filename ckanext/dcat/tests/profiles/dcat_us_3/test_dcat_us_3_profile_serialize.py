@@ -277,6 +277,14 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             g, distribution_ref, DCAT.byteSize, resource["size"], XSD.nonNegativeInteger
         )
 
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.temporalResolution,
+            resource["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+
         # Checksum
         checksum = self._triple(g, distribution_ref, SPDX.checksum, None)[2]
         assert checksum

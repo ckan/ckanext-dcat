@@ -177,6 +177,7 @@
             "download_url": "https://example.com/data.csv",
             "issued": "2024-05-01T01:20:33",
             "modified": "2024-05-05T09:33:20",
+            "temporal_resolution": "PT15M",
             "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0",
             "rights": "This dataset is provided by the United States Malacological Commission (USMC)",
             "conforms_to": [

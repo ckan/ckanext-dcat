@@ -101,6 +101,7 @@
             <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>
             <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
+            <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
             <dcat:compressFormat>http://www.iana.org/assignments/media-types/application/gzip</dcat:compressFormat>
             <dcat:packageFormat>http://publications.europa.eu/resource/authority/file-type/TAR</dcat:packageFormat>
             <dcat:byteSize>12323</dcat:byteSize>

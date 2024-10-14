@@ -385,6 +385,10 @@ resource_fields:
   preset: dcat_date
   help_text: Most recent date on which the resource was changed, updated or modified.
 
+- field_name: temporal_resolution
+  label: Temporal resolution
+  help_text: Minimum time period resolvable in the distribution.
+
 - field_name: language
   label: Language
   preset: multiple_text

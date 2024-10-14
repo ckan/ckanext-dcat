@@ -118,6 +118,7 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["modified"] == "2012-05-01T00:04:06"
         assert resource["status"] == "http://purl.org/adms/status/Completed"
         assert resource["size"] == 12323
+        assert resource["temporal_resolution"] == "PT15M"
         assert (
             resource["compress_format"]
             == "http://www.iana.org/assignments/media-types/application/gzip"
