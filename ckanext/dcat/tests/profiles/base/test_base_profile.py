@@ -706,7 +706,7 @@ class TestBaseRDFProfile(object):
             <vcard:Organization>
               <vcard:fn>Point of Contact</vcard:fn>
               <vcard:hasEmail rdf:resource="mailto:contact@some.org"/>
-              <vcard:hasUid rdf:resource="http://some.org"/>
+              <vcard:hasUID rdf:resource="https://orcid.org/0000-0002-9095-9201"/>
             </vcard:Organization>
           </adms:contactPoint>
         </rdfs:SomeClass>
@@ -725,4 +725,4 @@ class TestBaseRDFProfile(object):
         # mailto gets removed for storage and is added again on output
         assert contact['email'] == 'contact@some.org'
 
-        assert contact['identifier'] == 'http://some.org'
+        assert contact['identifier'] == 'https://orcid.org/0000-0002-9095-9201'
