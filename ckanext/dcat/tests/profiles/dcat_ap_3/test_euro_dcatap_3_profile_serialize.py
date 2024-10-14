@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from rdflib.namespace import RDF
