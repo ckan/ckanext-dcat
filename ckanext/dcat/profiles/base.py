@@ -419,58 +419,37 @@ class RDFProfile(object):
         else:
             dataset_dict["extras"].append({"key": key, "value": value})
 
-    def _publisher(self, subject, predicate):
+    def _agent_details(self, subject, predicate):
         """
-        Returns a dict with details about a dct:publisher entity, a foaf:Agent
+        Returns a dict with details about a dct:publisher or dct:creator entity, a foaf:Agent
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
         Examples:
 
-        <dct:publisher>
+        <dct:publisher> or <dct:creator>
             <foaf:Organization rdf:about="http://orgs.vocab.org/some-org">
                 <foaf:name>Publishing Organization for dataset 1</foaf:name>
                 <foaf:mbox>contact@some.org</foaf:mbox>
                 <foaf:homepage>http://some.org</foaf:homepage>
                 <dct:type rdf:resource="http://purl.org/adms/publishertype/NonProfitOrganisation"/>
             </foaf:Organization>
-        </dct:publisher>
 
-        {
-            'uri': 'http://orgs.vocab.org/some-org',
-            'name': 'Publishing Organization for dataset 1',
-            'email': 'contact@some.org',
-            'url': 'http://some.org',
-            'type': 'http://purl.org/adms/publishertype/NonProfitOrganisation',
-        }
-
-        <dct:publisher rdf:resource="http://publications.europa.eu/resource/authority/corporate-body/EURCOU" />
-
-        {
-            'uri': 'http://publications.europa.eu/resource/authority/corporate-body/EURCOU'
-        }
-
-        Returns keys for uri, name, email, url and type with the values set to
-        an empty string if they could not be found
+        Returns keys for uri, name, email, url, type, and identifier with the values set to
+        an empty string if they could not be found.
         """
 
-        publisher = {}
+        agent_details = {}
 
         for agent in self.g.objects(subject, predicate):
+            agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
+            agent_details["name"] = self._object_value(agent, FOAF.name)
+            agent_details["email"] = self._object_value(agent, FOAF.mbox)
+            agent_details["url"] = self._object_value(agent, FOAF.homepage)
+            agent_details["type"] = self._object_value(agent, DCT.type)
+            agent_details['identifier'] = self._object_value(agent, DCT.identifier)
 
-            publisher["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
-
-            publisher["name"] = self._object_value(agent, FOAF.name)
-
-            publisher["email"] = self._object_value(agent, FOAF.mbox)
-
-            publisher["url"] = self._object_value(agent, FOAF.homepage)
-
-            publisher["type"] = self._object_value(agent, DCT.type)
-
-            publisher['identifier'] = self._object_value(agent, DCT.identifier)
-
-        return publisher
+        return agent_details
 
     def _contact_details(self, subject, predicate):
         """
@@ -1139,7 +1118,7 @@ class RDFProfile(object):
         out.append(
             {
                 "key": "source_catalog_publisher",
-                "value": json.dumps(self._publisher(catalog_ref, DCT.publisher)),
+                "value": json.dumps(self._agent_details(catalog_ref, DCT.publisher)),
             }
         )
         return out

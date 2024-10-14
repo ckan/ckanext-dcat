@@ -34,7 +34,6 @@ from .base import (
 
 config = toolkit.config
 
-
 DISTRIBUTION_LICENSE_FALLBACK_CONFIG = "ckanext.dcat.resource.inherit.license"
 
 
@@ -122,11 +121,19 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     )
 
         # Publisher
-        publisher = self._publisher(dataset_ref, DCT.publisher)
+        publisher = self._agent_details(dataset_ref, DCT.publisher)
         for key in ("uri", "name", "email", "url", "type", "identifier"):
             if publisher.get(key):
                 dataset_dict["extras"].append(
                     {"key": "publisher_{0}".format(key), "value": publisher.get(key)}
+                )
+
+        # Creator
+        creator = self._agent_details(dataset_ref, DCT.creator)
+        for key in ("uri", "name", "email", "url", "type", "identifier"):
+            if creator.get(key):
+                dataset_dict["extras"].append(
+                    {"key": "creator_{0}".format(key), "value": creator.get(key)}
                 )
 
         # Temporal
@@ -250,7 +257,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     "publisher_name",
                     "publisher_email",
                 ):
-
                     extra["key"] = "dcat_" + extra["key"]
 
                 if extra["key"] == "language":
@@ -411,6 +417,48 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("identifier", DCT.identifier, None, URIRefOrLiteral),
             ]
             self._add_triples_from_dict(publisher_details, publisher_ref, items)
+
+        # Creator
+        creator_ref = None
+
+        if dataset_dict.get("creator"):
+            # Scheming publisher field: will be handled in a separate profile
+            pass
+        elif any(
+            [
+                self._get_dataset_value(dataset_dict, "creator_uri"),
+                self._get_dataset_value(dataset_dict, "creator_name"),
+            ]
+        ):
+            # Legacy creator_* extras
+            creator_uri = self._get_dataset_value(dataset_dict, "creator_uri")
+            creator_name = self._get_dataset_value(dataset_dict, "creator_name")
+            if creator_uri:
+                creator_ref = CleanedURIRef(creator_uri)
+            else:
+                # No creator_uri
+                creator_ref = BNode()
+
+            creator_details = {
+                "name": creator_name,
+                "email": self._get_dataset_value(dataset_dict, "creator_email"),
+                "url": self._get_dataset_value(dataset_dict, "creator_url"),
+                "type": self._get_dataset_value(dataset_dict, "creator_type"),
+                "identifier": self._get_dataset_value(dataset_dict, "creator_identifier"),
+            }
+
+        # Add to graph
+        if creator_ref:
+            g.add((creator_ref, RDF.type, FOAF.Agent))
+            g.add((dataset_ref, DCT.creator, creator_ref))  # Use DCT.creator for creator
+            items = [
+                ("name", FOAF.name, None, Literal),
+                ("email", FOAF.mbox, None, Literal),
+                ("url", FOAF.homepage, None, URIRef),
+                ("type", DCT.type, None, URIRefOrLiteral),
+                ("identifier", DCT.identifier, None, URIRefOrLiteral),
+            ]
+            self._add_triples_from_dict(creator_details, creator_ref, items)
 
         # Temporal
         start = self._get_dataset_value(dataset_dict, "temporal_start")
