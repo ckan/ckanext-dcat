@@ -758,6 +758,38 @@ class RDFProfile(object):
                 }
             )
 
+    def _add_statement_to_graph(self, data_dict, key, subject, predicate, _class=None):
+        """
+        Adds a statement property to the graph.
+        If it is a Literal value, it is added as a node (with a class if provided)
+        with a RDFS.label property, eg:
+
+            dct:accessRights [ a dct:RightsStatement ;
+                rdfs:label "Statement about access rights" ] ;
+
+        An URI can also be used:
+
+            dct:accessRights <https://example.org/vocab/access-right/TODO/PUBLIC> ;
+
+            [...]
+
+            <https://example.org/vocab/access-right/TODO/PUBLIC> a dct:RightsStatement .
+        """
+        value = self._get_dict_value(data_dict, key)
+        if value:
+            _object = URIRefOrLiteral(value)
+            if isinstance(_object, Literal):
+                statement_ref = BNode()
+                self.g.add((subject, predicate, statement_ref))
+                if _class:
+                    self.g.add((statement_ref, RDF.type, _class))
+                self.g.add((statement_ref, RDFS.label, _object))
+
+            else:
+                self.g.add((subject, predicate, _object))
+                if _class:
+                    self.g.add((_object, RDF.type, _class))
+
     def _schema_field(self, key):
         """
         Returns the schema field information if the provided key exists as a field in
