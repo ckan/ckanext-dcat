@@ -153,6 +153,48 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://publications.europa.eu/webapi/rdf/sparql"
         ]
 
+    def test_two_distributions(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix locn: <http://www.w3.org/ns/locn#> .
+        @prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcterms:publisher <https://example.com/publisher1> ;
+          dcat:distribution <http://test.ckan.net/dataset/xxx/resource/yyy> ;
+          dcat:distribution <http://test.ckan.net/dataset/xxx/resource/zzz>
+        .
+
+        <http://test.ckan.net/dataset/xxx/resource/yyy> a dcat:Distribution ;
+            dcterms:title "Resource 1" ;
+            dcterms:identifier "id1"
+        .
+
+        <http://test.ckan.net/dataset/xxx/resource/zzz> a dcat:Distribution ;
+            dcterms:title "Resource 2" ;
+            dcterms:identifier "id2"
+        .
+
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets[0]["resources"]) == 2
+
+        assert datasets[0]["resources"][0]["name"] == "Resource 1"
+        assert datasets[0]["resources"][0]["identifier"] == "id1"
+        assert datasets[0]["resources"][1]["name"] == "Resource 2"
+        assert datasets[0]["resources"][1]["identifier"] == "id2"
+
     def test_bbox(self):
 
         data = """
@@ -188,3 +230,88 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["bbox"][0]["east"] == "10.3"
         assert dataset["bbox"][0]["north"] == "50.2"
         assert dataset["bbox"][0]["south"] == "20.2"
+
+    def test_data_dictionary_dataset(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix locn: <http://www.w3.org/ns/locn#> .
+        @prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcterms:publisher <https://example.com/publisher1> ;
+          dcat-us:describedBy [ a dcat:Distribution ;
+                  dcterms:format <https://resources.data.gov/vocab/file-type/TODO/JSON> ;
+                  dcterms:license <https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0> ;
+                  dcat:accessURL <https://example.org/some-data-dictionary> ]
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+        assert (
+            dataset["data_dictionary"][0]["url"]
+            == "https://example.org/some-data-dictionary"
+        )
+        assert (
+            dataset["data_dictionary"][0]["format"]
+            == "https://resources.data.gov/vocab/file-type/TODO/JSON"
+        )
+        assert (
+            dataset["data_dictionary"][0]["license"]
+            == "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
+        )
+
+    def test_data_dictionary_distribution(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix locn: <http://www.w3.org/ns/locn#> .
+        @prefix gsp: <http://www.opengis.net/ont/geosparql#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcterms:publisher <https://example.com/publisher1> ;
+          dcat:distribution <http://test.ckan.net/dataset/xxx/resource/yyy>
+        .
+
+
+        <http://test.ckan.net/dataset/xxx/resource/yyy> a dcat:Distribution ;
+          dcat-us:describedBy [ a dcat:Distribution ;
+                  dcterms:format <https://resources.data.gov/vocab/file-type/TODO/JSON> ;
+                  dcterms:license <https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0> ;
+                  dcat:accessURL <https://example.org/some-data-dictionary> ]
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        resource = datasets[0]["resources"][0]
+        assert (
+            resource["data_dictionary"][0]["url"]
+            == "https://example.org/some-data-dictionary"
+        )
+        assert (
+            resource["data_dictionary"][0]["format"]
+            == "https://resources.data.gov/vocab/file-type/TODO/JSON"
+        )
+        assert (
+            resource["data_dictionary"][0]["license"]
+            == "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
+        )

@@ -1,6 +1,6 @@
 from decimal import Decimal, DecimalException
 
-from rdflib import Literal, BNode
+from rdflib import Literal, BNode, URIRef
 
 from ckanext.dcat.profiles import (
     DCAT,
@@ -8,6 +8,7 @@ from ckanext.dcat.profiles import (
     DCT,
     FOAF,
     RDF,
+    RDFS,
     SKOS,
     XSD,
 )
@@ -59,6 +60,84 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
 
         self._graph_from_catalog_base(catalog_dict, catalog_ref)
 
+    def _data_dictionary_parse(self, data_dict, subject):
+
+        g = self.g
+
+        for data_dictionary_ref in g.objects(subject, DCATUS.describedBy):
+            if isinstance(data_dictionary_ref, Literal):
+                data_dict["data_dictionary"] = str(data_dictionary_ref)
+            else:
+                if not isinstance(data_dict.get("data_dictionary"), list):
+                    data_dict["data_dictionary"] = []
+                data_dictionary_dict = {}
+                for item in [
+                    (DCAT.accessURL, "url"),
+                    (DCT["format"], "format"),
+                    (DCT.license, "license"),
+                ]:
+                    predicate, key = item
+                    value = self._object_value(data_dictionary_ref, predicate)
+                    if value:
+                        data_dictionary_dict[key] = value
+                if data_dictionary_dict:
+                    data_dict["data_dictionary"].append(data_dictionary_dict)
+
+        return data_dict
+
+    def _data_dictionary_graph(self, data_dict, subject):
+        """
+        Adds triples related to the data dictionary property of a Datasets
+        or a Distribution
+
+        TODO: Link somehow to the DataStore data dictionary if that exists
+        and is public
+        """
+
+        g = self.g
+
+        data_dictionary = self._get_dict_value(data_dict, "data_dictionary")
+        if isinstance(data_dictionary, str):
+            g.add((subject, DCATUS.describedBy, Literal(data_dictionary)))
+        elif (
+            isinstance(data_dictionary, list)
+            and len(data_dictionary)
+            and isinstance(data_dictionary[0], dict)
+        ):
+            data_dictionary = data_dictionary[0]
+            url = data_dictionary.get("url")
+            if url:
+                data_dictionary_ref = BNode()
+                g.add((data_dictionary_ref, RDF.type, DCAT.Distribution))
+                self._add_triple_from_dict(
+                    data_dictionary,
+                    data_dictionary_ref,
+                    DCAT.accessURL,
+                    "url",
+                    _type=URIRef,
+                    _class=RDFS.Resource,
+                )
+                if data_dictionary.get("format"):
+                    self._add_triple_from_dict(
+                        data_dictionary,
+                        data_dictionary_ref,
+                        DCT["format"],
+                        "format",
+                        _type=URIRefOrLiteral,
+                        _class=DCT.MediaTypeOrExtent,
+                    )
+                # TODO: fallback to dataset / distribution one
+                if data_dictionary.get("license"):
+                    self._add_triple_from_dict(
+                        data_dictionary,
+                        data_dictionary_ref,
+                        DCT.license,
+                        "license",
+                        _type=URIRefOrLiteral,
+                        _class=DCT.LicenseDocument,
+                    )
+                g.add((subject, DCATUS.describedBy, data_dictionary_ref))
+
     def _parse_dataset_v3_us(self, dataset_dict, dataset_ref):
 
         g = self.g
@@ -76,19 +155,28 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                 }
             )
 
+        # Data dictionary
+        self._data_dictionary_parse(dataset_dict, dataset_ref)
+
         for distribution_ref in self._distributions(dataset_ref):
 
-            # Distribution identifier
-            value = self._object_value(distribution_ref, DCT.identifier)
-            if value:
-                for resource_dict in dataset_dict.get("resources", []):
-                    if resource_dict["distribution_ref"] == str(distribution_ref):
+            for resource_dict in dataset_dict.get("resources", []):
+                if resource_dict["distribution_ref"] == str(distribution_ref):
+
+                    # Distribution identifier
+                    value = self._object_value(distribution_ref, DCT.identifier)
+                    if value:
                         resource_dict["identifier"] = value
 
-            # Temporal resolution
-            value = self._object_value(distribution_ref, DCAT.temporalResolution)
-            if value:
-                resource_dict["temporal_resolution"] = value
+                    # Temporal resolution
+                    value = self._object_value(
+                        distribution_ref, DCAT.temporalResolution
+                    )
+                    if value:
+                        resource_dict["temporal_resolution"] = value
+
+                    # Data dictionary
+                    self._data_dictionary_parse(resource_dict, distribution_ref)
 
     def _graph_from_dataset_v3_us(self, dataset_dict, dataset_ref):
 
@@ -144,6 +232,9 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                 ):
                     add_bounding(item[0], item[1])
 
+        # Data dictionary
+        self._data_dictionary_graph(dataset_dict, dataset_ref)
+
         for resource_dict in dataset_dict.get("resources", []):
 
             distribution_ref = CleanedURIRef(resource_uri(resource_dict))
@@ -166,3 +257,6 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                 "temporal_resolution",
                 _datatype=XSD.duration,
             )
+
+            # Data dictionary
+            self._data_dictionary_graph(resource_dict, distribution_ref)

@@ -26,8 +26,6 @@ from ckanext.dcat.profiles import (
     RDFS,
 )
 
-DCAT_AP_PROFILES = ["dcat_us_3"]
-
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
@@ -224,14 +222,16 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
         assert self._triple(g, spatial[0][2], LOCN.Geometry, wkt_geom, GSP.wktLiteral)
 
-        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        resource = dataset_dict["resources"][0]
-
         # Alternate identifiers
         ids = []
         for subject in [t[2] for t in g.triples((dataset_ref, ADMS.identifier, None))]:
             ids.append(str(g.value(subject, SKOS.notation)))
         assert ids == dataset["alternate_identifier"]
+
+        # Resources
+
+        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        resource = dataset_dict["resources"][0]
 
         # Resources: core fields
 
@@ -340,7 +340,7 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             ],
         }
 
-        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        s = RDFSerializer()
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset_dict)
@@ -365,7 +365,7 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             ],
         }
 
-        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        s = RDFSerializer()
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset_dict)
@@ -384,7 +384,7 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             ],
         }
 
-        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        s = RDFSerializer()
         g = s.g
 
         dataset_ref = s.graph_from_dataset(dataset_dict)
@@ -417,4 +417,132 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             DCATUS.southBoundingLatitude,
             dataset_dict["bbox"][0]["south"],
             data_type=XSD.decimal,
+        )
+
+    def test_data_dictionary_dataset(self):
+
+        data_dictionary_dict = {
+            "url": "https://example.org/some-data-dictionary",
+            "format": "https://resources.data.gov/vocab/file-type/TODO/JSON",
+            "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0",
+        }
+
+        dataset_dict = {
+            "name": "test-dcat-us",
+            "description": "Test",
+            "data_dictionary": [data_dictionary_dict],
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        data_dictionary_ref = [s for s in g.objects(dataset_ref, DCATUS.describedBy)][0]
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            RDF.type,
+            DCAT.Distribution,
+        )
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            DCAT.accessURL,
+            URIRef(data_dictionary_dict["url"]),
+        )
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            DCT["format"],
+            URIRef(data_dictionary_dict["format"]),
+        )
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            DCT.license,
+            URIRef(data_dictionary_dict["license"]),
+        )
+
+    def test_data_dictionary_distribution(self):
+
+        data_dictionary_dict = {
+            "url": "https://example.org/some-data-dictionary",
+            "format": "https://resources.data.gov/vocab/file-type/TODO/JSON",
+            "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0",
+        }
+
+        dataset_dict = {
+            "name": "test-dcat-us",
+            "description": "Test",
+            "resources": [
+                {
+                    "id": "2607a002-142a-40b1-8026-96457b70c01d",
+                    "name": "test",
+                    "data_dictionary": [data_dictionary_dict],
+                }
+            ],
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        distribution_ref = [s for s in g.objects(dataset_ref, DCAT.distribution)][0]
+
+        data_dictionary_ref = [
+            s for s in g.objects(distribution_ref, DCATUS.describedBy)
+        ][0]
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            RDF.type,
+            DCAT.Distribution,
+        )
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            DCAT.accessURL,
+            URIRef(data_dictionary_dict["url"]),
+        )
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            DCT["format"],
+            URIRef(data_dictionary_dict["format"]),
+        )
+
+        assert self._triple(
+            g,
+            data_dictionary_ref,
+            DCT.license,
+            URIRef(data_dictionary_dict["license"]),
+        )
+
+    def test_data_dictionary_dataset_string(self):
+
+        dataset_dict = {
+            "name": "test-dcat-us",
+            "description": "Test",
+            "data_dictionary": "https://example.org/some-data-dictionary",
+        }
+
+        s = RDFSerializer()
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        assert self._triple(
+            g,
+            dataset_ref,
+            DCATUS.describedBy,
+            dataset_dict["data_dictionary"],
         )

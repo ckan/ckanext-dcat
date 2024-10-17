@@ -160,6 +160,13 @@
         }
     ],
     "spatial_resolution_in_meters": 1.5,
+    "data_dictionary": [
+        {
+            "url": "https://example.org/some-data-dictionary",
+            "format": "https://resources.data.gov/vocab/file-type/TODO/JSON",
+            "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
+        }
+    ],
     "resources": [
         {
             "name": "Resource 1",
@@ -187,6 +194,13 @@
                 "http://id.loc.gov/vocabulary/iso639-1/en",
                 "http://id.loc.gov/vocabulary/iso639-1/es",
                 "http://id.loc.gov/vocabulary/iso639-1/ca"
+            ],
+            "data_dictionary": [
+                {
+                    "url": "https://example.org/some-data-dictionary",
+                    "format": "https://resources.data.gov/vocab/file-type/TODO/JSON",
+                    "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
+                }
             ]
         }
     ]
