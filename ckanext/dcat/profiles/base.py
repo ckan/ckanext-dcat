@@ -468,7 +468,7 @@ class RDFProfile(object):
 
         for agent in self.g.objects(subject, predicate):
 
-            contact["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
+            contact["uri"] = str(agent) if isinstance(agent, URIRef) else ""
 
             contact["name"] = self._get_vcard_property_value(
                 agent, VCARD.hasFN, VCARD.fn
@@ -477,6 +477,8 @@ class RDFProfile(object):
             contact["email"] = self._without_mailto(
                 self._get_vcard_property_value(agent, VCARD.hasEmail)
             )
+
+            contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
 
         return contact
 

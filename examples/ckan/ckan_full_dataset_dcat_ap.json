@@ -52,11 +52,22 @@
     "contact": [
         {
             "name": "Contact 1",
-            "email": "contact1@example.org"
+            "email": "contact1@example.org",
+            "identifier": "123"
         },
         {
             "name": "Contact 2",
-            "email": "contact2@example.org"
+            "email": "contact2@example.org",
+            "identifier": "456"
+        }
+    ],
+    "creator": [
+        {
+            "name": "Test Creator",
+            "email": "creator@example.org",
+            "url": "https://example.org",
+            "identifier": "http://example.org/creator-id",
+            "type": "public_body"
         }
     ],
     "creator": [

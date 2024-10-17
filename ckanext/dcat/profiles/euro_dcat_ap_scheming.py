@@ -145,6 +145,13 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     _type=URIRef,
                     value_modifier=self._add_mailto,
                 )
+                self._add_triple_from_dict(
+                    item,
+                    contact_details,
+                    VCARD.hasUID,
+                    "identifier",
+                    _type=URIRefOrLiteral
+                )
 
         self._add_agent(dataset_ref, dataset_dict, "publisher", DCT.publisher)
         self._add_agent(dataset_ref, dataset_dict, "creator", DCT.creator)

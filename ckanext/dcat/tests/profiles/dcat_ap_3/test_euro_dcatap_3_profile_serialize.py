@@ -147,6 +147,12 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             URIRef("mailto:" + dataset_dict["contact"][0]["email"]),
         )
         assert self._triple(
+            g,
+            contact_details[0][2],
+            VCARD.hasUID,
+            dataset_dict["contact"][0]["identifier"],
+        )
+        assert self._triple(
             g, contact_details[1][2], VCARD.fn, dataset_dict["contact"][1]["name"]
         )
         assert self._triple(
@@ -154,6 +160,12 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             contact_details[1][2],
             VCARD.hasEmail,
             URIRef("mailto:" + dataset_dict["contact"][1]["email"]),
+        )
+        assert self._triple(
+            g,
+            contact_details[1][2],
+            VCARD.hasUID,
+            dataset_dict["contact"][1]["identifier"],
         )
 
         publisher = [t for t in g.triples((dataset_ref, DCT.publisher, None))]
