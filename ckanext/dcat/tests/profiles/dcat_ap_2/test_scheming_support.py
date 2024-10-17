@@ -790,6 +790,54 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://publications.europa.eu/webapi/rdf/sparql"
         ]
 
+    def test_statement_label(self):
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dct:title "Dataset 1" ;
+          dct:description "This is a dataset" ;
+          dct:accessRights [
+              a dct:RightsStatement;
+              rdfs:label "Some statement"
+            ]
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["notes"] == "This is a dataset"
+        assert dataset["access_rights"] == "Some statement"
+
+    def test_statement_literal(self):
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dct:title "Dataset 1" ;
+          dct:description "This is a dataset" ;
+          dct:accessRights "Some statement"
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["notes"] == "This is a dataset"
+        assert dataset["access_rights"] == "Some statement"
 
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")

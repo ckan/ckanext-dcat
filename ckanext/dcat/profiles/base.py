@@ -218,6 +218,8 @@ class RDFProfile(object):
                 # Use first object as fallback if no object with the default language is available
                 elif fallback == "":
                     fallback = str(o)
+            elif len(list(self.g.objects(o, RDFS.label))):
+                return str(next(self.g.objects(o, RDFS.label)))
             else:
                 return str(o)
         return fallback
