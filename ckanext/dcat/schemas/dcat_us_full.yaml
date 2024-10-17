@@ -226,6 +226,11 @@ dataset_fields:
   label: Access rights
   validators: ignore_missing unicode_safe
   help_text: Information that indicates whether the dataset is Open Data, has access restrictions or is not public.
+- field_name: liability
+  label: Liability statement
+  form_snippet: markdown.html
+  display_snippet: markdown.html
+  help_text: A statement intended to limit the legal exposure of the data provider by disclaiming warranties or guarantees.
 
 - field_name: alternate_identifier
   label: Other identifier

@@ -20,6 +20,7 @@
     "dcat_type": "http://purl.org/dc/dcmitype/Dataset",
     "version_notes": "Some version notes",
     "access_rights": "https://resources.data.gov/vocab/access-right/TODO/PUBLIC",
+    "liability": "Some statement about liability",
     "alternate_identifier": [
         "https://org1.example.org/datasets/alt-id-1",
         "https://org2.example.org/datasets/alt-id-2"

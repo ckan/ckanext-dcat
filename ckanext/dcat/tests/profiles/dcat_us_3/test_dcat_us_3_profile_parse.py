@@ -237,8 +237,6 @@ class TestSchemingParseSupport(BaseParseTest):
         @prefix dcat: <http://www.w3.org/ns/dcat#> .
         @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
         @prefix dcterms: <http://purl.org/dc/terms/> .
-        @prefix locn: <http://www.w3.org/ns/locn#> .
-        @prefix gsp: <http://www.opengis.net/ont/geosparql#> .
 
         <https://example.com/dataset1>
           a dcat:Dataset ;
@@ -277,8 +275,6 @@ class TestSchemingParseSupport(BaseParseTest):
         @prefix dcat: <http://www.w3.org/ns/dcat#> .
         @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
         @prefix dcterms: <http://purl.org/dc/terms/> .
-        @prefix locn: <http://www.w3.org/ns/locn#> .
-        @prefix gsp: <http://www.opengis.net/ont/geosparql#> .
 
         <https://example.com/dataset1>
           a dcat:Dataset ;
@@ -287,7 +283,6 @@ class TestSchemingParseSupport(BaseParseTest):
           dcterms:publisher <https://example.com/publisher1> ;
           dcat:distribution <http://test.ckan.net/dataset/xxx/resource/yyy>
         .
-
 
         <http://test.ckan.net/dataset/xxx/resource/yyy> a dcat:Distribution ;
           dcat-us:describedBy [ a dcat:Distribution ;
@@ -315,3 +310,32 @@ class TestSchemingParseSupport(BaseParseTest):
             resource["data_dictionary"][0]["license"]
             == "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
         )
+
+    def test_data_liability_statement(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcterms:publisher <https://example.com/publisher1> ;
+          dcat-us:liabilityStatement [
+              a dcat-us:LiabilityStatement;
+              rdfs:label "This dataset is provided 'as-is'."
+            ]
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["liability"] == "This dataset is provided 'as-is'."

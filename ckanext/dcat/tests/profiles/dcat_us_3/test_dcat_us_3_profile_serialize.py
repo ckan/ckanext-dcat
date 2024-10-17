@@ -228,6 +228,10 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             ids.append(str(g.value(subject, SKOS.notation)))
         assert ids == dataset["alternate_identifier"]
 
+        # Liability statement
+        statement = [s for s in g.objects(dataset_ref, DCATUS.liabilityStatement)][0]
+        assert self._triple(g, statement, RDFS.label, dataset["liability"])
+
         # Resources
 
         distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]

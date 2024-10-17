@@ -158,6 +158,11 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
         # Data dictionary
         self._data_dictionary_parse(dataset_dict, dataset_ref)
 
+        # Liability statement
+        value = self._object_value(dataset_ref, DCATUS.liabilityStatement)
+        if value:
+            dataset_dict["liability"] = value
+
         for distribution_ref in self._distributions(dataset_ref):
 
             for resource_dict in dataset_dict.get("resources", []):
@@ -234,6 +239,15 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
 
         # Data dictionary
         self._data_dictionary_graph(dataset_dict, dataset_ref)
+
+        # Liability statement
+        self._add_statement_to_graph(
+            dataset_dict,
+            "liability",
+            dataset_ref,
+            DCATUS.liabilityStatement,
+            DCATUS.LiabilityStatement,
+        )
 
         for resource_dict in dataset_dict.get("resources", []):
 
