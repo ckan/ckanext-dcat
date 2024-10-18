@@ -660,7 +660,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
         assert publisher['name'] == 'Publishing Organization for dataset 1'
@@ -688,7 +688,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
 

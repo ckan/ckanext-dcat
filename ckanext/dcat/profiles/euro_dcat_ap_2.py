@@ -125,10 +125,23 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                         ("availability", DCATAP.availability),
                         ("compress_format", DCAT.compressFormat),
                         ("package_format", DCAT.packageFormat),
+                        ("temporal_resolution", DCAT.temporalResolution),
                     ):
                         value = self._object_value(distribution, predicate)
                         if value:
                             resource_dict[key] = value
+
+                    # Spatial resolution in meters
+                    spatial_resolution = self._object_value_float_list(
+                        distribution, DCAT.spatialResolutionInMeters
+                    )
+                    if spatial_resolution:
+                        value = (
+                            spatial_resolution[0]
+                            if len(spatial_resolution) == 1
+                            else json.dumps(spatial_resolution)
+                        )
+                        resource_dict["spatial_resolution_in_meters"] = value
 
                     #  Lists
                     for key, predicate in (
@@ -292,7 +305,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
         # Resources
         for resource_dict in dataset_dict.get("resources", []):
 
-            distribution = CleanedURIRef(resource_uri(resource_dict))
+            distribution_ref = CleanedURIRef(resource_uri(resource_dict))
 
             #  Simple values
             items = [
@@ -313,8 +326,39 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                 ),
             ]
 
-            self._add_triples_from_dict(resource_dict, distribution, items)
+            self._add_triples_from_dict(resource_dict, distribution_ref, items)
 
+            # Temporal resolution
+            self._add_triple_from_dict(
+                resource_dict,
+                distribution_ref,
+                DCAT.temporalResolution,
+                "temporal_resolution",
+                _datatype=XSD.duration,
+            )
+
+            # Spatial resolution in meters
+            spatial_resolution_in_meters = self._read_list_value(
+                self._get_resource_value(resource_dict, "spatial_resolution_in_meters")
+            )
+            if spatial_resolution_in_meters:
+                for value in spatial_resolution_in_meters:
+                    try:
+                        self.g.add(
+                            (
+                                distribution_ref,
+                                DCAT.spatialResolutionInMeters,
+                                Literal(Decimal(value), datatype=XSD.decimal),
+                            )
+                        )
+                    except (ValueError, TypeError, DecimalException):
+                        self.g.add(
+                            (
+                                distribution_ref,
+                                DCAT.spatialResolutionInMeters,
+                                Literal(value),
+                            )
+                        )
             #  Lists
             items = [
                 (
@@ -325,7 +369,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     ELI.LegalResource,
                 ),
             ]
-            self._add_list_triples_from_dict(resource_dict, distribution, items)
+            self._add_list_triples_from_dict(resource_dict, distribution_ref, items)
 
             # Access services
             access_service_list = resource_dict.get("access_services", [])
@@ -346,7 +390,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     # in further profiles
                     access_service_dict["access_service_ref"] = str(access_service_node)
 
-                self.g.add((distribution, DCAT.accessService, access_service_node))
+                self.g.add((distribution_ref, DCAT.accessService, access_service_node))
 
                 self.g.add((access_service_node, RDF.type, DCAT.DataService))
 

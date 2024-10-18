@@ -68,6 +68,9 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-02-27</dct:issued>
                     <dct:title>Download WFS Naturräume Geest und Marsch (GML)</dct:title>
                     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-03-07T10:00:00</dct:modified>
+                    <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">{temp_res}</dcat:temporalResolution>
+                    <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">{spatial_res}</dcat:spatialResolutionInMeters>
+
                     <dcatap:availability rdf:resource="{availability}"/>
                     <dcat:compressFormat rdf:resource="{compressFormat}"/>
                     <dcat:packageFormat rdf:resource="{packageFormat}"/>
@@ -134,6 +137,8 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert resource['availability'] == dist_availability
         assert resource['compress_format'] == compress_format
         assert resource['package_format'] == package_format
+        assert resource['temporal_resolution'] == temporal_resolution
+        assert resource['spatial_resolution_in_meters'] == spatial_resolution_in_meters
 
         # List values
         dist_applicable_legislation_list = json.loads(resource.get('applicable_legislation'))

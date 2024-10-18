@@ -82,6 +82,13 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             dataset_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+        assert self._triple(
+            g,
+            dataset_ref,
             DCAT.spatialResolutionInMeters,
             dataset["spatial_resolution_in_meters"],
             data_type=XSD.decimal,
@@ -101,13 +108,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             DCT.modified,
             dataset["modified"],
             data_type=XSD.date,
-        )
-        assert self._triple(
-            g,
-            dataset_ref,
-            DCAT.temporalResolution,
-            dataset["temporal_resolution"],
-            data_type=XSD.duration,
         )
 
         # List fields
@@ -325,6 +325,20 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             distribution_ref,
             DCAT.downloadURL,
             URIRef(resource["download_url"]),
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.spatialResolutionInMeters,
+            dataset["spatial_resolution_in_meters"],
+            data_type=XSD.decimal,
         )
 
         assert self._triple(
@@ -750,6 +764,9 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["rights"] == "Some statement about rights"
         assert resource["issued"] == "2012-05-11"
         assert resource["modified"] == "2012-05-01T00:04:06"
+        assert resource["temporal_resolution"] == "PT15M"
+        assert resource["spatial_resolution_in_meters"] == 1.5
+
         assert resource["status"] == "http://purl.org/adms/status/Completed"
         assert resource["size"] == 12323
         assert (

@@ -118,6 +118,8 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["rights"] == "Some statement about rights"
         assert resource["issued"] == "2012-05-11"
         assert resource["modified"] == "2012-05-01T00:04:06"
+        assert resource["temporal_resolution"] == "PT15M"
+        assert resource["spatial_resolution_in_meters"] == 1.5
         assert resource["status"] == "http://purl.org/adms/status/Completed"
         assert resource["size"] == 12323
         assert (
