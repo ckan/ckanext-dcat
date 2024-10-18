@@ -714,6 +714,9 @@ class RDFProfile(object):
                     items = value.split(",")
                 else:
                     items = [value]  # Normal text value
+        elif isinstance(value, ((int, float, complex))):
+            items = [value]  # number
+
         return items
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):

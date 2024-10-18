@@ -185,6 +185,8 @@
             "download_url": "https://example.com/data.csv",
             "issued": "2024-05-01T01:20:33",
             "modified": "2024-05-05T09:33:20",
+            "temporal_resolution": "PT15M",
+            "spatial_resolution_in_meters": 1.5,
             "license": "http://creativecommons.org/licenses/by/3.0/",
             "rights": "Some stament about rights",
             "language": [

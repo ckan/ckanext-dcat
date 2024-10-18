@@ -276,6 +276,20 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             DCAT.downloadURL,
             URIRef(resource["download_url"]),
         )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.spatialResolutionInMeters,
+            dataset["spatial_resolution_in_meters"],
+            data_type=XSD.decimal,
+        )
 
         assert self._triple(
             g, distribution_ref, DCAT.byteSize, resource["size"], XSD.nonNegativeInteger

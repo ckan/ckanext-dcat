@@ -263,14 +263,5 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                 _type=URIRefOrLiteral,
             )
 
-            # Temporal resolution
-            self._add_triple_from_dict(
-                resource_dict,
-                distribution_ref,
-                DCAT.temporalResolution,
-                "temporal_resolution",
-                _datatype=XSD.duration,
-            )
-
             # Data dictionary
             self._data_dictionary_graph(resource_dict, distribution_ref)

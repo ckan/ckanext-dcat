@@ -500,6 +500,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             'availability': 'EXPERIMENTAL',
             'compress_format': 'gzip',
             'package_format': 'TAR',
+            'temporal_resolution': 'PT15M',
+            'spatial_resolution_in_meters': '1.5',
             'access_services': json.dumps([
                 {
                     'availability': 'AVAILABLE',
@@ -542,6 +544,8 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, distribution, DCATAP.availability, Literal(resource['availability']))
         assert self._triple(g, distribution, DCAT.compressFormat, Literal(resource['compress_format']))
         assert self._triple(g, distribution, DCAT.packageFormat, Literal(resource['package_format']))
+        assert self._triple(g, distribution, DCAT.temporalResolution, Literal(resource['temporal_resolution'], datatype=XSD.duration))
+        assert self._triple(g, distribution, DCAT.spatialResolutionInMeters, Literal(resource['spatial_resolution_in_meters'], datatype=XSD.decimal))
 
         # Access services
         object_list = self._triples(g, distribution, DCAT.accessService, None)

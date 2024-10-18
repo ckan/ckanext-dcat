@@ -102,6 +102,7 @@
             <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
             <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
+            <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.5</dcat:spatialResolutionInMeters>
             <dcat:compressFormat>http://www.iana.org/assignments/media-types/application/gzip</dcat:compressFormat>
             <dcat:packageFormat>http://publications.europa.eu/resource/authority/file-type/TAR</dcat:packageFormat>
             <dcat:byteSize>12323</dcat:byteSize>
