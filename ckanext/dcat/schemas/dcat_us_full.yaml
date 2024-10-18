@@ -257,6 +257,7 @@ dataset_fields:
   label: Access rights
   validators: ignore_missing unicode_safe
   help_text: Information that indicates whether the dataset is Open Data, has access restrictions or is not public.
+
 - field_name: liability
   label: Liability statement
   form_snippet: markdown.html
@@ -281,6 +282,17 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: Language or languages of the dataset.
   # TODO: language form snippet / validator / graph
+
+- field_name: purpose
+  label: Purpose
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: The purpose of the dataset
+
+- field_name: usage
+  label: Usage note
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
 
 - field_name: documentation
   label: Documentation
@@ -353,6 +365,10 @@ resource_fields:
   label: Media type
   validators: if_empty_guess_format ignore_missing unicode_safe
   help_text: Media type for this format. If not provided it will be guessed.
+
+- field_name: character_encoding
+  label: Character encoding
+  help_text: Character encoding of the file as described by IANA.
 
 - field_name: compress_format
   label: Compress format

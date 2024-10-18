@@ -38,6 +38,12 @@
     "documentation": [
         "https://example.org/some-doc.html"
     ],
+    "purpose": [
+        "Some notes about the purpose of the dataset"
+    ],
+    "usage": [
+        "Some notes about the usage of the dataset"
+    ],
     "conforms_to": [
         "https://resources.data.gov/vocab/TODO/ProtocolValue/DCAT_US_3_0"
     ],
@@ -187,6 +193,7 @@
             "url": "https://example.com/data.csv",
             "format": "https://resources.data.gov/vocab/file-type/TODO/CSV",
             "mimetype": "http://www.iana.org/assignments/media-types/text/csv",
+            "character_encoding": "UTF-8",
             "compress_format": "http://www.iana.org/assignments/media-types/application/gzip",
             "package_format": "http://publications.europa.eu/resource/authority/file-type/TAR",
             "size": 12323,

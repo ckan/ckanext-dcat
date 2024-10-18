@@ -123,6 +123,7 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["modified"] == "2012-05-01T00:04:06"
         assert resource["status"] == "http://purl.org/adms/status/Completed"
         assert resource["size"] == 12323
+        assert resource["character_encoding"] == "UTF-8"
         assert resource["temporal_resolution"] == "PT15M"
         assert resource["spatial_resolution_in_meters"] == 1.5
         assert (
@@ -387,3 +388,52 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["contributor"][1]["name"] == "Test Contributor 1"
         assert dataset["contributor"][1]["email"] == "contributor1@example.org"
         assert dataset["contributor"][1]["url"] == "https://example.org"
+
+    def test_usage_note(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          skos:scopeNote "Some statement about usage"
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["usage"] == ["Some statement about usage"]
+
+    def test_purpose(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcat-us:purpose "Some statement about purpose"
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["purpose"] == ["Some statement about purpose"]

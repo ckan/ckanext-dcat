@@ -1,5 +1,6 @@
 from .base import RDFProfile, CleanedURIRef
 from .base import (
+    CNT,
     RDF,
     XSD,
     SKOS,

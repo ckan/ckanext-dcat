@@ -11,6 +11,7 @@ from ckanext.dcat.tests.utils import BaseSerializeTest
 
 from ckanext.dcat import utils
 from ckanext.dcat.profiles import (
+    CNT,
     DCAT,
     DCATUS,
     DCT,
@@ -132,6 +133,14 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
         assert (
             self._triples_list_values(g, dataset_ref, DCT.isReferencedBy)
             == dataset["is_referenced_by"]
+        )
+        assert (
+            self._triples_list_values(g, dataset_ref, DCATUS.purpose)
+            == dataset["purpose"]
+        )
+        assert (
+            self._triples_list_values(g, dataset_ref, SKOS.scopeNote)
+            == dataset["usage"]
         )
 
         # Repeating subfields
@@ -314,15 +323,21 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             g,
             distribution_ref,
             DCAT.temporalResolution,
-            dataset["temporal_resolution"],
+            resource["temporal_resolution"],
             data_type=XSD.duration,
         )
         assert self._triple(
             g,
             distribution_ref,
             DCAT.spatialResolutionInMeters,
-            dataset["spatial_resolution_in_meters"],
+            resource["spatial_resolution_in_meters"],
             data_type=XSD.decimal,
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            CNT.characterEncoding,
+            resource["character_encoding"],
         )
 
         assert self._triple(

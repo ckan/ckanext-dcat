@@ -1,8 +1,10 @@
-from decimal import Decimal, DecimalException
+import json
+from decimal import DecimalException
 
 from rdflib import Literal, BNode, URIRef
 
 from ckanext.dcat.profiles import (
+    CNT,
     DCAT,
     DCATUS,
     DCT,
@@ -170,6 +172,15 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
             for contributor in contributors:
                 dataset_dict["contributor"].append(contributor)
 
+        # List fields
+        for key, predicate in (
+            ("purpose", DCATUS.purpose),
+            ("usage", SKOS.scopeNote),
+        ):
+            values = self._object_value_list(dataset_ref, predicate)
+            if values:
+                dataset_dict[key] = values
+
         for distribution_ref in self._distributions(dataset_ref):
 
             for resource_dict in dataset_dict.get("resources", []):
@@ -186,6 +197,13 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
                     )
                     if value:
                         resource_dict["temporal_resolution"] = value
+
+                    # Character encoding
+                    value = self._object_value(
+                        distribution_ref, CNT.characterEncoding
+                    )
+                    if value:
+                        resource_dict["character_encoding"] = value
 
                     # Data dictionary
                     self._data_dictionary_parse(resource_dict, distribution_ref)
@@ -259,6 +277,13 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
         # Contributor
         self._add_agents(dataset_ref, dataset_dict, "contributor", DCT.contributor)
 
+        #  Lists
+        items = [
+            ("purpose", DCATUS.purpose, None, Literal),
+            ("usage", SKOS.scopeNote, None, Literal),
+        ]
+        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+
         for resource_dict in dataset_dict.get("resources", []):
 
             distribution_ref = CleanedURIRef(resource_uri(resource_dict))
@@ -275,3 +300,12 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
 
             # Data dictionary
             self._data_dictionary_graph(resource_dict, distribution_ref)
+
+            # Character encoding
+            self._add_triple_from_dict(
+                resource_dict,
+                distribution_ref,
+                CNT.characterEncoding,
+                "character_encoding",
+                _type=Literal,
+            )

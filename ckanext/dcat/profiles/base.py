@@ -13,6 +13,7 @@ from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_year, is_year_month, is_date
 
+CNT = Namespace("http://www.w3.org/2011/content#")
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
@@ -28,6 +29,7 @@ OWL = Namespace("http://www.w3.org/2002/07/owl#")
 SPDX = Namespace("http://spdx.org/rdf/terms#")
 
 namespaces = {
+    "cnt": CNT,
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,
