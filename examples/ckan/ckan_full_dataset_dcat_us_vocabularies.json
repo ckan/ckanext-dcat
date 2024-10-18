@@ -68,6 +68,18 @@
             "url": "https://example.org"
         }
     ],
+    "contributor": [
+        {
+            "name": "Test Contributor 1",
+            "email": "contributor1@example.org",
+            "url": "https://example.org"
+        },
+        {
+            "name": "Test Contributor 2",
+            "email": "contributor2@example.org",
+            "url": "https://example.org"
+        }
+    ],
     "temporal_coverage": [
         {
             "start": "1905-03-01",

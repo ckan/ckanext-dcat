@@ -177,6 +177,40 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
             URIRef(dataset_dict["publisher"][0]["url"]),
         )
 
+        contributor = [t for t in g.triples((dataset_ref, DCT.contributor, None))]
+
+        assert len(contributor) == 2
+        assert self._triple(
+            g, contributor[0][2], FOAF.name, dataset_dict["contributor"][0]["name"]
+        )
+        assert self._triple(
+            g,
+            contributor[0][2],
+            VCARD.hasEmail,
+            URIRef("mailto:" + dataset_dict["contributor"][0]["email"]),
+        )
+        assert self._triple(
+            g,
+            contributor[0][2],
+            FOAF.homepage,
+            URIRef(dataset_dict["contributor"][0]["url"]),
+        )
+        assert self._triple(
+            g, contributor[1][2], FOAF.name, dataset_dict["contributor"][1]["name"]
+        )
+        assert self._triple(
+            g,
+            contributor[1][2],
+            VCARD.hasEmail,
+            URIRef("mailto:" + dataset_dict["contributor"][1]["email"]),
+        )
+        assert self._triple(
+            g,
+            contributor[1][2],
+            FOAF.homepage,
+            URIRef(dataset_dict["contributor"][1]["url"]),
+        )
+
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
 
         assert len(temporal) == len(dataset["temporal_coverage"])

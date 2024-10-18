@@ -163,6 +163,13 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
         if value:
             dataset_dict["liability"] = value
 
+        # Contributors
+        contributors = self._agents_details(dataset_ref, DCT.contributor)
+        if contributors:
+            dataset_dict["contributor"] = []
+            for contributor in contributors:
+                dataset_dict["contributor"].append(contributor)
+
         for distribution_ref in self._distributions(dataset_ref):
 
             for resource_dict in dataset_dict.get("resources", []):
@@ -248,6 +255,9 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
             DCATUS.liabilityStatement,
             DCATUS.LiabilityStatement,
         )
+
+        # Contributor
+        self._add_agents(dataset_ref, dataset_dict, "contributor", DCT.contributor)
 
         for resource_dict in dataset_dict.get("resources", []):
 

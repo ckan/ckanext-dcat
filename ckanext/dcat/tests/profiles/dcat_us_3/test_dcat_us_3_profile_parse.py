@@ -93,6 +93,10 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["contact"][0]["name"] == "Point of Contact"
         assert dataset["contact"][0]["email"] == "contact@some.org"
 
+        assert dataset["creator"][0]["name"] == "Creating Organization for dataset 1"
+        assert dataset["creator"][0]["email"] == "creator@example.org"
+        assert dataset["creator"][0]["url"] == "http://example.org"
+
         assert (
             dataset["publisher"][0]["name"] == "Publishing Organization for dataset 1"
         )
@@ -102,6 +106,7 @@ class TestSchemingParseSupport(BaseParseTest):
             dataset["publisher"][0]["type"]
             == "http://purl.org/adms/publishertype/NonProfitOrganisation"
         )
+
         assert dataset["temporal_coverage"][0]["start"] == "1905-03-01"
         assert dataset["temporal_coverage"][0]["end"] == "2013-01-05"
 
@@ -324,7 +329,6 @@ class TestSchemingParseSupport(BaseParseTest):
           a dcat:Dataset ;
           dcterms:title "Dataset 1" ;
           dcterms:description "This is a dataset" ;
-          dcterms:publisher <https://example.com/publisher1> ;
           dcat-us:liabilityStatement [
               a dcat-us:LiabilityStatement;
               rdfs:label "This dataset is provided 'as-is'."
@@ -340,3 +344,46 @@ class TestSchemingParseSupport(BaseParseTest):
         dataset = datasets[0]
 
         assert dataset["liability"] == "This dataset is provided 'as-is'."
+
+    def test_contributors(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dcat-us: <http://resources.data.gov/ontology/dcat-us#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+        @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dcterms:title "Dataset 1" ;
+          dcterms:description "This is a dataset" ;
+          dcterms:contributor <https://orcid.org/0000-0002-0693-466X> ;
+          dcterms:contributor [
+            a foaf:Agent;
+            foaf:name "Test Contributor 1" ;
+            vcard:hasEmail <mailto:contributor1@example.org> ;
+            foaf:homepage <https://example.org> ;
+            ]
+        .
+
+        <https://orcid.org/0000-0002-0693-466X> a foaf:Person;
+          foaf:name "John Doe" ;
+        .
+        """
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+
+        assert dataset["contributor"][0]["name"] == "John Doe"
+        assert (
+            dataset["contributor"][0]["uri"] == "https://orcid.org/0000-0002-0693-466X"
+        )
+
+        assert dataset["contributor"][1]["name"] == "Test Contributor 1"
+        assert dataset["contributor"][1]["email"] == "contributor1@example.org"
+        assert dataset["contributor"][1]["url"] == "https://example.org"
