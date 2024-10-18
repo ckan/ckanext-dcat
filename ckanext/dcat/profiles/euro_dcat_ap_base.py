@@ -120,21 +120,24 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                         {"key": "contact_{0}".format(key), "value": contact.get(key)}
                     )
 
-        # Publisher
-        publisher = self._agent_details(dataset_ref, DCT.publisher)
-        for key in ("uri", "name", "email", "url", "type", "identifier"):
-            if publisher.get(key):
-                dataset_dict["extras"].append(
-                    {"key": "publisher_{0}".format(key), "value": publisher.get(key)}
-                )
-
-        # Creator
-        creator = self._agent_details(dataset_ref, DCT.creator)
-        for key in ("uri", "name", "email", "url", "type", "identifier"):
-            if creator.get(key):
-                dataset_dict["extras"].append(
-                    {"key": "creator_{0}".format(key), "value": creator.get(key)}
-                )
+        # Publishers and creators
+        for item in [("publisher", DCT.publisher), ("creator", DCT.creator)]:
+            agent_key, predicate = item
+            if self._schema_field(agent_key):
+                # This is a scheming field, will be hanlded in a separate profile
+                pass
+            else:
+                agents = self._agents_details(dataset_ref, predicate)
+                if agents:
+                    agent = agents[0]
+                    for key in ("uri", "name", "email", "url", "type", "identifier"):
+                        if agent.get(key):
+                            dataset_dict["extras"].append(
+                                {
+                                    "key": f"{agent_key}_{key}",
+                                    "value": agent.get(key)
+                                }
+                            )
 
         # Temporal
         start, end = self._time_interval(dataset_ref, DCT.temporal)
