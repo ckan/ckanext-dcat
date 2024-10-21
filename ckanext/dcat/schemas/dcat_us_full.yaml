@@ -312,12 +312,6 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: A related resource, such as a publication, that references, cites, or otherwise points to the dataset.
 
-- field_name: applicable_legislation
-  label: Applicable legislation
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_text
-  help_text: The legislation that mandates the creation or management of the dataset.
-
 - field_name: data_dictionary
   label: Data dictionary
   repeating_label: Data dictionary
@@ -471,12 +465,6 @@ resource_fields:
   preset: multiple_text
   validators: ignore_missing scheming_multiple_text
   help_text: An established schema to which the described resource conforms.
-
-- field_name: applicable_legislation
-  label: Applicable legislation
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_text
-  help_text: The legislation that mandates the creation or management of the resource.
 
 - field_name: access_services
   label: Access services
