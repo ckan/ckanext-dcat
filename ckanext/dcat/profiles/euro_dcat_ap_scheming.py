@@ -100,14 +100,17 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     dataset_dict[field_name] = [new_dict]
                     dataset_dict["extras"] = new_extras
 
+        # Contact details
+        contacts = self._contact_details(dataset_ref, DCAT.contactPoint)
+        if contacts:
+            dataset_dict["contact"] = contacts
+
         # Publishers and creators
         for item in [("publisher", DCT.publisher), ("creator", DCT.creator)]:
             key, predicate = item
             agents = self._agents_details(dataset_ref, predicate)
             if agents:
-                dataset_dict[key] = []
-                for publisher in agents:
-                    dataset_dict[key].append(publisher)
+                dataset_dict[key] = agents
 
         # Repeating subfields: resources
         for schema_field in self._dataset_schema["resource_fields"]:

@@ -461,7 +461,7 @@ class RDFProfile(object):
 
     def _contact_details(self, subject, predicate):
         """
-        Returns a dict with details about a vcard expression
+        Returns a list of dicts with details about vcard expressions
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
@@ -469,10 +469,10 @@ class RDFProfile(object):
         an empty string if they could not be found
         """
 
-        contact = {}
-
+        contacts = []
         for agent in self.g.objects(subject, predicate):
 
+            contact = {}
             contact["uri"] = str(agent) if isinstance(agent, URIRef) else ""
 
             contact["name"] = self._get_vcard_property_value(
@@ -484,8 +484,9 @@ class RDFProfile(object):
             )
 
             contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
+            contacts.append(contact)
 
-        return contact
+        return contacts
 
     def _parse_geodata(self, spatial, datatype, cur_value):
         """

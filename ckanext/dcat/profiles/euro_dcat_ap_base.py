@@ -108,17 +108,24 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 dataset_dict["extras"].append({"key": key, "value": json.dumps(values)})
 
         # Contact details
-        contact = self._contact_details(dataset_ref, DCAT.contactPoint)
-        if not contact:
-            # adms:contactPoint was supported on the first version of DCAT-AP
-            contact = self._contact_details(dataset_ref, ADMS.contactPoint)
-
-        if contact:
-            for key in ("uri", "name", "email", "identifier"):
-                if contact.get(key):
-                    dataset_dict["extras"].append(
-                        {"key": "contact_{0}".format(key), "value": contact.get(key)}
-                    )
+        if self._schema_field("contact"):
+            # This is a scheming field, will be hanlded in a separate profile
+            pass
+        else:
+            contact = self._contact_details(dataset_ref, DCAT.contactPoint)
+            if not contact:
+                # adms:contactPoint was supported on the first version of DCAT-AP
+                contact = self._contact_details(dataset_ref, ADMS.contactPoint)
+            if contact:
+                contact = contact[0]
+                for key in ("uri", "name", "email", "identifier"):
+                    if contact.get(key):
+                        dataset_dict["extras"].append(
+                            {
+                                "key": "contact_{0}".format(key),
+                                "value": contact.get(key)
+                            }
+                        )
 
         # Publishers and creators
         for item in [("publisher", DCT.publisher), ("creator", DCT.creator)]:
