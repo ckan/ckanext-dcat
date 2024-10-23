@@ -50,7 +50,10 @@ class SchemaOrgProfile(RDFProfile):
         self._list_fields_graph(dataset_ref, dataset_dict)
 
         # Publisher
-        self._publisher_graph(dataset_ref, dataset_dict)
+        self._agent_graph(dataset_ref, dataset_dict, SCHEMA.publisher, "publisher")
+
+        # Creator
+        self._agent_graph(dataset_ref, dataset_dict, SCHEMA.creator, "creator")
 
         # Temporal
         self._temporal_graph(dataset_ref, dataset_dict)
@@ -156,74 +159,73 @@ class SchemaOrgProfile(RDFProfile):
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
-    def _publisher_graph(self, dataset_ref, dataset_dict):
+    def _agent_graph(self, dataset_ref, dataset_dict, agent_type, schema_property_prefix):
+        uri_key = f"{schema_property_prefix}_uri"
+        name_key = f"{schema_property_prefix}_name"
+        url_key = f"{schema_property_prefix}_url"
+        email_key = f"{schema_property_prefix}_email"
+        identifier_key = f"{schema_property_prefix}_identifier"
+
         if any(
             [
-                self._get_dataset_value(dataset_dict, "publisher_uri"),
-                self._get_dataset_value(dataset_dict, "publisher_name"),
+                self._get_dataset_value(dataset_dict, uri_key),
+                self._get_dataset_value(dataset_dict, name_key),
                 dataset_dict.get("organization"),
             ]
         ):
+            agent_uri = self._get_dataset_value(dataset_dict, uri_key)
+            agent_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
+            agent_name = self._get_dataset_value(dataset_dict, name_key)
 
-            publisher_uri = self._get_dataset_value(dataset_dict, "publisher_uri")
-            publisher_uri_fallback = publisher_uri_organization_fallback(dataset_dict)
-            publisher_name = self._get_dataset_value(dataset_dict, "publisher_name")
-            if publisher_uri:
-                publisher_details = CleanedURIRef(publisher_uri)
-            elif not publisher_name and publisher_uri_fallback:
-                # neither URI nor name are available, use organization as fallback
-                publisher_details = CleanedURIRef(publisher_uri_fallback)
+            if agent_uri:
+                agent_details = CleanedURIRef(agent_uri)
+            elif not agent_name and agent_uri_fallback:
+                agent_details = CleanedURIRef(agent_uri_fallback)
             else:
-                # No publisher_uri
-                publisher_details = BNode()
+                agent_details = BNode()
 
-            self.g.add((publisher_details, RDF.type, SCHEMA.Organization))
-            self.g.add((dataset_ref, SCHEMA.publisher, publisher_details))
+            self.g.add((agent_details, RDF.type, SCHEMA.Organization))
+            self.g.add((dataset_ref, agent_type, agent_details))
 
-            # In case no name and URI are available, again fall back to organization.
-            # If no name but an URI is available, the name literal remains empty to
-            # avoid mixing organization and dataset values.
             if (
-                not publisher_name
-                and not publisher_uri
+                not agent_name
+                and not agent_uri
                 and dataset_dict.get("organization")
             ):
-                publisher_name = dataset_dict["organization"]["title"]
-            self.g.add((publisher_details, SCHEMA.name, Literal(publisher_name)))
+                agent_name = dataset_dict["organization"]["title"]
+            self.g.add((agent_details, SCHEMA.name, Literal(agent_name)))
 
             contact_point = BNode()
             self.g.add((contact_point, RDF.type, SCHEMA.ContactPoint))
-            self.g.add((publisher_details, SCHEMA.contactPoint, contact_point))
-
+            self.g.add((agent_details, SCHEMA.contactPoint, contact_point))
             self.g.add((contact_point, SCHEMA.contactType, Literal("customer service")))
 
-            publisher_url = self._get_dataset_value(dataset_dict, "publisher_url")
-            if not publisher_url and dataset_dict.get("organization"):
-                publisher_url = dataset_dict["organization"].get("url") or config.get(
+            agent_url = self._get_dataset_value(dataset_dict, url_key)
+            if not agent_url and dataset_dict.get("organization"):
+                agent_url = dataset_dict["organization"].get("url") or config.get(
                     "ckan.site_url"
                 )
+            self.g.add((contact_point, SCHEMA.url, Literal(agent_url)))
 
-            self.g.add((contact_point, SCHEMA.url, Literal(publisher_url)))
             items = [
                 (
-                    "publisher_email",
+                    email_key,
                     SCHEMA.email,
                     ["contact_email", "maintainer_email", "author_email"],
                     Literal,
                 ),
                 (
-                    "publisher_name",
+                    name_key,
                     SCHEMA.name,
                     ["contact_name", "maintainer", "author"],
                     Literal,
                 ),
             ]
-
             self._add_triples_from_dict(dataset_dict, contact_point, items)
 
-            publisher_identifier = self._get_dataset_value(dataset_dict, "publisher_identifier")
-            if publisher_identifier:
-                self.g.add((publisher_details, SCHEMA.identifier, Literal(publisher_identifier)))
+            agent_identifier = self._get_dataset_value(dataset_dict, identifier_key)
+            if agent_identifier:
+                self.g.add((agent_details, SCHEMA.identifier, Literal(agent_identifier)))
 
     def _temporal_graph(self, dataset_ref, dataset_dict):
         start = self._get_dataset_value(dataset_dict, "temporal_start")

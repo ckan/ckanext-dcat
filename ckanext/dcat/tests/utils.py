@@ -64,3 +64,6 @@ class BaseSerializeTest(object):
             if dict.get(key) == value:
                 return dict
         return None
+
+    def _get_file_contents(self, file_name):
+        return get_file_contents(file_name)

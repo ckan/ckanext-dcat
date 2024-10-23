@@ -34,7 +34,6 @@ from .base import (
 
 config = toolkit.config
 
-
 DISTRIBUTION_LICENSE_FALLBACK_CONFIG = "ckanext.dcat.resource.inherit.license"
 
 
@@ -115,18 +114,26 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             contact = self._contact_details(dataset_ref, ADMS.contactPoint)
 
         if contact:
-            for key in ("uri", "name", "email"):
+            for key in ("uri", "name", "email", "identifier"):
                 if contact.get(key):
                     dataset_dict["extras"].append(
                         {"key": "contact_{0}".format(key), "value": contact.get(key)}
                     )
 
         # Publisher
-        publisher = self._publisher(dataset_ref, DCT.publisher)
+        publisher = self._agent_details(dataset_ref, DCT.publisher)
         for key in ("uri", "name", "email", "url", "type", "identifier"):
             if publisher.get(key):
                 dataset_dict["extras"].append(
                     {"key": "publisher_{0}".format(key), "value": publisher.get(key)}
+                )
+
+        # Creator
+        creator = self._agent_details(dataset_ref, DCT.creator)
+        for key in ("uri", "name", "email", "url", "type", "identifier"):
+            if creator.get(key):
+                dataset_dict["extras"].append(
+                    {"key": "creator_{0}".format(key), "value": creator.get(key)}
                 )
 
         # Temporal
@@ -250,7 +257,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     "publisher_name",
                     "publisher_email",
                 ):
-
                     extra["key"] = "dcat_" + extra["key"]
 
                 if extra["key"] == "language":
@@ -276,9 +282,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
             ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral, DCT.Frequency),
-            ("access_rights", DCT.accessRights, None, URIRefOrLiteral, DCT.AccessRights),
             ("dcat_type", DCT.type, None, URIRefOrLiteral),
-            ("provenance", DCT.provenance, None, URIRefOrLiteral, DCT.ProvenanceStatement),
         ]
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -412,6 +416,48 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ]
             self._add_triples_from_dict(publisher_details, publisher_ref, items)
 
+        # Creator
+        creator_ref = None
+
+        if dataset_dict.get("creator"):
+            # Scheming publisher field: will be handled in a separate profile
+            pass
+        elif any(
+            [
+                self._get_dataset_value(dataset_dict, "creator_uri"),
+                self._get_dataset_value(dataset_dict, "creator_name"),
+            ]
+        ):
+            # Legacy creator_* extras
+            creator_uri = self._get_dataset_value(dataset_dict, "creator_uri")
+            creator_name = self._get_dataset_value(dataset_dict, "creator_name")
+            if creator_uri:
+                creator_ref = CleanedURIRef(creator_uri)
+            else:
+                # No creator_uri
+                creator_ref = BNode()
+
+            creator_details = {
+                "name": creator_name,
+                "email": self._get_dataset_value(dataset_dict, "creator_email"),
+                "url": self._get_dataset_value(dataset_dict, "creator_url"),
+                "type": self._get_dataset_value(dataset_dict, "creator_type"),
+                "identifier": self._get_dataset_value(dataset_dict, "creator_identifier"),
+            }
+
+        # Add to graph
+        if creator_ref:
+            g.add((creator_ref, RDF.type, FOAF.Agent))
+            g.add((dataset_ref, DCT.creator, creator_ref))  # Use DCT.creator for creator
+            items = [
+                ("name", FOAF.name, None, Literal),
+                ("email", FOAF.mbox, None, Literal),
+                ("url", FOAF.homepage, None, URIRef),
+                ("type", DCT.type, None, URIRefOrLiteral),
+                ("identifier", DCT.identifier, None, URIRefOrLiteral),
+            ]
+            self._add_triples_from_dict(creator_details, creator_ref, items)
+
         # Temporal
         start = self._get_dataset_value(dataset_dict, "temporal_start")
         end = self._get_dataset_value(dataset_dict, "temporal_end")
@@ -452,6 +498,23 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ):
                 resource_license_fallback = dataset_dict["license_url"]
 
+        # Statetements
+        self._add_statement_to_graph(
+            dataset_dict,
+            "access_rights",
+            dataset_ref,
+            DCT.accessRights,
+            DCT.RightsStatement
+        )
+
+        self._add_statement_to_graph(
+            dataset_dict,
+            "provenance",
+            dataset_ref,
+            DCT.provenance,
+            DCT.ProvenanceStatement
+        )
+
         # Resources
         for resource_dict in dataset_dict.get("resources", []):
 
@@ -466,7 +529,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("name", DCT.title, None, Literal),
                 ("description", DCT.description, None, Literal),
                 ("status", ADMS.status, None, URIRefOrLiteral),
-                ("rights", DCT.rights, None, URIRefOrLiteral, DCT.RightsStatement),
                 ("license", DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
                 ("access_url", DCAT.accessURL, None, URIRef, RDFS.Resource),
                 ("download_url", DCAT.downloadURL, None, URIRef, RDFS.Resource),
@@ -481,6 +543,15 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
             ]
             self._add_list_triples_from_dict(resource_dict, distribution, items)
+
+            # Statetements
+            self._add_statement_to_graph(
+                resource_dict,
+                "rights",
+                distribution,
+                DCT.rights,
+                DCT.RightsStatement
+            )
 
             # Set default license for distribution if needed and available
 

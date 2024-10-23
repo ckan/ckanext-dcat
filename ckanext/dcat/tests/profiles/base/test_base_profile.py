@@ -660,7 +660,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._publisher(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
         assert publisher['name'] == 'Publishing Organization for dataset 1'
@@ -688,7 +688,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._publisher(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
 
@@ -706,6 +706,7 @@ class TestBaseRDFProfile(object):
             <vcard:Organization>
               <vcard:fn>Point of Contact</vcard:fn>
               <vcard:hasEmail rdf:resource="mailto:contact@some.org"/>
+              <vcard:hasUID rdf:resource="https://orcid.org/0000-0002-9095-9201"/>
             </vcard:Organization>
           </adms:contactPoint>
         </rdfs:SomeClass>
@@ -723,3 +724,5 @@ class TestBaseRDFProfile(object):
         assert contact['name'] == 'Point of Contact'
         # mailto gets removed for storage and is added again on output
         assert contact['email'] == 'contact@some.org'
+
+        assert contact['identifier'] == 'https://orcid.org/0000-0002-9095-9201'

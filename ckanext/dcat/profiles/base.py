@@ -218,6 +218,8 @@ class RDFProfile(object):
                 # Use first object as fallback if no object with the default language is available
                 elif fallback == "":
                     fallback = str(o)
+            elif len(list(self.g.objects(o, RDFS.label))):
+                return str(next(self.g.objects(o, RDFS.label)))
             else:
                 return str(o)
         return fallback
@@ -419,58 +421,37 @@ class RDFProfile(object):
         else:
             dataset_dict["extras"].append({"key": key, "value": value})
 
-    def _publisher(self, subject, predicate):
+    def _agent_details(self, subject, predicate):
         """
-        Returns a dict with details about a dct:publisher entity, a foaf:Agent
+        Returns a dict with details about a dct:publisher or dct:creator entity, a foaf:Agent
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
         Examples:
 
-        <dct:publisher>
+        <dct:publisher> or <dct:creator>
             <foaf:Organization rdf:about="http://orgs.vocab.org/some-org">
                 <foaf:name>Publishing Organization for dataset 1</foaf:name>
                 <foaf:mbox>contact@some.org</foaf:mbox>
                 <foaf:homepage>http://some.org</foaf:homepage>
                 <dct:type rdf:resource="http://purl.org/adms/publishertype/NonProfitOrganisation"/>
             </foaf:Organization>
-        </dct:publisher>
 
-        {
-            'uri': 'http://orgs.vocab.org/some-org',
-            'name': 'Publishing Organization for dataset 1',
-            'email': 'contact@some.org',
-            'url': 'http://some.org',
-            'type': 'http://purl.org/adms/publishertype/NonProfitOrganisation',
-        }
-
-        <dct:publisher rdf:resource="http://publications.europa.eu/resource/authority/corporate-body/EURCOU" />
-
-        {
-            'uri': 'http://publications.europa.eu/resource/authority/corporate-body/EURCOU'
-        }
-
-        Returns keys for uri, name, email, url and type with the values set to
-        an empty string if they could not be found
+        Returns keys for uri, name, email, url, type, and identifier with the values set to
+        an empty string if they could not be found.
         """
 
-        publisher = {}
+        agent_details = {}
 
         for agent in self.g.objects(subject, predicate):
+            agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
+            agent_details["name"] = self._object_value(agent, FOAF.name)
+            agent_details["email"] = self._object_value(agent, FOAF.mbox)
+            agent_details["url"] = self._object_value(agent, FOAF.homepage)
+            agent_details["type"] = self._object_value(agent, DCT.type)
+            agent_details['identifier'] = self._object_value(agent, DCT.identifier)
 
-            publisher["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
-
-            publisher["name"] = self._object_value(agent, FOAF.name)
-
-            publisher["email"] = self._object_value(agent, FOAF.mbox)
-
-            publisher["url"] = self._object_value(agent, FOAF.homepage)
-
-            publisher["type"] = self._object_value(agent, DCT.type)
-
-            publisher['identifier'] = self._object_value(agent, DCT.identifier)
-
-        return publisher
+        return agent_details
 
     def _contact_details(self, subject, predicate):
         """
@@ -486,7 +467,7 @@ class RDFProfile(object):
 
         for agent in self.g.objects(subject, predicate):
 
-            contact["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
+            contact["uri"] = str(agent) if isinstance(agent, URIRef) else ""
 
             contact["name"] = self._get_vcard_property_value(
                 agent, VCARD.hasFN, VCARD.fn
@@ -495,6 +476,8 @@ class RDFProfile(object):
             contact["email"] = self._without_mailto(
                 self._get_vcard_property_value(agent, VCARD.hasEmail)
             )
+
+            contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
 
         return contact
 
@@ -776,6 +759,38 @@ class RDFProfile(object):
                     "value": spatial.get(key),
                 }
             )
+
+    def _add_statement_to_graph(self, data_dict, key, subject, predicate, _class=None):
+        """
+        Adds a statement property to the graph.
+        If it is a Literal value, it is added as a node (with a class if provided)
+        with a RDFS.label property, eg:
+
+            dct:accessRights [ a dct:RightsStatement ;
+                rdfs:label "Statement about access rights" ] ;
+
+        An URI can also be used:
+
+            dct:accessRights <https://example.org/vocab/access-right/TODO/PUBLIC> ;
+
+            [...]
+
+            <https://example.org/vocab/access-right/TODO/PUBLIC> a dct:RightsStatement .
+        """
+        value = self._get_dict_value(data_dict, key)
+        if value:
+            _object = URIRefOrLiteral(value)
+            if isinstance(_object, Literal):
+                statement_ref = BNode()
+                self.g.add((subject, predicate, statement_ref))
+                if _class:
+                    self.g.add((statement_ref, RDF.type, _class))
+                self.g.add((statement_ref, RDFS.label, _object))
+
+            else:
+                self.g.add((subject, predicate, _object))
+                if _class:
+                    self.g.add((_object, RDF.type, _class))
 
     def _schema_field(self, key):
         """
@@ -1136,7 +1151,7 @@ class RDFProfile(object):
         out.append(
             {
                 "key": "source_catalog_publisher",
-                "value": json.dumps(self._publisher(catalog_ref, DCT.publisher)),
+                "value": json.dumps(self._agent_details(catalog_ref, DCT.publisher)),
             }
         )
         return out

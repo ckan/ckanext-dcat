@@ -42,6 +42,11 @@ dataset_fields:
     - field_name: email
       label: Email
       display_snippet: email.html
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the contact point. Such as a ROR ID.
+
   help_text: Contact information for enquiries about the dataset.
 
 - field_name: publisher
@@ -71,6 +76,38 @@ dataset_fields:
       label: Identifier
       help_text: Unique identifier for the publisher, such as a ROR ID.
   help_text: Entity responsible for making the dataset available.
+
+- field_name: creator
+  label: Creator
+  repeating_label: Creator
+  repeating_once: true
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+      help_text: URI of the creator, if available.
+
+    - field_name: name
+      label: Name
+      help_text: Name of the entity or person who created the dataset.
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+      help_text: Contact email of the creator.
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+      help_text: URL for more information about the creator.
+
+    - field_name: type
+      label: Type
+      help_text: Type of creator (e.g., Organization, Person).
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
 
 - field_name: license_id
   label: License
@@ -176,8 +213,6 @@ dataset_fields:
 - field_name: access_rights
   label: Access rights
   validators: ignore_missing unicode_safe
-  form_snippet: markdown.html
-  display_snippet: markdown.html
   help_text: Information that indicates whether the dataset is Open Data, has access restrictions or is not public.
 
 - field_name: alternate_identifier
@@ -313,6 +348,13 @@ resource_fields:
   label: License
   help_text: License in which the resource is made available. If not provided will be inherited from the dataset.
 
+- field_name: has_version
+  label: Has version
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_inline: true
+  help_text: This property refers to a related Dataset that is a version, edition, or adaptation of the described Dataset.
+
   # Note: this falls back to the standard resource url field
 - field_name: access_url
   label: Access URL
@@ -321,6 +363,7 @@ resource_fields:
   # Note: this falls back to the standard resource url field
 - field_name: download_url
   label: Download URL
+  display_snippet: link.html
   help_text: URL that provides a direct link to a downloadable file (defaults to the standard resource URL).
 
 - field_name: issued

@@ -10,7 +10,6 @@ from ckantoolkit import (
     _,
 )
 
-
 try:
     from ckanext.scheming.validation import scheming_validator
 except ImportError:

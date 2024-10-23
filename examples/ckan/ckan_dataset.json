@@ -8,6 +8,8 @@
             {"key": "guid", "value": "9df8df51-63db-37a8-e044-0003ba9b0d98"},
             {"key": "dcat_publisher_name", "value": "Geological Society"},
             {"key": "dcat_publisher_email", "value": "info@gs.org"},
+            {"key": "dcat_creator_name", "value": "John Doe"},
+            {"key": "dcat_creator_email", "value": "johndoe@example.com"},
             {"key": "language", "value": "en,es,ca"}
     ],
     "resources": [{"id": "b1e0b666-b7f4-44c1-9b16-56c78e86b66a",
