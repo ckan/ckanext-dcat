@@ -82,6 +82,13 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g,
             dataset_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+        assert self._triple(
+            g,
+            dataset_ref,
             DCAT.spatialResolutionInMeters,
             dataset["spatial_resolution_in_meters"],
             data_type=XSD.decimal,
@@ -101,13 +108,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             DCT.modified,
             dataset["modified"],
             data_type=XSD.date,
-        )
-        assert self._triple(
-            g,
-            dataset_ref,
-            DCAT.temporalResolution,
-            dataset["temporal_resolution"],
-            data_type=XSD.duration,
         )
 
         # List fields
@@ -190,7 +190,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             publisher[0][2],
             DCT.identifier,
-            URIRef(dataset_dict["publisher"][0]["identifier"])
+            URIRef(dataset_dict["publisher"][0]["identifier"]),
         )
 
         creator = [t for t in g.triples((dataset_ref, DCT.creator, None))]
@@ -221,9 +221,8 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             creator[0][2],
             DCT.identifier,
-            URIRef(dataset_dict["creator"][0]["identifier"])
+            URIRef(dataset_dict["creator"][0]["identifier"]),
         )
-
 
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
 
@@ -275,8 +274,8 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 
         # Statements
         for item in [
-            ('access_rights', DCT.accessRights),
-            ('provenance', DCT.provenance),
+            ("access_rights", DCT.accessRights),
+            ("provenance", DCT.provenance),
         ]:
             statement = [s for s in g.objects(dataset_ref, item[1])][0]
             assert self._triple(g, statement, RDFS.label, dataset[item[0]])
@@ -325,6 +324,20 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             distribution_ref,
             DCAT.downloadURL,
             URIRef(resource["download_url"]),
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.spatialResolutionInMeters,
+            dataset["spatial_resolution_in_meters"],
+            data_type=XSD.decimal,
         )
 
         assert self._triple(
@@ -388,7 +401,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 
         # Resources: statements
         statement = [s for s in g.objects(distribution_ref, DCT.rights)][0]
-        assert self._triple(g, statement, RDFS.label, resource['rights'])
+        assert self._triple(g, statement, RDFS.label, resource["rights"])
 
     def test_publisher_fallback_org(self):
 
@@ -750,6 +763,9 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["rights"] == "Some statement about rights"
         assert resource["issued"] == "2012-05-11"
         assert resource["modified"] == "2012-05-01T00:04:06"
+        assert resource["temporal_resolution"] == "PT15M"
+        assert resource["spatial_resolution_in_meters"] == 1.5
+
         assert resource["status"] == "http://purl.org/adms/status/Completed"
         assert resource["size"] == 12323
         assert (
@@ -838,6 +854,116 @@ class TestSchemingParseSupport(BaseParseTest):
 
         assert dataset["notes"] == "This is a dataset"
         assert dataset["access_rights"] == "Some statement"
+
+    def test_multiple_contacts(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dct:title "Dataset 1" ;
+          dct:description "This is a dataset" ;
+            dcat:contactPoint [ a vcard:Kind ;
+                vcard:fn "Test Contact 1" ;
+                vcard:hasEmail <mailto:contact1@example.org> ],
+            [ a vcard:Kind ;
+                vcard:fn "Test Contact 2" ;
+                vcard:hasEmail <mailto:contact2@example.org> ] ;
+        .
+        """
+
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+        assert len(dataset["contact"]) == 2
+        assert dataset["contact"][0]["name"] == "Test Contact 1"
+        assert dataset["contact"][0]["email"] == "contact1@example.org"
+        assert dataset["contact"][1]["name"] == "Test Contact 2"
+        assert dataset["contact"][1]["email"] == "contact2@example.org"
+
+    def test_multiple_publishers(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        @prefix org: <http://www.w3.org/ns/org#> .
+        @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+        @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dct:title "Dataset 1" ;
+          dct:description "This is a dataset" ;
+          dct:publisher [ a org:Organization ;
+                    skos:prefLabel "Test Publisher 1" ;
+                    vcard:hasEmail <mailto:publisher1@example.org> ;
+                    foaf:name "Test Publisher 1" ],
+                    [ a org:Organization ;
+                    skos:prefLabel "Test Publisher 2" ;
+                    vcard:hasEmail <mailto:publisher2@example.org> ;
+                    foaf:name "Test Publisher 2" ] ;
+        .
+        """
+
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+        assert len(dataset["publisher"]) == 2
+        assert dataset["publisher"][0]["name"] == "Test Publisher 1"
+        assert dataset["publisher"][0]["email"] == "publisher1@example.org"
+        assert dataset["publisher"][1]["name"] == "Test Publisher 2"
+        assert dataset["publisher"][1]["email"] == "publisher2@example.org"
+
+    def test_multiple_creators(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        @prefix org: <http://www.w3.org/ns/org#> .
+        @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+        @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+        <https://example.com/dataset1>
+          a dcat:Dataset ;
+          dct:title "Dataset 1" ;
+          dct:description "This is a dataset" ;
+          dct:creator [ a org:Organization ;
+                    skos:prefLabel "Test Creator 1" ;
+                    vcard:hasEmail <mailto:creator1@example.org> ;
+                    foaf:name "Test Creator 1" ],
+                    [ a org:Organization ;
+                    skos:prefLabel "Test Creator 2" ;
+                    vcard:hasEmail <mailto:creator2@example.org> ;
+                    foaf:name "Test Creator 2" ] ;
+        .
+        """
+
+        p = RDFParser()
+
+        p.parse(data, _format="ttl")
+        datasets = [d for d in p.datasets()]
+
+        dataset = datasets[0]
+        assert len(dataset["creator"]) == 2
+        assert dataset["creator"][0]["name"] == "Test Creator 1"
+        assert dataset["creator"][0]["email"] == "creator1@example.org"
+        assert dataset["creator"][1]["name"] == "Test Creator 2"
+        assert dataset["creator"][1]["email"] == "creator2@example.org"
+
 
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")

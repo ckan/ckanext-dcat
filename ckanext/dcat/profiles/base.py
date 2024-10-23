@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 from rdflib import term, URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
+from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS, ORG
 from geomet import wkt, InvalidGeoJSONException
 
 from ckantoolkit import config, url_for, asbool, aslist, get_action, ObjectNotFound
@@ -13,9 +13,11 @@ from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_year, is_year_month, is_date
 
+CNT = Namespace("http://www.w3.org/2011/content#")
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
+DCATUS = Namespace("http://resources.data.gov/ontology/dcat-us#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -27,9 +29,11 @@ OWL = Namespace("http://www.w3.org/2002/07/owl#")
 SPDX = Namespace("http://spdx.org/rdf/terms#")
 
 namespaces = {
+    "cnt": CNT,
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,
+    "dcatus": DCATUS,
     "adms": ADMS,
     "vcard": VCARD,
     "foaf": FOAF,
@@ -39,6 +43,7 @@ namespaces = {
     "locn": LOCN,
     "gsp": GSP,
     "owl": OWL,
+    "org": ORG,
     "spdx": SPDX,
 }
 
@@ -421,9 +426,10 @@ class RDFProfile(object):
         else:
             dataset_dict["extras"].append({"key": key, "value": value})
 
-    def _agent_details(self, subject, predicate):
+    def _agents_details(self, subject, predicate):
         """
-        Returns a dict with details about a dct:publisher or dct:creator entity, a foaf:Agent
+        Returns a list of dicts with details about a foaf:Agent property, e.g.
+        dct:publisher or dct:creator entity.
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
@@ -441,21 +447,26 @@ class RDFProfile(object):
         an empty string if they could not be found.
         """
 
-        agent_details = {}
-
+        agents = []
         for agent in self.g.objects(subject, predicate):
+            agent_details = {}
             agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
             agent_details["name"] = self._object_value(agent, FOAF.name)
             agent_details["email"] = self._object_value(agent, FOAF.mbox)
+            if not agent_details["email"]:
+                agent_details["email"] = self._without_mailto(
+                    self._object_value(agent, VCARD.hasEmail)
+                )
             agent_details["url"] = self._object_value(agent, FOAF.homepage)
             agent_details["type"] = self._object_value(agent, DCT.type)
             agent_details['identifier'] = self._object_value(agent, DCT.identifier)
+            agents.append(agent_details)
 
-        return agent_details
+        return agents
 
     def _contact_details(self, subject, predicate):
         """
-        Returns a dict with details about a vcard expression
+        Returns a list of dicts with details about vcard expressions
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
@@ -463,10 +474,10 @@ class RDFProfile(object):
         an empty string if they could not be found
         """
 
-        contact = {}
-
+        contacts = []
         for agent in self.g.objects(subject, predicate):
 
+            contact = {}
             contact["uri"] = str(agent) if isinstance(agent, URIRef) else ""
 
             contact["name"] = self._get_vcard_property_value(
@@ -478,8 +489,9 @@ class RDFProfile(object):
             )
 
             contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
+            contacts.append(contact)
 
-        return contact
+        return contacts
 
     def _parse_geodata(self, spatial, datatype, cur_value):
         """
@@ -711,6 +723,9 @@ class RDFProfile(object):
                     items = value.split(",")
                 else:
                     items = [value]  # Normal text value
+        elif isinstance(value, ((int, float, complex))):
+            items = [value]  # number
+
         return items
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
@@ -1148,10 +1163,13 @@ class RDFProfile(object):
             if val:
                 out.append({"key": key, "value": val})
 
+        publishers = self._agents_details(catalog_ref, DCT.publisher)
+        if publishers:
+            publisher = publishers[0]
         out.append(
             {
                 "key": "source_catalog_publisher",
-                "value": json.dumps(self._agent_details(catalog_ref, DCT.publisher)),
+                "value": json.dumps(publisher),
             }
         )
         return out
