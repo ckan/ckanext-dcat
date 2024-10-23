@@ -100,6 +100,18 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     dataset_dict[field_name] = [new_dict]
                     dataset_dict["extras"] = new_extras
 
+        # Contact details
+        contacts = self._contact_details(dataset_ref, DCAT.contactPoint)
+        if contacts:
+            dataset_dict["contact"] = contacts
+
+        # Publishers and creators
+        for item in [("publisher", DCT.publisher), ("creator", DCT.creator)]:
+            key, predicate = item
+            agents = self._agents_details(dataset_ref, predicate)
+            if agents:
+                dataset_dict[key] = agents
+
         # Repeating subfields: resources
         for schema_field in self._dataset_schema["resource_fields"]:
             if "repeating_subfields" in schema_field:
@@ -157,7 +169,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     _type=URIRefOrLiteral,
                 )
 
-        self._add_agents(dataset_ref, dataset_dict, "publisher", DCT.publisher, first_only=True)
+        self._add_agents(dataset_ref, dataset_dict, "publisher", DCT.publisher)
         self._add_agents(dataset_ref, dataset_dict, "creator", DCT.creator)
 
         temporal = dataset_dict.get("temporal_coverage")

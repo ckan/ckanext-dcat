@@ -721,6 +721,8 @@ class TestBaseRDFProfile(object):
 
         contact = p._contact_details(URIRef('http://example.org'), ADMS.contactPoint)
 
+        contact = contact[0]
+
         assert contact['name'] == 'Point of Contact'
         # mailto gets removed for storage and is added again on output
         assert contact['email'] == 'contact@some.org'
