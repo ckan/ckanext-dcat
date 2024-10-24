@@ -69,7 +69,7 @@ class URIRefOrLiteral(object):
     Like CleanedURIRef, this is a factory class.
     """
 
-    def __new__(cls, value):
+    def __new__(cls, value, lang=None):
         try:
             stripped_value = value.strip()
             if isinstance(value, str) and (
@@ -83,10 +83,10 @@ class URIRefOrLiteral(object):
                 # URI is fine, return the object
                 return uri_obj
             else:
-                return Literal(value)
+                return Literal(value, lang=lang)
         except Exception:
             # In case something goes wrong: use Literal
-            return Literal(value)
+            return Literal(value, lang=lang)
 
 
 class CleanedURIRef(object):
@@ -779,18 +779,25 @@ class RDFProfile(object):
         """
         value = self._get_dict_value(data_dict, key)
         if value:
-            _object = URIRefOrLiteral(value)
-            if isinstance(_object, Literal):
-                statement_ref = BNode()
-                self.g.add((subject, predicate, statement_ref))
-                if _class:
-                    self.g.add((statement_ref, RDF.type, _class))
-                self.g.add((statement_ref, RDFS.label, _object))
-
+            if isinstance(value, dict):
+                _objects = []
+                for lang in value:
+                    _objects.append(URIRefOrLiteral(value[lang], lang))
             else:
-                self.g.add((subject, predicate, _object))
-                if _class:
-                    self.g.add((_object, RDF.type, _class))
+                _objects = [URIRefOrLiteral(value)]
+            statement_ref = None
+            for _object in _objects:
+                if isinstance(_object, Literal):
+                    if not statement_ref:
+                        statement_ref = BNode()
+                        self.g.add((subject, predicate, statement_ref))
+                        if _class:
+                            self.g.add((statement_ref, RDF.type, _class))
+                    self.g.add((statement_ref, RDFS.label, _object))
+                else:
+                    self.g.add((subject, predicate, _object))
+                    if _class:
+                        self.g.add((_object, RDF.type, _class))
 
     def _schema_field(self, key):
         """
@@ -942,7 +949,16 @@ class RDFProfile(object):
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
+            # If it is a dict, we assume it's a fluent multilingual field
+            if isinstance(value, dict):
+                # We assume that all translated field values are Literals
+                for lang, translated_value in value.items():
+                    object = Literal(translated_value, datatype=_datatype, lang=lang)
+                    self.g.add((subject, predicate, object))
+                return
+
             # Normal text value
+
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef
