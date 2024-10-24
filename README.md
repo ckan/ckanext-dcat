@@ -43,6 +43,8 @@ To run the tests do:
 
     pytest --ckan-ini=test.ini ckanext/dcat/tests
 
+Note that there are tests relying on having [ckanext-harvest](https://github.com/ckan/ckanext-harvest), [ckanext-scheming](https://github.com/ckan/ckanext-scheming) and [ckanext-fluent](https://github.com/ckan/ckanext-fluent) installed.
+
 ## Releases
 
 To create a new release, follow these steps:
