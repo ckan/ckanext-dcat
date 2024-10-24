@@ -274,9 +274,19 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         g.add((dataset_ref, RDF.type, DCAT.Dataset))
 
         # Basic fields
+        title_key = (
+            "title_translated"
+            if "title_translated" in dataset_dict
+            else "title"
+        )
+        notes_key = (
+            "notes_translated"
+            if "notes_translated" in dataset_dict
+            else "notes"
+        )
         items = [
-            ("title", DCT.title, None, Literal),
-            ("notes", DCT.description, None, Literal),
+            (title_key, DCT.title, None, Literal),
+            (notes_key, DCT.description, None, Literal),
             ("url", DCAT.landingPage, None, URIRef, FOAF.Document),
             ("identifier", DCT.identifier, ["guid", "id"], URIRefOrLiteral),
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
@@ -287,8 +297,13 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         self._add_triples_from_dict(dataset_dict, dataset_ref, items)
 
         # Tags
-        for tag in dataset_dict.get("tags", []):
-            g.add((dataset_ref, DCAT.keyword, Literal(tag["name"])))
+        if "tags_translated" in dataset_dict:
+            for lang in dataset_dict["tags_translated"]:
+                for value in dataset_dict["tags_translated"][lang]:
+                    g.add((dataset_ref, DCAT.keyword, Literal(value, lang=lang)))
+        else:
+            for tag in dataset_dict.get("tags", []):
+                g.add((dataset_ref, DCAT.keyword, Literal(tag["name"])))
 
         # Dates
         items = [
@@ -525,9 +540,18 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             g.add((distribution, RDF.type, DCAT.Distribution))
 
             #  Simple values
+            name_key = (
+                "name_translated" if "name_translated" in resource_dict else "name"
+            )
+            description_key = (
+                "description_translated"
+                if "description_translated" in resource_dict
+                else "description"
+            )
+
             items = [
-                ("name", DCT.title, None, Literal),
-                ("description", DCT.description, None, Literal),
+                (name_key, DCT.title, None, Literal),
+                (description_key, DCT.description, None, Literal),
                 ("status", ADMS.status, None, URIRefOrLiteral),
                 ("license", DCT.license, None, URIRefOrLiteral, DCT.LicenseDocument),
                 ("access_url", DCAT.accessURL, None, URIRef, RDFS.Resource),
