@@ -29,20 +29,17 @@ class BaseSerializeTest(object):
             extras[extra["key"]] = extra["value"]
         return extras
 
-    def _triples(self, graph, subject, predicate, _object, data_type=None):
+    def _triples(self, graph, subject, predicate, _object, data_type=None, lang=None):
 
         if not (
             isinstance(_object, URIRef) or isinstance(_object, BNode) or _object is None
         ):
-            if data_type:
-                _object = Literal(_object, datatype=data_type)
-            else:
-                _object = Literal(_object)
+            _object = Literal(_object, datatype=data_type, lang=lang)
         triples = [t for t in graph.triples((subject, predicate, _object))]
         return triples
 
-    def _triple(self, graph, subject, predicate, _object, data_type=None):
-        triples = self._triples(graph, subject, predicate, _object, data_type)
+    def _triple(self, graph, subject, predicate, _object, data_type=None, lang=None):
+        triples = self._triples(graph, subject, predicate, _object, data_type, lang)
         return triples[0] if triples else None
 
     def _triples_list_values(self, graph, subject, predicate):

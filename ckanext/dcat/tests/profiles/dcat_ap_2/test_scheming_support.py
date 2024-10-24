@@ -190,7 +190,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             publisher[0][2],
             DCT.identifier,
-            URIRef(dataset_dict["publisher"][0]["identifier"])
+            URIRef(dataset_dict["publisher"][0]["identifier"]),
         )
 
         creator = [t for t in g.triples((dataset_ref, DCT.creator, None))]
@@ -221,9 +221,8 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             creator[0][2],
             DCT.identifier,
-            URIRef(dataset_dict["creator"][0]["identifier"])
+            URIRef(dataset_dict["creator"][0]["identifier"]),
         )
-
 
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]
 
@@ -270,16 +269,16 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
         assert self._triple(g, spatial[0][2], LOCN.Geometry, wkt_geom, GSP.wktLiteral)
 
-        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        resource = dataset_dict["resources"][0]
-
         # Statements
         for item in [
-            ('access_rights', DCT.accessRights),
-            ('provenance', DCT.provenance),
+            ("access_rights", DCT.accessRights),
+            ("provenance", DCT.provenance),
         ]:
             statement = [s for s in g.objects(dataset_ref, item[1])][0]
             assert self._triple(g, statement, RDFS.label, dataset[item[0]])
+
+        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        resource = dataset_dict["resources"][0]
 
         # Resources: core fields
 
@@ -388,7 +387,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
 
         # Resources: statements
         statement = [s for s in g.objects(distribution_ref, DCT.rights)][0]
-        assert self._triple(g, statement, RDFS.label, resource['rights'])
+        assert self._triple(g, statement, RDFS.label, resource["rights"])
 
     def test_publisher_fallback_org(self):
 
@@ -838,6 +837,7 @@ class TestSchemingParseSupport(BaseParseTest):
 
         assert dataset["notes"] == "This is a dataset"
         assert dataset["access_rights"] == "Some statement"
+
 
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
