@@ -23,7 +23,6 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets fluent")
-@pytest.mark.ckan_config("ckan.locales_offered", "en ca es")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_multilingual.yaml"
 )
@@ -180,3 +179,39 @@ class TestSchemingFluentSerializeSupport(BaseSerializeTest):
         assert self._triple(
             g, contact_details[0][2], VCARD.fn, dataset_dict["contact"][0]["name"]
         )
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets fluent")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_multilingual.yaml"
+)
+@pytest.mark.ckan_config(
+    "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
+)
+class TestSchemingFluentParseSupport(BaseParseTest):
+    def test_e2e_dcat_to_ckan(self):
+        """
+        Parse a DCAT RDF graph into a CKAN dataset dict, create a dataset with
+        package_create and check that all the translated fields are there
+        """
+        contents = self._get_file_contents("dcat/dataset_multilingual.ttl")
+
+        p = RDFParser()
+
+        p.parse(contents, _format="ttl")
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+
+        dataset_dict = datasets[0]
+
+        dataset_dict["name"] = "test-dcat-1"
+        dataset = call_action("package_create", **dataset_dict)
+
+        # Core fields
+
+        assert dataset["title"]["en"] == "Test DCAT dataset"
+        assert dataset["title"]["ca"] == "Conjunt de dades de prova DCAT"
+        assert dataset["title"]["es"] == "Conjunto de datos de prueba DCAT"
