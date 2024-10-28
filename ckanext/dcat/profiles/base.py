@@ -123,6 +123,8 @@ class RDFProfile(object):
 
     _dataset_schema = None
 
+    _form_languages = None
+
     # Cache for mappings of licenses URL/title to ID built when needed in
     # _license().
     _licenceregister_cache = None
@@ -145,6 +147,9 @@ class RDFProfile(object):
 
         self.compatibility_mode = compatibility_mode
 
+        self._default_lang = config.get("ckan.locale_default", "en")
+
+
         try:
             schema_show = get_action("scheming_dataset_schema_show")
             try:
@@ -156,6 +161,9 @@ class RDFProfile(object):
 
         except KeyError:
             pass
+
+        if self._dataset_schema:
+            self._form_languages = self._dataset_schema.get("form_languages")
 
     def _datasets(self):
         """
@@ -201,21 +209,40 @@ class RDFProfile(object):
             return _object
         return None
 
-    def _object_value(self, subject, predicate):
+    def _object_value(self, subject, predicate, multilingual=False):
         """
         Given a subject and a predicate, returns the value of the object
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
         If found, the string representation is returned, else an empty string
+
+        If multilingual is True, a dict with the language codes as keys will be
+        returned for each language found. e.g.
+
+            {
+                "en": "Dataset title",
+                "es": "Título del conjunto de datos"
+            }
+
+        If one of the languages defined in `form_languages` in the schema is not
+        found in the graph, an empty string will be returned.
+
+            {
+                "en": "Dataset title",
+                "es": ""
+            }
+
         """
-        default_lang = config.get("ckan.locale_default", "en")
+        if multilingual:
+            return self._object_value_multilingual(subject, predicate)
         fallback = ""
         for o in self.g.objects(subject, predicate):
             if isinstance(o, Literal):
-                if o.language and o.language == default_lang:
+                if o.language and o.language == self._default_lang:
                     return str(o)
-                # Use first object as fallback if no object with the default language is available
+                # Use first object as fallback if no object with the default
+                # language is available
                 elif fallback == "":
                     fallback = str(o)
             elif len(list(self.g.objects(o, RDFS.label))):
@@ -223,6 +250,31 @@ class RDFProfile(object):
             else:
                 return str(o)
         return fallback
+
+    def _object_value_multilingual(self, subject, predicate):
+        out = {}
+        for o in self.g.objects(subject, predicate):
+
+            if isinstance(o, Literal):
+                if o.language:
+                    out[o.language] = str(o)
+                else:
+                    out[self._default_lang] = str(o)
+            elif len(list(self.g.objects(o, RDFS.label))):
+                for label in self.g.objects(o, RDFS.label):
+                    if label.language:
+                        out[label.language] = str(label)
+                    else:
+                        out[self._default_lang] = str(label)
+            else:
+                out[self._default_lang] = str(o)
+
+        if self._form_languages:
+            for lang in self._form_languages:
+                if lang not in out:
+                    out[lang] = ""
+
+        return out
 
     def _object_value_multiple_predicate(self, subject, predicates):
         """
@@ -301,9 +353,44 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode  objects
 
-        If no values found, returns an empty string
+        If no values found, returns an empty list
         """
         return [str(o) for o in self.g.objects(subject, predicate)]
+
+    def _object_value_list_multilingual(self, subject, predicate):
+        """
+        Given a subject and a predicate, returns a dict with the language codes
+        as keys and the list of object values as values. e.g.
+
+            {
+                "en": ["Oaks", "Pines"],
+                "es": ["Robles", "Pinos"],
+            }
+
+        If one of the languages defined in `form_languages` in the schema is not
+        found in the graph, an empty list will be returned.
+
+            {
+                "en": ["Oaks", "Pines"],
+                "es": [],
+            }
+
+        Both subject and predicate must be rdflib URIRef or BNode  objects
+
+        If no values found, returns an empty list
+        """
+        out = {}
+        for o in self.g.objects(subject, predicate):
+            lang = o.language or self._default_lang
+            if lang not in out:
+                out[lang] = []
+            out[lang].append(str(o))
+
+        if self._form_languages:
+            for lang in self._form_languages:
+                if lang not in out:
+                    out[lang] = []
+        return out
 
     def _get_vcard_property_value(
         self, subject, predicate, predicate_string_property=None
@@ -822,6 +909,32 @@ class RDFProfile(object):
         for field in self._dataset_schema["resource_fields"]:
             if field["field_name"] == key:
                 return field
+
+    def _multilingual_dataset_fields(self):
+        """
+        Return a list of field names in the dataset shema that have multilingual
+        values (i.e. that use one of the fluent presets)
+        """
+        return self._multilingual_fields(entity="dataset")
+
+    def _multilingual_resource_fields(self):
+        """
+        Return a list of field names in the resource schema that have multilingual
+        values (i.e. that use one of the fluent presets)
+        """
+        return self._multilingual_fields(entity="resource")
+
+    def _multilingual_fields(self, entity="dataset"):
+        if not self._dataset_schema:
+            return []
+
+        out = []
+        for field in self._dataset_schema[f"{entity}_fields"]:
+            if field.get("validators") and any(
+                v for v in field["validators"].split() if v.startswith("fluent")
+            ):
+                out.append(field["field_name"])
+        return out
 
     def _set_dataset_value(self, dataset_dict, key, value):
         """

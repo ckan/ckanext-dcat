@@ -210,8 +210,45 @@ class TestSchemingFluentParseSupport(BaseParseTest):
         dataset_dict["name"] = "test-dcat-1"
         dataset = call_action("package_create", **dataset_dict)
 
-        # Core fields
+        # Dataset core fields
+        assert dataset["title"] == "Test DCAT dataset"
+        assert dataset["title_translated"]["en"] == "Test DCAT dataset"
+        assert dataset["title_translated"]["ca"] == "Conjunt de dades de prova DCAT"
+        assert dataset["title_translated"]["es"] == "Conjunto de datos de prueba DCAT"
 
-        assert dataset["title"]["en"] == "Test DCAT dataset"
-        assert dataset["title"]["ca"] == "Conjunt de dades de prova DCAT"
-        assert dataset["title"]["es"] == "Conjunto de datos de prueba DCAT"
+        assert dataset["notes"] == "Some description"
+        assert dataset["notes_translated"]["en"] == "Some description"
+        assert dataset["notes_translated"]["ca"] == "Una descripció qualsevol"
+        assert dataset["notes_translated"]["es"] == "Una descripción cualquiera"
+
+        # Tags
+        assert sorted(dataset["tags_translated"]["en"]) == sorted(["Oaks", "Pines"])
+        assert sorted(dataset["tags_translated"]["ca"]) == sorted(["Roures", "Pins"])
+        assert sorted(dataset["tags_translated"]["es"]) == sorted(["Robles", "Pinos"])
+
+        # Dataset fields
+        assert dataset["provenance"]["en"] == "Statement about provenance"
+        assert dataset["provenance"]["ca"] == "Una declaració sobre la procedència"
+        assert dataset["provenance"]["es"] == "Una declaración sobre la procedencia"
+
+        assert dataset["version_notes"]["en"] == "Some version notes"
+        assert dataset["version_notes"]["ca"] == "Notes sobre la versió"
+        assert dataset["version_notes"]["es"] == "Notas sobre la versión"
+
+        resource = dataset["resources"][0]
+
+        # Resource core fields
+        assert resource["name"] == "Resource 1"
+        assert resource["name_translated"]["en"] == "Resource 1"
+        assert resource["name_translated"]["ca"] == "Recurs 1"
+        assert resource["name_translated"]["es"] == "Recurso 1"
+
+        assert resource["description"] == "Some description"
+        assert resource["description_translated"]["en"] == "Some description"
+        assert resource["description_translated"]["ca"] == "Una descripció qualsevol"
+        assert resource["description_translated"]["es"] == "Una descripción cualquiera"
+
+        # Resource fields
+        assert resource["rights"]["en"] == "Some stament about rights"
+        assert resource["rights"]["ca"] == "Una nota sobre drets"
+        assert resource["rights"]["es"] == "Una nota sobre derechos"

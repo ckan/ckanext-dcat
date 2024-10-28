@@ -48,16 +48,33 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         dataset_dict["extras"] = []
         dataset_dict["resources"] = []
 
+        multilingual_fields = self._multilingual_dataset_fields()
+
         # Basic fields
         for key, predicate in (
-            ("title", DCT.title),
-            ("notes", DCT.description),
             ("url", DCAT.landingPage),
             ("version", OWL.versionInfo),
         ):
-            value = self._object_value(dataset_ref, predicate)
+            multilingual = key in multilingual_fields
+            value = self._object_value(
+                dataset_ref, predicate, multilingual=multilingual
+            )
             if value:
                 dataset_dict[key] = value
+
+        # Multilingual core fields
+        for key, predicate in (
+            ("title", DCT.title),
+            ("notes", DCT.description)
+        ):
+            if f"{key}_translated" in multilingual_fields:
+                value = self._object_value(dataset_ref, predicate, multilingual=True)
+                dataset_dict[f"{key}_translated"] = value
+                dataset_dict[f"{key}"] = value.get(self._default_lang)
+            else:
+                value = self._object_value(dataset_ref, predicate)
+                if value:
+                    dataset_dict[key] = value
 
         if not dataset_dict.get("version"):
             # adms:version was supported on the first version of the DCAT-AP
@@ -66,15 +83,20 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 dataset_dict["version"] = value
 
         # Tags
-        # replace munge_tag to noop if there's no need to clean tags
-        do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
-        tags_val = [
-            munge_tag(tag) if do_clean else tag for tag in self._keywords(dataset_ref)
-        ]
-        tags = [{"name": tag} for tag in tags_val]
-        dataset_dict["tags"] = tags
-
-        # Extras
+        if "tags_translated" in multilingual_fields:
+            dataset_dict["tags_translated"] = self._object_value_list_multilingual(
+                dataset_ref, DCAT.keyword)
+            dataset_dict["tags"] = [
+                {"name": t } for t in dataset_dict["tags_translated"][self._default_lang]
+            ]
+        else:
+            # replace munge_tag to noop if there's no need to clean tags
+            do_clean = toolkit.asbool(config.get(DCAT_CLEAN_TAGS, False))
+            tags_val = [
+                munge_tag(tag) if do_clean else tag for tag in self._keywords(dataset_ref)
+            ]
+            tags = [{"name": tag} for tag in tags_val]
+            dataset_dict["tags"] = tags
 
         #  Simple values
         for key, predicate in (
@@ -86,7 +108,11 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ("provenance", DCT.provenance),
             ("dcat_type", DCT.type),
         ):
-            value = self._object_value(dataset_ref, predicate)
+
+            multilingual = key in multilingual_fields
+            value = self._object_value(
+                dataset_ref, predicate, multilingual=multilingual
+            )
             if value:
                 dataset_dict["extras"].append({"key": key, "value": value})
 
@@ -175,24 +201,47 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
 
             resource_dict = {}
 
+            multilingual_fields = self._multilingual_resource_fields()
+
             #  Simple values
             for key, predicate in (
-                ("name", DCT.title),
-                ("description", DCT.description),
                 ("access_url", DCAT.accessURL),
                 ("download_url", DCAT.downloadURL),
                 ("issued", DCT.issued),
                 ("modified", DCT.modified),
                 ("status", ADMS.status),
                 ("license", DCT.license),
+                ("rights", DCT.rights),
             ):
-                value = self._object_value(distribution, predicate)
+                multilingual = key in multilingual_fields
+                value = self._object_value(
+                    distribution, predicate, multilingual=multilingual
+                )
                 if value:
                     resource_dict[key] = value
+
+            # Multilingual core fields
+            for key, predicate in (
+                ("name", DCT.title),
+                ("description", DCT.description)
+            ):
+                if f"{key}_translated" in multilingual_fields:
+                    value = self._object_value(
+                        distribution, predicate, multilingual=True
+                    )
+                    resource_dict[f"{key}_translated"] = value
+                    resource_dict[f"{key}"] = value.get(self._default_lang)
+                else:
+                    value = self._object_value(distribution, predicate)
+                    if value:
+                        resource_dict[key] = value
+
+            # URL
 
             resource_dict["url"] = self._object_value(
                 distribution, DCAT.downloadURL
             ) or self._object_value(distribution, DCAT.accessURL)
+
             #  Lists
             for key, predicate in (
                 ("language", DCT.language),
@@ -202,11 +251,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 values = self._object_value_list(distribution, predicate)
                 if values:
                     resource_dict[key] = json.dumps(values)
-
-            # rights
-            rights = self._access_rights(distribution, DCT.rights)
-            if rights:
-                resource_dict["rights"] = rights
 
             # Format and media type
             normalize_ckan_format = toolkit.asbool(
