@@ -852,10 +852,14 @@ class TestSchemingParseSupport(BaseParseTest):
           dct:description "This is a dataset" ;
             dcat:contactPoint [ a vcard:Kind ;
                 vcard:fn "Test Contact 1" ;
-                vcard:hasEmail <mailto:contact1@example.org> ],
+                vcard:hasEmail <mailto:contact1@example.org> ;
+                vcard:hasUID "https://orcid.org/0000-0002-9095-9201"
+                ],
             [ a vcard:Kind ;
                 vcard:fn "Test Contact 2" ;
-                vcard:hasEmail <mailto:contact2@example.org> ] ;
+                vcard:hasEmail <mailto:contact2@example.org> ;
+                vcard:hasUID "https://orcid.org/0000-0002-9095-9202"
+                ] ;
         .
         """
 
@@ -868,8 +872,16 @@ class TestSchemingParseSupport(BaseParseTest):
         assert len(dataset["contact"]) == 2
         assert dataset["contact"][0]["name"] == "Test Contact 1"
         assert dataset["contact"][0]["email"] == "contact1@example.org"
+        assert (
+            dataset["contact"][0]["identifier"]
+            == "https://orcid.org/0000-0002-9095-9201"
+        )
         assert dataset["contact"][1]["name"] == "Test Contact 2"
         assert dataset["contact"][1]["email"] == "contact2@example.org"
+        assert (
+            dataset["contact"][1]["identifier"]
+            == "https://orcid.org/0000-0002-9095-9202"
+        )
 
     def test_multiple_publishers(self):
 
@@ -889,10 +901,12 @@ class TestSchemingParseSupport(BaseParseTest):
           dct:publisher [ a org:Organization ;
                     skos:prefLabel "Test Publisher 1" ;
                     vcard:hasEmail <mailto:publisher1@example.org> ;
+                    dct:identifier "https://orcid.org/0000-0002-9095-9201" ;
                     foaf:name "Test Publisher 1" ],
                     [ a org:Organization ;
                     skos:prefLabel "Test Publisher 2" ;
                     vcard:hasEmail <mailto:publisher2@example.org> ;
+                    dct:identifier "https://orcid.org/0000-0002-9095-9202" ;
                     foaf:name "Test Publisher 2" ] ;
         .
         """
@@ -906,8 +920,16 @@ class TestSchemingParseSupport(BaseParseTest):
         assert len(dataset["publisher"]) == 2
         assert dataset["publisher"][0]["name"] == "Test Publisher 1"
         assert dataset["publisher"][0]["email"] == "publisher1@example.org"
+        assert (
+            dataset["publisher"][0]["identifier"]
+            == "https://orcid.org/0000-0002-9095-9201"
+        )
         assert dataset["publisher"][1]["name"] == "Test Publisher 2"
         assert dataset["publisher"][1]["email"] == "publisher2@example.org"
+        assert (
+            dataset["publisher"][1]["identifier"]
+            == "https://orcid.org/0000-0002-9095-9202"
+        )
 
     def test_multiple_creators(self):
 
