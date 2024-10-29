@@ -87,7 +87,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 check_name = new_fields_mapping.get(field_name, field_name)
                 for extra in dataset_dict.get("extras", []):
                     if extra["key"].startswith(f"{check_name}_"):
-                        subfield = extra["key"][extra["key"].index("_") + 1:]
+                        subfield = extra["key"][extra["key"].index("_") + 1 :]
                         if subfield in [
                             f["field_name"] for f in schema_field["repeating_subfields"]
                         ]:
@@ -99,6 +99,18 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 if new_dict:
                     dataset_dict[field_name] = [new_dict]
                     dataset_dict["extras"] = new_extras
+
+        # Contact details
+        contacts = self._contact_details(dataset_ref, DCAT.contactPoint)
+        if contacts:
+            dataset_dict["contact"] = contacts
+
+        # Publishers and creators
+        for item in [("publisher", DCT.publisher), ("creator", DCT.creator)]:
+            key, predicate = item
+            agents = self._agents_details(dataset_ref, predicate)
+            if agents:
+                dataset_dict[key] = agents
 
         # Repeating subfields: resources
         for schema_field in self._dataset_schema["resource_fields"]:
@@ -124,7 +136,11 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
         Add triples to the graph from new repeating subfields
         """
         contact = dataset_dict.get("contact")
-        if isinstance(contact, list) and len(contact) and self._not_empty_dict(contact[0]):
+        if (
+            isinstance(contact, list)
+            and len(contact)
+            and self._not_empty_dict(contact[0])
+        ):
             for item in contact:
                 contact_uri = item.get("uri")
                 if contact_uri:
@@ -150,11 +166,11 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     contact_details,
                     VCARD.hasUID,
                     "identifier",
-                    _type=URIRefOrLiteral
+                    _type=URIRefOrLiteral,
                 )
 
-        self._add_agent(dataset_ref, dataset_dict, "publisher", DCT.publisher)
-        self._add_agent(dataset_ref, dataset_dict, "creator", DCT.creator)
+        self._add_agents(dataset_ref, dataset_dict, "publisher", DCT.publisher)
+        self._add_agents(dataset_ref, dataset_dict, "creator", DCT.creator)
 
         temporal = dataset_dict.get("temporal_coverage")
         if (
@@ -172,7 +188,11 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 self.g.add((dataset_ref, DCT.temporal, temporal_ref))
 
         spatial = dataset_dict.get("spatial_coverage")
-        if isinstance(spatial, list) and len(spatial) and self._not_empty_dict(spatial[0]):
+        if (
+            isinstance(spatial, list)
+            and len(spatial)
+            and self._not_empty_dict(spatial[0])
+        ):
             for item in spatial:
                 if item.get("uri"):
                     spatial_ref = CleanedURIRef(item["uri"])
@@ -205,55 +225,59 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     except ValueError:
                         pass
 
-    def _add_agent(self, dataset_ref, dataset_dict, agent_key, rdf_predicate):
+    def _add_agents(
+        self, dataset_ref, dataset_dict, agent_key, rdf_predicate, first_only=False
+    ):
         """
-        Adds an agent (publisher or creator) to the RDF graph.
+        Adds one or more agents (e.g. publisher or creator) to the RDF graph.
 
         :param dataset_ref: The RDF reference of the dataset
         :param dataset_dict: The dataset dictionary containing agent information
-        :param agent_key: 'publisher' or 'creator' to specify the agent
-        :param rdf_predicate: The RDF predicate (DCT.publisher or DCT.creator)
+        :param agent_key: field name in the CKAN dict (.e.g. "publisher", "creator", etc)
+        :param rdf_predicate: The RDF predicate (DCT.publisher, DCT.creator, etc)
+        :first_only: Add the first item found only (used for 0..1 properties)
         """
         agent = dataset_dict.get(agent_key)
-        if (
-                isinstance(agent, list)
-                and len(agent)
-                and self._not_empty_dict(agent[0])
-        ):
-            agent = agent[0]
-            agent_uri = agent.get("uri")
-            if agent_uri:
-                agent_ref = CleanedURIRef(agent_uri)
-            else:
-                agent_ref = BNode()
+        if isinstance(agent, list) and len(agent) and self._not_empty_dict(agent[0]):
+            agents = [agent[0]] if first_only else agent
 
-            self.g.add((agent_ref, RDF.type, FOAF.Agent))
-            self.g.add((dataset_ref, rdf_predicate, agent_ref))
+            for agent in agents:
 
-            self._add_triple_from_dict(agent, agent_ref, FOAF.name, "name")
-            self._add_triple_from_dict(agent, agent_ref, FOAF.homepage, "url", _type=URIRef)
-            self._add_triple_from_dict(
-                agent,
-                agent_ref,
-                DCT.type,
-                "type",
-                _type=URIRefOrLiteral,
-            )
-            self._add_triple_from_dict(
-                agent,
-                agent_ref,
-                VCARD.hasEmail,
-                "email",
-                _type=URIRef,
-                value_modifier=self._add_mailto,
-            )
-            self._add_triple_from_dict(
-                agent,
-                agent_ref,
-                DCT.identifier,
-                "identifier",
-                _type=URIRefOrLiteral
-            )
+                agent_uri = agent.get("uri")
+                if agent_uri:
+                    agent_ref = CleanedURIRef(agent_uri)
+                else:
+                    agent_ref = BNode()
+
+                self.g.add((agent_ref, RDF.type, FOAF.Agent))
+                self.g.add((dataset_ref, rdf_predicate, agent_ref))
+
+                self._add_triple_from_dict(agent, agent_ref, FOAF.name, "name")
+                self._add_triple_from_dict(
+                    agent, agent_ref, FOAF.homepage, "url", _type=URIRef
+                )
+                self._add_triple_from_dict(
+                    agent,
+                    agent_ref,
+                    DCT.type,
+                    "type",
+                    _type=URIRefOrLiteral,
+                )
+                self._add_triple_from_dict(
+                    agent,
+                    agent_ref,
+                    VCARD.hasEmail,
+                    "email",
+                    _type=URIRef,
+                    value_modifier=self._add_mailto,
+                )
+                self._add_triple_from_dict(
+                    agent,
+                    agent_ref,
+                    DCT.identifier,
+                    "identifier",
+                    _type=URIRefOrLiteral,
+                )
 
     @staticmethod
     def _not_empty_dict(data_dict):
