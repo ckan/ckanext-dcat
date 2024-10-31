@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.1.0...HEAD)
 
 ## [v2.1.0](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...v2.1.0) - 2024-10-31
 
