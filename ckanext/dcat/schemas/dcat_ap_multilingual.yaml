@@ -1,0 +1,266 @@
+scheming_version: 2
+dataset_type: dataset
+about: DCAT AP schema with multilingual fields using ckanext-fluent
+about_url: http://github.com/ckan/ckanext-dcat
+form_languages: [en, ca, es]
+dataset_fields:
+- field_name: title_translated
+  label:
+    en: Title
+    ca: Títol
+    es: Título
+  fluent_form_label:
+    en:
+      en: Title (English)
+      ca: Títol (Anglès)
+      es: Título (Inglés)
+    ca:
+      en: Title (Catalan)
+      ca: Títol (Català)
+      es: Título (Catalán)
+    es:
+      en: Title (Spanish)
+      ca: Títol (Espanyol)
+      es: Título (Español)
+  preset: fluent_core_translated
+  required: true
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder: eg. my-dataset
+
+- field_name: notes_translated
+  label:
+    en: Description
+    ca: Descripció
+    es: Descripción
+  fluent_form_label:
+    en:
+      en: Description (English)
+      ca: Descripció (Anglès)
+      es: Descripción (Inglés)
+    ca:
+      en: Description (Catalan)
+      ca: Descripció (Català)
+      es: Descripción (Catalán)
+    es:
+      en: Description (Spanish)
+      ca: Descripció (Espanyol)
+      es: Descripción (Español)
+  preset: fluent_core_translated
+  form_snippet: fluent_markdown.html
+  display_snippet: fluent_markdown.html
+  required: true
+
+- field_name: tags_translated
+  label:
+  en: Keywords
+  ca: Mots clau
+  es: Palabras clave
+  fluent_form_label:
+    en:
+      en: Keywords (English)
+      ca: Paraules clau (Anglès)
+      es: Palabras clave (Inglés)
+    ca:
+      en: Keywords (Catalan)
+      ca: Paraules clau (Català)
+      es: Palabras clave (Catalán)
+    es:
+      en: Keywords (Spanish)
+      ca: Paraules clau (Espanyol)
+      es: Palabras clave (Español)
+  preset: fluent_tags
+  fluent_help_text:
+    en:
+      en: Keywords or tags describing the dataset. Use commas to separate multiple values (English).
+      ca: Paraules clau o etiquetes per descriure el conjunt de dades. Useu comes per separar-les (Anglès).
+      es: Palabras clave o etiquetas para describir el conjunto de datos. Usen comas para separarlas (Inglés).
+    ca:
+      en: Keywords or tags describing the dataset. Use commas to separate multiple values (Catalan).
+      ca: Paraules clau o etiquetes per descriure el conjunt de dades. Useu comes per separar-les (Català).
+      es: Palabras clave o etiquetas para describir el conjunto de datos. Usen comas para separarlas (Catalan).
+    es:
+      en: Keywords or tags describing the dataset. Use commas to separate multiple values (Spanish).
+      ca: Paraules clau o etiquetes per descriure el conjunt de dades. Useu comes per separar-les (Espanyol).
+      es: Palabras clave o etiquetas para describir el conjunto de datos. Usen comas para separarlas (Español).
+
+- field_name: contact
+  label: Contact points
+  repeating_label: Contact point
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the contact point. Such as a ROR ID.
+
+  help_text: Contact information for enquiries about the dataset.
+
+- field_name: license_id
+  label: License
+  form_snippet: license.html
+  help_text: License definitions and additional information can be found at http://opendefinition.org/.
+
+- field_name: owner_org
+  label: Organization
+  preset: dataset_organization
+  help_text: The CKAN organization the dataset belongs to.
+
+- field_name: url
+  label: Landing page
+  form_placeholder: http://example.com/dataset.json
+  display_snippet: link.html
+  help_text: Web page that can be navigated to gain access to the dataset, its distributions and/or additional information.
+
+  # Note: this will fall back to metadata_created if not present
+- field_name: issued
+  label: Release date
+  preset: dcat_date
+  help_text: Date of publication of the dataset.
+
+  # Note: this will fall back to metadata_modified if not present
+- field_name: modified
+  label: Modification date
+  preset: dcat_date
+  help_text: Most recent date on which the dataset was changed, updated or modified.
+
+- field_name: version
+  label: Version
+  validators: ignore_missing unicode_safe package_version_validator
+  help_text: Version number or other version designation of the dataset.
+
+- field_name: version_notes
+  preset: fluent_markdown
+  label:
+    en: Version notes
+    ca: Notes sobre la versió
+    es: Notas sobre la versión
+
+- field_name: provenance
+  preset: fluent_markdown
+  label:
+    en: Provenance
+    ca: Procedència
+    es: Procedencia
+
+- field_name: language
+  label: Language
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: Language or languages of the dataset.
+  # TODO: language form snippet / validator / graph
+
+- field_name: documentation
+  label: Documentation
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: A page or document about this dataset.
+
+# Note: if not provided, this will be autogenerated
+- field_name: uri
+  label: URI
+  help_text: An URI for this dataset (if not provided it will be autogenerated).
+
+# TODO: relation-based properties are not yet included (e.g. is_version_of, source, sample, etc)
+#
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
+
+- field_name: name_translated
+  label:
+    en: Title
+    ca: Títol
+    es: Título
+  fluent_form_label:
+    en:
+      en: Title (English)
+      ca: Títol (Anglès)
+      es: Título (Inglés)
+    ca:
+      en: Title (Catalan)
+      ca: Títol (Català)
+      es: Título (Catalán)
+    es:
+      en: Title (Spanish)
+      ca: Títol (Espanyol)
+      es: Título (Español)
+  preset: fluent_core_translated
+  required: true
+
+- field_name: description_translated
+  label:
+    en: Description
+    ca: Descripció
+    es: Descripción
+  fluent_form_label:
+    en:
+      en: Description (English)
+      ca: Descripció (Anglès)
+      es: Descripción (Inglés)
+    ca:
+      en: Description (Catalan)
+      ca: Descripció (Català)
+      es: Descripción (Catalán)
+    es:
+      en: Description (Spanish)
+      ca: Descripció (Espanyol)
+      es: Descripción (Español)
+  preset: fluent_core_translated
+
+- field_name: format
+  label: Format
+  preset: resource_format_autocomplete
+  help_text: File format. If not provided it will be guessed.
+
+- field_name: rights
+  preset: fluent_markdown
+  label:
+    en: Rights
+    ca: Drets
+    es: Derechos
+
+  # Note: this falls back to the standard resource url field
+- field_name: access_url
+  label: Access URL
+  help_text: URL that gives access to the dataset (defaults to the standard resource URL).
+
+  # Note: this falls back to the standard resource url field
+- field_name: download_url
+  label: Download URL
+  display_snippet: link.html
+  help_text: URL that provides a direct link to a downloadable file (defaults to the standard resource URL).
+
+- field_name: issued
+  label: Release date
+  preset: dcat_date
+  help_text: Date of publication of the resource.
+
+- field_name: modified
+  label: Modification date
+  preset: dcat_date
+  help_text: Most recent date on which the resource was changed, updated or modified.
+
+- field_name: language
+  label: Language
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: Language or languages of the resource.
+
+  # Note: if not provided, this will be autogenerated
+- field_name: uri
+  label: URI
+  help_text: An URI for this resource (if not provided it will be autogenerated).

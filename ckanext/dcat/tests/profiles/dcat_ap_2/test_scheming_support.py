@@ -36,10 +36,6 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
-    "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
-)
-@pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
 class TestSchemingSerializeSupport(BaseSerializeTest):
@@ -269,9 +265,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
         assert self._triple(g, spatial[0][2], LOCN.Geometry, wkt_geom, GSP.wktLiteral)
 
-        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
-        resource = dataset_dict["resources"][0]
-
         # Statements
         for item in [
             ("access_rights", DCT.accessRights),
@@ -279,6 +272,9 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         ]:
             statement = [s for s in g.objects(dataset_ref, item[1])][0]
             assert self._triple(g, statement, RDFS.label, dataset[item[0]])
+
+        distribution_ref = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        resource = dataset_dict["resources"][0]
 
         # Resources: core fields
 
@@ -609,10 +605,6 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
-    "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
-)
-@pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
 class TestSchemingValidators:
@@ -639,10 +631,6 @@ class TestSchemingValidators:
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
-)
-@pytest.mark.ckan_config(
-    "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
 )
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
@@ -974,10 +962,6 @@ class TestSchemingParseSupport(BaseParseTest):
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
-)
-@pytest.mark.ckan_config(
-    "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
 )
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"

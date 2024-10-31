@@ -115,7 +115,84 @@ Extensions define their available profiles using the `ckan.rdf.profiles` entrypo
     euro_dcat_ap_scheming=ckanext.dcat.profiles:EuropeanDCATAPSchemingProfile
     schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
 
-## RDF DCAT Parser
+## Multilingual support
+
+Support for parsing and serializing multilingual properties is provided by integrating with
+[ckanext-fluent](https://github.com/ckan/ckanext-fluent), which provides a way to store multilingual
+data in CKAN entities like datasets and resources.
+
+Multilingual fields need to use one of the fluent [presets](https://github.com/ckan/ckanext-fluent#fluent_text-fields) (like `fluent_text`, `fluent_markdown` or `fluent_tags`) in their schema, e.g.:
+
+```yaml
+- field_name: provenance
+  preset: fluent_markdown
+  label:
+    en: Provenance
+    ca: Procedència
+    es: Procedencia
+```
+
+This will make CKAN store the values for the different languages separately. The parsers will
+import properties from DCAT serializations in this format if the field is defined as fluent in
+the schema:
+
+```json
+{
+    "name": "test-dataset",
+    "provenance": {
+        "en": "Statement about provenance",
+        "ca": "Una declaració sobre la procedència",
+        "es": "Una declaración sobre la procedencia"
+    }
+}
+```
+
+!!! Note
+    If one of the languages is missing in the DCAT serialization, an empty string will be
+    returned for that language. Also if the DCAT serialization does not define the language
+    used, the default CKAN language will be used ([`ckan.locale_default`](https://docs.ckan.org/en/latest/maintaining/configuration.html#ckan-locale-default)).
+
+
+Conversely, when serializing the CKAN dataset, a new triple will be added for each of the
+defined languages (if the translation is present):
+
+```turtle
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/dataset/0112cf32-bce0-4071-9504-923375f9f2ad> a dcat:Dataset ;
+    dct:title "Conjunt de dades de prova DCAT"@ca,
+        "Test DCAT dataset"@en,
+        "Conjunto de datos de prueba DCAT"@es ;
+    dct:description "Una descripció qualsevol"@ca,
+        "Some description"@en,
+        "Una descripción cualquiera"@es ;
+    dct:language "ca",
+        "en",
+        "es" ;
+    dct:provenance [ a dct:ProvenanceStatement ;
+        rdfs:label "Una declaració sobre la procedència"@ca,
+            "Statement about provenance"@en,
+            "Una declaración sobre la procedencia"@es ] ;
+```
+
+See [*examples/ckan/ckan_dataset_multilingual.json*](https://github.com/ckan/ckanext-dcat/blob/master/examples/ckan/ckan_dataset_multilingual.json) and [*examples/dcat/dataset_multilingual.ttl*](https://github.com/ckan/ckanext-dcat/blob/master/examples/dcat/dataset_multilingual.ttl)
+for examples of a multilingual CKAN dataset and DCAT serialization.
+
+
+Users [writing custom profiles](#writing-custom-profiles) can make use of the `_object_value_multilingual()`
+and `_object_value_list_multilingual()` functions of the profile class to handle custom fields not defined
+in the base profiles.
+
+
+## Internals
+
+### RDF DCAT Parser
 
 The `ckanext.dcat.processors.RDFParser` class allows to read RDF serializations in different
 formats and extract CKAN dataset dicts. It will look for DCAT datasets and distributions
@@ -164,7 +241,7 @@ The parser is implemented using [RDFLib](https://rdflib.readthedocs.org/), a Pyt
 RDF serialization format supported by RDFLib can be parsed into CKAN datasets. The `examples` folder contains
 serializations in different formats including RDF/XML, Turtle or JSON-LD.
 
-## RDF DCAT Serializer
+### RDF DCAT Serializer
 
 The `ckanext.dcat.processors.RDFSerializer` class generates RDF serializations in different
 formats from CKAN dataset dicts, like the ones returned by [`package_show`](http://docs.ckan.org/en/latest/api/index.html#ckan.logic.action.get.package_show) or [`package_search`](http://docs.ckan.org/en/latest/api/index.html#ckan.logic.action.get.package_search).
@@ -233,10 +310,6 @@ the following values will be used for `dct:accrualPeriodicity`:
 Once the dataset graph has been obtained, this is serialized into a text format using [RDFLib](https://rdflib.readthedocs.org/),
 so any format it supports can be obtained (common formats are 'xml', 'turtle' or 'json-ld').
 
-### Inherit license from the dataset as fallback in distributions
-It is possible to inherit the license from the dataset to the distributions, but only if there is no license defined in the resource yet. By default the license is not inherited from the dataset. This can be activated by setting the following parameter in the CKAN config file:
-
-    ckanext.dcat.resource.inherit.license = True
 
 
 

@@ -1,0 +1,74 @@
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/dataset/0112cf32-bce0-4071-9504-923375f9f2ad> a dcat:Dataset ;
+    dct:description "Una descripció qualsevol"@ca,
+        "Some description"@en,
+        "Una descripción cualquiera"@es ;
+    dct:identifier "0112cf32-bce0-4071-9504-923375f9f2ad" ;
+    dct:issued "2024-05-01"^^xsd:date ;
+    dct:language "ca",
+        "en",
+        "es" ;
+    dct:modified "2024-05-05"^^xsd:date ;
+    dct:provenance [ a dct:ProvenanceStatement ;
+            rdfs:label "Una declaració sobre la procedència"@ca,
+                "Statement about provenance"@en,
+                "Una declaración sobre la procedencia"@es ] ;
+    dct:title "Conjunt de dades de prova DCAT"@ca,
+        "Test DCAT dataset"@en,
+        "Conjunto de datos de prueba DCAT"@es ;
+    owl:versionInfo "1.0b" ;
+    adms:versionNotes "Notes sobre la versió"@ca,
+        "Some version notes"@en,
+        "Notas sobre la versión"@es ;
+    dcat:contactPoint [ a vcard:Kind ;
+            vcard:fn "Contact 2" ;
+            vcard:hasEmail <mailto:contact2@example.org> ;
+            vcard:hasUID "456" ],
+        [ a vcard:Kind ;
+            vcard:fn "Contact 1" ;
+            vcard:hasEmail <mailto:contact1@example.org> ;
+            vcard:hasUID "123" ] ;
+    dcat:distribution <https://example.org/dataset/0112cf32-bce0-4071-9504-923375f9f2ad/resource/db416e08-1efd-46ae-8ca6-7bc6aaba9e10> ;
+    dcat:keyword "Pins"@ca,
+        "Roures"@ca,
+        "Oaks"@en,
+        "Pines"@en,
+        "Pinos"@es,
+        "Robles"@es ;
+    dcat:landingPage <http://example.org/ds1> ;
+    foaf:page <https://example.org/some-doc.html> .
+
+<http://example.org/ds1> a foaf:Document .
+
+<https://example.org/dataset/0112cf32-bce0-4071-9504-923375f9f2ad/resource/db416e08-1efd-46ae-8ca6-7bc6aaba9e10> a dcat:Distribution ;
+    dct:description "Una descripció qualsevol"@ca,
+        "Some description"@en,
+        "Una descripción cualquiera"@es ;
+    dct:format "CSV" ;
+    dct:issued "2024-05-01T01:20:33"^^xsd:dateTime ;
+    dct:language "ca",
+        "en",
+        "es" ;
+    dct:modified "2024-05-05T09:33:20"^^xsd:dateTime ;
+    dct:rights [ a dct:RightsStatement ;
+            rdfs:label "Una nota sobre drets"@ca,
+                "Some stament about rights"@en,
+                "Una nota sobre derechos"@es ] ;
+    dct:title "Recurs 1"@ca,
+        "Resource 1"@en,
+        "Recurso 1"@es ;
+    dcat:accessURL <https://example.com/data.csv> ;
+    dcat:downloadURL <https://example.com/data.csv> .
+
+<https://example.org/some-doc.html> a foaf:Document .
+
+<https://example.com/data.csv> a rdfs:Resource .
+
