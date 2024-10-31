@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 from rdflib import term, URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
+from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS, ORG
 from geomet import wkt, InvalidGeoJSONException
 
 from ckantoolkit import config, url_for, asbool, aslist, get_action, ObjectNotFound
@@ -13,9 +13,11 @@ from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_year, is_year_month, is_date
 
+CNT = Namespace("http://www.w3.org/2011/content#")
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
+DCATUS = Namespace("http://resources.data.gov/ontology/dcat-us#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -27,9 +29,11 @@ OWL = Namespace("http://www.w3.org/2002/07/owl#")
 SPDX = Namespace("http://spdx.org/rdf/terms#")
 
 namespaces = {
+    "cnt": CNT,
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,
+    "dcatus": DCATUS,
     "adms": ADMS,
     "vcard": VCARD,
     "foaf": FOAF,
@@ -39,6 +43,7 @@ namespaces = {
     "locn": LOCN,
     "gsp": GSP,
     "owl": OWL,
+    "org": ORG,
     "spdx": SPDX,
 }
 
@@ -805,6 +810,9 @@ class RDFProfile(object):
                     items = value.split(",")
                 else:
                     items = [value]  # Normal text value
+        elif isinstance(value, ((int, float, complex))):
+            items = [value]  # number
+
         return items
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):

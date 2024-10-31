@@ -183,9 +183,9 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                                 # Index a flattened version
                                 new_key = f'extras_{field["field_name"]}__{key}'
                                 if not dataset_dict.get(new_key):
-                                    dataset_dict[new_key] = value
+                                    dataset_dict[new_key] = str(value)
                                 else:
-                                    dataset_dict[new_key] += ' ' + value
+                                    dataset_dict[new_key] += ' ' + str(value)
 
                     subfields = dataset_dict.pop(field['field_name'], None)
                     if field['field_name'] == 'spatial_coverage':
