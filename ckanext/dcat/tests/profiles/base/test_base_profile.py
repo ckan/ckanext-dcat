@@ -880,7 +880,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
         assert publisher['name'] == 'Publishing Organization for dataset 1'
@@ -908,7 +908,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
 
@@ -940,6 +940,8 @@ class TestBaseRDFProfile(object):
         p = RDFProfile(g)
 
         contact = p._contact_details(URIRef('http://example.org'), ADMS.contactPoint)
+
+        contact = contact[0]
 
         assert contact['name'] == 'Point of Contact'
         # mailto gets removed for storage and is added again on output
