@@ -15,14 +15,15 @@
     "issued": "2024-05-01",
     "modified": "2024-05-05",
     "identifier": "xx-some-dataset-id-yy",
-    "frequency": "monthly",
-    "provenance": "Statement about provenance",
-    "dcat_type": "test-type",
+    "frequency": "http://purl.org/cld/terms/annual",
+    "provenance": "https://example.org/some-provenance-statement.html",
+    "dcat_type": "http://purl.org/dc/dcmitype/Dataset",
     "version_notes": "Some version notes",
-    "access_rights": "Statement about access rights",
+    "access_rights": "https://resources.data.gov/vocab/access-right/TODO/PUBLIC",
+    "liability": "Some statement about liability",
     "alternate_identifier": [
-        "alt-id-1",
-        "alt-id-2"
+        "https://org1.example.org/datasets/alt-id-1",
+        "https://org2.example.org/datasets/alt-id-2"
     ],
     "theme": [
         "https://example.org/uri/theme1",
@@ -30,67 +31,63 @@
         "https://example.org/uri/theme3"
     ],
     "language": [
-        "en",
-        "ca",
-        "es"
+        "http://id.loc.gov/vocabulary/iso639-1/en",
+        "http://id.loc.gov/vocabulary/iso639-1/es",
+        "http://id.loc.gov/vocabulary/iso639-1/ca"
     ],
     "documentation": [
         "https://example.org/some-doc.html"
     ],
+    "purpose": [
+        "Some notes about the purpose of the dataset"
+    ],
+    "usage": [
+        "Some notes about the usage of the dataset"
+    ],
     "conforms_to": [
-        "Standard 1",
-        "Standard 2"
+        "https://resources.data.gov/vocab/TODO/ProtocolValue/DCAT_US_3_0"
     ],
     "is_referenced_by": [
-        "https://doi.org/10.1038/sdata.2018.22",
-        "test_isreferencedby"
-    ],
-    "applicable_legislation": [
-        "http://data.europa.eu/eli/reg_impl/2023/138/oj",
-        "http://data.europa.eu/eli/reg_impl/2023/138/oj_alt"
+        "https://doi.org/10.1038/sdata.2018.22"
     ],
     "contact": [
         {
             "name": "Contact 1",
-            "email": "contact1@example.org",
-            "identifier": "123"
+            "email": "contact1@example.org"
         },
         {
             "name": "Contact 2",
-            "email": "contact2@example.org",
-            "identifier": "456"
+            "email": "contact2@example.org"
         }
     ],
     "creator": [
         {
             "name": "Test Creator",
             "email": "creator@example.org",
-            "url": "https://example.org",
-            "identifier": "http://example.org/creator-id",
-            "type": "public_body"
-        }
-    ],
-    "creator": [
-        {
-            "name": "Test Creator",
-            "email": "creator@example.org",
-            "url": "https://example.org",
-            "identifier": "http://example.org/creator-id",
-            "type": "public_body"
+            "url": "https://example.org"
         }
     ],
     "publisher": [
         {
             "name": "Test Publisher",
             "email": "publisher@example.org",
-            "url": "https://example.org",
-            "identifier": "http://example.org/publisher-id",
-            "type": "public_body"
+            "url": "https://example.org"
+        }
+    ],
+    "contributor": [
+        {
+            "name": "Test Contributor 1",
+            "email": "contributor1@example.org",
+            "url": "https://example.org"
+        },
+        {
+            "name": "Test Contributor 2",
+            "email": "contributor2@example.org",
+            "url": "https://example.org"
         }
     ],
     "temporal_coverage": [
         {
-
             "start": "1905-03-01",
             "end": "2013-01-05"
         },
@@ -100,6 +97,20 @@
         }
     ],
     "temporal_resolution": "PT15M",
+    "bbox": [
+        {
+            "west": -179.15,
+            "east": -129.98,
+            "north": 71.54,
+            "south": 51.21
+        },
+        {
+            "west": -125.0,
+            "east": -66.9,
+            "north": 49.4,
+            "south": 24.4
+        }
+    ],
     "spatial_coverage": [
         {
             "geom": {
@@ -168,13 +179,21 @@
         }
     ],
     "spatial_resolution_in_meters": 1.5,
+    "data_dictionary": [
+        {
+            "url": "https://example.org/some-data-dictionary",
+            "format": "https://resources.data.gov/vocab/file-type/TODO/JSON",
+            "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
+        }
+    ],
     "resources": [
         {
             "name": "Resource 1",
             "description": "Some description",
             "url": "https://example.com/data.csv",
-            "format": "CSV",
-            "availability": "http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL",
+            "format": "https://resources.data.gov/vocab/file-type/TODO/CSV",
+            "mimetype": "http://www.iana.org/assignments/media-types/text/csv",
+            "character_encoding": "UTF-8",
             "compress_format": "http://www.iana.org/assignments/media-types/application/gzip",
             "package_format": "http://publications.europa.eu/resource/authority/file-type/TAR",
             "size": 12323,
@@ -187,25 +206,22 @@
             "modified": "2024-05-05T09:33:20",
             "temporal_resolution": "PT15M",
             "spatial_resolution_in_meters": 1.5,
-            "license": "http://creativecommons.org/licenses/by/3.0/",
-            "rights": "Some stament about rights",
-            "language": [
-                "en",
-                "ca",
-                "es"
+            "temporal_resolution": "PT15M",
+            "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0",
+            "rights": "This dataset is provided by the United States Malacological Commission (USMC)",
+            "conforms_to": [
+                "https://resources.data.gov/vocab/TODO/ProtocolValue/DCAT_US_3_0"
             ],
-            "access_services": [
+            "language": [
+                "http://id.loc.gov/vocabulary/iso639-1/en",
+                "http://id.loc.gov/vocabulary/iso639-1/es",
+                "http://id.loc.gov/vocabulary/iso639-1/ca"
+            ],
+            "data_dictionary": [
                 {
-                    "title": "Access Service 1",
-                    "endpoint_description": "https://example.org/endpoint_description",
-                    "endpoint_url": [
-                        "https://example.org/access_service/1",
-                        "https://example.org/access_service/2"
-                    ],
-                    "serves_dataset": [
-                        "https://example.org/dataset/1",
-                        "https://example.org/dataset/2"
-                    ]
+                    "url": "https://example.org/some-data-dictionary",
+                    "format": "https://resources.data.gov/vocab/file-type/TODO/JSON",
+                    "license": "https://resources.data.gov/vocab/license/TODO/CC_BYNC_4_0"
                 }
             ]
         }

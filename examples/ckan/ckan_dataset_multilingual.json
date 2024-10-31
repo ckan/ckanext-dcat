@@ -1,0 +1,94 @@
+{
+    "name": "test-dataset-multilingual",
+    "title": "Test DCAT dataset",
+    "title_translated": {
+        "en": "Test DCAT dataset",
+        "ca": "Conjunt de dades de prova DCAT",
+        "es": "Conjunto de datos de prueba DCAT"
+    },
+    "notes": "Some description",
+    "notes_translated": {
+        "en": "Some description",
+        "ca": "Una descripció qualsevol",
+        "es": "Una descripción cualquiera"
+    },
+    "url": "http://example.org/ds1",
+    "tags": [
+        {
+            "name": "Oaks"
+        },
+        {
+            "name": "Pines"
+        }
+    ],
+    "tags_translated": {
+        "en": ["Oaks", "Pines"],
+        "ca": ["Roures", "Pins"],
+        "es": ["Robles", "Pinos"]
+    },
+    "issued": "2024-05-01",
+    "modified": "2024-05-05",
+    "provenance": {
+        "en": "Statement about provenance",
+        "ca": "Una declaració sobre la procedència",
+        "es": "Una declaración sobre la procedencia"
+    },
+    "version": "1.0b",
+    "version_notes":{
+        "en": "Some version notes",
+        "ca": "Notes sobre la versió",
+        "es": "Notas sobre la versión"
+    },
+    "language": [
+        "en",
+        "ca",
+        "es"
+    ],
+    "documentation": [
+        "https://example.org/some-doc.html"
+    ],
+    "contact": [
+        {
+            "name": "Contact 1",
+            "email": "contact1@example.org",
+            "identifier": "123"
+        },
+        {
+            "name": "Contact 2",
+            "email": "contact2@example.org",
+            "identifier": "456"
+        }
+    ],
+    "resources": [
+        {
+            "name": "Resource 1",
+            "name_translated": {
+                "en": "Resource 1",
+                "ca": "Recurs 1",
+                "es": "Recurso 1"
+            },
+            "description": "Some description",
+            "description_translated": {
+                "en": "Some description",
+                "ca": "Una descripció qualsevol",
+                "es": "Una descripción cualquiera"
+            },
+            "url": "https://example.com/data.csv",
+            "format": "CSV",
+            "access_url": "https://example.com/data.csv",
+            "download_url": "https://example.com/data.csv",
+            "issued": "2024-05-01T01:20:33",
+            "modified": "2024-05-05T09:33:20",
+            "rights": {
+                "en": "Some stament about rights",
+                "ca": "Una nota sobre drets",
+                "es": "Una nota sobre derechos"
+            },
+            "language": [
+                "en",
+                "ca",
+                "es"
+            ]
+        }
+    ]
+}

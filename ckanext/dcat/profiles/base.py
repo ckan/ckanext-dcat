@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from dateutil.parser import parse as parse_date
 from rdflib import term, URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS
+from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS, ORG
 from geomet import wkt, InvalidGeoJSONException
 
 from ckantoolkit import config, url_for, asbool, aslist, get_action, ObjectNotFound
@@ -13,9 +13,11 @@ from ckan.lib.helpers import resource_formats
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_year, is_year_month, is_date
 
+CNT = Namespace("http://www.w3.org/2011/content#")
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
+DCATUS = Namespace("http://resources.data.gov/ontology/dcat-us#")
 ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
@@ -27,9 +29,11 @@ OWL = Namespace("http://www.w3.org/2002/07/owl#")
 SPDX = Namespace("http://spdx.org/rdf/terms#")
 
 namespaces = {
+    "cnt": CNT,
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,
+    "dcatus": DCATUS,
     "adms": ADMS,
     "vcard": VCARD,
     "foaf": FOAF,
@@ -39,6 +43,7 @@ namespaces = {
     "locn": LOCN,
     "gsp": GSP,
     "owl": OWL,
+    "org": ORG,
     "spdx": SPDX,
 }
 
@@ -69,7 +74,7 @@ class URIRefOrLiteral(object):
     Like CleanedURIRef, this is a factory class.
     """
 
-    def __new__(cls, value):
+    def __new__(cls, value, lang=None):
         try:
             stripped_value = value.strip()
             if isinstance(value, str) and (
@@ -83,10 +88,10 @@ class URIRefOrLiteral(object):
                 # URI is fine, return the object
                 return uri_obj
             else:
-                return Literal(value)
+                return Literal(value, lang=lang)
         except Exception:
             # In case something goes wrong: use Literal
-            return Literal(value)
+            return Literal(value, lang=lang)
 
 
 class CleanedURIRef(object):
@@ -123,6 +128,8 @@ class RDFProfile(object):
 
     _dataset_schema = None
 
+    _form_languages = None
+
     # Cache for mappings of licenses URL/title to ID built when needed in
     # _license().
     _licenceregister_cache = None
@@ -145,6 +152,9 @@ class RDFProfile(object):
 
         self.compatibility_mode = compatibility_mode
 
+        self._default_lang = config.get("ckan.locale_default", "en")
+
+
         try:
             schema_show = get_action("scheming_dataset_schema_show")
             try:
@@ -156,6 +166,9 @@ class RDFProfile(object):
 
         except KeyError:
             pass
+
+        if self._dataset_schema:
+            self._form_languages = self._dataset_schema.get("form_languages")
 
     def _datasets(self):
         """
@@ -201,21 +214,40 @@ class RDFProfile(object):
             return _object
         return None
 
-    def _object_value(self, subject, predicate):
+    def _object_value(self, subject, predicate, multilingual=False):
         """
         Given a subject and a predicate, returns the value of the object
 
         Both subject and predicate must be rdflib URIRef or BNode objects
 
         If found, the string representation is returned, else an empty string
+
+        If multilingual is True, a dict with the language codes as keys will be
+        returned for each language found. e.g.
+
+            {
+                "en": "Dataset title",
+                "es": "Título del conjunto de datos"
+            }
+
+        If one of the languages defined in `form_languages` in the schema is not
+        found in the graph, an empty string will be returned.
+
+            {
+                "en": "Dataset title",
+                "es": ""
+            }
+
         """
-        default_lang = config.get("ckan.locale_default", "en")
+        if multilingual:
+            return self._object_value_multilingual(subject, predicate)
         fallback = ""
         for o in self.g.objects(subject, predicate):
             if isinstance(o, Literal):
-                if o.language and o.language == default_lang:
+                if o.language and o.language == self._default_lang:
                     return str(o)
-                # Use first object as fallback if no object with the default language is available
+                # Use first object as fallback if no object with the default
+                # language is available
                 elif fallback == "":
                     fallback = str(o)
             elif len(list(self.g.objects(o, RDFS.label))):
@@ -223,6 +255,31 @@ class RDFProfile(object):
             else:
                 return str(o)
         return fallback
+
+    def _object_value_multilingual(self, subject, predicate):
+        out = {}
+        for o in self.g.objects(subject, predicate):
+
+            if isinstance(o, Literal):
+                if o.language:
+                    out[o.language] = str(o)
+                else:
+                    out[self._default_lang] = str(o)
+            elif len(list(self.g.objects(o, RDFS.label))):
+                for label in self.g.objects(o, RDFS.label):
+                    if label.language:
+                        out[label.language] = str(label)
+                    else:
+                        out[self._default_lang] = str(label)
+            else:
+                out[self._default_lang] = str(o)
+
+        if self._form_languages:
+            for lang in self._form_languages:
+                if lang not in out:
+                    out[lang] = ""
+
+        return out
 
     def _object_value_multiple_predicate(self, subject, predicates):
         """
@@ -301,9 +358,44 @@ class RDFProfile(object):
 
         Both subject and predicate must be rdflib URIRef or BNode  objects
 
-        If no values found, returns an empty string
+        If no values found, returns an empty list
         """
         return [str(o) for o in self.g.objects(subject, predicate)]
+
+    def _object_value_list_multilingual(self, subject, predicate):
+        """
+        Given a subject and a predicate, returns a dict with the language codes
+        as keys and the list of object values as values. e.g.
+
+            {
+                "en": ["Oaks", "Pines"],
+                "es": ["Robles", "Pinos"],
+            }
+
+        If one of the languages defined in `form_languages` in the schema is not
+        found in the graph, an empty list will be returned.
+
+            {
+                "en": ["Oaks", "Pines"],
+                "es": [],
+            }
+
+        Both subject and predicate must be rdflib URIRef or BNode  objects
+
+        If no values found, returns an empty list
+        """
+        out = {}
+        for o in self.g.objects(subject, predicate):
+            lang = o.language or self._default_lang
+            if lang not in out:
+                out[lang] = []
+            out[lang].append(str(o))
+
+        if self._form_languages:
+            for lang in self._form_languages:
+                if lang not in out:
+                    out[lang] = []
+        return out
 
     def _get_vcard_property_value(
         self, subject, predicate, predicate_string_property=None
@@ -718,6 +810,9 @@ class RDFProfile(object):
                     items = value.split(",")
                 else:
                     items = [value]  # Normal text value
+        elif isinstance(value, ((int, float, complex))):
+            items = [value]  # number
+
         return items
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
@@ -786,18 +881,25 @@ class RDFProfile(object):
         """
         value = self._get_dict_value(data_dict, key)
         if value:
-            _object = URIRefOrLiteral(value)
-            if isinstance(_object, Literal):
-                statement_ref = BNode()
-                self.g.add((subject, predicate, statement_ref))
-                if _class:
-                    self.g.add((statement_ref, RDF.type, _class))
-                self.g.add((statement_ref, RDFS.label, _object))
-
+            if isinstance(value, dict):
+                _objects = []
+                for lang in value:
+                    _objects.append(URIRefOrLiteral(value[lang], lang))
             else:
-                self.g.add((subject, predicate, _object))
-                if _class:
-                    self.g.add((_object, RDF.type, _class))
+                _objects = [URIRefOrLiteral(value)]
+            statement_ref = None
+            for _object in _objects:
+                if isinstance(_object, Literal):
+                    if not statement_ref:
+                        statement_ref = BNode()
+                        self.g.add((subject, predicate, statement_ref))
+                        if _class:
+                            self.g.add((statement_ref, RDF.type, _class))
+                    self.g.add((statement_ref, RDFS.label, _object))
+                else:
+                    self.g.add((subject, predicate, _object))
+                    if _class:
+                        self.g.add((_object, RDF.type, _class))
 
     def _schema_field(self, key):
         """
@@ -822,6 +924,32 @@ class RDFProfile(object):
         for field in self._dataset_schema["resource_fields"]:
             if field["field_name"] == key:
                 return field
+
+    def _multilingual_dataset_fields(self):
+        """
+        Return a list of field names in the dataset shema that have multilingual
+        values (i.e. that use one of the fluent presets)
+        """
+        return self._multilingual_fields(entity="dataset")
+
+    def _multilingual_resource_fields(self):
+        """
+        Return a list of field names in the resource schema that have multilingual
+        values (i.e. that use one of the fluent presets)
+        """
+        return self._multilingual_fields(entity="resource")
+
+    def _multilingual_fields(self, entity="dataset"):
+        if not self._dataset_schema:
+            return []
+
+        out = []
+        for field in self._dataset_schema[f"{entity}_fields"]:
+            if field.get("validators") and any(
+                v for v in field["validators"].split() if v.startswith("fluent")
+            ):
+                out.append(field["field_name"])
+        return out
 
     def _set_dataset_value(self, dataset_dict, key, value):
         """
@@ -949,7 +1077,16 @@ class RDFProfile(object):
         elif value and date_value:
             self._add_date_triple(subject, predicate, value, _type)
         elif value:
+            # If it is a dict, we assume it's a fluent multilingual field
+            if isinstance(value, dict):
+                # We assume that all translated field values are Literals
+                for lang, translated_value in value.items():
+                    object = Literal(translated_value, datatype=_datatype, lang=lang)
+                    self.g.add((subject, predicate, object))
+                return
+
             # Normal text value
+
             # ensure URIRef items are preprocessed (space removal/url encoding)
             if _type == URIRef:
                 _type = CleanedURIRef

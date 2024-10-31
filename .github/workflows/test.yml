@@ -71,6 +71,8 @@ jobs:
         pip install -r ckanext-harvest/requirements.txt
         git clone https://github.com/ckan/ckanext-scheming
         pip install -e ckanext-scheming
+        git clone https://github.com/ckan/ckanext-fluent
+        pip install -e ckanext-fluent
     - name: Setup extension
       run: |
         ckan -c test.ini db init

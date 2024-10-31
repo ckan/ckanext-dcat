@@ -49,6 +49,7 @@ dcat_json_harvester = "ckanext.dcat.harvesters:DCATJSONHarvester"
 dcat_rdf_harvester = "ckanext.dcat.harvesters:DCATRDFHarvester"
 dcat_json_interface = "ckanext.dcat.plugins:DCATJSONInterface"
 dcat = "ckanext.dcat.plugins:DCATPlugin"
+
 structured_data = "ckanext.dcat.plugins:StructuredDataPlugin"
 # Test plugins
 test_rdf_harvester = "ckanext.dcat.tests.harvester.test_harvester:TestRDFHarvester"
@@ -60,4 +61,5 @@ euro_dcat_ap = "ckanext.dcat.profiles:EuropeanDCATAPProfile"
 euro_dcat_ap_2 = "ckanext.dcat.profiles:EuropeanDCATAP2Profile"
 euro_dcat_ap_3 = "ckanext.dcat.profiles:EuropeanDCATAP3Profile"
 euro_dcat_ap_scheming = "ckanext.dcat.profiles:EuropeanDCATAPSchemingProfile"
+dcat_us_3="ckanext.dcat.profiles:DCATUS3Profile"
 schemaorg = "ckanext.dcat.profiles:SchemaOrgProfile"

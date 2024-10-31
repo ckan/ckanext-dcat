@@ -103,7 +103,7 @@ Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data
 
 In terms of CKAN features, this extension offers:
 
-* [Pre-built CKAN schemas](getting-started.md#schemas) for common Application Profiles that can be adapted to each site requirements to provide out-of-the-box DCAT support in data portals, including tailored form fields, validation etc. (currently supporting DCAT AP v1, v2, and v3).
+* [Pre-built CKAN schemas](getting-started.md#schemas) for common Application Profiles that can be adapted to each site requirements to provide out-of-the-box DCAT support in data portals, including tailored form fields, validation etc. (currently supporting **DCAT-AP** [v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), [v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210) and [v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) and **DCAT-US** [v3](https://doi-do.github.io/dcat-us/)).
 
 * [DCAT Endpoints](endpoints.md) that expose the catalog datasets in different RDF serializations (`dcat` plugin).
 
@@ -114,7 +114,7 @@ In terms of CKAN features, this extension offers:
 
 These are implemented internally using:
 
-* A base [mapping](mapping.md) between DCAT and CKAN datasets and viceversa (compatible with [DCAT-AP v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), [DCAT-AP v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210) and [DCAT-AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/)).
+* A base [mapping](mapping.md) between DCAT and CKAN datasets and viceversa (compatible with **DCAT-AP** [v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), [v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210) and [v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) and **DCAT-US** [v3](https://doi-do.github.io/dcat-us/)).
 
 * An [RDF Parser](profiles.md#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](profiles.md#profiles).
 
