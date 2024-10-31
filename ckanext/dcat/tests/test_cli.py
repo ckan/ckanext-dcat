@@ -31,7 +31,7 @@ def test_produce(cli):
         "..",
         "examples",
         "ckan",
-        "full_ckan_dataset.json",
+        "full_ckan_dataset_legacy.json",
     )
 
     result = cli.invoke(dcat_cli, ["produce", "-f", "jsonld", path])
