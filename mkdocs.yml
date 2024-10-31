@@ -1,6 +1,6 @@
 site_name: ckanext-dcat
-#site_url: https://docs.ckan.org/projects/ckanext-dcat
-site_url: http://localhost:8000
+site_url: https://docs.ckan.org/projects/ckanext-dcat
+#site_url: http://localhost:8000
 
 site_description: >-
   The documentation of ckanext-dcat, a CKAN extension that allows to expose
