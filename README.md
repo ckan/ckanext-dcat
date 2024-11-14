@@ -1,4 +1,4 @@
-# ckanext-dcat
+# ckanext-dcat-health-ri 
 
 
 [![Tests](https://github.com/ckan/ckanext-dcat/workflows/Tests/badge.svg?branch=master)](https://github.com/ckan/ckanext-dcat/actions)
