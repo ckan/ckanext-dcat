@@ -36,10 +36,6 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
     @pytest.mark.ckan_config(
         "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
     )
-    @pytest.mark.ckan_config(
-        "scheming.presets",
-        "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
-    )
     @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
     def test_e2e_ckan_to_dcat(self):
         """
@@ -299,6 +295,20 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             distribution_ref,
             DCAT.downloadURL,
             URIRef(resource["download_url"]),
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.temporalResolution,
+            dataset["temporal_resolution"],
+            data_type=XSD.duration,
+        )
+        assert self._triple(
+            g,
+            distribution_ref,
+            DCAT.spatialResolutionInMeters,
+            dataset["spatial_resolution_in_meters"],
+            data_type=XSD.decimal,
         )
 
         assert self._triple(

@@ -1,7 +1,27 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.1.0...HEAD)
 
+## [v2.1.0](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...v2.1.0) - 2024-10-31
+
+* New base profile for the [DCAT US v3](https://doi-do.github.io/dcat-us/) specification.
+  All mandatory properties and most of the recommended and optional ones are supported. During the
+  implementation of this work a few adjustments have been done to the base DCAT profile ([#314](https://github.com/ckan/ckanext-dcat/pull/314)) :
+
+    * Support for temporal and spatial resolutions in distributions, which were missing on the DCAT AP profiles
+    * Allow multiple values for dct:creator in DCAT AP
+
+* Multilingual support in DCAT profiles. Multilingual support is provided via integration
+  with [ckanext-fluent](https://github.com/ckan/ckanext-fluent). Check the [documentation](https://docs.ckan.org/projects/ckanext-dcat/en/latest/profiles/#multilingual-support) for full details ([#318](https://github.com/ckan/ckanext-dcat/pull/318))
+* At the serialization level, a new triple will be added for each of the defined languages
+* Support for multiple agents when parsing ([#317](https://github.com/ckan/ckanext-dcat/pull/317))
+* Improve serialization of statements, using RDFS.label in line with the DCAT 3 spec recommendation ([#313](https://github.com/ckan/ckanext-dcat/pull/313))
+* Store UIDs from contact clases ([#312](https://github.com/ckan/ckanext-dcat/pull/312))
+* Fix input issues for access_rights field ([#309](https://github.com/ckan/ckanext-dcat/pull/309))
+* Add `has_version` to the full DCAT AP schema ([#306](https://github.com/ckan/ckanext-dcat/pull/306))
+* Add pyproject.toml file ([#304](https://github.com/ckan/ckanext-dcat/pull/304))
+* Decouple extension from ckanext-scheming ([#303](https://github.com/ckan/ckanext-dcat/pull/303))
+* Add support for dct:creator in base DCAT profiles ([#302](https://github.com/ckan/ckanext-dcat/pull/302))
 * Fix DCAT date validator on empty values ([#297](https://github.com/ckan/ckanext-dcat/pull/297))
 * Add support for hydra collection type PartialCollectionView ([#299](https://github.com/ckan/ckanext-dcat/pull/299))
 
@@ -9,7 +29,7 @@
 
 * New profile for [DCAT-AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0), `euro_dcat_ap_3`, which is now
   the default. Existing sites willing to stick with DCAT-AP v2.x can specify the profile in the configuration if they
-  are not doing so yet (`ckan.dcat.rdf.profiles = euro_dcat_ap_2`). The new `euro_dcat_ap_3` profile relies on 
+  are not doing so yet (`ckan.dcat.rdf.profiles = euro_dcat_ap_2`). The new `euro_dcat_ap_3` profile relies on
   ckanext-scheming metadata schemas (see below).
 * Support for standard CKAN [ckanext-scheming](https://github.com/ckan/ckanext-scheming) schemas.
   The DCAT profiles now seamlessly integrate with fields defined via the YAML or JSON scheming files.
@@ -23,7 +43,7 @@
     * Actual list support in the API output for list properties like `dct:language`
     * Multiple objects now allowed for properties like `dcat:ContactPoint`, `dct:spatial` or `dct:temporal`
     * Custom validators for date values that allow `xsd:gYear`, `xsd:gYearMonth`, `xsd:date` and `xsd:dateTime`
-  
+
 * [SHACL validation](https://github.com/SEMICeu/DCAT-AP/tree/master/releases/2.1.1) for DCAT-AP 2.1.1 profile (scheming and legacy).
   SHACL validation made surface the following issues in the existing profiles, which are now fixed ([#288](https://github.com/ckan/ckanext-dcat/pull/288)):
     * Cast `dcat:byteSize` and `dcat:spatialResolutionInMeters` as Decimal, not float

@@ -247,6 +247,226 @@ class TestBaseRDFProfile(object):
         assert isinstance(value, list)
         assert value == []
 
+    def test_object_value_multilingual(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dct:description "Una descripció qualsevol"@ca,
+                "Some description"@en,
+                "Una descripción cualquiera"@es ;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        description = p._object_value_multilingual(
+            URIRef("https://example.org/dataset/"), DCT.description
+        )
+        assert description["en"] == "Some description"
+        assert description["ca"] == "Una descripció qualsevol"
+        assert description["es"] == "Una descripción cualquiera"
+
+    def test_object_value_multilingual_missing_lang(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dct:description "Una descripció qualsevol"@ca,
+                "Some description"@en;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        p._form_languages = ["en", "ca", "es"]
+
+        description = p._object_value_multilingual(
+            URIRef("https://example.org/dataset/"), DCT.description
+        )
+        assert description["en"] == "Some description"
+        assert description["ca"] == "Una descripció qualsevol"
+        assert description["es"] == ""
+
+    def test_object_value_multilingual_default_lang(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dct:description "Some description";
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        description = p._object_value_multilingual(
+            URIRef("https://example.org/dataset/"), DCT.description
+        )
+        assert description["en"] == "Some description"
+
+    @pytest.mark.ckan_config("ckan.locale_default", "ca")
+    def test_object_value_multilingual_default_lang_config(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dct:description "Some description";
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        description = p._object_value_multilingual(
+            URIRef("https://example.org/dataset/"), DCT.description
+        )
+        assert description["ca"] == "Some description"
+
+    def test_object_value_multilingual_rdfs_label(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dct:provenance [ a dct:ProvenanceStatement ;
+                    rdfs:label "Una declaració sobre la procedència"@ca,
+                        "Statement about provenance"@en,
+                        "Una declaración sobre la procedencia"@es ] ;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        provenance = p._object_value_multilingual(
+            URIRef("https://example.org/dataset/"), DCT.provenance
+        )
+        assert provenance["en"] == "Statement about provenance"
+        assert provenance["ca"] == "Una declaració sobre la procedència"
+        assert provenance["es"] == "Una declaración sobre la procedencia"
+
+    def test_object_value_multilingual_list(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dcat:keyword "Pins"@ca,
+                "Roures"@ca,
+                "Oaks"@en,
+                "Pines"@en,
+                "Pinos"@es,
+                "Robles"@es ;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        keywords = p._object_value_list_multilingual(
+            URIRef("https://example.org/dataset/"), DCAT.keyword
+        )
+        assert sorted(keywords["en"]) == sorted(["Oaks", "Pines"])
+        assert sorted(keywords["ca"]) == sorted(["Roures", "Pins"])
+        assert sorted(keywords["es"]) == sorted(["Robles", "Pinos"])
+
+    def test_object_value_multilingual_list_missing_lang(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dcat:keyword "Pins"@ca,
+                "Roures"@ca,
+                "Oaks"@en,
+                "Pines"@en ;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        p._form_languages = ["en", "ca", "es"]
+
+        keywords = p._object_value_list_multilingual(
+            URIRef("https://example.org/dataset/"), DCAT.keyword
+        )
+        assert keywords["es"] == []
+
+    def test_object_value_multilingual_list_default_lang(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dcat:keyword "Oaks",
+                "Pines" ;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        keywords = p._object_value_list_multilingual(
+            URIRef("https://example.org/dataset/"), DCAT.keyword
+        )
+        assert sorted(keywords["en"]) == sorted(["Oaks", "Pines"])
+
+    @pytest.mark.ckan_config("ckan.locale_default", "ca")
+    def test_object_value_multilingual_list_default_lang_conf(self):
+
+        data = """
+        @prefix dcat: <http://www.w3.org/ns/dcat#> .
+        @prefix dct: <http://purl.org/dc/terms/> .
+
+        <https://example.org/dataset/> a dcat:Dataset ;
+            dcat:keyword "Oaks",
+                "Pines" ;
+        .
+        """
+        g = Graph()
+
+        g.parse(format='ttl', data=data)
+
+        p = RDFProfile(g)
+
+        keywords = p._object_value_list_multilingual(
+            URIRef("https://example.org/dataset/"), DCAT.keyword
+        )
+        assert sorted(keywords["ca"]) == sorted(["Oaks", "Pines"])
+
     def test_time_interval_schema_org(self):
 
         data = '''<?xml version="1.0" encoding="utf-8" ?>
@@ -660,7 +880,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
         assert publisher['name'] == 'Publishing Organization for dataset 1'
@@ -688,7 +908,7 @@ class TestBaseRDFProfile(object):
 
         p = RDFProfile(g)
 
-        publisher = p._agent_details(URIRef('http://example.org'), DCT.publisher)
+        publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
 
@@ -720,6 +940,8 @@ class TestBaseRDFProfile(object):
         p = RDFProfile(g)
 
         contact = p._contact_details(URIRef('http://example.org'), ADMS.contactPoint)
+
+        contact = contact[0]
 
         assert contact['name'] == 'Point of Contact'
         # mailto gets removed for storage and is added again on output

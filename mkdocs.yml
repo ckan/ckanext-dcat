@@ -1,6 +1,6 @@
 site_name: ckanext-dcat
-#site_url: https://docs.ckan.org/projects/ckanext-dcat
-site_url: http://localhost:8000
+site_url: https://docs.ckan.org/projects/ckanext-dcat
+#site_url: http://localhost:8000
 
 site_description: >-
   The documentation of ckanext-dcat, a CKAN extension that allows to expose
@@ -57,6 +57,9 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.snippets
 
+extra_javascript:
+  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
+  - _js/tablesort.js
 
 extra_css:
   - _css/extra.css
@@ -73,6 +76,4 @@ nav:
     - Google Dataset Search: 'google-dataset-search.md'
     - CLI: 'cli.md'
     - Configuration reference: 'configuration.md'
-#  - CHANGELOG: 'https://github.com/ckan/ckanext-dcat/blob/master/CHANGELOG.md'
-
   - CHANGELOG: 'changelog.md'

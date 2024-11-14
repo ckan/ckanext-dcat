@@ -58,6 +58,13 @@
             "email": "contact2@example.org"
         }
     ],
+    "creator": [
+        {
+            "name": "Test Creator",
+            "email": "creator@example.org",
+            "url": "https://example.org"
+        }
+    ],
     "publisher": [
         {
             "name": "Test Publisher",
@@ -159,6 +166,8 @@
             "download_url": "https://example.com/data.csv",
             "issued": "2024-05-01T01:20:33",
             "modified": "2024-05-05T09:33:20",
+            "temporal_resolution": "PT15M",
+            "spatial_resolution_in_meters": 1.5,
             "license": "http://publications.europa.eu/resource/authority/licence/CC_BYNC_4_0",
             "rights": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
             "conforms_to": [

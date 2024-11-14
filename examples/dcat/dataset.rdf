@@ -2,6 +2,7 @@
 <rdf:RDF
     xmlns:time="http://www.w3.org/2006/time#"
 	xmlns:dct="http://purl.org/dc/terms/"
+	xmlns:cnt="http://www.w3.org/2011/content#"
 	xmlns:dcat="http://www.w3.org/ns/dcat#"
     xmlns:dcatap="http://data.europa.eu/r5r/"
 	xmlns:foaf="http://xmlns.com/foaf/0.1/"
@@ -91,6 +92,7 @@
         <dcat:Distribution rdf:about="https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/1">
             <dct:title>Some website</dct:title>
             <dct:description>A longer description</dct:description>
+            <dct:identifier>https://example.org/distributions/1</dct:identifier>
             <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-05-11</dct:issued>
             <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-01T00:04:06</dct:modified>
             <dct:license rdf:resource="http://creativecommons.org/licenses/by-nc/2.0/"/>
@@ -100,6 +102,9 @@
             <dcat:accessURL rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.bgs.ac.uk/gbase/geochemcd/home.html</dcat:accessURL>
             <dct:format>HTML</dct:format>
             <dcat:mediaType>text/html</dcat:mediaType>
+            <cnt:characterEncoding>UTF-8</cnt:characterEncoding>
+            <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
+            <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.5</dcat:spatialResolutionInMeters>
             <dcat:compressFormat>http://www.iana.org/assignments/media-types/application/gzip</dcat:compressFormat>
             <dcat:packageFormat>http://publications.europa.eu/resource/authority/file-type/TAR</dcat:packageFormat>
             <dcat:byteSize>12323</dcat:byteSize>
