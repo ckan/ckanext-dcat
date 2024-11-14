@@ -53,8 +53,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-        with:
-         path: ${{ github.sha }}
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Install requirements (common)
       run: |
         pip install -r requirements.txt
