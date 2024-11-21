@@ -433,9 +433,6 @@ class RDFProfile(object):
         It checks for time intervals defined with DCAT, W3C Time hasBeginning & hasEnd
         and schema.org startDate & endDate.
 
-        Note that partial dates will be expanded to the first month / day
-        value, eg '1904' -> '1904-01-01'.
-
         Returns a tuple with the start and end date values, both of which
         can be None if not found
         """
