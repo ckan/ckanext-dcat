@@ -32,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.ckan-image }}
+      options: --user root
     services:
       solr:
         image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
