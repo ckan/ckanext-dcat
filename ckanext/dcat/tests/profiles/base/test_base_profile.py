@@ -510,7 +510,7 @@ class TestBaseRDFProfile(object):
             <dct:PeriodOfTime>
               <time:hasBeginning>
                 <time:Instant>
-                  <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                  <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDateTime>
                 </time:Instant>
               </time:hasBeginning>
               <time:hasEnd>
@@ -532,7 +532,7 @@ class TestBaseRDFProfile(object):
 
         start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
 
-        assert start == '1904-01-01'
+        assert start == '1904'
         assert end == '2014-03-22'
 
     def test_time_interval_w3c_time_inXSDDateTimeStamp(self):
@@ -548,7 +548,7 @@ class TestBaseRDFProfile(object):
             <dct:PeriodOfTime>
               <time:hasBeginning>
                 <time:Instant>
-                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTimeStamp>
+                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDateTimeStamp>
                 </time:Instant>
               </time:hasBeginning>
               <time:hasEnd>
@@ -570,7 +570,7 @@ class TestBaseRDFProfile(object):
 
         start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
 
-        assert start == '1904-01-01'
+        assert start == '1904'
         assert end == '2014-03-22'
 
     def test_time_interval_w3c_time_inXSDDate(self):
@@ -586,7 +586,7 @@ class TestBaseRDFProfile(object):
             <dct:PeriodOfTime>
               <time:hasBeginning>
                 <time:Instant>
-                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDate>
+                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDate>
                 </time:Instant>
               </time:hasBeginning>
               <time:hasEnd>
@@ -608,7 +608,7 @@ class TestBaseRDFProfile(object):
 
         start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
 
-        assert start == '1904-01-01'
+        assert start == '1904'
         assert end == '2014-03-22'
 
     def test_time_interval_multiple_w3c_time(self):
@@ -627,9 +627,9 @@ class TestBaseRDFProfile(object):
             <dct:PeriodOfTime>
               <time:hasBeginning>
                 <time:Instant>
-                  <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2005</time:inXSDDateTime>
-                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTimeStamp>
-                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1974</time:inXSDDate>
+                  <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">2005</time:inXSDDateTime>
+                  <time:inXSDDateTimeStamp rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDateTimeStamp>
+                  <time:inXSDDate rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1974</time:inXSDDate>
                 </time:Instant>
               </time:hasBeginning>
               <time:hasEnd>
@@ -653,7 +653,7 @@ class TestBaseRDFProfile(object):
 
         start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal)
 
-        assert start == '1904-01-01'
+        assert start == '1904'
         assert end == '2014-03-22'
 
     def test_time_interval_dcat(self):
@@ -706,7 +706,7 @@ class TestBaseRDFProfile(object):
                 <dct:PeriodOfTime>
                   <time:hasBeginning>
                     <time:Instant>
-                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDateTime>
                     </time:Instant>
                   </time:hasBeginning>
                   <time:hasEnd>
@@ -763,7 +763,7 @@ class TestBaseRDFProfile(object):
                 <dct:PeriodOfTime>
                   <time:hasBeginning>
                     <time:Instant>
-                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                      <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDateTime>
                     </time:Instant>
                   </time:hasBeginning>
                   <time:hasEnd>
@@ -827,7 +827,7 @@ class TestBaseRDFProfile(object):
                 <dct:PeriodOfTime>
                     <time:hasBeginning>
                         <time:Instant>
-                        <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1904</time:inXSDDateTime>
+                        <time:inXSDDateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#gYear">1904</time:inXSDDateTime>
                         </time:Instant>
                     </time:hasBeginning>
                     <time:hasEnd>
@@ -849,7 +849,7 @@ class TestBaseRDFProfile(object):
 
         start, end = p._time_interval(URIRef('http://example.org'), DCT.temporal, dcat_ap_version=2)
 
-        assert start == '1904-01-01'
+        assert start == '1904'
         assert end == '2014-03-22'
 
     def test_publisher_foaf(self):
