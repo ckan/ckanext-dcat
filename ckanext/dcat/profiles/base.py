@@ -536,7 +536,9 @@ class RDFProfile(object):
             agent_details = {}
             agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
             agent_details["name"] = self._object_value(agent, FOAF.name)
-            agent_details["email"] = self._object_value(agent, FOAF.mbox)
+            agent_details["email"] = self._without_mailto(
+                self._object_value(agent, FOAF.mbox)
+            )
             if not agent_details["email"]:
                 agent_details["email"] = self._without_mailto(
                     self._object_value(agent, VCARD.hasEmail)
