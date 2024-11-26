@@ -23,30 +23,39 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             dataset_dict, dataset_ref
         )
 
-        dataset_dict = self._parse_mandatory_fields(dataset_dict, dataset_ref)
+        dataset_dict = self._parse_health_fields(dataset_dict, dataset_ref)
 
         return dataset_dict
 
-    def _parse_mandatory_fields(self, dataset_dict, dataset_ref):
-
-        #  Lists for "purpose" and "health theme"
+    def _parse_health_fields(self, dataset_dict, dataset_ref):
         for (
             key,
             predicate,
         ) in (
-            ("purpose", HEALTHDCATAP.purpose),
+            # ("purpose", HEALTHDCATAP.purpose),
+            ("health_category", HEALTHDCATAP.healthCategory),
             ("health_theme", HEALTHDCATAP.healthTheme),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
-                dataset_dict[key].append(json.dumps(values))
+                dataset_dict[key] = values
 
-        # Find number of records
-        number_of_records = self._object_value_int(
-            dataset_ref, HEALTHDCATAP.numberOfRecords
-        )
-        if number_of_records is not None:
-            dataset_dict["number_of_records"] = number_of_records
+        for key, predicate in (
+            ("min_typical_age", HEALTHDCATAP.minTypicalAge),
+            ("max_typical_age", HEALTHDCATAP.maxTypicalAge),
+            ("number_of_records", HEALTHDCATAP.numberOfRecords),
+        ):
+            value = self._object_value_int(dataset_ref, predicate)
+            # a zero value evaluates as False but is definitely not a None
+            if value is not None:
+                dataset_dict[key] = value
+
+        # Purpose is a dpv:Purpose, inside is a dct:Description
+
+        # Add the HDAB. There should only ever be one but you never know
+        agents = self._agents_details(dataset_ref, HEALTHDCATAP.hdab)
+        if agents:
+            dataset_dict["hdab"] = agents
 
         return dataset_dict
 
@@ -93,6 +102,3 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)
-
-    def __init__(self):
-        return None

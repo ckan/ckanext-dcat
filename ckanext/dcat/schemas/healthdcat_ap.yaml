@@ -265,19 +265,69 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: A free text statement of the purpose of the processing of data or personal data.
 
+- field_name: health_category
+  label: Health category
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+     The health category to which this dataset belongs as described in the Commission Regulation on
+     the European Health Data Space laying down a list of categories of electronic data for
+     secondary use, Art.33.
+
 - field_name: health_theme
   label: Health theme
   preset: multiple_text
   validators: ignore_missing scheming_multiple_text
   help_text: >
-    The health category to which this dataset belongs as described in the Commission Regulation
-    on the European Health Data Space laying down a list of categories of electronic data for secondary use, Art.33.
+    A category of the Dataset or tag describing the Dataset.
+
+- field_name: min_typical_age
+  label: Minimum typical age
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text:  Minimum typical age of the population within the dataset.
+
+- field_name: max_typical_age
+  label: Maximum typical age
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text:  Maximum typical age of the population within the dataset.
 
 - field_name: number_of_records
   label: Number of records
   validators: ignore_missing int_validator
   form_snippet: number.html
   help_text: Size of the dataset in terms of the number of records.
+
+
+# Officially there can only be one HDAB for now, but keep it repeating subfield just in case
+- field_name: hdab
+  label: Health data access body
+  repeating_label: Health data access body
+  repeating_once: true
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+
+    - field_name: type
+      label: Type
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the HDAB, such as a ROR ID.
+  help_text:  Health Data Access Body supporting access to data in the Member State.
 
 
 #- field_name: hvd_category

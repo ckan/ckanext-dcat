@@ -9,9 +9,9 @@ from ckanext.dcat.tests.utils import BaseParseTest
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:healthdcat_ap.yaml"
 )
-@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
+@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_health_dcat_ap")
 class TestSchemingParseSupport(BaseParseTest):
     def test_e2e_dcat_to_ckan(self):
         """
@@ -123,6 +123,20 @@ class TestSchemingParseSupport(BaseParseTest):
         # )
         assert dataset["temporal_coverage"][0]["start"] == "2020-03-01"
         assert dataset["temporal_coverage"][0]["end"] == "2024-12-31"
+
+        ## HealthDCAT specific
+        assert sorted(dataset["health_theme"]) == [
+            "https://www.wikidata.org/wiki/Q58624061",
+            "https://www.wikidata.org/wiki/Q7907952",
+        ]
+
+        assert dataset["hdab"][0]["name"] == "Belgian Health Data Agency"
+        assert dataset["hdab"][0]["email"] == "info@hda.fgov.be"
+        assert dataset["hdab"][0]["url"] == "https://www.hda.belgium.be"
+
+        assert dataset["number_of_records"] == "124866488"
+        assert dataset["min_typical_age"] == "0"
+        assert dataset["max_typical_age"] == "110"
 
         # resource = dataset["resources"][0]
 

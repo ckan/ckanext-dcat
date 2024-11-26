@@ -117,7 +117,7 @@
                 <https://w3id.org/dpv/dpv-pd#Age> , <https://w3id.org/dpv/dpv-pd#Location> , <https://w3id.org/dpv/dpv-pd#Gender> , <https://w3id.org/dpv/dpv-pd#Nationality> , <https://w3id.org/dpv/dpv-pd#HealthRecord>;
         <https://w3id.org/dpv#hasPurpose>
                 [ a                <https://w3id.org/dpv#Purpose>;
-                  dct:description  "The primary objective of Sciensano's LINK-VACC project is to monitor COVID-19 vaccines post-authorization and evaluate the public health value of prioritizing vaccination for people with comorbidities. This involves assessing the vaccines' effectiveness and safety in the broader population context, beyond the limited scope of clinical trials, and determining future vaccination policies in public health emergencies such as epidemics or pandemics"@en
+                  dct:description  "The primary objective of Sciensano's LINK-VACC project is to ..."@en
                 ] .
 
 <http://piveau.io/set/distribution/5ed03cf0-2be3-44a6-b8d7-fe5b352cccf5>
