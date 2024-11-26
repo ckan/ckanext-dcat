@@ -62,7 +62,7 @@
         dct:alternative                 "LINK-VACC"@en;
         dct:conformsTo                  <https://www.wikidata.org/wiki/Q19597236>;
         dct:creator                     <internalURI:creator0>;
-        dct:description                 "The LINK-VACC project links selected variables from existing registries for COVID-19 vaccine surveillance, in order to ensure the monitoring of COVID- 19 vaccines in the phase following their marketing authorization (post-authorization surveillance). This includes the measurement of uptake and coverage of the vaccination, the estimation of vaccine effectiveness, and continuous monitoring of the vaccineâ€™s safety. For these purposes, existing pseudonymized data on COVID-19 laboratory test results, hospitalized COVID-19 patients, COVID-19 vaccinations, underlying health problems, socio-demographic and -economic factors, and healthcare worker status are linked. | Funding: The project is funded by the Belgian Federal Authorities | Geo coverage: Nuts 3 | Target population: General population | Personal identifier: National identifier | Level of aggregation: Individual | Linkage possible: Yes | Regulations for data sharing: External investigators with a request for selected data should fill in the data request form (https://epistat.wiv-isp.be/datarequest). Depending on the type of desired data (anonymous or pseudonymized), the provision of data will have to be assessed by the Belgian Information Security Committee Social Security & Health based on legal and ethical regulations, and is outlined in a data transfer agreement with the data owner (Sciensano)."@en;
+        dct:description                 "The LINK-VACC project links selected variables from existing registries..."@en;
         dct:identifier                  "http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
         dct:isPartOf                    <http://ehelse.healthdataportal.eu/catalog/1b0546d1-8c9f-4499-82f9-52bbc759e4ad>;
         dct:isReferencedBy              <https://doi.org/10.1136/jech-2023-220751> , <https://doi.org/10.1186/s13690-021-00709-x>;
@@ -70,7 +70,7 @@
         dct:language                    <http://publications.europa.eu/resource/authority/language/ENG> , <http://publications.europa.eu/resource/authority/language/NLD> , <http://publications.europa.eu/resource/authority/language/FRA>;
         dct:modified                    "2024-10-09T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         dct:provenance                  [ a           dct:ProvenanceStatement;
-                                          rdfs:label  "The data for the LINK-VACC project is sourced from several existing databases, including Vaccinnet+, HealthData COVID-19 database (Contact tracing and Clinic database), CoBRHA, STATBEL, and the AIM database. These databases collectively provide comprehensive demographic, clinical, and socio-economic data relevant to the project's objectives"@en
+                                          rdfs:label  "The data for the LINK-VACC project is sourced from..."@en
                                         ];
         dct:publisher                   [ a              foaf:Organization , foaf:Agent;
                                           foaf:homepage  <https://sciensano.be>;
@@ -92,17 +92,14 @@
         adms:sample                     <http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef>;
         adms:versionNotes               "Dataset continuously updated"@en;
         dcat:contactPoint               <internalURI:contactPoint0>;
-        dcat:distribution               <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>;
+        # dcat:distribution               <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>;
         dcat:hasVersion                 <http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c>;
-        dcat:keyword                    "COVID-19"@en , "Vaccination"@en , "Vaccine effectiveness"@en , "Vaccine"@en , "Surveillance"@en , "Post-market authorization"@en , "corona virus"@en , "SARS-CoV-2"@en , "Data linkage"@en , "Public health surveillance"@en;
-        dcat:landingPage                [ a              foaf:Document;
-                                          rdfs:label     "Landing Page for Sciensano"@en;
-                                          foaf:homepage  <https://sciensano.service-now.com/sp>
-                                        ];
+        dcat:keyword                    "COVID-19"@en , "Vaccination"@en , "Vaccine effectiveness"@en;
         dcat:spatialResolutionInMeters  "10"^^<http://www.w3.org/2001/XMLSchema#decimal>;
         dcat:temporalResolution         "P1D"^^<http://www.w3.org/2001/XMLSchema#duration>;
         dcat:theme                      <http://publications.europa.eu/resource/authority/data-theme/HEAL>;
-        dcat:version                    "Project HDBP0250";
+        # dcat:version is not mapped in ckan
+        # dcat:version                    "Project HDBP0250";
         dqv:hasQualityAnnotation        [ a               dqv:QualityCertificate;
                                           oa:hasBody      <https://certificates.theodi.org/en/datasets/393/certificate>;
                                           oa:hasTarget    <https://certificates.theodi.org/en/datasets/393>;
@@ -268,22 +265,22 @@
 <http://publications.europa.eu/resource/authority/file-type/CSV>
         a       dct:MediaTypeOrExtent .
 
-<http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>
-        a                             dcat:Distribution;
-        dcatap:applicableLegislation  <http://data.europa.eu/eli/reg/2022/868/oj>;
-        dct:description               "Belgian Health Data Agency  For better Healthcare, Research & Policy Making"@en;
-        dct:format                    <http://publications.europa.eu/resource/authority/file-type/CSV>;
-        dct:identifier                "http://ehelse.healthdataportal.eu/distribution/13a3851d-6cdf-4570-a7f0-7f03015d1925";
-        dct:isPartOf                  <http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e>;
-        dct:issued                    "2024-06-03T08:51:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
-        dct:license                   <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>;
-        dct:modified                  "2024-06-04T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
-        dct:rights                    [ a           dct:RightsStatement;
-                                        rdfs:label  "Access to data is conditional on the issuance of a permit by the HDAB after submission of a data request application (English)"@en
-                                      ];
-        dct:title                     "Belgian Health Data Agency"@en;
-        dcat:accessURL                <https://www.hda.belgium.be/>;
-        dcat:byteSize                 "80000"^^<http://www.w3.org/2001/XMLSchema#decimal> .
+# <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>
+#         a                             dcat:Distribution;
+#         dcatap:applicableLegislation  <http://data.europa.eu/eli/reg/2022/868/oj>;
+#         dct:description               "Belgian Health Data Agency  For better Healthcare, Research & Policy Making"@en;
+#         dct:format                    <http://publications.europa.eu/resource/authority/file-type/CSV>;
+#         dct:identifier                "http://ehelse.healthdataportal.eu/distribution/13a3851d-6cdf-4570-a7f0-7f03015d1925";
+#         dct:isPartOf                  <http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e>;
+#         dct:issued                    "2024-06-03T08:51:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+#         dct:license                   <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>;
+#         dct:modified                  "2024-06-04T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+#         dct:rights                    [ a           dct:RightsStatement;
+#                                         rdfs:label  "Access to data is conditional on the issuance of a permit by the HDAB after submission of a data request application (English)"@en
+#                                       ];
+#         dct:title                     "Belgian Health Data Agency"@en;
+#         dcat:accessURL                <https://www.hda.belgium.be/>;
+#         dcat:byteSize                 "80000"^^<http://www.w3.org/2001/XMLSchema#decimal> .
 
 <internalURI:wasGeneratedBy0>
         a                       prov:Activity;
