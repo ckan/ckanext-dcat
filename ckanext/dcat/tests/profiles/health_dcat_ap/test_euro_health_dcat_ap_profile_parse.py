@@ -134,9 +134,24 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["hdab"][0]["email"] == "info@hda.fgov.be"
         assert dataset["hdab"][0]["url"] == "https://www.hda.belgium.be"
 
-        assert dataset["number_of_records"] == "124866488"
         assert dataset["min_typical_age"] == "0"
         assert dataset["max_typical_age"] == "110"
+        assert dataset["number_of_records"] == "124866488"
+        assert dataset["number_of_unique_individuals"] == "8914722"
+
+        assert dataset["population_coverage"] == [
+            "The population targeted by the LINK-VACC project comprises all individuals ..."
+        ]
+        assert dataset["publisher_note"] == [
+            "Sciensano is a research institute and the national public health institute ..."
+        ]
+
+        assert dataset["retention_period"] == [
+            {
+                "start": "2020-03-01",
+                "end": "2034-12-31",
+            }
+        ]
 
         # resource = dataset["resources"][0]
 

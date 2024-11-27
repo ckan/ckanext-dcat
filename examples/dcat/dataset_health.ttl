@@ -46,9 +46,9 @@
         <http://healthdataportal.eu/ns/health#numberOfUniqueIndividuals>
                 "8914722"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
         <http://healthdataportal.eu/ns/health#populationCoverage>
-                "The population targeted by the LINK-VACC project comprises all individuals in Belgium who have received a COVID-19 vaccine, undergone testing for COVID-19, or have been hospitalized with a confirmed diagnosis of COVID-19. The project also considers healthcare professionals and the general Belgian population for understanding vaccination coverage and effectiveness, especially among those with comorbidities and varying socio-economic backgrounds."@en;
+                "The population targeted by the LINK-VACC project comprises all individuals ..."@en;
         <http://healthdataportal.eu/ns/health#publisherNote>
-                "Sciensano is a research institute and the national public health institute of Belgium. It is a so-called federal scientific institution that operates under the authority of the federal minister of Public Health and the federal minister of Agriculture of Belgium"@en;
+                "Sciensano is a research institute and the national public health institute ..."@en;
         <http://healthdataportal.eu/ns/health#publisherType>
                 <http://healthdataportal.eu/resource/authority/publisher-type/nationalPublicHealthInstitute>;
         <http://healthdataportal.eu/ns/health#retentionPeriod>

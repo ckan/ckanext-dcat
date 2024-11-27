@@ -297,7 +297,41 @@ dataset_fields:
   label: Number of records
   validators: ignore_missing int_validator
   form_snippet: number.html
-  help_text: Size of the dataset in terms of the number of records.
+  help_text: Size of the dataset in terms of the number of records
+
+- field_name: number_of_unique_individuals
+  label: Number of records for unique individuals.
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text:  Number of records for unique individuals.
+
+- field_name: publisher_note
+  label: Publisher note
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+    A description of the publisher activities.
+
+- field_name: population_coverage
+  label: Population coverage
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+    A definition of the population within the dataset.
+
+- field_name: retention_period
+  label: Retention period
+  repeating_subfields:
+
+    - field_name: start
+      label: Start
+      preset: dcat_date
+
+    - field_name: end
+      label: End
+      preset: dcat_date
+
+  help_text:  A temporal period which the dataset is available for secondary use.
 
 
 # Officially there can only be one HDAB for now, but keep it repeating subfield just in case
