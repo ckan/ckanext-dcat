@@ -80,9 +80,25 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["temporal_resolution"] == "P1D"
         assert dataset["spatial_resolution_in_meters"] == "10.0"
 
+        assert sorted(dataset["coding_system"]) == [
+            "http://www.wikidata.org/entity/P1690",
+            "http://www.wikidata.org/entity/P4229",
+        ]
+
+        # Doesn't really get mapped for some reason
+        # assert dataset["spatial_coverage"] == [
+        #     {
+        #         "uri": "http://publications.europa.eu/resource/authority/country/BEL",
+        #         "text": None,
+        #         "geom": None,
+        #         "bbox": None,
+        #         "cent": None,
+        #     }
+        # ]
+
         # List fields
         assert sorted(dataset["conforms_to"]) == [
-            "https://www.wikidata.org/wiki/Q19597236"
+            "http://www.wikidata.org/entity/Q19597236"
         ]
         assert sorted(dataset["language"]) == [
             "http://publications.europa.eu/resource/authority/language/ENG",

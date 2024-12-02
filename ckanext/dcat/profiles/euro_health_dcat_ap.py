@@ -72,6 +72,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             predicate,
         ) in (
             # ("purpose", HEALTHDCATAP.purpose),
+            ("coding_system", HEALTHDCATAP.hasCodingSystem),
             ("health_category", HEALTHDCATAP.healthCategory),
             ("health_theme", HEALTHDCATAP.healthTheme),
             ("population_coverage", HEALTHDCATAP.populationCoverage),

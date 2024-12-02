@@ -258,6 +258,13 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: The legislation that mandates the creation or management of the dataset.
 
+- field_name: coding_system
+  label: Coding system
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+    Coding systems in use (e.g. ICD-10-CM, DGRs, SNOMED CT, ...).
+    To comply with HealthDCAT-AP, Wikidata URIs MUST be used.
 
 - field_name: purpose
   label: Purpose
