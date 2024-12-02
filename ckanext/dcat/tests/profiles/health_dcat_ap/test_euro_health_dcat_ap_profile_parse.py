@@ -126,8 +126,8 @@ class TestSchemingParseSupport(BaseParseTest):
 
         ## HealthDCAT specific
         assert sorted(dataset["health_theme"]) == [
-            "https://www.wikidata.org/wiki/Q58624061",
-            "https://www.wikidata.org/wiki/Q7907952",
+            "http://www.wikidata.org/entity/Q58624061",
+            "http://www.wikidata.org/entity/Q7907952",
         ]
 
         assert dataset["hdab"][0]["name"] == "Belgian Health Data Agency"

@@ -19,8 +19,8 @@
                 <http://piveau.io/set/distribution/5ed03cf0-2be3-44a6-b8d7-fe5b352cccf5>;
         <http://healthdataportal.eu/ns/health#hasCodeValues>
                 <internalURI:hasCodeValues0> , <internalURI:hasCodeValues1>;
-        <http://healthdataportal.eu/ns/health#hasCodingSystem>
-                <internalURI:hasCodingSystem0> , <internalURI:hasCodingSystem1>;
+        <http://healthdataportal.eu/ns/health#hasCodingSystem> <http://www.wikidata.org/entity/P1690>,
+                                     <http://www.wikidata.org/entity/P4229>;
         <http://healthdataportal.eu/ns/health#hdab>
                 [ a              foaf:Organization;
                   locn:address   [ a                 locn:Address;
@@ -36,7 +36,7 @@
         <http://healthdataportal.eu/ns/health#healthCategory>
                 <http://13.81.34.152:1101/resource/authority/healthcategories/PHDR> , <http://13.81.34.152:1101/resource/authority/healthcategories/IDHP> , <http://13.81.34.152:1101/resource/authority/healthcategories/DIOH> , <http://13.81.34.152:1101/resource/authority/healthcategories/EHRS>;
         <http://healthdataportal.eu/ns/health#healthTheme>
-                <https://www.wikidata.org/wiki/Q7907952> , <https://www.wikidata.org/wiki/Q58624061>;
+                <http://www.wikidata.org/entity/Q7907952> , <http://www.wikidata.org/entity/Q58624061>;
         <http://healthdataportal.eu/ns/health#maxTypicalAge>
                 "110"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
         <http://healthdataportal.eu/ns/health#minTypicalAge>
@@ -60,7 +60,7 @@
         dct:accessRights                <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC>;
         dct:accrualPeriodicity          <http://publications.europa.eu/resource/authority/frequency/DAILY>;
         dct:alternative                 "LINK-VACC"@en;
-        dct:conformsTo                  <https://www.wikidata.org/wiki/Q19597236>;
+        dct:conformsTo                  <http://www.wikidata.org/entity/Q19597236>;
         dct:creator                     <internalURI:creator0>;
         dct:description                 "The LINK-VACC project links selected variables from existing registries..."@en;
         dct:identifier                  "http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
@@ -204,23 +204,9 @@
         dcat:downloadURL              <https://github.com/CAVDgit/EHDS2_UC_Sciensano/blob/main/use_case_1_synthetic_data_10K_individuals.csv>;
         dcat:mediaType                <http://www.iana.org/assignments/media-types/text/csv> .
 
-<internalURI:hasCodingSystem0>
-        a                dct:Standard;
-        dct:alternative  "ICD-10-PCS"@en;
-        dct:identifier   "https://www.wikidata.org/wiki/Property:P1690"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
-        dct:title        "identifier in the ICD-10-PCS (Procedure Coding System, International Classification of Diseases, 10th revision)"@en;
-        dcat:version     "10th Revision" .
 
 <http://publications.europa.eu/resource/authority/language/NLD>
         a       dct:LinguisticSystem .
-
-<https://www.wikidata.org/wiki/Q19597236>
-        a           dct:Standard;
-        rdfs:label  "Fast Healthcare Interoperability Resources"@en .
-
-<https://www.wikidata.org/wiki/Q7907952>
-        a               skos:Concept;
-        skos:prefLabel  "vaccine efficacy"@en .
 
 <http://publications.europa.eu/resource/authority/language/ENG>
         a       dct:LinguisticSystem .
@@ -228,13 +214,6 @@
 <http://healthdataportal.eu/resource/authority/publisher-type/nationalPublicHealthInstitute>
         a               skos:Concept;
         skos:prefLabel  "National Public Health Institute"@en .
-
-<internalURI:hasCodingSystem1>
-        a                dct:Standard;
-        dct:alternative  "ICD-10-CM"@en;
-        dct:identifier   "https://www.wikidata.org/wiki/Property:P4229"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
-        dct:title        "identifier in the ICD-10-CM (International Classification of Diseases, 10th Revision, Clinical Modification)"@en;
-        dcat:version     "10th Revision" .
 
 <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC>
         a       dct:RightsStatement .
@@ -258,7 +237,7 @@
         a                   skos:Concept;
         dct:identifier      "https://icd.who.int/browse10/2019/en#/Y59.0"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
         skos:definition     "Viral vaccines"@en;
-        skos:hasTopConcept  <https://www.wikidata.org/wiki/Property:P494>;
+        skos:hasTopConcept  <http://www.wikidata.org/entity/P494>;
         skos:notation       "Y59.0";
         skos:prefLabel      "Viral vaccines"@en .
 
@@ -311,14 +290,10 @@
         a                   skos:Concept;
         dct:identifier      "https://icd.who.int/browse10/2019/en#/U07.1"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
         skos:definition     "COVID-19, virus identified"@en;
-        skos:hasTopConcept  <https://www.wikidata.org/wiki/Property:P494>;
+        skos:hasTopConcept  <http://www.wikidata.org/entity/P494>;
         skos:notation       "U07.1";
         skos:prefLabel      "COVID-19"@en .
 
 <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>
         a           dct:LicenseDocument;
         rdfs:label  "Creative Commons Attributionâ€“NonCommercialâ€“NoDerivs 3.0 Unported"@en .
-
-<https://www.wikidata.org/wiki/Q58624061>
-        a               skos:Concept;
-        skos:prefLabel  "viral vaccines"@en .
