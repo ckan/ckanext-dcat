@@ -1,6 +1,9 @@
 [
     {
         "access_rights": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+        "analytics": [
+            "http://example.com/analytics"
+        ],
         "alternate_identifier": [
             "internalURI:admsIdentifier0"
         ],
@@ -9,6 +12,10 @@
         ],
         "author": null,
         "author_email": null,
+        "code_values": [
+            "http://example.com/code1",
+            "http://example.com/code2"
+        ],
         "coding_system": [
             "http://www.wikidata.org/entity/P1690",
             "http://www.wikidata.org/entity/P4229"
@@ -78,7 +85,13 @@
         "purpose": [
             "https://w3id.org/dpv#AcademicResearch"
         ],
-        "spatial_resolution_in_meters": "10.0",
+        "qualified_relation": [
+            {
+                "uri": "",
+                "relation": "http://example.com/dataset/3.141592",
+                "role": "http://www.iana.org/assignments/relation/related"
+            }
+        ],
         "state": "active",
         "temporal_resolution": "P1D",
         "theme": [
@@ -111,7 +124,7 @@
             },
             {
                 "key": "sample",
-                "value": "[\"http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef\"]"
+                "value": "[\"http://example.com/sample\"]"
             },
             {
                 "key": "spatial_uri",
@@ -125,7 +138,7 @@
                 "name": "EU Health Data Access Body",
                 "type": "",
                 "uri": "",
-                "url": "https: //www.hda.belgium.be"
+                "url": "https://www.example.com/hdab"
             }
         ],
         "publisher": [

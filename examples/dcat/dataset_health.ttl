@@ -16,9 +16,10 @@
         a                               dcat:Resource , dcat:Dataset;
         dcatap:applicableLegislation    <http://data.europa.eu/eli/reg/2022/868/oj>;
         <http://healthdataportal.eu/ns/health#analytics>
-                <http://piveau.io/set/distribution/5ed03cf0-2be3-44a6-b8d7-fe5b352cccf5>;
+                <http://example.com/analytics>;
         <http://healthdataportal.eu/ns/health#hasCodeValues>
-                <internalURI:hasCodeValues0> , <internalURI:hasCodeValues1>;
+                <http://example.com/code1>,
+                <http://example.com/code2>;
         <http://healthdataportal.eu/ns/health#hasCodingSystem> <http://www.wikidata.org/entity/P1690>,
                                      <http://www.wikidata.org/entity/P4229>;
         <http://healthdataportal.eu/ns/health#hdab>
@@ -72,6 +73,11 @@
                                           foaf:name      "Contact Point"
                                         ];
         dct:relation                    <http://example.com/dataset/9876543210>;
+        dcat:qualifiedRelation [
+                a dcat:Relationship ;
+                dct:relation <http://example.com/dataset/3.141592> ;
+                dcat:hadRole <http://www.iana.org/assignments/relation/related>
+        ];
         dct:spatial                     <http://publications.europa.eu/resource/authority/country/BEL>;
         dct:temporal                    [ a               dct:PeriodOfTime;
                                           dcat:endDate    "2024-12-31"^^<http://www.w3.org/2001/XMLSchema#date>;
@@ -83,7 +89,7 @@
                                           skos:prefLabel  "Personal Data"
                                         ];
         adms:identifier                 <internalURI:admsIdentifier0>;
-        adms:sample                     <http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef>;
+        adms:sample                     <http://example.com/sample>;
         adms:versionNotes               "Dataset continuously updated";
         dcat:contactPoint               <internalURI:contactPoint0>;
         # dcat:distribution               <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>;
@@ -92,7 +98,7 @@
         dcat:spatialResolutionInMeters  "10"^^<http://www.w3.org/2001/XMLSchema#decimal>;
         dcat:temporalResolution         "P1D"^^<http://www.w3.org/2001/XMLSchema#duration>;
         dcat:theme                      <http://publications.europa.eu/resource/authority/data-theme/HEAL>;
-        # dcat:version is not mapped in ckan
+        # dcat:version is not mapped in ckan and should be hasVersion
         # dcat:version                    "Project HDBP0250";
         dqv:hasQualityAnnotation        [ a               dqv:QualityCertificate;
                                           oa:hasBody      <https://certificates.theodi.org/en/datasets/393/certificate>;
@@ -112,7 +118,7 @@
         <https://w3id.org/dpv#hasPurpose>
                 <https://w3id.org/dpv#AcademicResearch>.
 
-<http://piveau.io/set/distribution/5ed03cf0-2be3-44a6-b8d7-fe5b352cccf5>
+<http://example.com/analytics>
         a                             dcat:Distribution;
         dcatap:applicableLegislation  <http://data.europa.eu/eli/reg/2022/868/oj>;
         dct:format                    <http://publications.europa.eu/resource/authority/file-type/CSV>;
@@ -174,7 +180,7 @@
                 <internalURI:variables0>;
         dcat:keyword  "TEST-DATASET" .
 
-<http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef>
+<http://example.com/sample>
         a                             dcat:Distribution;
         dcatap:applicableLegislation  <http://data.europa.eu/eli/reg/2022/868/oj>;
         dct:format                    <http://publications.europa.eu/resource/authority/file-type/CSV>;

@@ -2,10 +2,10 @@
 
 import json
 
-from rdflib import RDF, SKOS, XSD, BNode, Literal
+from rdflib import RDF, SKOS, XSD, BNode, Literal, term
 from rdflib.namespace import Namespace
 
-from ckanext.dcat.profiles.base import DCAT, DCT, URIRefOrLiteral
+from ckanext.dcat.profiles.base import DCAT, DCT, CleanedURIRef, URIRefOrLiteral
 from ckanext.dcat.profiles.euro_dcat_ap_3 import EuropeanDCATAP3Profile
 
 # HealthDCAT-AP namespace. Note: not finalized yet
@@ -49,6 +49,11 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         if agents:
             dataset_dict["hdab"] = agents
 
+        # Add any qualifiedRelations
+        qual_relations = self._relationship_details(dataset_ref, DCAT.qualifiedRelation)
+        if qual_relations:
+            dataset_dict["qualified_relation"] = qual_relations
+
         # Retention period
         retention_start, retention_end = self._time_interval(
             dataset_ref, HEALTHDCATAP.retentionPeriod, dcat_ap_version=2
@@ -80,7 +85,8 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             key,
             predicate,
         ) in (
-            # ("purpose", HEALTHDCATAP.purpose),
+            ("analytics", HEALTHDCATAP.analytics),
+            ("code_values", HEALTHDCATAP.hasCodeValues),
             ("coding_system", HEALTHDCATAP.hasCodingSystem),
             ("health_category", HEALTHDCATAP.healthCategory),
             ("health_theme", HEALTHDCATAP.healthTheme),
@@ -113,6 +119,8 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
         ## key, predicate, fallbacks, _type, _class
         items = [
+            ("analytics", HEALTHDCATAP.analytics, None, URIRefOrLiteral),
+            ("code_values", HEALTHDCATAP.hasCodeValues, None, URIRefOrLiteral),
             ("coding_system", HEALTHDCATAP.hasCodingSystem, None, URIRefOrLiteral),
             ("health_category", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
             ("health_theme", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
@@ -139,6 +147,9 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             self._add_nonneg_integer_triple(dataset_dict, dataset_ref, key, predicate)
 
         self._add_agents(dataset_ref, dataset_dict, "hdab", HEALTHDCATAP.hdab)
+        self._add_relationship(
+            dataset_ref, dataset_dict, "qualified_relation", DCAT.qualifiedRelation
+        )
 
     def _add_nonneg_integer_triple(self, dataset_dict, dataset_ref, key, predicate):
         """
@@ -179,6 +190,78 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 if item.get("end"):
                     self._add_date_triple(temporal_ref, DCAT.endDate, item["end"])
                 self.g.add((dataset_ref, DCT.temporal, temporal_ref))
+
+    def _relationship_details(self, subject, predicate):
+        """
+        Returns a list of dicts with details about a dcat:Relationship property, e.g.
+        dcat:qualifiedRelation
+
+        Both subject and predicate must be rdflib URIRef or BNode objects
+
+        Returns keys for uri, role, and relation with the values set to
+        an empty string if they could not be found.
+        """
+
+        relations = []
+        for relation in self.g.objects(subject, predicate):
+            relation_details = {}
+            relation_details["uri"] = (
+                str(relation) if isinstance(relation, term.URIRef) else ""
+            )
+            relation_details["role"] = self._object_value(relation, DCAT.hadRole)
+            relation_details["relation"] = self._object_value(relation, DCT.relation)
+            relations.append(relation_details)
+
+        return relations
+
+    def _add_relationship(
+        self,
+        dataset_ref,
+        dataset_dict,
+        relation_key,
+        rdf_predicate,
+    ):
+        """
+        Adds one or more Relationships to the RDF graph.
+
+        :param dataset_ref: The RDF reference of the dataset
+        :param dataset_dict: The dataset dictionary containing agent information
+        :param relation_key: field name in the CKAN dict (.e.g. "qualifiedRelation")
+        :param rdf_predicate: The RDF predicate (DCAT.qualifiedRelation)
+        """
+        relation = dataset_dict.get(relation_key)
+        if (
+            isinstance(relation, list)
+            and len(relation)
+            and self._not_empty_dict(relation[0])
+        ):
+            relations = relation
+
+            for relation in relations:
+
+                agent_uri = relation.get("uri")
+                if agent_uri:
+                    agent_ref = CleanedURIRef(agent_uri)
+                else:
+                    agent_ref = BNode()
+
+                self.g.add((agent_ref, DCT.type, DCAT.Relationship))
+                self.g.add((dataset_ref, rdf_predicate, agent_ref))
+
+                self._add_triple_from_dict(
+                    relation,
+                    agent_ref,
+                    DCT.relation,
+                    "relation",
+                    _type=URIRefOrLiteral,
+                )
+                self._add_triple_from_dict(
+                    relation,
+                    agent_ref,
+                    DCAT.hadRole,
+                    "role",
+                    _type=URIRefOrLiteral,
+                )
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)

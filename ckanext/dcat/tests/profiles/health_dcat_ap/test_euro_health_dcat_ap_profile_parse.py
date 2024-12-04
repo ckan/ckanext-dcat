@@ -72,14 +72,18 @@ class TestSchemingParseSupport(BaseParseTest):
             == "This example dataset is partly sourced from TEHDAS2"
         )
 
-        # Hard to map (example uses a blind node which doesn't work well in CKAN)
+        # Hard to map (example uses a blank node which doesn't work well in CKAN)
         # assert dataset["dcat_type"] == "test-type"
 
         assert dataset["issued"] == "2024-01-01T00:00:00+00:00"
         assert dataset["modified"] == "2024-12-31T23:59:59+00:00"
         assert dataset["temporal_resolution"] == "P1D"
-        assert dataset["spatial_resolution_in_meters"] == "10.0"
 
+        assert dataset["analytics"] == ["http://example.com/analytics"]
+        assert sorted(dataset["code_values"]) == [
+            "http://example.com/code1",
+            "http://example.com/code2",
+        ]
         assert sorted(dataset["coding_system"]) == [
             "http://www.wikidata.org/entity/P1690",
             "http://www.wikidata.org/entity/P4229",
@@ -128,15 +132,22 @@ class TestSchemingParseSupport(BaseParseTest):
         # Repeating subfields
 
         assert dataset["contact"][0]["name"] == "Contact Point"
-        assert dataset["contact"][0]["email"] == "covacsurv@sciensano.be"
+        assert dataset["contact"][0]["email"] == "contact@example.com"
 
         assert dataset["publisher"][0]["name"] == "Contact Point"
         assert dataset["publisher"][0]["email"] == "info@example.com"
         assert dataset["publisher"][0]["url"] == "https://healthdata.nl"
-        # assert (
-        #     dataset["publisher"][0]["type"]
-        #     == "http://purl.org/adms/publishertype/NonProfitOrganisation"
-        # )
+
+        assert len(dataset["qualified_relation"]) == 1
+        assert (
+            dataset["qualified_relation"][0]["relation"]
+            == "http://example.com/dataset/3.141592"
+        )
+        assert (
+            dataset["qualified_relation"][0]["role"]
+            == "http://www.iana.org/assignments/relation/related"
+        )
+
         assert dataset["temporal_coverage"][0]["start"] == "2020-03-01"
         assert dataset["temporal_coverage"][0]["end"] == "2024-12-31"
 
