@@ -576,6 +576,9 @@ class RDFProfile(object):
             )
 
             contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
+
+            contact["url"] = self._get_vcard_property_value(agent, VCARD.hasURL)
+
             contacts.append(contact)
 
         return contacts
@@ -821,9 +824,7 @@ class RDFProfile(object):
         or object.
         """
         spatial_formats = aslist(
-            config.get(
-                "ckanext.dcat.output_spatial_format", DEFAULT_SPATIAL_FORMATS
-            )
+            config.get("ckanext.dcat.output_spatial_format", DEFAULT_SPATIAL_FORMATS)
         )
 
         if isinstance(value, str):
