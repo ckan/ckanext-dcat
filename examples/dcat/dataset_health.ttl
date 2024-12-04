@@ -12,7 +12,7 @@
 @prefix spdx:   <http://spdx.org/rdf/terms#> .
 @prefix vcard:  <http://www.w3.org/2006/vcard/ns#> .
 
-<http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e>
+<http://example.healthdata.nl/set/dataset>
         a                               dcat:Resource , dcat:Dataset;
         dcatap:applicableLegislation    <http://data.europa.eu/eli/reg/2022/868/oj>;
         <http://healthdataportal.eu/ns/health#analytics>
@@ -23,18 +23,12 @@
                                      <http://www.wikidata.org/entity/P4229>;
         <http://healthdataportal.eu/ns/health#hdab>
                 [ a              foaf:Organization;
-                  locn:address   [ a                 locn:Address;
-                                   locn:adminUnitL1  "http://publications.europa.eu/resource/authority/country/BEL";
-                                   locn:fullAddress  "Galileelaan 5, Bus 2";
-                                   locn:postCode     "1210";
-                                   locn:postName     "Saint-Josse-ten-Noode"
-                                 ];
-                  foaf:homepage  <https://www.hda.belgium.be>;
-                  foaf:mbox      <mailto:info@hda.fgov.be>;
-                  foaf:name      "Belgian Health Data Agency"
+                  foaf:homepage  <https://www.example.com/hdab>;
+                  foaf:mbox      <mailto:hdab@example.com>;
+                  foaf:name      "EU Health Data Access Body"
                 ];
         <http://healthdataportal.eu/ns/health#healthCategory>
-                <http://13.81.34.152:1101/resource/authority/healthcategories/PHDR> , <http://13.81.34.152:1101/resource/authority/healthcategories/IDHP> , <http://13.81.34.152:1101/resource/authority/healthcategories/DIOH> , <http://13.81.34.152:1101/resource/authority/healthcategories/EHRS>;
+                <http://example.com/ontology/resource/authority/healthcategories/PHDR> , <http://example.com/ontology/resource/authority/healthcategories/IDHP> , <http://example.com/ontology/resource/authority/healthcategories/DIOH> , <http://example.com/ontology/resource/authority/healthcategories/EHRS>;
         <http://healthdataportal.eu/ns/health#healthTheme>
                 <http://www.wikidata.org/entity/Q7907952> , <http://www.wikidata.org/entity/Q58624061>;
         <http://healthdataportal.eu/ns/health#maxTypicalAge>
@@ -42,59 +36,59 @@
         <http://healthdataportal.eu/ns/health#minTypicalAge>
                 "0"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
         <http://healthdataportal.eu/ns/health#numberOfRecords>
-                "124866488"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
+                "123456789"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
         <http://healthdataportal.eu/ns/health#numberOfUniqueIndividuals>
-                "8914722"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
+                "7654321"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
         <http://healthdataportal.eu/ns/health#populationCoverage>
-                "The population targeted by the LINK-VACC project comprises all individuals ..."@en;
+                "This example includes a very non-descript population";
         <http://healthdataportal.eu/ns/health#publisherNote>
-                "Sciensano is a research institute and the national public health institute ..."@en;
+                "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation.";
         <http://healthdataportal.eu/ns/health#publisherType>
-                <http://healthdataportal.eu/resource/authority/publisher-type/nationalPublicHealthInstitute>;
+                <http://example.com/publisherType/undefined>;
         <http://healthdataportal.eu/ns/health#retentionPeriod>
                 [ a               dct:PeriodOfTime;
-                  rdfs:comment    "As stated in the CSI deliberation"@en;
+                  rdfs:comment    "As stated in the CSI deliberation";
                   dcat:endDate    "2034-12-31"^^<http://www.w3.org/2001/XMLSchema#date>;
                   dcat:startDate  "2020-03-01"^^<http://www.w3.org/2001/XMLSchema#date>
                 ];
         dct:accessRights                <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC>;
         dct:accrualPeriodicity          <http://publications.europa.eu/resource/authority/frequency/DAILY>;
-        dct:alternative                 "LINK-VACC"@en;
+        dct:alternative                 "TEST-DATASET";
         dct:conformsTo                  <http://www.wikidata.org/entity/Q19597236>;
         dct:creator                     <internalURI:creator0>;
-        dct:description                 "The LINK-VACC project links selected variables from existing registries..."@en;
-        dct:identifier                  "http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
-        dct:isPartOf                    <http://ehelse.healthdataportal.eu/catalog/1b0546d1-8c9f-4499-82f9-52bbc759e4ad>;
-        dct:isReferencedBy              <https://doi.org/10.1136/jech-2023-220751> , <https://doi.org/10.1186/s13690-021-00709-x>;
-        dct:issued                      "2023-01-20T08:51:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+        dct:description                 "This dataset is an example of using HealthDCAT-AP in CKAN";
+        dct:identifier                  "http://example.com/dataset/1234567890"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
+        dct:isPartOf                    <http://example.com/catalog/abcdefghijklmnopqrstuvwxyz>;
+        dct:isReferencedBy              <https://doi.org/10.1038/sdata.2016.18> , <https://dx.doi.org/10.1002/jmri.28679>;
+        dct:issued                      "2024-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         dct:language                    <http://publications.europa.eu/resource/authority/language/ENG> , <http://publications.europa.eu/resource/authority/language/NLD> , <http://publications.europa.eu/resource/authority/language/FRA>;
-        dct:modified                    "2024-10-09T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+        dct:modified                    "2024-12-31T23:59:59Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         dct:provenance                  [ a           dct:ProvenanceStatement;
-                                          rdfs:label  "The data for the LINK-VACC project is sourced from..."@en
+                                          rdfs:label  "This example dataset is partly sourced from TEHDAS2"
                                         ];
         dct:publisher                   [ a              foaf:Organization , foaf:Agent;
-                                          foaf:homepage  <https://sciensano.be>;
-                                          foaf:mbox      <mailto:info@sciensano.be>;
-                                          foaf:name      "Sciensano"
+                                          foaf:homepage  <https://healthdata.nl>;
+                                          foaf:mbox      <mailto:info@example.com>;
+                                          foaf:name      "Contact Point"
                                         ];
-        dct:relation                    <http://ehelse.healthdataportal.eu/dataset/32987e34-3f23-4e14-b7a3-8a884eb79e51>;
+        dct:relation                    <http://example.com/dataset/9876543210>;
         dct:spatial                     <http://publications.europa.eu/resource/authority/country/BEL>;
         dct:temporal                    [ a               dct:PeriodOfTime;
                                           dcat:endDate    "2024-12-31"^^<http://www.w3.org/2001/XMLSchema#date>;
                                           dcat:startDate  "2020-03-01"^^<http://www.w3.org/2001/XMLSchema#date>
                                         ];
-        dct:title                       "[Adapted] Linking of registers for COVID-19 vaccine surveillance"@en;
+        dct:title                       "HealthDCAT-AP test dataset";
         dct:type                        [ a               skos:Concept;
                                           skos:inScheme   <http://publications.europa.eu/resource/authority/dataset-type/PERSONAL_DATA>;
-                                          skos:prefLabel  "Personal Data"@en
+                                          skos:prefLabel  "Personal Data"
                                         ];
         adms:identifier                 <internalURI:admsIdentifier0>;
         adms:sample                     <http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef>;
-        adms:versionNotes               "Dataset continuously updated"@en;
+        adms:versionNotes               "Dataset continuously updated";
         dcat:contactPoint               <internalURI:contactPoint0>;
         # dcat:distribution               <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>;
-        dcat:hasVersion                 <http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c>;
-        dcat:keyword                    "COVID-19"@en , "Vaccination"@en , "Vaccine effectiveness"@en;
+        dcat:hasVersion                 <http://example.com/dataset/1234567890>;
+        dcat:keyword                    "Test 1" , "Test 2" , "Test 3";
         dcat:spatialResolutionInMeters  "10"^^<http://www.w3.org/2001/XMLSchema#decimal>;
         dcat:temporalResolution         "P1D"^^<http://www.w3.org/2001/XMLSchema#duration>;
         dcat:theme                      <http://publications.europa.eu/resource/authority/data-theme/HEAL>;
@@ -108,17 +102,15 @@
         prov:qualifiedAttribution       <internalURI:qualifiedAttribution0>;
         prov:wasGeneratedBy             <internalURI:wasGeneratedBy0>;
         foaf:page                       [ a              foaf:Document;
-                                          rdfs:label     "Landing Page for Sciensano"@en;
+                                          rdfs:label     "Landing Page for Sciensano";
                                           foaf:homepage  <https://www.sciensano.be/en/projects/linking-registers-covid-19-vaccine-surveillance>
                                         ];
         <https://w3id.org/dpv#hasLegalBasis>
-                <internalURI:hasLegalBasis0>;
+                <https://w3id.org/dpv#Consent>;
         <https://w3id.org/dpv#hasPersonalData>
                 <https://w3id.org/dpv/dpv-pd#Age> , <https://w3id.org/dpv/dpv-pd#Location> , <https://w3id.org/dpv/dpv-pd#Gender> , <https://w3id.org/dpv/dpv-pd#Nationality> , <https://w3id.org/dpv/dpv-pd#HealthRecord>;
         <https://w3id.org/dpv#hasPurpose>
-                [ a                <https://w3id.org/dpv#Purpose>;
-                  dct:description  "The primary objective of Sciensano's LINK-VACC project is to ..."@en
-                ] .
+                <https://w3id.org/dpv#AcademicResearch>.
 
 <http://piveau.io/set/distribution/5ed03cf0-2be3-44a6-b8d7-fe5b352cccf5>
         a                             dcat:Distribution;
@@ -130,9 +122,9 @@
         dct:license                   <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>;
         dct:modified                  "2024-06-04T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         dct:rights                    [ a           dct:RightsStatement;
-                                        rdfs:label  "_g_L202C11377"@en , "internalURI:wasGeneratedBy0"@en , "_g_L123C7733"@en
+                                        rdfs:label  "_g_L202C11377" , "internalURI:wasGeneratedBy0" , "_g_L123C7733"
                                       ];
-        dct:title                     "Technical report number of unique study subjects available by environment for project HDBP0250"@en;
+        dct:title                     "Technical report number of unique study subjects available by environment for project HDBP0250";
         dcat:accessURL                <https://www.dummy.com/>;
         dcat:downloadURL              <https://fair.healthdata.be/sites/default/files/distribution/d43a158e-7d13-4660-bbc3-9d3f8d5501e5/Technical_report_number_of_unique_study_subjects_available_by_environment_for_project_HDBP0250.csv>;
         dcat:mediaType                <http://www.iana.org/assignments/media-types/text/csv> .
@@ -142,9 +134,9 @@
 
 <internalURI:creator0>
         a              foaf:Agent;
-        foaf:homepage  <https://org.belgif.be/id/CbeRegisteredEntity/0693876830>;
-        foaf:mbox      <mailto:info@sciensano.be>;
-        foaf:name      "Sciensano" .
+        foaf:homepage  <https:/example.com/homepage>;
+        foaf:mbox      <mailto:info@example.com>;
+        foaf:name      "Contact Point" .
 
 <internalURI:admsIdentifier0>
         a                  adms:Identifier;
@@ -153,10 +145,10 @@
 
 <internalURI:contactPoint0>
         a                       vcard:Organization , vcard:Kind;
-        vcard:fn                "Sciensano";
-        vcard:hasEmail          <mailto:covacsurv@sciensano.be>;
-        vcard:hasURL            <https://sciensano.be>;
-        vcard:organisationName  "Sciensano";
+        vcard:fn                "Contact Point";
+        vcard:hasEmail          <mailto:contact@example.com>;
+        vcard:hasURL            <https://healthdata.nl>;
+        vcard:organisationName  "Contact Point";
         vcard:organisationUnit  "Health Information" .
 
 <http://piveau.io/set/record/16e16149-bf41-42f6-8741-225e8c97a35e>
@@ -171,20 +163,16 @@
                            ];
         foaf:primaryTopic  <http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e> .
 
-<internalURI:hasLegalBasis0>
-        a                <https://w3id.org/dpv#LegalBasis>;
-        dct:description  "The protocol of the LINK-VACC project was approved by the medical ethics committee University Hospital Brussels â€“ Vrije Universiteit Brussel (VUB) on 03/02/2021 (reference number 2020/523) and obtained authorization from the Information Security Committee (ISC) Social Security and Health (reference number IVC/KSZG/21/034)."@en;
-        dct:source       <https://www.ehealth.fgov.be/ehealthplatform/file/view/AX_-9sZSuwVJMAnC0ENo?filename=21-028-f166-LINK-VACC-modifi%2525C3%2525A9e%252520le%2525205%252520avril%2525202022.pdf> , <https://www.ehealth.fgov.be/ehealthplatform/file/cc73d96153bbd5448a56f19d925d05b1379c7f21/5d6d0fac126be09862b805ec2181d8ef97ade9aa/21-028-f212-afmps-vaccinnet-modifiee-le-18-juin-2021.pdf> .
 
 <http://publications.europa.eu/resource/authority/language/FRA>
         a       dct:LinguisticSystem .
 
 <internalURI:sampleTable0>
         a             <http://www.w3.org/ns/csvw#Table>;
-        dct:title     "ID_TU_STATBEL_POP"@en;
+        dct:title     "ID_TU_STATBEL_POP";
         <http://www.w3.org/ns/csvw#column>
                 <internalURI:variables0>;
-        dcat:keyword  "LINK-VACC"@en .
+        dcat:keyword  "TEST-DATASET" .
 
 <http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef>
         a                             dcat:Distribution;
@@ -197,9 +185,9 @@
         dct:license                   <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>;
         dct:modified                  "2024-06-04T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         dct:rights                    [ a           dct:RightsStatement;
-                                        rdfs:label  "Free access."@en
+                                        rdfs:label  "Free access."
                                       ];
-        dct:title                     "Proxy data generating for the EHDS2 Pilot project Sciensano Use Case"@en;
+        dct:title                     "Proxy data generating for the EHDS2 Pilot project Sciensano Use Case";
         dcat:accessURL                <https://www.dummy.com/>;
         dcat:downloadURL              <https://github.com/CAVDgit/EHDS2_UC_Sciensano/blob/main/use_case_1_synthetic_data_10K_individuals.csv>;
         dcat:mediaType                <http://www.iana.org/assignments/media-types/text/csv> .
@@ -211,9 +199,9 @@
 <http://publications.europa.eu/resource/authority/language/ENG>
         a       dct:LinguisticSystem .
 
-<http://healthdataportal.eu/resource/authority/publisher-type/nationalPublicHealthInstitute>
+<http://example.com/publisherType/undefined>
         a               skos:Concept;
-        skos:prefLabel  "National Public Health Institute"@en .
+        skos:prefLabel  "National Public Health Institute" .
 
 <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC>
         a       dct:RightsStatement .
@@ -227,7 +215,7 @@
         prov:agent    [ a              foaf:Organization;
                         foaf:homepage  <https://healhdata.be>;
                         foaf:mbox      <mailto:healthdata@sciensano.be>;
-                        foaf:name      "Sciensano"
+                        foaf:name      "Contact Point"
                       ] .
 
 <http://publications.europa.eu/resource/authority/country/BEL>
@@ -236,10 +224,10 @@
 <internalURI:hasCodeValues0>
         a                   skos:Concept;
         dct:identifier      "https://icd.who.int/browse10/2019/en#/Y59.0"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
-        skos:definition     "Viral vaccines"@en;
+        skos:definition     "Viral vaccines";
         skos:hasTopConcept  <http://www.wikidata.org/entity/P494>;
         skos:notation       "Y59.0";
-        skos:prefLabel      "Viral vaccines"@en .
+        skos:prefLabel      "Viral vaccines" .
 
 <http://publications.europa.eu/resource/authority/file-type/CSV>
         a       dct:MediaTypeOrExtent .
@@ -247,7 +235,7 @@
 # <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>
 #         a                             dcat:Distribution;
 #         dcatap:applicableLegislation  <http://data.europa.eu/eli/reg/2022/868/oj>;
-#         dct:description               "Belgian Health Data Agency  For better Healthcare, Research & Policy Making"@en;
+#         dct:description               "EU Health Data Access Body  For better Healthcare, Research & Policy Making";
 #         dct:format                    <http://publications.europa.eu/resource/authority/file-type/CSV>;
 #         dct:identifier                "http://ehelse.healthdataportal.eu/distribution/13a3851d-6cdf-4570-a7f0-7f03015d1925";
 #         dct:isPartOf                  <http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e>;
@@ -255,21 +243,21 @@
 #         dct:license                   <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>;
 #         dct:modified                  "2024-06-04T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
 #         dct:rights                    [ a           dct:RightsStatement;
-#                                         rdfs:label  "Access to data is conditional on the issuance of a permit by the HDAB after submission of a data request application (English)"@en
+#                                         rdfs:label  "Access to data is conditional on the issuance of a permit by the HDAB after submission of a data request application (English)"
 #                                       ];
-#         dct:title                     "Belgian Health Data Agency"@en;
-#         dcat:accessURL                <https://www.hda.belgium.be/>;
+#         dct:title                     "EU Health Data Access Body";
+#         dcat:accessURL                <https://www.example.com/hdab/>;
 #         dcat:byteSize                 "80000"^^<http://www.w3.org/2001/XMLSchema#decimal> .
 
 <internalURI:wasGeneratedBy0>
         a                       prov:Activity;
-        rdfs:label              "http://dbpedia.org/resource/Record_linkage"@en;
+        rdfs:label              "http://dbpedia.org/resource/Record_linkage";
         rdfs:seeAlso            <https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp>;
         dct:type                <http://dbpedia.org/resource/Record_linkage>;
         prov:startedAtTime      "2021-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         prov:wasAssociatedWith  [ a                     prov:Agent;
                                   prov:actedOnBehalfOf  [ a          prov:Organization , prov:Agent;
-                                                          foaf:name  "Sciensano"
+                                                          foaf:name  "Contact Point"
                                                         ];
                                   foaf:homepage         <https://www.sciensano.be/fr/people/joris-van-loenhout>;
                                   foaf:mbox             <mailto:Joris.VanLoenhout@sciensano.be>;
@@ -282,18 +270,18 @@
         <http://www.w3.org/ns/csvw#datatype>
                 <https://string.eu>;
         <http://www.w3.org/ns/csvw#describes>
-                "Patient death reason\tInformation on wheter the cause of death was COVID-19."@en;
+                "Patient death reason\tInformation on wheter the cause of death was COVID-19.";
         <http://www.w3.org/ns/csvw#name>
                 "CD_COD_COVID" .
 
 <internalURI:hasCodeValues1>
         a                   skos:Concept;
         dct:identifier      "https://icd.who.int/browse10/2019/en#/U07.1"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
-        skos:definition     "COVID-19, virus identified"@en;
+        skos:definition     "COVID-19, virus identified";
         skos:hasTopConcept  <http://www.wikidata.org/entity/P494>;
         skos:notation       "U07.1";
-        skos:prefLabel      "COVID-19"@en .
+        skos:prefLabel      "Test 1" .
 
 <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>
         a           dct:LicenseDocument;
-        rdfs:label  "Creative Commons Attributionâ€“NonCommercialâ€“NoDerivs 3.0 Unported"@en .
+        rdfs:label  "Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported" .

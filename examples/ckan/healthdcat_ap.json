@@ -1,175 +1,181 @@
-{
-    "access_rights": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
-    "alternate_identifier": [
-        "internalURI:admsIdentifier0"
-    ],
-    "applicable_legislation": [
-        "http://data.europa.eu/eli/reg/2022/868/oj"
-    ],
-    "author": null,
-    "author_email": null,
-    "coding_system": [
-        "http://www.wikidata.org/entity/P1690",
-        "http://www.wikidata.org/entity/P4229"
-    ],
-    "conforms_to": [
-        "http://www.wikidata.org/entity/Q19597236"
-    ],
-    "creator_user_id": null,
-    "dcat_type": "n1049372e768c4429a6b2200c22f5f1a4b7",
-    "documentation": [
-        "n1049372e768c4429a6b2200c22f5f1a4b9"
-    ],
-    "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-    "health_category": [
-        "http://13.81.34.152:1101/resource/authority/healthcategories/PHDR",
-        "http://13.81.34.152:1101/resource/authority/healthcategories/IDHP",
-        "http://13.81.34.152:1101/resource/authority/healthcategories/DIOH",
-        "http://13.81.34.152:1101/resource/authority/healthcategories/EHRS"
-    ],
-    "health_theme": [
-        "http://www.wikidata.org/entity/Q7907952",
-        "http://www.wikidata.org/entity/Q58624061"
-    ],
-    "id": "e7ccf79d-705c-427f-8e96-f87bcd6e5318",
-    "identifier": "http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c",
-    "is_referenced_by": [
-        "https://doi.org/10.1136/jech-2023-220751",
-        "https://doi.org/10.1186/s13690-021-00709-x"
-    ],
-    "isopen": false,
-    "issued": "2023-01-20T08:51:00+00:00",
-    "language": [
-        "http://publications.europa.eu/resource/authority/language/ENG",
-        "http://publications.europa.eu/resource/authority/language/NLD",
-        "http://publications.europa.eu/resource/authority/language/FRA"
-    ],
-    "license_id": "",
-    "license_title": "",
-    "maintainer": null,
-    "maintainer_email": null,
-    "max_typical_age": "110",
-    "metadata_created": "2024-12-02T19:00:30.897399",
-    "metadata_modified": "2024-12-02T19:00:30.897406",
-    "min_typical_age": "0",
-    "modified": "2024-10-09T00:00:00+00:00",
-    "name": "test-dcat-1",
-    "notes": "The LINK-VACC project links selected variables from existing registries...",
-    "num_resources": 0,
-    "num_tags": 3,
-    "number_of_records": "124866488",
-    "number_of_unique_individuals": "8914722",
-    "organization": null,
-    "population_coverage": [
-        "The population targeted by the LINK-VACC project comprises all individuals ..."
-    ],
-    "private": false,
-    "provenance": "The data for the LINK-VACC project is sourced from...",
-    "publisher_note": [
-        "Sciensano is a research institute and the national public health institute ..."
-    ],
-    "publisher_type": [
-        "http: //healthdataportal.eu/resource/authority/publisher-type/nationalPublicHealthInstitute"
-    ],
-    "spatial_resolution_in_meters": "10.0",
-    "state": "active",
-    "temporal_resolution": "P1D",
-    "theme": [
-        "http://publications.europa.eu/resource/authority/data-theme/HEAL"
-    ],
-    "title": "[Adapted] Linking of registers for COVID-19 vaccine surveillance",
-    "type": "dataset",
-    "uri": "http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e",
-    "version_notes": "Dataset continuously updated",
-    "contact": [
-        {
-            "email": "covacsurv@sciensano.be",
-            "identifier": "",
-            "name": "Sciensano",
-            "uri": "internalURI:contactPoint0"
-        }
-    ],
-    "creator": [
-        {
-            "email": "info@sciensano.be",
-            "identifier": "",
-            "name": "Sciensano",
-            "type": "",
-            "uri": "internalURI:creator0",
-            "url": "https://org.belgif.be/id/CbeRegisteredEntity/0693876830"
-        }
-    ],
-    "extras": [
-        {
-            "key": "related_resource",
-            "value": "[\"http://ehelse.healthdataportal.eu/dataset/32987e34-3f23-4e14-b7a3-8a884eb79e51\"]"
-        },
-        {
-            "key": "sample",
-            "value": "[\"http: //piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef\"]"
-        },
-        {
-            "key": "spatial_uri",
-            "value": "http://publications.europa.eu/resource/authority/country/BEL"
-        }
-    ],
-    "hdab": [
-        {
-            "email": "info@hda.fgov.be",
-            "identifier": "",
-            "name": "Belgian Health Data Agency",
-            "type": "",
-            "uri": "",
-            "url": "https: //www.hda.belgium.be"
-        }
-    ],
-    "publisher": [
-        {
-            "email": "info@sciensano.be",
-            "identifier": "",
-            "name": "Sciensano",
-            "type": "",
-            "uri": "",
-            "url": "https://sciensano.be"
-        }
-    ],
-    "retention_period": [
-        {
-            "end": "2034-12-31",
-            "start": "2020-03-01"
-        }
-    ],
-    "tags": [
-        {
-            "display_name": "COVID-19",
-            "id": "5c418ec2-cb41-4c42-9b9c-f5d1e3a831e5",
-            "name": "COVID-19",
-            "state": "active",
-            "vocabulary_id": null
-        },
-        {
-            "display_name": "Vaccination",
-            "id": "c4117ace-2114-470d-b6e9-0df7580a12d8",
-            "name": "Vaccination",
-            "state": "active",
-            "vocabulary_id": null
-        },
-        {
-            "display_name": "Vaccine effectiveness",
-            "id": "d5a5288d-3bff-431e-be94-12c71d25d75b",
-            "name": "Vaccine effectiveness",
-            "state": "active",
-            "vocabulary_id": null
-        }
-    ],
-    "temporal_coverage": [
-        {
-            "end": "2024-12-31",
-            "start": "2020-03-01"
-        }
-    ],
-    "resources": [],
-    "groups": [],
-    "relationships_as_subject": [],
-    "relationships_as_object": []
-}
+[
+    {
+        "access_rights": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+        "alternate_identifier": [
+            "internalURI:admsIdentifier0"
+        ],
+        "applicable_legislation": [
+            "http://data.europa.eu/eli/reg/2022/868/oj"
+        ],
+        "author": null,
+        "author_email": null,
+        "coding_system": [
+            "http://www.wikidata.org/entity/P1690",
+            "http://www.wikidata.org/entity/P4229"
+        ],
+        "conforms_to": [
+            "http://www.wikidata.org/entity/Q19597236"
+        ],
+        "creator_user_id": null,
+        "dcat_type": "n1049372e768c4429a6b2200c22f5f1a4b7",
+        "documentation": [
+            "n1049372e768c4429a6b2200c22f5f1a4b9"
+        ],
+        "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+        "health_category": [
+            "http://example.com/ontology/resource/authority/healthcategories/PHDR",
+            "http://example.com/ontology/resource/authority/healthcategories/IDHP",
+            "http://example.com/ontology/resource/authority/healthcategories/DIOH",
+            "http://example.com/ontology/resource/authority/healthcategories/EHRS"
+        ],
+        "health_theme": [
+            "http://www.wikidata.org/entity/Q7907952",
+            "http://www.wikidata.org/entity/Q58624061"
+        ],
+        "id": "e7ccf79d-705c-427f-8e96-f87bcd6e5318",
+        "identifier": "http://example.com/dataset/1234567890",
+        "is_referenced_by": [
+            "https://doi.org/10.1038/sdata.2016.18",
+            "https://dx.doi.org/10.1002/jmri.28679"
+        ],
+        "isopen": false,
+        "issued": "2024-01-01T00:00:00+00:00",
+        "language": [
+            "http://publications.europa.eu/resource/authority/language/ENG",
+            "http://publications.europa.eu/resource/authority/language/NLD",
+            "http://publications.europa.eu/resource/authority/language/FRA"
+        ],
+        "legal_basis": [
+            "https://w3id.org/dpv#Consent"
+        ],
+        "license_id": "",
+        "license_title": "",
+        "maintainer": null,
+        "maintainer_email": null,
+        "max_typical_age": "110",
+        "metadata_created": "2024-12-02T19:00:30.897399",
+        "metadata_modified": "2024-12-02T19:00:30.897406",
+        "min_typical_age": "0",
+        "modified": "2024-12-31T23:59:59+00:00",
+        "name": "test-dcat-1",
+        "notes": "This dataset is an example of using HealthDCAT-AP in CKAN",
+        "num_resources": 0,
+        "num_tags": 3,
+        "number_of_records": "123456789",
+        "number_of_unique_individuals": "7654321",
+        "organization": null,
+        "population_coverage": [
+            "This example includes a very non-descript population"
+        ],
+        "private": false,
+        "provenance": "This example dataset is partly sourced from TEHDAS2",
+        "publisher_note": [
+            "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation."
+        ],
+        "publisher_type": [
+            "http://example.com/publisherType/undefined"
+        ],
+        "purpose": [
+            "https://w3id.org/dpv#AcademicResearch"
+        ],
+        "spatial_resolution_in_meters": "10.0",
+        "state": "active",
+        "temporal_resolution": "P1D",
+        "theme": [
+            "http://publications.europa.eu/resource/authority/data-theme/HEAL"
+        ],
+        "title": "HealthDCAT-AP test dataset",
+        "type": "dataset",
+        "uri": "http://example.healthdata.nl/set/dataset",
+        "version_notes": "Dataset continuously updated",
+        "contact": [
+            {
+                "email": "covacsurv@sciensano.be",
+                "identifier": "",
+                "name": "Contact Point"
+            }
+        ],
+        "creator": [
+            {
+                "email": "info@example.com",
+                "identifier": "",
+                "name": "Contact Point",
+                "type": "",
+                "url": "https:/example.com/homepage"
+            }
+        ],
+        "extras": [
+            {
+                "key": "related_resource",
+                "value": "[\"http://example.com/dataset/9876543210\"]"
+            },
+            {
+                "key": "sample",
+                "value": "[\"http://piveau.io/set/distribution/12f5eb54-a2f7-4549-b4ac-1e1d10003cef\"]"
+            },
+            {
+                "key": "spatial_uri",
+                "value": "http://publications.europa.eu/resource/authority/country/BEL"
+            }
+        ],
+        "hdab": [
+            {
+                "email": "hdab@example.com",
+                "identifier": "",
+                "name": "EU Health Data Access Body",
+                "type": "",
+                "uri": "",
+                "url": "https: //www.hda.belgium.be"
+            }
+        ],
+        "publisher": [
+            {
+                "email": "info@example.com",
+                "identifier": "",
+                "name": "Contact Point",
+                "type": "",
+                "uri": "",
+                "url": "https://healthdata.nl"
+            }
+        ],
+        "retention_period": [
+            {
+                "end": "2034-12-31",
+                "start": "2020-03-01"
+            }
+        ],
+        "tags": [
+            {
+                "display_name": "Test 1",
+                "id": "5c418ec2-cb41-4c42-9b9c-f5d1e3a831e5",
+                "name": "Test 1",
+                "state": "active",
+                "vocabulary_id": null
+            },
+            {
+                "display_name": "Test 2",
+                "id": "c4117ace-2114-470d-b6e9-0df7580a12d8",
+                "name": "Test 2",
+                "state": "active",
+                "vocabulary_id": null
+            },
+            {
+                "display_name": "Test 3",
+                "id": "d5a5288d-3bff-431e-be94-12c71d25d75b",
+                "name": "Test 3",
+                "state": "active",
+                "vocabulary_id": null
+            }
+        ],
+        "temporal_coverage": [
+            {
+                "end": "2024-12-31",
+                "start": "2020-03-01"
+            }
+        ],
+        "resources": [],
+        "groups": [],
+        "relationships_as_subject": [],
+        "relationships_as_object": []
+    }
+]

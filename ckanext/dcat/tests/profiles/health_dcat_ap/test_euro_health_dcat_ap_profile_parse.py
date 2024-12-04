@@ -1,9 +1,15 @@
 # test
+import json
+import logging
+from pprint import pprint
+
 import pytest
 from ckan.tests.helpers import call_action
 
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.tests.utils import BaseParseTest
+
+log = logging.getLogger(__name__)
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
@@ -36,29 +42,23 @@ class TestSchemingParseSupport(BaseParseTest):
 
         # Core fields
 
-        assert (
-            dataset["title"]
-            == "[Adapted] Linking of registers for COVID-19 vaccine surveillance"
-        )
+        assert dataset["title"] == "HealthDCAT-AP test dataset"
         assert (
             dataset["notes"]
-            == "The LINK-VACC project links selected variables from existing registries..."
+            == "This dataset is an example of using HealthDCAT-AP in CKAN"
         )
         # assert dataset["url"] == "http://dataset.info.org"
         # assert dataset["version"] == "Project HDBP0250"
         # assert dataset["license_id"] == "cc-nc"
         assert sorted([t["name"] for t in dataset["tags"]]) == [
-            "COVID-19",
-            "Vaccination",
-            "Vaccine effectiveness",
+            "Test 1",
+            "Test 2",
+            "Test 3",
         ]
 
         # Standard fields
         assert dataset["version_notes"] == "Dataset continuously updated"
-        assert (
-            dataset["identifier"]
-            == "http://fdp2.healthdataportal.eu/dataset/8bb235c9-7bcd-4290-a188-49fe33c2170c"
-        )
+        assert dataset["identifier"] == "http://example.com/dataset/1234567890"
         assert (
             dataset["frequency"]
             == "http://publications.europa.eu/resource/authority/frequency/DAILY"
@@ -69,14 +69,14 @@ class TestSchemingParseSupport(BaseParseTest):
         )
         assert (
             dataset["provenance"]
-            == "The data for the LINK-VACC project is sourced from..."
+            == "This example dataset is partly sourced from TEHDAS2"
         )
 
         # Hard to map (example uses a blind node which doesn't work well in CKAN)
         # assert dataset["dcat_type"] == "test-type"
 
-        assert dataset["issued"] == "2023-01-20T08:51:00+00:00"
-        assert dataset["modified"] == "2024-10-09T00:00:00+00:00"
+        assert dataset["issued"] == "2024-01-01T00:00:00+00:00"
+        assert dataset["modified"] == "2024-12-31T23:59:59+00:00"
         assert dataset["temporal_resolution"] == "P1D"
         assert dataset["spatial_resolution_in_meters"] == "10.0"
 
@@ -117,22 +117,22 @@ class TestSchemingParseSupport(BaseParseTest):
         #     "http://dataset.info.org/doc2",
         # ]
 
-        # <> , <https://doi.org/10.1186/s13690-021-00709-x>;
+        # <> , <https://dx.doi.org/10.1002/jmri.28679>;
         assert sorted(dataset["is_referenced_by"]) == [
-            "https://doi.org/10.1136/jech-2023-220751",
-            "https://doi.org/10.1186/s13690-021-00709-x",
+            "https://doi.org/10.1038/sdata.2016.18",
+            "https://dx.doi.org/10.1002/jmri.28679",
         ]
         assert sorted(dataset["applicable_legislation"]) == [
             "http://data.europa.eu/eli/reg/2022/868/oj",
         ]
         # Repeating subfields
 
-        assert dataset["contact"][0]["name"] == "Sciensano"
+        assert dataset["contact"][0]["name"] == "Contact Point"
         assert dataset["contact"][0]["email"] == "covacsurv@sciensano.be"
 
-        assert dataset["publisher"][0]["name"] == "Sciensano"
-        assert dataset["publisher"][0]["email"] == "info@sciensano.be"
-        assert dataset["publisher"][0]["url"] == "https://sciensano.be"
+        assert dataset["publisher"][0]["name"] == "Contact Point"
+        assert dataset["publisher"][0]["email"] == "info@example.com"
+        assert dataset["publisher"][0]["url"] == "https://healthdata.nl"
         # assert (
         #     dataset["publisher"][0]["type"]
         #     == "http://purl.org/adms/publishertype/NonProfitOrganisation"
@@ -146,21 +146,28 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://www.wikidata.org/entity/Q7907952",
         ]
 
-        assert dataset["hdab"][0]["name"] == "Belgian Health Data Agency"
-        assert dataset["hdab"][0]["email"] == "info@hda.fgov.be"
-        assert dataset["hdab"][0]["url"] == "https://www.hda.belgium.be"
+        assert dataset["legal_basis"] == ["https://w3id.org/dpv#Consent"]
+
+        assert dataset["hdab"][0]["name"] == "EU Health Data Access Body"
+        assert dataset["hdab"][0]["email"] == "hdab@example.com"
+        assert dataset["hdab"][0]["url"] == "https://www.example.com/hdab"
 
         assert dataset["min_typical_age"] == "0"
         assert dataset["max_typical_age"] == "110"
-        assert dataset["number_of_records"] == "124866488"
-        assert dataset["number_of_unique_individuals"] == "8914722"
+        assert dataset["number_of_records"] == "123456789"
+        assert dataset["number_of_unique_individuals"] == "7654321"
 
         assert dataset["population_coverage"] == [
-            "The population targeted by the LINK-VACC project comprises all individuals ..."
+            "This example includes a very non-descript population"
         ]
         assert dataset["publisher_note"] == [
-            "Sciensano is a research institute and the national public health institute ..."
+            "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation."
         ]
+        assert dataset["publisher_type"] == [
+            "http://example.com/publisherType/undefined"
+        ]
+
+        assert dataset["purpose"] == ["https://w3id.org/dpv#AcademicResearch"]
 
         assert dataset["retention_period"] == [
             {

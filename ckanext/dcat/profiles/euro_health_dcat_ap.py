@@ -2,13 +2,22 @@
 
 import json
 
-from rdflib import SKOS, XSD, Literal
+from rdflib import RDF, SKOS, XSD, BNode, Literal
 from rdflib.namespace import Namespace
 
-from ckanext.dcat.profiles.base import URIRefOrLiteral
+from ckanext.dcat.profiles.base import DCAT, DCT, URIRefOrLiteral
 from ckanext.dcat.profiles.euro_dcat_ap_3 import EuropeanDCATAP3Profile
 
+# HealthDCAT-AP namespace. Note: not finalized yet
 HEALTHDCATAP = Namespace("http://healthdataportal.eu/ns/health#")
+
+# Data Privacy Vocabulary namespace
+DPV = Namespace("https://w3id.org/dpv#")
+
+namespaces = {
+    "healthdcatap": HEALTHDCATAP,
+    "dpv": DPV,
+}
 
 
 class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
@@ -75,8 +84,11 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             ("coding_system", HEALTHDCATAP.hasCodingSystem),
             ("health_category", HEALTHDCATAP.healthCategory),
             ("health_theme", HEALTHDCATAP.healthTheme),
+            ("legal_basis", DPV.hasLegalBasis),
             ("population_coverage", HEALTHDCATAP.populationCoverage),
             ("publisher_note", HEALTHDCATAP.publisherNote),
+            ("publisher_type", HEALTHDCATAP.publisherType),
+            ("purpose", DPV.hasPurpose),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -84,44 +96,89 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
         super().graph_from_dataset(dataset_dict, dataset_ref)
+        for prefix, namespace in namespaces.items():
+            self.g.bind(prefix, namespace)
 
-        g = self.g
+        # g = self.g
+
+        # ("coding_system", HEALTHDCATAP.hasCodingSystem),
+        # ("health_category", HEALTHDCATAP.healthCategory),
+        # ("health_theme", HEALTHDCATAP.healthTheme),
+        # ("population_coverage", HEALTHDCATAP.populationCoverage),
+        # ("publisher_note", HEALTHDCATAP.publisherNote),
+        # ("publisher_type", HEALTHDCATAP.publisherType),
         # List items:
         #  - Purpose
         #  - Health theme
+
+        ## key, predicate, fallbacks, _type, _class
         items = [
-            ("purpose", HEALTHDCATAP.purpose, None, URIRefOrLiteral),
+            ("coding_system", HEALTHDCATAP.hasCodingSystem, None, URIRefOrLiteral),
+            ("health_category", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
+            ("health_theme", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
+            ("legal_basis", DPV.hasLegalBasis, None, URIRefOrLiteral),
             (
-                "health_theme",
-                HEALTHDCATAP.healthTheme,
+                "population_coverage",
+                HEALTHDCATAP.populationCoverage,
                 None,
                 URIRefOrLiteral,
-                SKOS.concept,
             ),
+            ("publisher_note", HEALTHDCATAP.publisherNote, None, URIRefOrLiteral),
+            ("publisher_type", HEALTHDCATAP.publisherType, None, URIRefOrLiteral),
+            ("purpose", DPV.hasPurpose, None, URIRefOrLiteral),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
-        # Number of records
-        if dataset_dict.get("number_of_records"):
+        items = [
+            ("min_typical_age", HEALTHDCATAP.minTypicalAge),
+            ("max_typical_age", HEALTHDCATAP.maxTypicalAge),
+            ("number_of_records", HEALTHDCATAP.numberOfRecords),
+            ("number_of_unique_individuals", HEALTHDCATAP.numberOfUniqueIndividuals),
+        ]
+        for key, predicate in items:
+            self._add_nonneg_integer_triple(dataset_dict, dataset_ref, key, predicate)
+
+        self._add_agents(dataset_ref, dataset_dict, "hdab", HEALTHDCATAP.hdab)
+
+    def _add_nonneg_integer_triple(self, dataset_dict, dataset_ref, key, predicate):
+        """
+        Adds non-negative integers to the Dataset graph (xsd:nonNegativeInteger)
+
+        dataset_ref: subject of Graph
+        key: scheming key in CKAN
+        predicate: predicate to use
+        """
+        value = self._get_dict_value(dataset_dict, key)
+
+        if value:
             try:
-                g.add(
+                if int(value) < 0:
+                    raise ValueError("Not a non-negative integer")
+                self.g.add(
                     (
                         dataset_ref,
-                        HEALTHDCATAP.numberOfRecords,
-                        Literal(
-                            dataset_dict["number_of_records"],
-                            datatype=XSD.nonNegativeInteger,
-                        ),
+                        predicate,
+                        Literal(int(value), datatype=XSD.nonNegativeInteger),
                     )
                 )
             except (ValueError, TypeError):
-                g.add(
-                    (
-                        dataset_ref,
-                        HEALTHDCATAP.numberOfRecords,
-                        Literal(dataset_dict["number_of_records"]),
-                    )
-                )
+                self.g.add((dataset_ref, predicate, Literal(value)))
+
+    def _add_timeframe_triple(self, dataset_dict, dataset_ref):
+        temporal = dataset_dict.get("temporal_coverage")
+        if (
+            isinstance(temporal, list)
+            and len(temporal)
+            and self._not_empty_dict(temporal[0])
+        ):
+            for item in temporal:
+                temporal_ref = BNode()
+                self.g.add((temporal_ref, RDF.type, DCT.PeriodOfTime))
+                if item.get("start"):
+                    self._add_date_triple(temporal_ref, DCAT.startDate, item["start"])
+                if item.get("end"):
+                    self._add_date_triple(temporal_ref, DCAT.endDate, item["end"])
+                self.g.add((dataset_ref, DCT.temporal, temporal_ref))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)

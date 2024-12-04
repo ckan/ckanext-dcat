@@ -288,6 +288,12 @@ dataset_fields:
   help_text: >
     A category of the Dataset or tag describing the Dataset.
 
+- field_name: legal_basis
+  label: Legal basis
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:  The legal basis used to justify processing of personal data.
+
 - field_name: min_typical_age
   label: Minimum typical age
   validators: ignore_missing int_validator
@@ -318,6 +324,13 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: >
     A description of the publisher activities.
+
+- field_name: publisher_type
+  label: Publisher type
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+     A type of organisation that makes the Dataset available.
 
 - field_name: population_coverage
   label: Population coverage
