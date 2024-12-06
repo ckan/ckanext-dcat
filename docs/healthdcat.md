@@ -12,7 +12,8 @@ profile, aims to standardize health metadata within the scope of EHDS, fostering
 interoperability, findability and accessibility of electronic health data across the EU.
 
 **Note:** HealthDCAT-AP is still under active development and not finalized yet. Cardinalities,
-certain vocabularies and the namespace have not officially been ratified yet.
+certain vocabularies and the namespace have not officially been ratified yet. These are expected to
+be finalized after the public consultation in Q1 2025.
 
 The goal of this profile is to provide the wider FAIR community and other EU portals with a starting
 point for implementing HealthDCAT-AP within their own data catalogs.
@@ -31,7 +32,8 @@ This profile has currently no additional settings. To select the profile, make s
 ## Limitations and deviations
 
 As HealthDCAT-AP is still a draft, it is bound for change. There are currently still some
-inconsistencies in the standard and unclarities regarding certain properties. Below a short summary:
+inconsistencies in the standard and unclarities regarding certain properties. Below a short summary
+of limitations and implementaiton decisions made during development of this profile.
 
 1. Cardinalities have not yet been finalized for HealthDCAT-AP. This CKAN scheme has taken a very
    liberal approach and takes all values as strictly optional (no failed validation for missing
@@ -53,7 +55,7 @@ inconsistencies in the standard and unclarities regarding certain properties. Be
   out in the wild that uses a blank node for this and adds several properties, however this is
    inconsistent with other DCAT implementations.
 6. DatasetSeries are not supported yet by CKAN, and also not by this profile.
-7. The *quality annotation* property has not been implemented due to it being very vaguely specified
-   for now.
+7. The *quality annotation* property has not been implemented due to usage not being completely
+defined yet.
 8. There is no multilingual support yet.
 9. For other properties, any limitations from the DCAT-AP profiles still apply.
