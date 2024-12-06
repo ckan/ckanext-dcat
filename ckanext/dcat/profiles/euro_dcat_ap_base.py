@@ -144,12 +144,12 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 contact = self._contact_details(dataset_ref, ADMS.contactPoint)
             if contact:
                 contact = contact[0]
-                for key in ("uri", "name", "email", "identifier"):
+                for key in ("uri", "name", "email", "identifier", "url"):
                     if contact.get(key):
                         dataset_dict["extras"].append(
                             {
                                 "key": "contact_{0}".format(key),
-                                "value": contact.get(key)
+                                "value": contact.get(key),
                             }
                         )
 

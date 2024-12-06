@@ -1,0 +1,81 @@
+# This Graph contains no blank nodes, to allow for easy comparison between a generated graph
+# The blind nodes can be compared manually
+
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dpv: <https://w3id.org/dpv#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.healthdata.nl/set/dataset> a dcat:Dataset ;
+#     healthdcatap:hdab [ a foaf:Agent ;
+#             vcard:hasEmail <mailto:hdab@example.com> ;
+#             foaf:homepage <https://www.example.com/hdab> ;
+#             foaf:name "EU Health Data Access Body" ] ;
+#     dct:provenance [ a dct:ProvenanceStatement ;
+#             rdfs:label "This example dataset is partly sourced from TEHDAS2" ] ;
+#     dct:publisher [ a foaf:Agent ;
+#             vcard:hasEmail <mailto:info@example.com> ;
+#             foaf:homepage <https://healthdata.nl> ;
+#             foaf:name "Contact Point" ] ;
+#     dct:temporal [ a dct:PeriodOfTime ;
+#             dcat:endDate "2024-12-31"^^xsd:date ;
+#             dcat:startDate "2020-03-01"^^xsd:date ] ;
+#     adms:identifier [ a adms:Identifier ;
+#             skos:notation "internalURI:admsIdentifier0" ] ;
+#     dcat:contactPoint [ a vcard:Kind ;
+#             vcard:fn "Contact Point" ;
+#             vcard:hasEmail <mailto:contact@example.com> ] ;
+    dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+    healthdcatap:analytics <http://example.com/analytics>;
+    healthdcatap:hasCodeValues <http://example.com/code1>,
+                <http://example.com/code2>;
+    healthdcatap:hasCodingSystem <http://www.wikidata.org/entity/P1690>,
+        <http://www.wikidata.org/entity/P4229> ;
+    healthdcatap:healthCategory <http://example.com/ontology/resource/authority/healthcategories/DIOH>,
+        <http://example.com/ontology/resource/authority/healthcategories/EHRS>,
+        <http://example.com/ontology/resource/authority/healthcategories/IDHP>,
+        <http://example.com/ontology/resource/authority/healthcategories/PHDR>,
+        <http://www.wikidata.org/entity/Q58624061>,
+        <http://www.wikidata.org/entity/Q7907952> ;
+    healthdcatap:maxTypicalAge "110"^^xsd:nonNegativeInteger ;
+    healthdcatap:minTypicalAge "0"^^xsd:nonNegativeInteger ;
+    healthdcatap:numberOfRecords "123456789"^^xsd:nonNegativeInteger ;
+    healthdcatap:numberOfUniqueIndividuals "7654321"^^xsd:nonNegativeInteger ;
+    healthdcatap:populationCoverage "This example includes a very non-descript population" ;
+    healthdcatap:publisherNote "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation." ;
+    healthdcatap:publisherType <http://example.com/publisherType/undefined> ;
+    dct:accessRights <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
+    dct:accrualPeriodicity <http://publications.europa.eu/resource/authority/frequency/DAILY> ;
+    dct:conformsTo <http://www.wikidata.org/entity/Q19597236> ;
+    dct:description "This dataset is an example of using HealthDCAT-AP in CKAN" ;
+    dct:identifier <http://example.com/dataset/1234567890> ;
+    dct:isReferencedBy <https://doi.org/10.1038/sdata.2016.18>,
+        <https://dx.doi.org/10.1002/jmri.28679> ;
+    dct:issued "2024-01-01T00:00:00+00:00"^^xsd:dateTime ;
+    dct:language <http://publications.europa.eu/resource/authority/language/ENG>,
+        <http://publications.europa.eu/resource/authority/language/FRA>,
+        <http://publications.europa.eu/resource/authority/language/NLD> ;
+    dct:modified "2024-12-31T23:59:59+00:00"^^xsd:dateTime ;
+    dct:relation <http://example.com/dataset/9876543210> ;
+    dct:title "HealthDCAT-AP test dataset" ;
+    dct:type "n1049372e768c4429a6b2200c22f5f1a4b7" ;
+    adms:sample <http://example.com/sample> ;
+    adms:versionNotes "Dataset continuously updated" ;
+    dcat:keyword "Test 1",
+        "Test 2",
+        "Test 3" ;
+    dcat:temporalResolution "P1D"^^xsd:duration ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
+    foaf:page "n1049372e768c4429a6b2200c22f5f1a4b9" ;
+    dpv:hasLegalBasis dpv:Consent ;
+    dpv:hasPurpose dpv:AcademicResearch ;
+    dpv:hasPersonalData <https://w3id.org/dpv/dpv-pd#Age>,
+        <https://w3id.org/dpv/dpv-pd#Gender>,
+        <https://w3id.org/dpv/dpv-pd#HealthRecord> .
