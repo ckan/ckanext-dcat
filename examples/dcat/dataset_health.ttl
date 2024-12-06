@@ -114,7 +114,9 @@
         <https://w3id.org/dpv#hasLegalBasis>
                 <https://w3id.org/dpv#Consent>;
         <https://w3id.org/dpv#hasPersonalData>
-                <https://w3id.org/dpv/dpv-pd#Age> , <https://w3id.org/dpv/dpv-pd#Location> , <https://w3id.org/dpv/dpv-pd#Gender> , <https://w3id.org/dpv/dpv-pd#Nationality> , <https://w3id.org/dpv/dpv-pd#HealthRecord>;
+                <https://w3id.org/dpv/dpv-pd#Age>,
+                <https://w3id.org/dpv/dpv-pd#Gender>,
+                <https://w3id.org/dpv/dpv-pd#HealthRecord>;
         <https://w3id.org/dpv#hasPurpose>
                 <https://w3id.org/dpv#AcademicResearch>.
 

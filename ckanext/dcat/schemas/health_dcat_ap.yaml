@@ -335,6 +335,12 @@ dataset_fields:
   form_snippet: number.html
   help_text:  Number of records for unique individuals.
 
+- field_name: personal_data
+  label: Personal data
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: Key elements that represent an individual in the dataset.
+
 - field_name: publisher_note
   label: Publisher note
   preset: multiple_text

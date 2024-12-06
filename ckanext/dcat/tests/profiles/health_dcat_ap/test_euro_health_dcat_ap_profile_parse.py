@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:healthdcat_ap.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:health_dcat_ap.yaml"
 )
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_health_dcat_ap")
 class TestSchemingParseSupport(BaseParseTest):
@@ -47,9 +47,7 @@ class TestSchemingParseSupport(BaseParseTest):
             dataset["notes"]
             == "This dataset is an example of using HealthDCAT-AP in CKAN"
         )
-        # assert dataset["url"] == "http://dataset.info.org"
-        # assert dataset["version"] == "Project HDBP0250"
-        # assert dataset["license_id"] == "cc-nc"
+
         assert sorted([t["name"] for t in dataset["tags"]]) == [
             "Test 1",
             "Test 2",
@@ -90,6 +88,7 @@ class TestSchemingParseSupport(BaseParseTest):
         ]
 
         # Doesn't really get mapped for some reason
+        # Should be covered in DCAT-AP base profile
         # assert dataset["spatial_coverage"] == [
         #     {
         #         "uri": "http://publications.europa.eu/resource/authority/country/BEL",
@@ -112,16 +111,7 @@ class TestSchemingParseSupport(BaseParseTest):
         assert sorted(dataset["theme"]) == [
             "http://publications.europa.eu/resource/authority/data-theme/HEAL"
         ]
-        # assert sorted(dataset["alternate_identifier"]) == [
-        #     "alternate-identifier-1",
-        #     "alternate-identifier-2",
-        # ]
-        # assert sorted(dataset["documentation"]) == [
-        #     "http://dataset.info.org/doc1",
-        #     "http://dataset.info.org/doc2",
-        # ]
 
-        # <> , <https://dx.doi.org/10.1002/jmri.28679>;
         assert sorted(dataset["is_referenced_by"]) == [
             "https://doi.org/10.1038/sdata.2016.18",
             "https://dx.doi.org/10.1002/jmri.28679",
@@ -129,8 +119,8 @@ class TestSchemingParseSupport(BaseParseTest):
         assert sorted(dataset["applicable_legislation"]) == [
             "http://data.europa.eu/eli/reg/2022/868/oj",
         ]
-        # Repeating subfields
 
+        # Repeating subfields
         assert dataset["contact"][0]["name"] == "Contact Point"
         assert dataset["contact"][0]["email"] == "contact@example.com"
 
@@ -163,10 +153,17 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["hdab"][0]["email"] == "hdab@example.com"
         assert dataset["hdab"][0]["url"] == "https://www.example.com/hdab"
 
+        # CKAN converts these to strings, but also converts back to decimal/nonneg int
         assert dataset["min_typical_age"] == "0"
         assert dataset["max_typical_age"] == "110"
         assert dataset["number_of_records"] == "123456789"
         assert dataset["number_of_unique_individuals"] == "7654321"
+
+        assert sorted(dataset["personal_data"]) == [
+            "https://w3id.org/dpv/dpv-pd#Age",
+            "https://w3id.org/dpv/dpv-pd#Gender",
+            "https://w3id.org/dpv/dpv-pd#HealthRecord",
+        ]
 
         assert dataset["population_coverage"] == [
             "This example includes a very non-descript population"
@@ -186,55 +183,3 @@ class TestSchemingParseSupport(BaseParseTest):
                 "end": "2034-12-31",
             }
         ]
-
-        # resource = dataset["resources"][0]
-
-        # # Resources: core fields
-        # assert resource["url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
-
-        # # Resources: standard fields
-        # assert resource["license"] == "http://creativecommons.org/licenses/by-nc/2.0/"
-        # assert resource["rights"] == "Some statement about rights"
-        # assert resource["issued"] == "2012-05-11"
-        # assert resource["modified"] == "2012-05-01T00:04:06"
-        # assert resource["temporal_resolution"] == "PT15M"
-        # assert resource["spatial_resolution_in_meters"] == 1.5
-        # assert resource["status"] == "http://purl.org/adms/status/Completed"
-        # assert resource["size"] == 12323
-        # assert (
-        #     resource["availability"]
-        #     == "http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL"
-        # )
-        # assert (
-        #     resource["compress_format"]
-        #     == "http://www.iana.org/assignments/media-types/application/gzip"
-        # )
-        # assert (
-        #     resource["package_format"]
-        #     == "http://publications.europa.eu/resource/authority/file-type/TAR"
-        # )
-
-        # assert resource["hash"] == "4304cf2e751e6053c90b1804c89c0ebb758f395a"
-        # assert (
-        #     resource["hash_algorithm"]
-        #     == "http://spdx.org/rdf/terms#checksumAlgorithm_sha1"
-        # )
-
-        # assert (
-        #     resource["access_url"] == "http://www.bgs.ac.uk/gbase/geochemcd/home.html"
-        # )
-        # assert "download_url" not in resource
-
-        # # Resources: list fields
-        # assert sorted(resource["language"]) == ["ca", "en", "es"]
-        # assert sorted(resource["documentation"]) == [
-        #     "http://dataset.info.org/distribution1/doc1",
-        #     "http://dataset.info.org/distribution1/doc2",
-        # ]
-        # assert sorted(resource["conforms_to"]) == ["Standard 1", "Standard 2"]
-
-        # # Resources: repeating subfields
-        # assert resource["access_services"][0]["title"] == "Sparql-end Point"
-        # assert resource["access_services"][0]["endpoint_url"] == [
-        #     "http://publications.europa.eu/webapi/rdf/sparql"
-        # ]

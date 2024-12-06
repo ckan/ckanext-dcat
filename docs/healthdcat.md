@@ -25,7 +25,7 @@ this profile requires *ckanext-scheming*.
 ## Usage and settings
 
 This profile has currently no additional settings. To select the profile, make sure
-`scheming.dataset_schemas`  includes `ckanext.dcat.schemas:healthdcat_ap.yaml`, and
+`scheming.dataset_schemas`  includes `ckanext.dcat.schemas:health_dcat_ap.yaml`, and
 `ckanext.dcat.rdf.profiles` includes `euro_health_dcat_ap`.
 
 ## Limitations and deviations

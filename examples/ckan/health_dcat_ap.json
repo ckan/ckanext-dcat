@@ -71,6 +71,11 @@
         "number_of_records": "123456789",
         "number_of_unique_individuals": "7654321",
         "organization": null,
+        "personal_data": [
+            "https://w3id.org/dpv/dpv-pd#Age",
+            "https://w3id.org/dpv/dpv-pd#Gender",
+            "https://w3id.org/dpv/dpv-pd#HealthRecord"
+        ],
         "population_coverage": [
             "This example includes a very non-descript population"
         ],

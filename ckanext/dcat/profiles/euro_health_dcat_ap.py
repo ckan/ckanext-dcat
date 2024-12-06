@@ -2,7 +2,7 @@
 
 import json
 
-from rdflib import RDF, SKOS, XSD, BNode, Literal, term
+from rdflib import RDF, SKOS, XSD, BNode, Literal, URIRef, term
 from rdflib.namespace import Namespace
 
 from ckanext.dcat.profiles.base import DCAT, DCT, CleanedURIRef, URIRefOrLiteral
@@ -40,9 +40,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         self.__parse_healthdcat_stringvalues(dataset_dict, dataset_ref)
 
         self.__parse_healthdcat_intvalues(dataset_dict, dataset_ref)
-
-        # Purpose is a dpv:Purpose, inside is a dct:Description
-        pass
 
         # Add the HDAB. There should only ever be one but you never know
         agents = self._agents_details(dataset_ref, HEALTHDCATAP.hdab)
@@ -91,6 +88,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             ("health_category", HEALTHDCATAP.healthCategory),
             ("health_theme", HEALTHDCATAP.healthTheme),
             ("legal_basis", DPV.hasLegalBasis),
+            ("personal_data", DPV.hasPersonalData),
             ("population_coverage", HEALTHDCATAP.populationCoverage),
             ("publisher_note", HEALTHDCATAP.publisherNote),
             ("publisher_type", HEALTHDCATAP.publisherType),
@@ -104,18 +102,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         super().graph_from_dataset(dataset_dict, dataset_ref)
         for prefix, namespace in namespaces.items():
             self.g.bind(prefix, namespace)
-
-        # g = self.g
-
-        # ("coding_system", HEALTHDCATAP.hasCodingSystem),
-        # ("health_category", HEALTHDCATAP.healthCategory),
-        # ("health_theme", HEALTHDCATAP.healthTheme),
-        # ("population_coverage", HEALTHDCATAP.populationCoverage),
-        # ("publisher_note", HEALTHDCATAP.publisherNote),
-        # ("publisher_type", HEALTHDCATAP.publisherType),
-        # List items:
-        #  - Purpose
-        #  - Health theme
 
         ## key, predicate, fallbacks, _type, _class
         items = [
@@ -131,6 +117,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 None,
                 URIRefOrLiteral,
             ),
+            ("personal_data", DPV.hasPersonalData, None, URIRef),
             ("publisher_note", HEALTHDCATAP.publisherNote, None, URIRefOrLiteral),
             ("publisher_type", HEALTHDCATAP.publisherType, None, URIRefOrLiteral),
             ("purpose", DPV.hasPurpose, None, URIRefOrLiteral),

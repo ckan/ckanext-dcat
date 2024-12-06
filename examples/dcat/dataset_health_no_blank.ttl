@@ -75,4 +75,7 @@
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
     foaf:page "n1049372e768c4429a6b2200c22f5f1a4b9" ;
     dpv:hasLegalBasis dpv:Consent ;
-    dpv:hasPurpose dpv:AcademicResearch .
+    dpv:hasPurpose dpv:AcademicResearch ;
+    dpv:hasPersonalData <https://w3id.org/dpv/dpv-pd#Age>,
+        <https://w3id.org/dpv/dpv-pd#Gender>,
+        <https://w3id.org/dpv/dpv-pd#HealthRecord> .

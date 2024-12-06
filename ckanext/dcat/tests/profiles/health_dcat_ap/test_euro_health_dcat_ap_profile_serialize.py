@@ -34,7 +34,7 @@ DCAT_AP_PROFILES = ["euro_dcat_ap_3"]
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
-    "scheming.dataset_schemas", "ckanext.dcat.schemas:healthdcat_ap.yaml"
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:health_dcat_ap.yaml"
 )
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_health_dcat_ap")
 class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
@@ -45,7 +45,9 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
         Note: in this HealthDCAT-AP profile, only the HealthDCAT-AP specific triples are tested for.
         Triples in other profiles could be tested, but should mainly be tested by their respective
         profiles."""
-        dataset_dict = json.loads(self._get_file_contents("ckan/healthdcat_ap.json"))[0]
+        dataset_dict = json.loads(self._get_file_contents("ckan/health_dcat_ap.json"))[
+            0
+        ]
 
         dataset = call_action("package_create", **dataset_dict)
 
