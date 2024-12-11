@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.ckan-image }}
-      options: --user root        
+      options: --user root
     services:
       solr:
         image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
@@ -76,7 +76,7 @@ jobs:
         pip install -e ckanext-fluent
     - name: Setup extension
       run: |
-        su ckan -c "ckan -c test.ini db init"
-        su ckan -c "ckan -c test.ini db pending-migrations --apply"
+        ckan -c test.ini db init
+        ckan -c test.ini db pending-migrations --apply
     - name: Run tests
-      run: su ckan -c "pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=term-missing --disable-warnings ckanext/dcat/tests"
+      run: pytest --ckan-ini=test.ini --cov=ckanext.dcat --cov-report=term-missing --cov-append --disable-warnings ckanext/dcat/tests
