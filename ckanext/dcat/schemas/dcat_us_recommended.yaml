@@ -42,6 +42,10 @@ dataset_fields:
     - field_name: email
       label: Email
       display_snippet: email.html
+    
+    - field_name: url
+      label: URL
+      help_text: A URL associated with the contact
   help_text: Contact information for enquiries about the dataset.
 
 - field_name: publisher

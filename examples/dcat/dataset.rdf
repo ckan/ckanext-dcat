@@ -68,6 +68,7 @@
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>
         <vcard:hasEmail rdf:resource="mailto:contact@some.org"/>
+        <vcard:hasURL rdf:resource="https://example.org"/>
       </vcard:Organization>
     </dcat:contactPoint>
     <dct:publisher>

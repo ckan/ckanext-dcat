@@ -91,6 +91,7 @@ class TestSchemingParseSupport(BaseParseTest):
 
         assert dataset["contact"][0]["name"] == "Point of Contact"
         assert dataset["contact"][0]["email"] == "contact@some.org"
+        assert dataset["contact"][0]["url"] == "https://example.org"
 
         assert (
             dataset["publisher"][0]["name"] == "Publishing Organization for dataset 1"
