@@ -53,7 +53,8 @@
         {
             "name": "Contact 1",
             "email": "contact1@example.org",
-            "identifier": "123"
+            "identifier": "123",
+            "url": "https://example.org"
         },
         {
             "name": "Contact 2",

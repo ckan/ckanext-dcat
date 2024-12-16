@@ -536,7 +536,9 @@ class RDFProfile(object):
             agent_details = {}
             agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
             agent_details["name"] = self._object_value(agent, FOAF.name)
-            agent_details["email"] = self._object_value(agent, FOAF.mbox)
+            agent_details["email"] = self._without_mailto(
+                self._object_value(agent, FOAF.mbox)
+            )
             if not agent_details["email"]:
                 agent_details["email"] = self._without_mailto(
                     self._object_value(agent, VCARD.hasEmail)
@@ -573,6 +575,9 @@ class RDFProfile(object):
             )
 
             contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
+
+            contact["url"] = self._get_vcard_property_value(agent, VCARD.hasURL)
+
             contacts.append(contact)
 
         return contacts
@@ -818,9 +823,7 @@ class RDFProfile(object):
         or object.
         """
         spatial_formats = aslist(
-            config.get(
-                "ckanext.dcat.output_spatial_format", DEFAULT_SPATIAL_FORMATS
-            )
+            config.get("ckanext.dcat.output_spatial_format", DEFAULT_SPATIAL_FORMATS)
         )
 
         if isinstance(value, str):

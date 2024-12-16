@@ -168,6 +168,13 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     "identifier",
                     _type=URIRefOrLiteral,
                 )
+                self._add_triple_from_dict(
+                    item,
+                    contact_details,
+                    VCARD.hasURL,
+                    "url",
+                    _type=URIRef,
+                )
 
         self._add_agents(dataset_ref, dataset_dict, "publisher", DCT.publisher)
         self._add_agents(dataset_ref, dataset_dict, "creator", DCT.creator)

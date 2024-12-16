@@ -104,7 +104,10 @@ dataset_fields:
     - field_name: identifier
       label: Identifier
       help_text: Unique identifier for the contact point. Such as a ROR ID.
-
+    
+    - field_name: url
+      label: URL
+      help_text: A URL associated with the contact
   help_text: Contact information for enquiries about the dataset.
 
 - field_name: license_id

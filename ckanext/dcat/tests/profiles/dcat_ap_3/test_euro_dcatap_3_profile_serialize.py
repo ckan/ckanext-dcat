@@ -149,6 +149,9 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             dataset_dict["contact"][0]["identifier"],
         )
         assert self._triple(
+            g, contact_details[0][2], VCARD.hasURL, URIRef(dataset_dict["contact"][0]["url"])
+        )
+        assert self._triple(
             g, contact_details[1][2], VCARD.fn, dataset_dict["contact"][1]["name"]
         )
         assert self._triple(
