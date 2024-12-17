@@ -77,7 +77,10 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 _parse_list_value(resource_dict, field_name)
 
         # Repeating subfields
-        new_fields_mapping = {"temporal_coverage": "temporal"}
+        new_fields_mapping = {
+            "spatial_coverage": "spatial",
+            "temporal_coverage": "temporal",
+        }
         for schema_field in self._dataset_schema["dataset_fields"]:
             if "repeating_subfields" in schema_field:
                 # Check if existing extras need to be migrated
@@ -94,6 +97,9 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                             new_dict[subfield] = extra["value"]
                         else:
                             new_extras.append(extra)
+                    elif extra["key"] == "spatial" and field_name == "spatial_coverage":
+                        # Special case, spatial geom
+                        new_dict["geom"] = extra["value"]
                     else:
                         new_extras.append(extra)
                 if new_dict:
