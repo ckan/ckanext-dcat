@@ -10,3 +10,10 @@ presets:
     form_snippet: date.html
     display_snippet: dcat_date.html
     validators: ignore_missing dcat_date convert_to_json_if_datetime
+
+- preset_name: cr_title
+  values:
+    validators: not_empty unicode_safe
+    form_snippet: large_text.html
+    form_attrs:
+      data-module: slug-preview-target
