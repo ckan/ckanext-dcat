@@ -203,9 +203,6 @@ def test_validate_dcat_us_3_graph():
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r
 
-    with open("shacl.txt", "w") as f:
-        f.write(results_text)
-
     failures = [
         str(t[2])
         for t in results_graph.triples(
