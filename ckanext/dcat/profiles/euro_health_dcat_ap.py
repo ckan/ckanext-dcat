@@ -1,7 +1,3 @@
-"""Test document"""
-
-import json
-
 from rdflib import RDF, SKOS, XSD, BNode, Literal, URIRef, term
 from rdflib.namespace import Namespace
 

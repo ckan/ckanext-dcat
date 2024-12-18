@@ -67,7 +67,6 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
         reference = Graph()
         reference.parse(data=contents, format="turtle")
 
-        print(s.g.serialize(format="turtle"))
         # First check that all non-blind nodes from the reference are present in the output
         # Any other nodes added by other profiles (e.g. DCAT-AP 3) we do not have an opinion about
         for triple in reference:
