@@ -87,17 +87,11 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://www.wikidata.org/entity/P4229",
         ]
 
-        # Doesn't really get mapped for some reason
-        # Should be covered in DCAT-AP base profile
-        # assert dataset["spatial_coverage"] == [
-        #     {
-        #         "uri": "http://publications.europa.eu/resource/authority/country/BEL",
-        #         "text": None,
-        #         "geom": None,
-        #         "bbox": None,
-        #         "cent": None,
-        #     }
-        # ]
+        assert dataset["spatial_coverage"] == [
+            {
+                "uri": "http://publications.europa.eu/resource/authority/country/BEL",
+            }
+        ]
 
         # List fields
         assert sorted(dataset["conforms_to"]) == [
