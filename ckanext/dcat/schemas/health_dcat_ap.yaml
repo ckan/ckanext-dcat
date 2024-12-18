@@ -409,7 +409,6 @@ dataset_fields:
 - field_name: qualified_relation
   label: Qualified relation
   repeating_label: Relationship
-  repeating_once: true
   repeating_subfields:
 
     - field_name: uri
