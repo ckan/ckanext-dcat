@@ -22,10 +22,13 @@ jobs:
         include:
           - ckan-version: "2.11"
             ckan-image: "ckan/ckan-dev:2.11-py3.10"
+            solr-version: "9"
           - ckan-version: "2.10"
             ckan-image: "ckan/ckan-dev:2.10-py3.10"
+            solr-version: "9"
           - ckan-version: "2.9"
             ckan-image: "ckan/ckan-dev:2.9-py3.9"
+            solr-version: "8"
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
@@ -35,7 +38,7 @@ jobs:
       options: --user root
     services:
       solr:
-        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr${{ matrix.solr-version }}
       postgres:
         image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:

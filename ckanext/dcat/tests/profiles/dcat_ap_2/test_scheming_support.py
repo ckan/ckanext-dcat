@@ -741,6 +741,12 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["temporal_coverage"][0]["start"] == "1905-03-01"
         assert dataset["temporal_coverage"][0]["end"] == "2013-01-05"
 
+        assert (
+            dataset["spatial_coverage"][0]["uri"]
+            == "http://publications.europa.eu/mdr/authority/country/ZWE"
+        )
+        assert dataset["spatial_coverage"][0]["geom"]
+
         resource = dataset["resources"][0]
 
         # Resources: core fields
