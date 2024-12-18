@@ -42,11 +42,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         if agents:
             dataset_dict["hdab"] = agents
 
-        # Add any qualifiedRelations
-        qual_relations = self._relationship_details(dataset_ref, DCAT.qualifiedRelation)
-        if qual_relations:
-            dataset_dict["qualified_relation"] = qual_relations
-
         # Retention period
         retention_start, retention_end = self._time_interval(
             dataset_ref, HEALTHDCATAP.retentionPeriod, dcat_ap_version=2
@@ -130,9 +125,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             self._add_nonneg_integer_triple(dataset_dict, dataset_ref, key, predicate)
 
         self._add_agents(dataset_ref, dataset_dict, "hdab", HEALTHDCATAP.hdab)
-        self._add_relationship(
-            dataset_ref, dataset_dict, "qualified_relation", DCAT.qualifiedRelation
-        )
 
     def _add_nonneg_integer_triple(self, dataset_dict, dataset_ref, key, predicate):
         """
@@ -173,29 +165,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 if item.get("end"):
                     self._add_date_triple(temporal_ref, DCAT.endDate, item["end"])
                 self.g.add((dataset_ref, DCT.temporal, temporal_ref))
-
-    def _relationship_details(self, subject, predicate):
-        """
-        Returns a list of dicts with details about a dcat:Relationship property, e.g.
-        dcat:qualifiedRelation
-
-        Both subject and predicate must be rdflib URIRef or BNode objects
-
-        Returns keys for uri, role, and relation with the values set to
-        an empty string if they could not be found.
-        """
-
-        relations = []
-        for relation in self.g.objects(subject, predicate):
-            relation_details = {}
-            relation_details["uri"] = (
-                str(relation) if isinstance(relation, term.URIRef) else ""
-            )
-            relation_details["role"] = self._object_value(relation, DCAT.hadRole)
-            relation_details["relation"] = self._object_value(relation, DCT.relation)
-            relations.append(relation_details)
-
-        return relations
 
     def _add_relationship(
         self,
