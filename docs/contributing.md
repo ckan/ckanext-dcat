@@ -8,7 +8,7 @@ Besides the general guidance provided in the [CKAN documentation](https://docs.c
 ### Including new profiles
 
 
-New [profiles](#profiles.md) that are useful to the wider community are welcome, provided that they are sustainable long term. A maintainer unfamiliar with the profile should be able to know what the profile does and be confident that everything works as expected. The way to achieve this is with tests (lots of them!) and documentation.
+New [profiles](profiles.md) that are useful to the wider community are welcome, provided that they are sustainable long term. A maintainer unfamiliar with the profile should be able to know what the profile does and be confident that everything works as expected. The way to achieve this is with tests (lots of them!) and documentation.
 
 More localized profiles are better placed in dedicated extensions.
 
