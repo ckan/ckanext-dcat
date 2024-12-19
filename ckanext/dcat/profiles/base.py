@@ -2,16 +2,16 @@ import datetime
 import json
 from urllib.parse import quote
 
-from dateutil.parser import parse as parse_date
-from rdflib import term, URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDF, XSD, SKOS, RDFS, ORG
-from geomet import wkt, InvalidGeoJSONException
-
-from ckantoolkit import config, url_for, asbool, aslist, get_action, ObjectNotFound
-from ckan.model.license import LicenseRegister
 from ckan.lib.helpers import resource_formats
+from ckan.model.license import LicenseRegister
+from ckantoolkit import ObjectNotFound, asbool, aslist, config, get_action, url_for
+from dateutil.parser import parse as parse_date
+from geomet import InvalidGeoJSONException, wkt
+from rdflib import BNode, Literal, URIRef, term
+from rdflib.namespace import ORG, RDF, RDFS, SKOS, XSD, Namespace
+
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
-from ckanext.dcat.validators import is_year, is_year_month, is_date
+from ckanext.dcat.validators import is_date, is_year, is_year_month
 
 CNT = Namespace("http://www.w3.org/2011/content#")
 DCT = Namespace("http://purl.org/dc/terms/")
