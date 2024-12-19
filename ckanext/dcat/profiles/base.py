@@ -14,6 +14,7 @@ from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_year, is_year_month, is_date
 
 CNT = Namespace("http://www.w3.org/2011/content#")
+CR = Namespace("http://mlcommons.org/croissant/")
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
@@ -30,6 +31,7 @@ SPDX = Namespace("http://spdx.org/rdf/terms#")
 
 namespaces = {
     "cnt": CNT,
+    "cr": CR,
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,
