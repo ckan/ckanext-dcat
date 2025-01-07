@@ -1,8 +1,7 @@
 # ckanext-dcat
 
 
-[![Tests](https://github.com/ckan/ckanext-dcat/workflows/Tests/badge.svg?branch=master)](https://github.com/ckan/ckanext-dcat/actions)
-[![Code Coverage](http://codecov.io/github/ckan/ckanext-dcat/coverage.svg?branch=master)](http://codecov.io/github/ckan/ckanext-dcat?branch=master)
+[![Tests](https://github.com/ckan/ckanext-dcat/actions/workflows/test.yml/badge.svg)](https://github.com/ckan/ckanext-dcat/actions)
 
 
 Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data publishers expose and consume metadata as serialized RDF documents using [DCAT](https://github.com/ckan/ckan).
