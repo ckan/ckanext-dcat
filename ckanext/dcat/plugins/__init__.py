@@ -81,7 +81,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     # IConfigurer
 
     def update_config(self, config):
-        p.toolkit.add_template_directory(config, '../templates')
+        p.toolkit.add_template_directory(config, '../templates/dcat')
 
         # Check catalog URI on startup to emit a warning if necessary
         utils.catalog_uri()
@@ -243,7 +243,14 @@ class DCATJSONInterface(p.SingletonPlugin):
 
 
 class StructuredDataPlugin(p.SingletonPlugin):
+
+    p.implements(p.IConfigurer, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
+
+    # IConfigurer
+
+    def update_config(self, config):
+        p.toolkit.add_template_directory(config, '../templates/structured_data')
 
     # ITemplateHelpers
 
