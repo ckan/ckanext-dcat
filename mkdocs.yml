@@ -76,4 +76,5 @@ nav:
     - Google Dataset Search: 'google-dataset-search.md'
     - CLI: 'cli.md'
     - Configuration reference: 'configuration.md'
+  - Contributing: 'contributing.md'
   - CHANGELOG: 'changelog.md'

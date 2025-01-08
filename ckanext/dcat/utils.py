@@ -37,7 +37,6 @@ CONTENT_TYPES = {
 DCAT_CLEAN_TAGS = 'ckanext.dcat.clean_tags'
 
 DEFAULT_CATALOG_ENDPOINT = '/catalog.{_format}'
-ENABLE_RDF_ENDPOINTS_CONFIG = 'ckanext.dcat.enable_rdf_endpoints'
 ENABLE_CONTENT_NEGOTIATION_CONFIG = 'ckanext.dcat.enable_content_negotiation'
 
 
@@ -95,43 +94,6 @@ def field_labels():
         'created': _('Created'),
     }
 
-def helper_available(helper_name):
-    '''
-    Checks if a given helper name is available on `h`
-    '''
-    try:
-        getattr(h, helper_name)
-    except (AttributeError, HelperError):
-        return False
-    return True
-
-def structured_data(dataset_id, profiles=None, _format='jsonld'):
-    '''
-    Returns a string containing the structured data of the given
-    dataset id and using the given profiles (if no profiles are supplied
-    the default profiles are used).
-
-    This string can be used in the frontend.
-    '''
-    if not profiles:
-        profiles = ['schemaorg']
-
-    data = toolkit.get_action('dcat_dataset_show')(
-        {},
-        {
-            'id': dataset_id,
-            'profiles': profiles,
-            'format': _format,
-        }
-    )
-    # parse result again to prevent UnicodeDecodeError and add formatting
-    try:
-        json_data = json.loads(data)
-        return json.dumps(json_data, sort_keys=True,
-                          indent=4, separators=(',', ': '), cls=json.JSONEncoderForHTML)
-    except ValueError:
-        # result was not JSON, return anyway
-        return data
 
 def catalog_uri():
     '''
@@ -459,11 +421,3 @@ def read_catalog_page(_format):
     response.headers['Content-type'] = CONTENT_TYPES[_format]
 
     return response
-
-
-def endpoints_enabled():
-    return toolkit.asbool(config.get(ENABLE_RDF_ENDPOINTS_CONFIG, True))
-
-
-def get_endpoint(_type='dataset'):
-    return 'dcat.read_dataset' if _type == 'dataset' else 'dcat.read_catalog'

@@ -1,0 +1,13 @@
+{% ckan_extends %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  {% block structured_data %}
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {{ h.structured_data(pkg) | safe }}
+    </script>
+  {% endblock %}
+{% endblock %}

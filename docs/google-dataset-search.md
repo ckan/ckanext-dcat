@@ -2,18 +2,22 @@
 
 The `structured_data` plugin will add the necessary markup to dataset pages in order to get your datasets indexed by [Google Dataset Search](https://toolbox.google.com/datasetsearch). This markup is a [structured data](https://developers.google.com/search/docs/guides/intro-structured-data) JSON-LD snippet that uses the [schema.org](https://schema.org) vocabulary to describe the dataset.
 
-    ckan.plugins = dcat structured_data
+    ckan.plugins = structured_data
 
-By default this uses the `schemaorg` profile (see [Profiles](profiles.md#profiles)) to serialize the dataset to JSON-LD, which is then added to the dataset detail page.
-To change the schema, you have to override the Jinja template block called `structured_data` in [`templates/package/read_base.html`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/templates/package/read_base.html) and call the template helper function with different parameters:
+You don't need to load the `dcat` plugin to use the `structured_data` plugin, but you can load them both to enable both functionalities.
+
+The plugin uses the `schemaorg` profile by default (see [Profiles](profiles.md#profiles)) to serialize the dataset to JSON-LD, which is then added to the dataset detail page.
+
+To use a custom profile, you have to override the Jinja template block called `structured_data` in [`templates/package/read_base.html`](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/templates/structured_data/package/read_base.html) and call the template helper function with different parameters:
 
     {% block structured_data %}
       <script type="application/ld+json">
-      {{ h.structured_data(pkg.id, ['my_custom_schema'])|safe }}
+      {{ h.structured_data(pkg, ['my_custom_schema']) | safe }}
       </script>
     {% endblock %}
 
-Example output of structured data in JSON-LD:
+
+Below is an example of the structured data in JSON-LD embedded in the dataset page source:
 
 ```html
     <script type="application/ld+json">
