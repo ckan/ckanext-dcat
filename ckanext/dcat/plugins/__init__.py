@@ -264,6 +264,7 @@ class CroissantPlugin(p.SingletonPlugin):
 
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
+    p.implements(p.IBlueprint)
 
     # IConfigurer
 
@@ -276,3 +277,8 @@ class CroissantPlugin(p.SingletonPlugin):
         return {
             'croissant': helpers.croissant,
         }
+
+    # IBlueprint
+
+    def get_blueprint(self):
+        return [blueprints.croissant]
