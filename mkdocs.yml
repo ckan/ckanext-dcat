@@ -74,6 +74,7 @@ nav:
   - Other features:
     - 'harvester.md'
     - Google Dataset Search: 'google-dataset-search.md'
+    - Croissant ML: 'croissant.md'
     - CLI: 'cli.md'
     - Configuration reference: 'configuration.md'
   - Contributing: 'contributing.md'
