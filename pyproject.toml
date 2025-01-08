@@ -51,6 +51,7 @@ dcat_json_interface = "ckanext.dcat.plugins:DCATJSONInterface"
 dcat = "ckanext.dcat.plugins:DCATPlugin"
 
 structured_data = "ckanext.dcat.plugins:StructuredDataPlugin"
+croissant = "ckanext.dcat.plugins:CroissantPlugin"
 # Test plugins
 test_rdf_harvester = "ckanext.dcat.tests.harvester.test_harvester:TestRDFHarvester"
 test_rdf_null_harvester = "ckanext.dcat.tests.harvester.test_harvester:TestRDFNullHarvester"

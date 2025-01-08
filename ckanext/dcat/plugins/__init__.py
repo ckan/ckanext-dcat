@@ -258,3 +258,21 @@ class StructuredDataPlugin(p.SingletonPlugin):
         return {
             'structured_data': helpers.structured_data,
         }
+
+
+class CroissantPlugin(p.SingletonPlugin):
+
+    p.implements(p.IConfigurer, inherit=True)
+    p.implements(p.ITemplateHelpers, inherit=True)
+
+    # IConfigurer
+
+    def update_config(self, config):
+        p.toolkit.add_template_directory(config, '../templates/croissant')
+
+    # ITemplateHelpers
+
+    def get_helpers(self):
+        return {
+            'croissant': helpers.croissant,
+        }
