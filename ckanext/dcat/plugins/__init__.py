@@ -19,6 +19,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_datasets_list,
                                 dcat_auth,
                                 )
+from ckanext.dcat import helpers
 from ckanext.dcat import utils
 from ckanext.dcat.validators import dcat_validators
 
@@ -81,7 +82,7 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
     # IConfigurer
 
     def update_config(self, config):
-        p.toolkit.add_template_directory(config, '../templates')
+        p.toolkit.add_template_directory(config, '../templates/dcat')
 
         # Check catalog URI on startup to emit a warning if necessary
         utils.catalog_uri()
@@ -102,9 +103,8 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     def get_helpers(self):
         return {
-            'helper_available': utils.helper_available,
-            'dcat_get_endpoint': utils.get_endpoint,
-            'dcat_endpoints_enabled': utils.endpoints_enabled,
+            'dcat_get_endpoint': helpers.get_endpoint,
+            'dcat_endpoints_enabled': helpers.endpoints_enabled,
         }
 
     # IActions
@@ -243,11 +243,18 @@ class DCATJSONInterface(p.SingletonPlugin):
 
 
 class StructuredDataPlugin(p.SingletonPlugin):
+
+    p.implements(p.IConfigurer, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
+
+    # IConfigurer
+
+    def update_config(self, config):
+        p.toolkit.add_template_directory(config, '../templates/structured_data')
 
     # ITemplateHelpers
 
     def get_helpers(self):
         return {
-            'structured_data': utils.structured_data,
+            'structured_data': helpers.structured_data,
         }

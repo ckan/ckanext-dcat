@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, jsonify, make_response
+from flask import Blueprint, jsonify
 
 from ckantoolkit import config
 
@@ -7,6 +7,7 @@ from ckan.views.dataset import CreateView
 
 import ckan.plugins.toolkit as toolkit
 import ckanext.dcat.utils as utils
+from ckanext.dcat.helpers import endpoints_enabled
 
 dcat = Blueprint(
     'dcat',
@@ -23,7 +24,7 @@ def read_dataset(_id, _format=None, package_type=None):
     return utils.read_dataset_page(_id, _format)
 
 
-if utils.endpoints_enabled():
+if endpoints_enabled():
 
     # requirements={'_format': 'xml|rdf|n3|ttl|jsonld'}
     dcat.add_url_rule(config.get('ckanext.dcat.catalog_endpoint',
