@@ -19,6 +19,7 @@ from ckanext.dcat.logic import (dcat_dataset_show,
                                 dcat_datasets_list,
                                 dcat_auth,
                                 )
+from ckanext.dcat import helpers
 from ckanext.dcat import utils
 from ckanext.dcat.validators import dcat_validators
 
@@ -102,9 +103,8 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
 
     def get_helpers(self):
         return {
-            'helper_available': utils.helper_available,
-            'dcat_get_endpoint': utils.get_endpoint,
-            'dcat_endpoints_enabled': utils.endpoints_enabled,
+            'dcat_get_endpoint': helpers.get_endpoint,
+            'dcat_endpoints_enabled': helpers.endpoints_enabled,
         }
 
     # IActions
@@ -256,5 +256,5 @@ class StructuredDataPlugin(p.SingletonPlugin):
 
     def get_helpers(self):
         return {
-            'structured_data': utils.structured_data,
+            'structured_data': helpers.structured_data,
         }
