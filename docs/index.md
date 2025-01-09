@@ -116,6 +116,6 @@ These are implemented internally using:
 
 * A base [mapping](mapping.md) between DCAT and CKAN datasets and viceversa (compatible with **DCAT-AP** [v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), [v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210) and [v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) and **DCAT-US** [v3](https://doi-do.github.io/dcat-us/)).
 
-* An [RDF Parser](profiles.md#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](profiles.md#profiles).
+* An [RDF Parser](writing-profiles.md#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](profiles.md#profiles).
 
-* An [RDF Serializer](profiles.md#rdf-dcat-serializer) that allows to transform CKAN datasets metadata to different semantic formats, also allowing customizable [profiles](profiles.md#profiles).
+* An [RDF Serializer](writing-profiles.md#rdf-dcat-serializer) that allows to transform CKAN datasets metadata to different semantic formats, also allowing customizable [profiles](profiles.md#profiles).

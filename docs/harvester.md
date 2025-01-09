@@ -1,6 +1,6 @@
 ## RDF DCAT harvester
 
-The [RDF parser](profiles.md#rdf-dcat-parser) described in the previous section has been integrated into a harvester,
+The [RDF parser](writing-profiles.md#rdf-dcat-parser) described in the previous section has been integrated into a harvester,
 to allow automatic import of datasets from remote sources. To enable the RDF harvester, add the `harvest` and `dcat_rdf_harvester` plugins to your CKAN configuration file (you will also need to install [ckanext-harvest](https://github.com/ckan/ckanext-harvest)):
 
     ckan.plugins = ... harvest dcat_rdf_harvester

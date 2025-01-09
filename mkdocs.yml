@@ -70,7 +70,9 @@ nav:
   - DCAT support:
     - 'endpoints.md'
     - DCAT ↔  CKAN mapping: 'mapping.md'
-    - 'profiles.md'
+    - Base profiles: 'profiles.md'
+    - Application profiles: 'application-profiles.md'
+    - Writing profiles: 'writing-profiles.md'
   - Other features:
     - 'harvester.md'
     - Google Dataset Search: 'google-dataset-search.md'
