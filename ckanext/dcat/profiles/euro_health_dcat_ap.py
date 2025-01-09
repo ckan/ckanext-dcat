@@ -1,7 +1,7 @@
-from rdflib import RDF, SKOS, XSD, BNode, Literal, URIRef, term
+from rdflib import XSD, Literal, URIRef
 from rdflib.namespace import Namespace
 
-from ckanext.dcat.profiles.base import DCAT, DCT, CleanedURIRef, URIRefOrLiteral
+from ckanext.dcat.profiles.base import URIRefOrLiteral
 from ckanext.dcat.profiles.euro_dcat_ap_3 import EuropeanDCATAP3Profile
 
 # HealthDCAT-AP namespace. Note: not finalized yet
@@ -18,8 +18,9 @@ namespaces = {
 
 class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
     """
-    A profile implementing HealthDCAT-AP, a health-related extension of the DCAT application profile
-    for sharing information about Catalogues containing Datasets and Data Services descriptions in Europe.
+    A profile implementing HealthDCAT-AP, a health-related extension of the DCAT
+    application profile for sharing information about Catalogues containing Datasets
+    and Data Services descriptions in Europe.
     """
 
     def parse_dataset(self, dataset_dict, dataset_ref):
@@ -69,10 +70,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 dataset_dict[key] = value
 
     def __parse_healthdcat_stringvalues(self, dataset_dict, dataset_ref):
-        for (
-            key,
-            predicate,
-        ) in (
+        for (key, predicate,) in (
             ("analytics", HEALTHDCATAP.analytics),
             ("code_values", HEALTHDCATAP.hasCodeValues),
             ("coding_system", HEALTHDCATAP.hasCodingSystem),
@@ -94,7 +92,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         for prefix, namespace in namespaces.items():
             self.g.bind(prefix, namespace)
 
-        ## key, predicate, fallbacks, _type, _class
+        # key, predicate, fallbacks, _type, _class
         items = [
             ("analytics", HEALTHDCATAP.analytics, None, URIRefOrLiteral),
             ("code_values", HEALTHDCATAP.hasCodeValues, None, URIRefOrLiteral),
@@ -149,71 +147,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 )
             except (ValueError, TypeError):
                 self.g.add((dataset_ref, predicate, Literal(value)))
-
-    def _add_timeframe_triple(self, dataset_dict, dataset_ref):
-        temporal = dataset_dict.get("temporal_coverage")
-        if (
-            isinstance(temporal, list)
-            and len(temporal)
-            and self._not_empty_dict(temporal[0])
-        ):
-            for item in temporal:
-                temporal_ref = BNode()
-                self.g.add((temporal_ref, RDF.type, DCT.PeriodOfTime))
-                if item.get("start"):
-                    self._add_date_triple(temporal_ref, DCAT.startDate, item["start"])
-                if item.get("end"):
-                    self._add_date_triple(temporal_ref, DCAT.endDate, item["end"])
-                self.g.add((dataset_ref, DCT.temporal, temporal_ref))
-
-    def _add_relationship(
-        self,
-        dataset_ref,
-        dataset_dict,
-        relation_key,
-        rdf_predicate,
-    ):
-        """
-        Adds one or more Relationships to the RDF graph.
-
-        :param dataset_ref: The RDF reference of the dataset
-        :param dataset_dict: The dataset dictionary containing agent information
-        :param relation_key: field name in the CKAN dict (.e.g. "qualifiedRelation")
-        :param rdf_predicate: The RDF predicate (DCAT.qualifiedRelation)
-        """
-        relation = dataset_dict.get(relation_key)
-        if (
-            isinstance(relation, list)
-            and len(relation)
-            and self._not_empty_dict(relation[0])
-        ):
-            relations = relation
-
-            for relation in relations:
-
-                agent_uri = relation.get("uri")
-                if agent_uri:
-                    agent_ref = CleanedURIRef(agent_uri)
-                else:
-                    agent_ref = BNode()
-
-                self.g.add((agent_ref, DCT.type, DCAT.Relationship))
-                self.g.add((dataset_ref, rdf_predicate, agent_ref))
-
-                self._add_triple_from_dict(
-                    relation,
-                    agent_ref,
-                    DCT.relation,
-                    "relation",
-                    _type=URIRefOrLiteral,
-                )
-                self._add_triple_from_dict(
-                    relation,
-                    agent_ref,
-                    DCAT.hadRole,
-                    "role",
-                    _type=URIRefOrLiteral,
-                )
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)
