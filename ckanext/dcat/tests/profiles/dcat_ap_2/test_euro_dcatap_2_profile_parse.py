@@ -555,7 +555,6 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
 
         # List
         endpoint_url_list = access_service.get('endpoint_url')
-        print(access_service)
         assert len(endpoint_url_list) == 1
         assert 'http://publications.europa.eu/webapi/rdf/sparql' in endpoint_url_list
 

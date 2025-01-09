@@ -70,6 +70,12 @@
         </dct:PeriodOfTime>
     </dct:temporal>
     <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
+    <dcat:qualifiedRelation>
+      <dcat:Relationship>
+        <dct:relation rdf:resource="http://example.com/dataset/3.141592"/>
+        <dcat:hadRole rdf:resource="http://www.iana.org/assignments/relation/related"/>
+      </dcat:Relationship>
+    </dcat:qualifiedRelation>
     <dcat:contactPoint>
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>
