@@ -268,6 +268,23 @@ dataset_fields:
   help_inline: true
   help_text: This property refers to a related Dataset that is a version, edition, or adaptation of the described Dataset.
 
+- field_name: qualified_relation
+  label: Qualified relation
+  repeating_label: Relationship
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: relation
+      label: Relation
+      help_text: The resource related to the source resource.
+
+    - field_name: role
+      label: Role
+      help_text: The function of an entity or agent with respect to another entity or resource.
+  help_text: A description of a relationship with another resource.
+
 #- field_name: hvd_category
 #  label: HVD Category
 #  preset: multiple_text

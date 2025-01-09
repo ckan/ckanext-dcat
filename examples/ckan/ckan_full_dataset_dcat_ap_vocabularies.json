@@ -148,6 +148,13 @@
         }
     ],
     "spatial_resolution_in_meters": 1.5,
+    "qualified_relation": [
+        {
+            "uri": "",
+            "relation": "http://example.com/dataset/3.141592",
+            "role": "http://www.iana.org/assignments/relation/related"
+        }
+    ],
     "resources": [
         {
             "name": "Resource 1",

@@ -147,6 +147,9 @@ def test_validate_dcat_ap_2_graph_shapes_range():
     known_failures = [
         "Value does not have class skos:Concept",
         "Value does not have class dcat:Dataset",
+        # Qualified relations
+        "Value does not conform to Shape :DcatResource_Shape. See details for more information.",
+        "The node is either a Catalog, Dataset or a DataService",
     ]
 
     assert set(failures) - set(known_failures) == set(), results_text

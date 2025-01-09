@@ -10,6 +10,7 @@ from .base import (
     FOAF,
     SKOS,
     LOCN,
+    RDFS,
 )
 
 
@@ -355,7 +356,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 else:
                     agent_ref = BNode()
 
-                self.g.add((agent_ref, DCT.type, DCAT.Relationship))
+                self.g.add((agent_ref, RDF.type, DCAT.Relationship))
                 self.g.add((dataset_ref, rdf_predicate, agent_ref))
 
                 self._add_triple_from_dict(
@@ -364,6 +365,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     DCT.relation,
                     "relation",
                     _type=URIRefOrLiteral,
+                    _class=RDFS.Resource,
                 )
                 self._add_triple_from_dict(
                     relation,
@@ -371,6 +373,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     DCAT.hadRole,
                     "role",
                     _type=URIRefOrLiteral,
+                    _class=DCAT.Role,
                 )
 
     @staticmethod
