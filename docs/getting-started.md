@@ -13,7 +13,7 @@
 
 3.  Enable the required plugins in your ini file:
 
-        ckan.plugins = dcat dcat_rdf_harvester structured_data
+        ckan.plugins = dcat dcat_rdf_harvester structured_data croissant
 
 4. To use the pre-built schemas, install [ckanext-scheming](https://github.com/ckan/ckanext-scheming):
 
@@ -28,7 +28,7 @@ For further configuration options available, see [Configuration reference](confi
 ## Schemas
 
 The extension includes ready to use [ckanext-scheming](https://github.com/ckan/ckanext-scheming) schemas
-that enable DCAT support. These include a schema definition file (located
+that enable [DCAT](https://www.w3.org/TR/vocab-dcat-3/) and [Croissant](https://docs.mlcommons.org/croissant/docs/croissant-spec.html) support. These include a schema definition file (located
 in [`ckanext/dcat/schemas`](https://github.com/ckan/ckanext-dcat/tree/master/ckanext/dcat/schemas))
 plus extra validators and other custom logic that integrates the metadata modifications with the
 RDF DCAT [Parsers](profiles.md#rdf-dcat-parser) and [Serializers](profiles.md#rdf-dcat-serializer) and other CKAN features and extensions.
@@ -38,6 +38,7 @@ There are the following schemas currently included with the extension:
 * *dcat_ap_recommended.yaml*: Includes the recommended properties for `dcat:Dataset` and `dcat:Distribution` according to the DCAT AP specification. You can use this schema with the `euro_dcat_ap_2` (+ `euro_dcat_ap_scheming`) and `euro_dcat_ap_3` profiles.
 * *dcat_ap_full.yaml*: Includes most of the properties defined for `dcat:Dataset` and `dcat:Distribution` in the [DCAT AP v2.1](https://semiceu.github.io/DCAT-AP/releases/2.1.1/) and [DCAT AP v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) specification. You can use this schema with the `euro_dcat_ap_2` (+ `euro_dcat_ap_scheming`) and `euro_dcat_ap_3` profiles.
 * *dcat_ap_multilingual.yaml*: An example schema implementing multilingual metadata in some fields using [ckanext-fluent](https://github.com/ckan/ckanext-fluent). See [Multilingual support](profiles.md#multilingual-support) for more information.
+* *croissant.yaml*: Includes a modified implementation of `schema:Dataset` and all properties for [`cr:FileObject`](https://docs.mlcommons.org/croissant/docs/croissant-spec.html#fileobject) and [`cr:FileSet`](https://docs.mlcommons.org/croissant/docs/croissant-spec.html#fileset). Currently [`cr:RecordSet`](https://docs.mlcommons.org/croissant/docs/croissant-spec.html#recordset) is not catered for. You can use this schema with the `croissant` profile.
 
 
 Most sites will want to use these as a base to create their own custom schema to address their own requirements, perhaps alongside a [custom profile](profiles.md#profiles). Of course site maintainers can add or remove schema fields, as well as change the existing validators.
