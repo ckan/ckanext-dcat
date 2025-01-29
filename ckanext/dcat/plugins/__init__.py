@@ -178,9 +178,9 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                                         # Index a flattened version
                                         new_key = f'extras_{field["field_name"]}__{key}'
                                         if not dataset_dict.get(new_key):
-                                            dataset_dict[new_key] = value
+                                            dataset_dict[new_key] = str(value)
                                         else:
-                                            dataset_dict[new_key] += ' ' + value
+                                            dataset_dict[new_key] += ' ' + str(value)
                     else:
                         # Log or handle the case where the field is not a list
                         logging.debug(
