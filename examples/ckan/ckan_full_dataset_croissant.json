@@ -6,7 +6,7 @@
     "id_given": "my-custom-id",
     "is_live_dataset": true,
     "url": "http://example.org/ds1",
-    "version": "1.0b",
+    "version": "1.0.0",
     "tags": [
         {
             "name": "Tag 1"

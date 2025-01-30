@@ -8,6 +8,7 @@ import datetime
 
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
+from rdflib.namespace import Namespace
 from ckantoolkit import url_for, config
 
 from ckanext.dcat.utils import resource_uri
@@ -16,8 +17,13 @@ from .base import (
     CR,
     DCT,
     RDF,
-    SCHEMA,
 )
+
+# The Croissant validator insists on https and will consider invalid
+# output that uses the http namespace
+
+SCHEMA = Namespace("https://schema.org/")
+
 
 class CroissantProfile(RDFProfile):
     """

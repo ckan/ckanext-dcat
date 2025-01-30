@@ -9,13 +9,15 @@ from ckanext.dcat.tests.utils import get_file_contents
 
 def test_valid_output():
 
-    dataset_dict = json.loads(get_file_contents("ckan/ckan_full_dataset_croissant.json"))
+    dataset_dict = json.loads(
+        get_file_contents("ckan/ckan_full_dataset_croissant.json")
+    )
 
     s = RDFSerializer(profiles=["croissant"])
 
     s.graph_from_dataset(dataset_dict)
 
-    croissant_dict = s.g.serialize(format="json-ld")
+    croissant_dict = json.loads(s.g.serialize(format="json-ld", auto_compact=True))
 
     try:
         mlc.Dataset(croissant_dict)
