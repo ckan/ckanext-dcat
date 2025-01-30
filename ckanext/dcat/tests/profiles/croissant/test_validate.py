@@ -6,7 +6,7 @@ from ckan.tests.helpers import call_action
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.tests.utils import get_file_contents
 
-
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="croissant is not available in py<3.10")
 def test_valid_output():
 
     dataset_dict = json.loads(
