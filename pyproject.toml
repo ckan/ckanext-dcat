@@ -1,6 +1,6 @@
 [project]
 name = "ckanext-dcat"
-version = "2.1.0"
+version = "2.2.0"
 description = "Plugins for exposing and consuming DCAT metadata on CKAN"
 authors = [
     {name = "Adrià Mercader", email = "amercadero@gmail.com"}
