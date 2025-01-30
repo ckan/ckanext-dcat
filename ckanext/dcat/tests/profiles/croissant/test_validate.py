@@ -1,4 +1,5 @@
 import json
+import sys
 
 import mlcroissant as mlc
 
