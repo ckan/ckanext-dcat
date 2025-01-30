@@ -2,6 +2,8 @@ import json
 
 import mlcroissant as mlc
 
+import pytest
+
 from ckan.tests.helpers import call_action
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.tests.utils import get_file_contents
