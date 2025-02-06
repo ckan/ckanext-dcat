@@ -3,6 +3,7 @@ import json
 import re
 
 from dateutil.parser import parse as parse_date
+from ckan import model
 from ckantoolkit import (
     missing,
     StopOnError,
@@ -13,6 +14,7 @@ from ckantoolkit import (
 try:
     from ckanext.scheming.validation import scheming_validator
 except ImportError:
+
     def scheming_validator(func):
         return func
 
@@ -139,7 +141,33 @@ def scheming_multiple_number(field, schema):
     return _scheming_multiple_number
 
 
+def dataset_id_or_uri(value):
+
+    if not value:
+        return
+
+    # value should have been validated by scheming_multiple_text
+    items = json.loads(value)
+
+    for item in items:
+        item = item.strip()
+        if item.startswith("http://") or item.startswith("https://"):
+            continue
+
+        pkg = model.Package.get(item)
+        if not pkg:
+            raise Invalid(_(f"Dataset not found: {item}"))
+
+        if pkg.state == "deleted":
+            raise Invalid(_(f"Can not link to deleted dataset: {item}"))
+
+    return value
+
+    ipdb.set_trace()
+
+
 dcat_validators = {
     "scheming_multiple_number": scheming_multiple_number,
     "dcat_date": dcat_date,
+    "dataset_id_or_uri": dataset_id_or_uri,
 }

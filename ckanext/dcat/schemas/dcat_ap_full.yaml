@@ -263,10 +263,13 @@ dataset_fields:
 
 - field_name: has_version
   label: Has version
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_text
-  help_inline: true
+  preset: dataset_relation
   help_text: This property refers to a related Dataset that is a version, edition, or adaptation of the described Dataset.
+
+- field_name: source
+  label: Source
+  preset: dataset_relation
+  help_text: A related Dataset from which the described Dataset is derived.
 
 - field_name: qualified_relation
   label: Qualified relation
