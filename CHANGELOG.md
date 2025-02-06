@@ -1,6 +1,18 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.1.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.2.0...HEAD)
+
+## [v2.2.0](https://github.com/ckan/ckanext-dcat/compare/v2.1.0...v2.2.0) - 2025-01-30
+
+* New profile for the [HealthDCAT-AP](https://healthdcat-ap.github.io/) application profile. Check the
+  [documentation]() for all details. Thanks to folks at Health-RI for the contribution
+  ([#326](https://github.com/ckan/ckanext-dcat/pull/326))
+* Support for Qualified relations at the `dcat:Dataset` level in all DCAT base profiles ([97ca441](https://github.com/ckan/ckanext-dcat/commit/97ca441ec80bd68060638da9e84662da0c656de6))
+* Fix parsing of spatial properties when using scheming ([#327](https://github.com/ckan/ckanext-dcat/pull/327))
+* Add VCARD.hasURL property parsing/serialization ([#324](https://github.com/ckan/ckanext-dcat/pull/324))
+* Support for rdflib 7.2 (date parsing) ([#323](https://github.com/ckan/ckanext-dcat/pull/323))
+* Fix: Move has version from distribution to dataset ([#322](https://github.com/ckan/ckanext-dcat/pull/322))
+* Decouple `dcat` and `structured_data` plugins ([#329](https://github.com/ckan/ckanext-dcat/pull/329))
 
 ## [v2.1.0](https://github.com/ckan/ckanext-dcat/compare/v2.0.0...v2.1.0) - 2024-10-31
 
