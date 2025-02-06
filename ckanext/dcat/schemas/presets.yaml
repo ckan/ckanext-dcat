@@ -10,3 +10,14 @@ presets:
     form_snippet: date.html
     display_snippet: dcat_date.html
     validators: ignore_missing dcat_date convert_to_json_if_datetime
+
+
+- preset_name: dataset_relation
+  values:
+    # TODO: Widget to select existing datasets
+    form_snippet: multiple_text.html
+    # TODO: Snippet that turns ids into dataset page links
+    display_snippet: multiple_text.html
+    validators: ignore_missing scheming_multiple_text dataset_id_or_uri
+    output_validators: scheming_load_json
+    help_inline: true

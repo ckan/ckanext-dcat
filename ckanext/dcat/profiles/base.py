@@ -10,7 +10,7 @@ from geomet import InvalidGeoJSONException, wkt
 from rdflib import BNode, Literal, URIRef, term
 from rdflib.namespace import ORG, RDF, RDFS, SKOS, XSD, Namespace
 
-from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS, dataset_uri
 from ckanext.dcat.validators import is_date, is_year, is_year_month
 
 CNT = Namespace("http://www.w3.org/2011/content#")
@@ -1006,6 +1006,36 @@ class RDFProfile(object):
 
     def _add_list_triples_from_dict(self, _dict, subject, items):
         self._add_triples_from_dict(_dict, subject, items, list_value=True)
+
+    def _add_list_dataset_triples_from_dict(self, _dict, subject, items):
+        for item in items:
+            try:
+                key, predicate, fallbacks, _type, _class = item
+            except ValueError:
+                key, predicate, fallbacks, _type = item
+                _class = None
+            self._add_triple_from_dict(
+                _dict,
+                subject,
+                predicate,
+                key,
+                fallbacks=fallbacks,
+                list_value=True,
+                _type=_type,
+                _class=_class,
+                value_modifier=self._get_local_uri
+            )
+
+    def _get_local_uri(self, value):
+
+        items = self._read_list_value(value)
+        new_items = []
+        for item in items:
+            if item.startswith("http://") or item.startswith("https://"):
+                new_items.append(item)
+            else:
+                new_items.append(dataset_uri({"id": item}))
+        return new_items
 
     def _add_triples_from_dict(
         self, _dict, subject, items, list_value=False, date_value=False
