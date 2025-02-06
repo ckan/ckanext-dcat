@@ -163,8 +163,6 @@ def dataset_id_or_uri(value):
 
     return value
 
-    ipdb.set_trace()
-
 
 dcat_validators = {
     "scheming_multiple_number": scheming_multiple_number,
