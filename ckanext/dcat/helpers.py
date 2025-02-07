@@ -1,11 +1,13 @@
 """
 Helpers used by templates
 """
+
 import simplejson as json
 
 import ckantoolkit as toolkit
 
 from ckanext.dcat.processors import RDFSerializer
+from ckanext.dcat.profiles.croissant import JSONLD_CONTEXT
 
 config = toolkit.config
 
@@ -71,4 +73,4 @@ def croissant(dataset_dict, profiles=None):
     if not profiles:
         profiles = ["croissant"]
 
-    return _get_serialization(dataset_dict, profiles, "jsonld")
+    return _get_serialization(dataset_dict, profiles, "jsonld", context=JSONLD_CONTEXT)
