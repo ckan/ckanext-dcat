@@ -8,6 +8,7 @@ import datetime
 
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
+from rdflib.namespace import Namespace
 from ckantoolkit import url_for, config
 
 from ckanext.dcat.utils import resource_uri
@@ -16,8 +17,62 @@ from .base import (
     CR,
     DCT,
     RDF,
-    SCHEMA,
 )
+
+# The Croissant validator insists on https and will consider invalid
+# output that uses the http namespace
+
+SCHEMA = Namespace("https://schema.org/")
+
+
+JSONLD_CONTEXT = {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "sc": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "dct": "http://purl.org/dc/terms/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+}
+
+
+
 
 class CroissantProfile(RDFProfile):
     """
@@ -296,9 +351,23 @@ class CroissantProfile(RDFProfile):
         items = [
             ("name", SCHEMA.name, None, Literal),
             ("description", SCHEMA.description, None, Literal),
-            ("hash", SCHEMA.sha256, None, Literal),
         ]
         self._add_triples_from_dict(resource_dict, resource_ref, items)
+
+        if resource_dict.get("hash"):
+            predicate = None
+            if len(resource_dict["hash"]) == 32:
+                predicate = SCHEMA.md5
+            elif len(resource_dict["hash"]) == 64:
+                predicate = SCHEMA.sha256
+            if predicate:
+                self._add_triple_from_dict(
+                    resource_dict,
+                    resource_ref,
+                    predicate,
+                    "hash",
+                    _type=Literal
+                )
 
     def _resource_list_fields_graph(self, resource_ref, resource_dict):
         items = [
@@ -347,13 +416,16 @@ class CroissantProfile(RDFProfile):
                 self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is added to the dataset_ref node, not to the resource_ref node
                 self.g.add((subresource_ref, RDF.type, subresource_type_specific))
 
-                items = [
-                    ("description", SCHEMA.description, None, Literal),
-                    ("format", SCHEMA.encodingFormat, None, Literal),
-                ]
-                self._add_triples_from_dict(subresource_dict, subresource_ref, items)
+                # Basic fields
+                self._resource_basic_fields_graph(subresource_ref, subresource_dict)
 
-                if resource_dict.get("type") == "fileSet":
+                # Format
+                self._resource_format_graph(subresource_ref, subresource_dict)
+
+                # URL
+                self._resource_url_graph(subresource_ref, subresource_dict)
+
+                if subresource_dict.get("type") == "fileSet":
                     items = [
                         ("includes", CR.includes, None, Literal),
                         ("excludes", CR.excludes, None, Literal),
