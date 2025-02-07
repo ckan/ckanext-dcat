@@ -57,19 +57,27 @@
             "description": "Some description",
             "url": "https://example.com/data.csv",
             "format": "CSV",
-            "type": "fileSet",
             "id_given": "my-custom-resource-id",
-            "size": 12323,
-            "hash": "4304cf2e751e6053c90b1804c89c0ebb758f395a",
+            "size": "12323",
+            "hash": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79",
             "subresources": [
                 {
                     "type": "fileObject",
-                    "id_given": "my-custom-subresource-id",
+                    "id_given": "my-custom-subresource-id-1",
+                    "url": "https://example.com/data.csv",
                     "description": "Test subresource 1",
+                    "hash": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79",
+                    "format": "CSV"
+                },
+                {
+                    "type": "fileSet",
+                    "id_given": "my-custom-subresource-id-2",
+                    "description": "Test subresource 2",
                     "format": "CSV",
                     "includes": "**.csv",
                     "excludes": "**.txt"
                 }
+
             ]
         }
     ]

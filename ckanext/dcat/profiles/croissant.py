@@ -351,9 +351,23 @@ class CroissantProfile(RDFProfile):
         items = [
             ("name", SCHEMA.name, None, Literal),
             ("description", SCHEMA.description, None, Literal),
-            ("hash", SCHEMA.sha256, None, Literal),
         ]
         self._add_triples_from_dict(resource_dict, resource_ref, items)
+
+        if resource_dict.get("hash"):
+            predicate = None
+            if len(resource_dict["hash"]) == 32:
+                predicate = SCHEMA.md5
+            elif len(resource_dict["hash"]) == 64:
+                predicate = SCHEMA.sha256
+            if predicate:
+                self._add_triple_from_dict(
+                    resource_dict,
+                    resource_ref,
+                    predicate,
+                    "hash",
+                    _type=Literal
+                )
 
     def _resource_list_fields_graph(self, resource_ref, resource_dict):
         items = [
@@ -402,13 +416,16 @@ class CroissantProfile(RDFProfile):
                 self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is added to the dataset_ref node, not to the resource_ref node
                 self.g.add((subresource_ref, RDF.type, subresource_type_specific))
 
-                items = [
-                    ("description", SCHEMA.description, None, Literal),
-                    ("format", SCHEMA.encodingFormat, None, Literal),
-                ]
-                self._add_triples_from_dict(subresource_dict, subresource_ref, items)
+                # Basic fields
+                self._resource_basic_fields_graph(subresource_ref, subresource_dict)
 
-                if resource_dict.get("type") == "fileSet":
+                # Format
+                self._resource_format_graph(subresource_ref, subresource_dict)
+
+                # URL
+                self._resource_url_graph(subresource_ref, subresource_dict)
+
+                if subresource_dict.get("type") == "fileSet":
                     items = [
                         ("includes", CR.includes, None, Literal),
                         ("excludes", CR.excludes, None, Literal),
