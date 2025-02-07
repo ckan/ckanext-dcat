@@ -21,11 +21,13 @@ def get_endpoint(_type="dataset"):
     return "dcat.read_dataset" if _type == "dataset" else "dcat.read_catalog"
 
 
-def _get_serialization(dataset_dict, profiles=None, _format="jsonld"):
+def _get_serialization(dataset_dict, profiles=None, _format="jsonld", context=None):
 
     serializer = RDFSerializer(profiles=profiles)
 
-    output = serializer.serialize_dataset(dataset_dict, _format=_format)
+    output = serializer.serialize_dataset(
+        dataset_dict, _format=_format, context=context
+    )
 
     # parse result again to prevent UnicodeDecodeError and add formatting
     if _format == "jsonld":
