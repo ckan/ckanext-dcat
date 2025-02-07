@@ -1,7 +1,10 @@
 import json
 import sys
 
-import mlcroissant as mlc
+try:
+    import mlcroissant as mlc
+except ImportError:
+    pass
 
 import pytest
 
