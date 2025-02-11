@@ -220,9 +220,9 @@ class CroissantProfile(RDFProfile):
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
-    def _agent_graph(self, dataset_ref, dataset_dict, agent_type):
+    def _agent_graph(self, dataset_ref, dataset_dict, agent_role):
         agent_dicts = []
-        if agent_type == SCHEMA.creator:
+        if agent_role == SCHEMA.creator:
             if isinstance(self._get_dataset_value(dataset_dict, "creator"), list):
                 agent_dicts = self._get_dataset_value(dataset_dict, "creator") # required
             if len(agent_dicts) == 0 and isinstance(self._get_dataset_value(dataset_dict, "organization"), dict):
@@ -235,17 +235,17 @@ class CroissantProfile(RDFProfile):
                 if not agent_dict.get("url") and config.get("ckan.site_url"):
                     agent_dict["url"] = config.get("ckan.site_url")
                 agent_dicts = [agent_dict]
-        elif agent_type == SCHEMA.publisher:
+        elif agent_role == SCHEMA.publisher:
             if isinstance(self._get_dataset_value(dataset_dict, "publisher"), list):
                 agent_dicts = self._get_dataset_value(dataset_dict, "publisher") # recommended
 
         for agent_dict in agent_dicts:
             if agent_dict.get("type") == "organization":
-                agent_type_specific = SCHEMA.Organization
+                agent_type = SCHEMA.Organization
             elif agent_dict.get("type") == "person":
-                agent_type_specific = SCHEMA.Person
+                agent_type = SCHEMA.Person
             else:
-                agent_type_specific = SCHEMA.Organization
+                agent_type = SCHEMA.Organization
 
             agent_id_given = self._get_dict_value(agent_dict, "id_given") # optional
             if agent_id_given:
@@ -253,8 +253,8 @@ class CroissantProfile(RDFProfile):
             else:
                 agent_ref = BNode()
 
-            self.g.add((dataset_ref, agent_type, agent_ref))
-            self.g.add((agent_ref, RDF.type, agent_type_specific))
+            self.g.add((dataset_ref, agent_role, agent_ref))
+            self.g.add((agent_ref, RDF.type, agent_type))
 
             items = [
                 ("identifier", SCHEMA.identifier, None, Literal),
@@ -394,11 +394,11 @@ class CroissantProfile(RDFProfile):
 
             for subresource_dict in subresource_dicts:
                 if subresource_dict.get("type") == "fileObject":
-                    subresource_type_specific = CR.FileObject
+                    subresource_type = CR.FileObject
                 elif subresource_dict.get("type") == "fileSet":
-                    subresource_type_specific = CR.FileSet
+                    subresource_type = CR.FileSet
                 else:
-                    subresource_type_specific = CR.FileObject
+                    subresource_type = CR.FileObject
 
                 subresource_id_given = self._get_dict_value(subresource_dict, "id_given") # optional
                 if subresource_id_given:
@@ -407,7 +407,7 @@ class CroissantProfile(RDFProfile):
                     subresource_ref = BNode()
 
                 self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is added to the dataset_ref node, not to the resource_ref node
-                self.g.add((subresource_ref, RDF.type, subresource_type_specific))
+                self.g.add((subresource_ref, RDF.type, subresource_type))
 
                 # Basic fields
                 self._resource_basic_fields_graph(subresource_ref, subresource_dict)
