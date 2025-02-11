@@ -378,12 +378,6 @@ resource_fields:
       required: false
       preset: resource_format_autocomplete
 
-    # schema:sha256 | schema:Text | ONE
-    - field_name: hash
-      label: Hash
-      help_text: Checksum for the file contents.
-      required: false
-
     # cr:includes | schema:Text | MANY
     - field_name: includes
       label: Includes
