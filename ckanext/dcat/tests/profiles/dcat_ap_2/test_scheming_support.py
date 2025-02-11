@@ -265,6 +265,17 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
         wkt_geom = wkt.dumps(dataset["spatial_coverage"][0]["geom"], decimals=4)
         assert self._triple(g, spatial[0][2], LOCN.Geometry, wkt_geom, GSP.wktLiteral)
 
+        # Test qualified relation
+        relation = [t for t in g.triples((dataset_ref, DCAT.qualifiedRelation, None))]
+        assert len(relation) == 1
+        relation_items = [
+            (DCT.relation, URIRef(dataset_dict["qualified_relation"][0]["relation"])),
+            (DCAT.hadRole, URIRef(dataset_dict["qualified_relation"][0]["role"])),
+        ]
+        for predicate, value in relation_items:
+            assert self._triple(
+                g, relation[0][2], predicate, value
+            ), f"relation Predicate {predicate} does not have value {value}"
         # Statements
         for item in [
             ("access_rights", DCT.accessRights),
@@ -740,6 +751,23 @@ class TestSchemingParseSupport(BaseParseTest):
         )
         assert dataset["temporal_coverage"][0]["start"] == "1905-03-01"
         assert dataset["temporal_coverage"][0]["end"] == "2013-01-05"
+
+        assert (
+            dataset["spatial_coverage"][0]["uri"]
+            == "http://publications.europa.eu/mdr/authority/country/ZWE"
+        )
+        assert dataset["spatial_coverage"][0]["geom"]
+
+        assert len(dataset["qualified_relation"]) == 1
+        assert (
+            dataset["qualified_relation"][0]["relation"]
+            == "http://example.com/dataset/3.141592"
+        )
+        assert (
+            dataset["qualified_relation"][0]["role"]
+            == "http://www.iana.org/assignments/relation/related"
+        )
+
 
         resource = dataset["resources"][0]
 

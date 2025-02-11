@@ -42,7 +42,7 @@ RDF representations will be advertised using `<link rel="alternate">` tags on th
 </head>
 ```
 
-Check the [RDF DCAT Serializer](profiles.md#rdf-dcat-serializer) section for more details about how these are generated and how to customize the output using [profiles](profiles.md#profiles).
+Check the [RDF DCAT Serializer](writing-profiles.md#rdf-dcat-serializer) section for more details about how these are generated and how to customize the output using [profiles](profiles.md#profiles).
 
 
 You can specify the profile by using the `profiles=<profile1>,<profile2>` query parameter on the dataset endpoint (as a comma-separated list):

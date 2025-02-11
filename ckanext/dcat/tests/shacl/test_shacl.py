@@ -147,6 +147,9 @@ def test_validate_dcat_ap_2_graph_shapes_range():
     known_failures = [
         "Value does not have class skos:Concept",
         "Value does not have class dcat:Dataset",
+        # Qualified relations
+        "Value does not conform to Shape :DcatResource_Shape. See details for more information.",
+        "The node is either a Catalog, Dataset or a DataService",
     ]
 
     assert set(failures) - set(known_failures) == set(), results_text
@@ -199,15 +202,9 @@ def test_validate_dcat_us_3_graph():
 
     graph = graph_from_dataset("ckan_full_dataset_dcat_us_vocabularies.json")
 
-    graph.serialize(destination="graph.ttl")
-
-    graph.serialize(destination="graph.xml")
     path = _get_shacl_file_path("dcat-us_3.0_shacl_shapes.ttl")
     r = validate(graph, shacl_graph=path)
     conforms, results_graph, results_text = r
-
-    with open("shacl.txt", "w") as f:
-        f.write(results_text)
 
     failures = [
         str(t[2])

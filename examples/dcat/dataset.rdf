@@ -9,6 +9,7 @@
     xmlns:adms="http://www.w3.org/ns/adms#"
     xmlns:schema="http://schema.org/"
 	xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+    xmlns:locn="http://www.w3.org/ns/locn#"
 	xmlns:owl="http://www.w3.org/2002/07/owl#"
 	xmlns:spdx="http://spdx.org/rdf/terms#"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
@@ -38,6 +39,11 @@
     <dct:conformsTo>Standard 2</dct:conformsTo>
     <dct:license rdf:resource="https://data.some.org/link/to/license"/>
     <dct:spatial rdf:resource="http://publications.europa.eu/mdr/authority/country/ZWE"/>
+    <dct:spatial>
+      <dct:Location>
+        <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral">POLYGON ((11.9936 54.0486, 11.9936 54.2466, 12.3045 54.2466, 12.3045 54.0486, 11.9936 54.0486))</locn:geometry>
+      </dct:Location>
+    </dct:spatial>
     <dcat:spatialResolutionInMeters rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.5</dcat:spatialResolutionInMeters>
     <dct:accrualPeriodicity rdf:resource="http://purl.org/cld/freq/daily"/>
     <dct:accessRights>public</dct:accessRights>
@@ -64,10 +70,17 @@
         </dct:PeriodOfTime>
     </dct:temporal>
     <dcat:temporalResolution rdf:datatype="http://www.w3.org/2001/XMLSchema#duration">PT15M</dcat:temporalResolution>
+    <dcat:qualifiedRelation>
+      <dcat:Relationship>
+        <dct:relation rdf:resource="http://example.com/dataset/3.141592"/>
+        <dcat:hadRole rdf:resource="http://www.iana.org/assignments/relation/related"/>
+      </dcat:Relationship>
+    </dcat:qualifiedRelation>
     <dcat:contactPoint>
       <vcard:Organization>
         <vcard:fn>Point of Contact</vcard:fn>
         <vcard:hasEmail rdf:resource="mailto:contact@some.org"/>
+        <vcard:hasURL rdf:resource="https://example.org"/>
       </vcard:Organization>
     </dcat:contactPoint>
     <dct:publisher>
