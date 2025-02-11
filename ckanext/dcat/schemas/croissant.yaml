@@ -294,18 +294,6 @@ resource_fields:
   help_text: The name of the file. As much as possible, the name should reflect the name of the file as downloaded, including the file extension. e.g. "images.zip".
   required: false
 
-# @type | schema:Text | ONE
-- field_name: type
-  label: Type
-  help_text: Type of resource (e.g. FileObject, FileSet).
-  required: false
-  preset: select
-  choices:
-  - value: fileObject
-    label: FileObject
-  - value: fileSet
-    label: FileSet
-
 # @id | schema:Text | ONE
 - field_name: id_given
   label: ID

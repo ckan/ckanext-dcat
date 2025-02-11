@@ -310,13 +310,6 @@ class CroissantProfile(RDFProfile):
 
     def _resources_graph(self, dataset_ref, dataset_dict):
         for resource_dict in dataset_dict.get("resources", []):
-            if resource_dict.get("type") == "fileObject":
-                resource_type_specific = CR.FileObject
-            elif resource_dict.get("type") == "fileSet":
-                resource_type_specific = CR.FileSet
-            else:
-                resource_type_specific = CR.FileObject
-
             resource_id_given = self._get_dict_value(resource_dict, "id_given") # optional
             if resource_id_given:
                 resource_ref = CleanedURIRef(resource_id_given)
@@ -324,7 +317,7 @@ class CroissantProfile(RDFProfile):
                 resource_ref = URIRef(resource_uri(resource_dict)) # This is called 'distribution' in profiles/schemaorg.py. Changed for better internal consistency.
 
             self.g.add((dataset_ref, SCHEMA.distribution, resource_ref))
-            self.g.add((resource_ref, RDF.type, resource_type_specific)) # This is SCHEMA.DataDownload in profiles/schemaorg.py. Changed for compliance with the Croissant specification.
+            self.g.add((resource_ref, RDF.type, CR.FileObject)) # This is SCHEMA.DataDownload in profiles/schemaorg.py. Changed for compliance with the Croissant specification.
 
             self._resource_graph(dataset_ref, resource_ref, resource_dict)
 
