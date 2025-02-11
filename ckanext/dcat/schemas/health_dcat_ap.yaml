@@ -269,6 +269,14 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: The legislation that mandates the creation or management of the dataset.
 
+- field_name: has_version
+  label: Has version
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_inline: true
+  help_text: This property refers to a related Dataset that is a version, edition, or adaptation of the described Dataset.
+
+
 - field_name: code_values
   label: Code values
   preset: multiple_text
@@ -506,13 +514,6 @@ resource_fields:
 - field_name: license
   label: License
   help_text: License in which the resource is made available. If not provided will be inherited from the dataset.
-
-- field_name: has_version
-  label: Has version
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_text
-  help_inline: true
-  help_text: This property refers to a related Dataset that is a version, edition, or adaptation of the described Dataset.
 
   # Note: this falls back to the standard resource url field
 - field_name: access_url
