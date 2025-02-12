@@ -1,0 +1,188 @@
+{
+    "@context": {
+        "@language": "en",
+        "@vocab": "https://schema.org/",
+        "citeAs": "cr:citeAs",
+        "column": "cr:column",
+        "conformsTo": "dct:conformsTo",
+        "cr": "http://mlcommons.org/croissant/",
+        "data": {
+            "@id": "cr:data",
+            "@type": "@json"
+        },
+        "dataType": {
+            "@id": "cr:dataType",
+            "@type": "@vocab"
+        },
+        "dct": "http://purl.org/dc/terms/",
+        "examples": {
+            "@id": "cr:examples",
+            "@type": "@json"
+        },
+        "excludes": "cr:excludes",
+        "extract": "cr:extract",
+        "field": "cr:field",
+        "fileObject": "cr:fileObject",
+        "fileProperty": "cr:fileProperty",
+        "fileSet": "cr:fileSet",
+        "format": "cr:format",
+        "includes": "cr:includes",
+        "isLiveDataset": "cr:isLiveDataset",
+        "jsonPath": "cr:jsonPath",
+        "key": "cr:key",
+        "md5": "cr:md5",
+        "parentField": "cr:parentField",
+        "path": "cr:path",
+        "rai": "http://mlcommons.org/croissant/RAI/",
+        "recordSet": "cr:recordSet",
+        "references": "cr:references",
+        "regex": "cr:regex",
+        "repeated": "cr:repeated",
+        "replace": "cr:replace",
+        "sc": "https://schema.org/",
+        "separator": "cr:separator",
+        "source": "cr:source",
+        "subField": "cr:subField",
+        "transform": "cr:transform"
+    },
+    "@graph": [
+        {
+            "@id": "DATASET1-ID",
+            "@type": "Dataset",
+            "citeAs": "DATASET1-CITEAS",
+            "conformsTo": "http://mlcommons.org/croissant/1.0",
+            "creator": [
+                {
+                    "@id": "DATASET1-CREATOR1-ID"
+                },
+                {
+                    "@id": "DATASET1-CREATOR2-ID"
+                }
+            ],
+            "dateCreated": "2025-02-01T00:00:00",
+            "dateModified": "2025-02-15T00:00:00",
+            "datePublished": "2025-02-08T00:00:00",
+            "description": "DATASET1-DESCRIPTION",
+            "distribution": [
+                {
+                    "@id": "RESOURCE1-ID"
+                },
+                {
+                    "@id": "RESOURCE1-SUBRESOURCE1-ID"
+                },
+                {
+                    "@id": "RESOURCE1-SUBRESOURCE2-ID"
+                }
+            ],
+            "inLanguage": [
+                "DATASET1-LANGUAGE1",
+                "DATASET1-LANGUAGE2"
+            ],
+            "includedInDataCatalog": {
+                "@id": "_:Ne42808afa54f47409d5def754385b16d"
+            },
+            "isLiveDataset": false,
+            "keywords": [
+                "DATASET1-KEYWORD1",
+                "DATASET1-KEYWORD2"
+            ],
+            "license": "DATASET1-LICENSE",
+            "name": "DATASET1-NAME",
+            "publisher": [
+                {
+                    "@id": "DATASET1-PUBLISHER1-ID"
+                },
+                {
+                    "@id": "DATASET1-PUBLISHER2-ID"
+                }
+            ],
+            "sameAs": [
+                "DATASET1-SAMEAS1",
+                "DATASET1-SAMEAS2"
+            ],
+            "sdLicense": "DATASET1-SDLICENSE",
+            "url": "https://example.com/dataset/dataset1-url-slug",
+            "version": "1.0.0"
+        },
+        {
+            "@id": "_:Ne42808afa54f47409d5def754385b16d",
+            "@type": "DataCatalog",
+            "description": "",
+            "name": "CKAN",
+            "url": "https://example.com"
+        },
+        {
+            "@id": "DATASET1-CREATOR1-ID",
+            "@type": "Organization",
+            "email": "DATASET1-CREATOR1-EMAIL",
+            "identifier": "DATASET1-CREATOR1-IDENTIFIER",
+            "name": "DATASET1-CREATOR1-NAME",
+            "url": "DATASET1-CREATOR1-URL"
+        },
+        {
+            "@id": "DATASET1-CREATOR2-ID",
+            "@type": "Person",
+            "email": "DATASET1-CREATOR2-EMAIL",
+            "identifier": "DATASET1-CREATOR2-IDENTIFIER",
+            "name": "DATASET1-CREATOR2-NAME",
+            "url": "DATASET1-CREATOR2-URL"
+        },
+        {
+            "@id": "DATASET1-PUBLISHER1-ID",
+            "@type": "Organization",
+            "email": "DATASET1-PUBLISHER1-EMAIL",
+            "identifier": "DATASET1-PUBLISHER1-IDENTIFIER",
+            "name": "DATASET1-PUBLISHER1-NAME",
+            "url": "DATASET1-PUBLISHER1-URL"
+        },
+        {
+            "@id": "DATASET1-PUBLISHER2-ID",
+            "@type": "Person",
+            "email": "DATASET1-PUBLISHER2-EMAIL",
+            "identifier": "DATASET1-PUBLISHER2-IDENTIFIER",
+            "name": "DATASET1-PUBLISHER2-NAME",
+            "url": "DATASET1-PUBLISHER2-URL"
+        },
+        {
+            "@id": "RESOURCE1-ID",
+            "@type": "cr:FileObject",
+            "contentSize": "73148",
+            "contentUrl": "https://example.com/dataset/58aa5f61-a943-4fbb-b7a3-1a657fe07a74/resource/f99e9bd5-a1cc-42bf-a8b0-a61b0a3fc3b3/download/resource1.zip",
+            "description": "RESOURCE1-DESCRIPTION",
+            "encodingFormat": "RESOURCE1-FORMAT",
+            "md5": "c764ffdeee4894b3002337c5b1e70ecf",
+            "name": "RESOURCE1.zip",
+            "sameAs": "RESOURCE1-SAMEAS"
+        },
+        {
+            "@id": "RESOURCE1-SUBRESOURCE1-ID",
+            "@type": "cr:FileObject",
+            "containedIn": {
+                "@id": "RESOURCE1-ID"
+            },
+            "contentSize": "12345",
+            "contentUrl": "directory/file.zip",
+            "description": "RESOURCE1-SUBRESOURCE1-DESCRIPTION",
+            "encodingFormat": "RESOURCE1-SUBRESOURCE1-FORMAT",
+            "name": "file.zip",
+            "sameAs": "RESOURCE1-SUBRESOURCE1-SAMEAS"
+        },
+        {
+            "@id": "RESOURCE1-SUBRESOURCE2-ID",
+            "@type": "cr:FileSet",
+            "containedIn": {
+                "@id": "RESOURCE1-SUBRESOURCE1-ID"
+            },
+            "description": "RESOURCE1-SUBRESOURCE2-DESCRIPTION",
+            "encodingFormat": "RESOURCE1-SUBRESOURCE2-FORMAT",
+            "excludes": [
+                "RESOURCE1-SUBRESOURCE2-EXCLUDES1",
+                "RESOURCE1-SUBRESOURCE2-EXCLUDES2"
+            ],
+            "includes": [
+                "RESOURCE1-SUBRESOURCE2-INCLUDES1",
+                "RESOURCE1-SUBRESOURCE2-INCLUDES2"
+            ]
+        }
+    ]
+}
