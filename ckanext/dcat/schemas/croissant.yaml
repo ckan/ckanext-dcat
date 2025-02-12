@@ -330,13 +330,14 @@ resource_fields:
   required: false
 
 # schema:sameAs | schema:URL | MANY
+# TODO: The Croissant spec states this as cardinality MANY, but the validator only allows ONE. Need to check which is correct. Temporarily restricting to ONE here.
 - field_name: same_as
   label: Same as
   help_text: URL (or local name) of a FileObject with the same content, but in a different format.
   form_placeholder: http://example.com/my-organization/my-dataset/my-resource.csv
   required: false
-  preset: multiple_text
-  validators: ignore_missing scheming_multiple_text
+  # preset: multiple_text
+  # validators: ignore_missing scheming_multiple_text
 
 # schema:distribution | cr:FileObject / cr:FileSet | MANY
 - field_name: subresources
@@ -349,7 +350,7 @@ resource_fields:
     # @type | schema:Text | ONE
     - field_name: type
       label: Type
-      help_text: Type of resource (e.g. FileObject, FileSet).
+      help_text: Type of subresource (e.g. FileObject, FileSet).
       required: false
       preset: select
       choices:
@@ -358,25 +359,62 @@ resource_fields:
       - value: fileSet
         label: FileSet
 
+    # schema:contentUrl | schema:URL | ONE
+    - field_name: url
+      label: URL
+      help_text: For FileObject only. The filepath of the file within the resource, excluding the name of the top-level directory, and including the file's own name and extension. For a resource called "resource.zip" which contains a file called "file.csv" at the root level, this must be entered as "file.csv", not "resource/file.csv". For a resource called "resource.zip" which contains a directory called "directory" and a file called "file.csv", this must be entered as "directory/file.csv", not "resource/directory/file.csv".
+      required: false
+
+    # schema:name | schema:Text | ONE
+    # Leaving this to profiles/croissant.py to extract from the url
+    # - field_name: name
+    #   label: Name
+    #   help_text: For FileObject only. The name of the file. As much as possible, the name should reflect the name of the file as downloaded, including the file extension. e.g. "images.zip".
+    #   required: false
+
     # @id | schema:Text | ONE
     - field_name: id_given
       label: ID
-      help_text: Unique ID of the resource for internal graph references. Auto-generated if not provided. For FileObject this should be the name of the file. As much as possible, the name should reflect the name of the file as downloaded, including the file extension. e.g. "images.zip". For FileSet this can be any ID of your choice, not necessarily the name of the FileSet folder itself.
+      help_text: For FileObject or FileSet. Unique ID of the subresource for internal graph references. Auto-generated if not provided. But if you have a structure like resource/parent-subresource/child-subresource, and if this is a parent subresource, then you must supply an ID here and copy it into the associated child subresource's "ID contained in" field. These relationships can't be automatically determined, so this is the only case when an ID must be manually declared and referred to.
+      required: false
+
+    # cr:containedIn | schema:Text | MANY
+    # Ignoring Croissant cardinality of MANY
+    - field_name: id_given_contained_in
+      label: ID contained in
+      help_text: For FileObject or FileSet. The ID of another FileObject or FileSet that this one is contained in. By default, this is automatically set to the ID of the containing top-level resource. But if you have a structure like resource/parent-subresource/child-subresource, and if this is a child subresource, then you must supply an ID in the associated parent subresource's "ID" field and copy it here. These relationships can't be automatically determined, so this is the only case when an ID must be manually declared and referred to.
       required: false
 
     # schema:description | schema:Text | ONE
+    # This isn't explicitly mentioned in the Croissant specification, but is seen in some of its examples
     - field_name: description
       label: Description
-      help_text: Description of the resource.
+      help_text: For FileObject or FileSet. Description of the subresource.
       required: false
       form_snippet: markdown.html
 
     # schema:encodingFormat | schema:Text | ONE
     - field_name: format
       label: Format
-      help_text: The format of the resource, given as a mime type.
+      help_text: For FileObject or FileSet. The format of the file, given as a mime type.
       required: false
       preset: resource_format_autocomplete
+
+    # schema:contentSize | schema:Text | ONE
+    - field_name: size
+      label: Size
+      help_text: For FileObject only. File size in (mega/kilo/…)bytes. Defaults to bytes if a unit is not specified.
+      required: false
+
+    # schema:sameAs | schema:URL | MANY
+    # TODO: The Croissant spec states this as cardinality MANY, but the validator only allows ONE. Need to check which is correct. Temporarily restricting to ONE here.
+    - field_name: same_as
+      label: Same as
+      help_text: For FileObject only. URL (or local name) of a FileObject with the same content, but in a different format.
+      form_placeholder: http://example.com/my-organization/my-dataset/my-resource/my-subresource.csv
+      required: false
+      # preset: multiple_text
+      # validators: ignore_missing scheming_multiple_text
 
     # cr:includes | schema:Text | MANY
     - field_name: includes
@@ -393,10 +431,3 @@ resource_fields:
       required: false
       preset: multiple_text
       validators: ignore_missing scheming_multiple_text
-
-    # cr:containedIn | schema:Text | MANY
-    # Leaving this to profiles/croissant.py
-    # - field_name: contained_in
-    #   label: Contained in
-    #   help_text: Another FileObject or FileSet that this one is contained in, e.g., in the case of a file extracted from an archive. When this property is present, the contentUrl is evaluated as a relative path within the container object.
-    #   required: false

@@ -19,11 +19,8 @@ from .base import (
     RDF,
 )
 
-# The Croissant validator insists on https and will consider invalid
-# output that uses the http namespace
-
+# The Croissant validator insists on https and will consider invalid output that uses the http namespace
 SCHEMA = Namespace("https://schema.org/")
-
 
 JSONLD_CONTEXT = {
     "@language": "en",
@@ -47,6 +44,7 @@ JSONLD_CONTEXT = {
       "@id": "cr:examples",
       "@type": "@json"
     },
+    "excludes": "cr:excludes",
     "extract": "cr:extract",
     "field": "cr:field",
     "fileProperty": "cr:fileProperty",
@@ -71,9 +69,6 @@ JSONLD_CONTEXT = {
     "transform": "cr:transform"
 }
 
-
-
-
 class CroissantProfile(RDFProfile):
     """
     An RDF profile based on the schema.org Dataset, modified by Croissant.
@@ -95,9 +90,8 @@ class CroissantProfile(RDFProfile):
         # Namespaces
         self._bind_namespaces()
 
-        dataset_id_given = self._get_dict_value(dataset_dict, "id_given") # optional
-        if dataset_id_given:
-            dataset_ref = CleanedURIRef(dataset_id_given)
+        if dataset_dict.get("id_given"): # optional
+            dataset_ref = CleanedURIRef(dataset_dict["id_given"])
 
         g.add((dataset_ref, RDF.type, SCHEMA.Dataset))
 
@@ -245,11 +239,11 @@ class CroissantProfile(RDFProfile):
             elif agent_dict.get("type") == "person":
                 agent_type = SCHEMA.Person
             else:
+                agent_dict["type"] = "organization"
                 agent_type = SCHEMA.Organization
 
-            agent_id_given = self._get_dict_value(agent_dict, "id_given") # optional
-            if agent_id_given:
-                agent_ref = CleanedURIRef(agent_id_given)
+            if agent_dict.get("id_given"): # optional
+                agent_ref = CleanedURIRef(agent_dict["id_given"])
             else:
                 agent_ref = BNode()
 
@@ -310,16 +304,19 @@ class CroissantProfile(RDFProfile):
 
     def _resources_graph(self, dataset_ref, dataset_dict):
         for resource_dict in dataset_dict.get("resources", []):
-            resource_id_given = self._get_dict_value(resource_dict, "id_given") # optional
-            if resource_id_given:
-                resource_ref = CleanedURIRef(resource_id_given)
-            else:
-                resource_ref = URIRef(resource_uri(resource_dict)) # This is called 'distribution' in profiles/schemaorg.py. Changed for better internal consistency.
+            if isinstance(resource_dict, dict):
 
-            self.g.add((dataset_ref, SCHEMA.distribution, resource_ref))
-            self.g.add((resource_ref, RDF.type, CR.FileObject)) # This is SCHEMA.DataDownload in profiles/schemaorg.py. Changed for compliance with the Croissant specification.
+                resource_dict["type"] = "fileObject" # This is so for all top-level resources and so isn't asked of the user, unlike for subresources
 
-            self._resource_graph(dataset_ref, resource_ref, resource_dict)
+                if resource_dict.get("id_given"): # optional
+                    resource_ref = CleanedURIRef(resource_dict["id_given"])
+                else:
+                    resource_ref = URIRef(resource_uri(resource_dict)) # This is called 'distribution' in profiles/schemaorg.py. Changed for better internal consistency.
+
+                self.g.add((dataset_ref, SCHEMA.distribution, resource_ref))
+                self.g.add((resource_ref, RDF.type, CR.FileObject)) # This is SCHEMA.DataDownload in profiles/schemaorg.py. Changed for compliance with the Croissant specification.
+
+                self._resource_graph(dataset_ref, resource_ref, resource_dict)
 
     def _resource_graph(self, dataset_ref, resource_ref, resource_dict):
         # Basic fields
@@ -341,31 +338,53 @@ class CroissantProfile(RDFProfile):
         self._resource_subresources_graph(dataset_ref, resource_ref, resource_dict)
 
     def _resource_basic_fields_graph(self, resource_ref, resource_dict):
-        items = [
-            ("name", SCHEMA.name, None, Literal),
-            ("description", SCHEMA.description, None, Literal),
-        ]
-        self._add_triples_from_dict(resource_dict, resource_ref, items)
-
-        if resource_dict.get("hash"):
-            predicate = None
-            if len(resource_dict["hash"]) == 32:
-                predicate = SCHEMA.md5
-            elif len(resource_dict["hash"]) == 64:
-                predicate = SCHEMA.sha256
-            if predicate:
+        if resource_dict.get("type") == "fileObject":
+            if resource_dict.get("name"):
                 self._add_triple_from_dict(
                     resource_dict,
                     resource_ref,
-                    predicate,
-                    "hash",
+                    SCHEMA.name,
+                    "name",
                     _type=Literal
                 )
 
+            if resource_dict.get("hash"):
+                if len(resource_dict["hash"]) == 32:
+                    predicate = SCHEMA.md5
+                elif len(resource_dict["hash"]) == 64:
+                    predicate = SCHEMA.sha256
+                else:
+                    predicate = None
+                if predicate:
+                    self._add_triple_from_dict(
+                        resource_dict,
+                        resource_ref,
+                        predicate,
+                        "hash",
+                        _type=Literal
+                    )
+
+        if resource_dict.get("description"):
+            self._add_triple_from_dict(
+                resource_dict,
+                resource_ref,
+                SCHEMA.description,
+                "description",
+                _type=Literal
+            )
+
     def _resource_list_fields_graph(self, resource_ref, resource_dict):
-        items = [
-            ("same_as", SCHEMA.sameAs, None, Literal),
-        ]
+        if resource_dict.get("type") == "fileObject":
+            items = [
+                ("same_as", SCHEMA.sameAs, None, Literal),
+            ]
+        elif resource_dict.get("type") == "fileSet":
+            items = [
+                ("includes", CR.includes, None, Literal),
+                ("excludes", CR.excludes, None, Literal),
+            ]
+        else:
+            items = []
         self._add_list_triples_from_dict(resource_dict, resource_ref, items)
 
     def _resource_format_graph(self, resource_ref, resource_dict):
@@ -375,54 +394,39 @@ class CroissantProfile(RDFProfile):
             self.g.add((resource_ref, SCHEMA.encodingFormat, Literal(resource_dict["mimetype"])))
 
     def _resource_url_graph(self, resource_ref, resource_dict):
-        if resource_dict.get("url"):
-            self.g.add((resource_ref, SCHEMA.contentUrl, Literal(resource_dict.get("url"))))
+        if (resource_dict.get("type") == "fileObject") and resource_dict.get("url"):
+            self.g.add((resource_ref, SCHEMA.contentUrl, Literal(resource_dict["url"])))
 
     def _resource_numbers_graph(self, resource_ref, resource_dict):
-        if resource_dict.get("size"):
-            self.g.add((resource_ref, SCHEMA.contentSize, Literal(resource_dict["size"])))
+        if (resource_dict.get("type") == "fileObject") and resource_dict.get("size"):
+            self.g.add((resource_ref, SCHEMA.contentSize, Literal(str(resource_dict["size"])))) # This must be a string for the Croissant validator
 
     def _resource_subresources_graph(self, dataset_ref, resource_ref, resource_dict):
-        subresource_dicts = self._get_resource_value(resource_dict, "subresources")
+        for subresource_dict in resource_dict.get("subresources", []):
+            if isinstance(subresource_dict, dict):
 
-        if isinstance(subresource_dicts, list):
-            subresource_dicts = [
-                subresource_dict
-                for subresource_dict in subresource_dicts
-                if any(subresource_dict.values())
-            ]
-
-            for subresource_dict in subresource_dicts:
                 if subresource_dict.get("type") == "fileObject":
                     subresource_type = CR.FileObject
                 elif subresource_dict.get("type") == "fileSet":
                     subresource_type = CR.FileSet
                 else:
+                    subresource_dict["type"] = "fileObject"
                     subresource_type = CR.FileObject
 
-                subresource_id_given = self._get_dict_value(subresource_dict, "id_given") # optional
-                if subresource_id_given:
-                    subresource_ref = CleanedURIRef(subresource_id_given)
+                if (subresource_dict.get("type") == "fileObject") and subresource_dict.get("url"):
+                    subresource_dict["name"] = subresource_dict["url"].split("/")[-1]
+
+                if subresource_dict.get("id_given"):
+                    subresource_ref = CleanedURIRef(subresource_dict["id_given"])
                 else:
                     subresource_ref = BNode()
 
-                self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is added to the dataset_ref node, not to the resource_ref node
+                if subresource_dict.get("id_given_contained_in"):
+                    self.g.add((subresource_ref, SCHEMA.containedIn, CleanedURIRef(subresource_dict["id_given_contained_in"])))
+                else:
+                    self.g.add((subresource_ref, SCHEMA.containedIn, resource_ref))
+
+                self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is intentionally added to the dataset_ref node, not to the resource_ref node
                 self.g.add((subresource_ref, RDF.type, subresource_type))
 
-                # Basic fields
-                self._resource_basic_fields_graph(subresource_ref, subresource_dict)
-
-                # Format
-                self._resource_format_graph(subresource_ref, subresource_dict)
-
-                # URL
-                self._resource_url_graph(subresource_ref, subresource_dict)
-
-                if subresource_dict.get("type") == "fileSet":
-                    items = [
-                        ("includes", CR.includes, None, Literal),
-                        ("excludes", CR.excludes, None, Literal),
-                    ]
-                    self._add_list_triples_from_dict(subresource_dict, subresource_ref, items)
-
-                self.g.add((subresource_ref, CR.containedIn, resource_ref))
+                self._resource_graph(dataset_ref, subresource_ref, subresource_dict)
