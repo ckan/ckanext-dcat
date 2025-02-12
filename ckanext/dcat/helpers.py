@@ -6,6 +6,8 @@ import simplejson as json
 
 import ckantoolkit as toolkit
 
+from pyld import jsonld
+
 from ckanext.dcat.processors import RDFSerializer
 from ckanext.dcat.profiles.croissant import JSONLD_CONTEXT
 
@@ -23,7 +25,9 @@ def get_endpoint(_type="dataset"):
     return "dcat.read_dataset" if _type == "dataset" else "dcat.read_catalog"
 
 
-def _get_serialization(dataset_dict, profiles=None, _format="jsonld", context=None):
+def _get_serialization(
+    dataset_dict, profiles=None, _format="jsonld", context=None, frame=None
+):
 
     serializer = RDFSerializer(profiles=profiles)
 
@@ -32,9 +36,14 @@ def _get_serialization(dataset_dict, profiles=None, _format="jsonld", context=No
     )
 
     # parse result again to prevent UnicodeDecodeError and add formatting
+
     if _format == "jsonld":
         try:
             json_data = json.loads(output)
+
+            if frame:
+                json_data = jsonld.frame(json_data, frame)
+
             return json.dumps(
                 json_data,
                 sort_keys=True,
@@ -73,4 +82,8 @@ def croissant(dataset_dict, profiles=None):
     if not profiles:
         profiles = ["croissant"]
 
-    return _get_serialization(dataset_dict, profiles, "jsonld", context=JSONLD_CONTEXT)
+    frame = {"@context": JSONLD_CONTEXT, "@type": "sc:Dataset"}
+
+    return _get_serialization(
+        dataset_dict, profiles, "jsonld", context=JSONLD_CONTEXT, frame=frame
+    )
