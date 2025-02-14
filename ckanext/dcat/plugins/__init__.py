@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from builtins import object
+from functools import wraps
 import os
 import json
 
@@ -31,11 +32,17 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 I18N_DIR = os.path.join(HERE, u"../i18n")
 
 
-def config_declaration(func):
-    if p.toolkit.check_ckan_version(min_version="2.10.0"):
-        return p.toolkit.blanket.config_declarations(func)
-    else:
-        return func
+def config_declaration(declaration_file):
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if p.toolkit.check_ckan_version(min_version="2.10.0"):
+                return p.toolkit.blanket.config_declarations(declaration_file)
+            else:
+                return func
+        return wrapper
+    return decorator
 
 
 def _get_dataset_schema(dataset_type="dataset"):
