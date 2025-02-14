@@ -372,13 +372,19 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ("theme", DCAT.theme, None, URIRef),
             ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral, DCT.Standard),
             ("documentation", FOAF.page, None, URIRefOrLiteral, FOAF.Document),
+            ("sample", ADMS.sample, None, URIRefOrLiteral, DCAT.Distribution),
+        ]
+        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+
+
+        items = [
             ("related_resource", DCT.relation, None, URIRefOrLiteral, RDFS.Resource),
             ("has_version", DCT.hasVersion, None, URIRefOrLiteral),
             ("is_version_of", DCT.isVersionOf, None, URIRefOrLiteral),
             ("source", DCT.source, None, URIRefOrLiteral),
-            ("sample", ADMS.sample, None, URIRefOrLiteral, DCAT.Distribution),
         ]
-        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+        self._add_list_dataset_triples_from_dict(dataset_dict, dataset_ref, items)
+
 
         # Contact details
         if any(
