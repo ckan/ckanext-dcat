@@ -242,6 +242,7 @@ class DCATJSONInterface(p.SingletonPlugin):
         }
 
 
+@config_declaration("config_declaration_structured_data.yml")
 class StructuredDataPlugin(p.SingletonPlugin):
 
     p.implements(p.IConfigurer, inherit=True)
@@ -260,6 +261,7 @@ class StructuredDataPlugin(p.SingletonPlugin):
         }
 
 
+@config_declaration("config_declaration_croissant.yml")
 class CroissantPlugin(p.SingletonPlugin):
 
     p.implements(p.IConfigurer, inherit=True)

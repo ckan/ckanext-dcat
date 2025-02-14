@@ -67,7 +67,7 @@ def structured_data(dataset_dict, profiles=None):
     """
 
     if not profiles:
-        profiles = ["schemaorg"]
+        profiles = config.get("ckanext.dcat.structured_data.profiles", ["schemaorg"])
 
     return _get_serialization(dataset_dict, profiles, "jsonld")
 
@@ -80,7 +80,7 @@ def croissant(dataset_dict, profiles=None):
     """
 
     if not profiles:
-        profiles = ["croissant"]
+        profiles = config.get("ckanext.dcat.croissant.profiles", ["croissant"])
 
     frame = {"@context": JSONLD_CONTEXT, "@type": "sc:Dataset"}
 

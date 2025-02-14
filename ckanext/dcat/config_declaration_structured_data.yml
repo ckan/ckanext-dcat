@@ -1,0 +1,13 @@
+version: 1
+groups:
+  - annotation: Structured data settings
+    options:
+
+      - key: ckanext.dcat.structured_data.profiles
+        default: 'schemaorg'
+        type: list
+        description: |
+          Profiles to use when creating the [Structured Data](google-dataset-search.md) serializations
+        example: 'my_custom_structured_data_profile'
+
+
