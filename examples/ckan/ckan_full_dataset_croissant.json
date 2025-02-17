@@ -58,10 +58,6 @@
             "url": "https://example.com/data.csv",
             "format": "CSV",
             "id_given": "my-custom-resource-id",
-            "same_as": [
-                "http://some.other.catalog/datasets/123/resources/xyz",
-                "http://yet.another.catalog/datasets/567/resources/abc"
-            ],
             "size": "12323",
             "hash": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79",
             "subresources": [

@@ -175,9 +175,6 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
         )
         assert self._triple(g, resource_ref, SCHEMA.sha256, resource_dict["hash"])
         assert self._triple(g, resource_ref, SCHEMA.contentSize, resource_dict["size"])
-        assert sorted(
-            [str(t) for t in g.objects(resource_ref, SCHEMA.sameAs)]
-        ) == sorted(resource_dict["same_as"])
 
         # Sub-resources
 
