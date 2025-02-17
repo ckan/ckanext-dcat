@@ -31,7 +31,7 @@ The extension includes ready to use [ckanext-scheming](https://github.com/ckan/c
 that enable DCAT support. These include a schema definition file (located
 in [`ckanext/dcat/schemas`](https://github.com/ckan/ckanext-dcat/tree/master/ckanext/dcat/schemas))
 plus extra validators and other custom logic that integrates the metadata modifications with the
-RDF DCAT [Parsers](profiles.md#rdf-dcat-parser) and [Serializers](profiles.md#rdf-dcat-serializer) and other CKAN features and extensions.
+RDF DCAT [Parsers](writing-profiles.md#rdf-dcat-parser) and [Serializers](writing-profiles.md#rdf-dcat-serializer) and other CKAN features and extensions.
 
 There are the following schemas currently included with the extension:
 
@@ -41,8 +41,6 @@ There are the following schemas currently included with the extension:
 * *dcat_us_recommended.yaml*: Includes the recommended properties for `dcat:Dataset` and `dcat:Distribution` according to the [DCAT US](https://doi-do.github.io/dcat-us/) specification. You can use this schema with the `dcat_us_3` profile.
 * *dcat_us_full.yaml*: Includes most of the properties for `dcat:Dataset` and `dcat:Distribution` according to the [DCAT US](https://doi-do.github.io/dcat-us/) specification. You can use this schema with the `dcat_us_3` profile.
 * *croissant.yaml*: An example schema adding all properties defined in the [Croissant format specification](https://docs.mlcommons.org/croissant/docs/croissant-spec.html). You can use this schema with the [`croissant` profile](croissant.md).
-
-
 
 Most sites will want to use these as a base to create their own custom schema to address their own requirements, perhaps alongside a [custom profile](profiles.md#profiles). Of course site maintainers can add or remove schema fields, as well as change the existing validators.
 

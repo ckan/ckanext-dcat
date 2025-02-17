@@ -25,7 +25,7 @@ The extension includes a [schema](getting-started.md#schemas) ([`ckanext/dcat/sc
 
 ## Customizing
 
-If you want to modify the Croissant output you can [write your own profile](profiles.md/#writing-custom-profiles) extending the builtin `ckanext.dcat.profiles.croissant.CroissantProfile` class and register it.
+If you want to modify the Croissant output you can [write your own profile](writing-profiles.md) extending the builtin `ckanext.dcat.profiles.croissant.CroissantProfile` class and register it.
 
 In order to use the new profile use the following config option:
 
