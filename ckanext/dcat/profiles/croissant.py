@@ -9,7 +9,7 @@ import datetime
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace
-from ckantoolkit import url_for, config
+from ckantoolkit import url_for, config, asbool
 
 from ckanext.dcat.utils import resource_uri
 from .base import RDFProfile, CleanedURIRef
@@ -127,24 +127,6 @@ class CroissantProfile(RDFProfile):
         # Resources
         self._resources_graph(dataset_ref, dataset_dict)
 
-    def _add_date_triple(self, subject, predicate, value, _type=Literal):
-        """
-        Adds a new triple with a date object.
-
-        Dates are parsed using dateutil, and if the date obtained is correct,
-        added to the graph as an SCHEMA.DateTime value.
-
-        If there are parsing errors, the literal string value is added.
-        """
-        if not value:
-            return
-        try:
-            default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
-            _date = parse_date(value, default=default_datetime)
-            self.g.add((subject, predicate, _type(_date.isoformat())))
-        except ValueError:
-            self.g.add((subject, predicate, _type(value)))
-
     def _bind_namespaces(self):
         self.g.namespace_manager.bind("cr", CR, replace=True)
         self.g.namespace_manager.bind("schema", SCHEMA, replace=True)
@@ -168,15 +150,14 @@ class CroissantProfile(RDFProfile):
             ("issued", SCHEMA.datePublished, ["metadata_created"], Literal), # required
             ("modified", SCHEMA.dateModified, ["metadata_modified"], Literal), # recommended
         ]
+
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
         dataset_url = url_for("dataset.read", id=dataset_dict["name"], _external=True) # required
         self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
 
-        if dataset_dict.get("is_live_dataset") == "True":
-            is_live_dataset = True
-        elif dataset_dict.get("is_live_dataset") == "False":
-            is_live_dataset = False
+        if 'is_live_dataset' in dataset_dict:
+            is_live_dataset = asbool(dataset_dict["is_live_dataset"])
         else:
             is_live_dataset = None
 
@@ -220,6 +201,7 @@ class CroissantProfile(RDFProfile):
                 agent_dicts = self._get_dataset_value(dataset_dict, "creator") # required
             if len(agent_dicts) == 0 and isinstance(self._get_dataset_value(dataset_dict, "organization"), dict):
                 agent_dict = self._get_dataset_value(dataset_dict, "organization")
+                agent_dict["name"] = agent_dict["title"]
                 agent_dict["id_given"] = agent_dict["id"]
                 if not agent_dict.get("email") and self._get_dataset_value(dataset_dict, "maintainer_email"):
                     agent_dict["email"] = self._get_dataset_value(dataset_dict, "maintainer_email")
@@ -251,7 +233,7 @@ class CroissantProfile(RDFProfile):
 
             items = [
                 ("identifier", SCHEMA.identifier, None, Literal),
-                ("title", SCHEMA.name, None, Literal),
+                ("name", SCHEMA.name, None, Literal),
                 ("email", SCHEMA.email, None, Literal),
                 ("url", SCHEMA.url, None, Literal),
             ]

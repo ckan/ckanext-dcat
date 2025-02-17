@@ -115,7 +115,7 @@ dataset_fields:
   label: Date created
   help_text: The date the dataset was initially created.
   required: false
-  preset: date
+  preset: dcat_date
 
 # schema:datePublished | schema:Date / schema:DateTime | ONE | required
 # Following schemaorg.py, this will fall back to 'metadata_created' if not present
@@ -123,7 +123,7 @@ dataset_fields:
   label: Date published
   help_text: The date the dataset was published.
   required: true
-  preset: date
+  preset: dcat_date
 
 # schema:dateModified | schema:Date / schema:DateTime | ONE | recommended
 # Following schemaorg.py, this will fall back to 'metadata_modified' if not present
@@ -131,7 +131,7 @@ dataset_fields:
   label: Date modified
   help_text: The date the dataset was last modified.
   required: false
-  preset: date
+  preset: dcat_date
 
 # schema:inLanguage | schema:Language / schema:Text | MANY | recommended
 - field_name: language # Following dcat_ap_full.yaml and schemaorg.py
@@ -196,7 +196,7 @@ dataset_fields:
 
     # schema:name | schema:Text | ONE
     # Following schemaorg.py, this will fall back to 'organization["title"]' if not present
-    - field_name: title # In order to get 'organization["title"]' in the case of fall back, not 'organization["name"]' which is the organization's URL slug
+    - field_name: name # In order to get 'organization["title"]' in the case of fall back, not 'organization["name"]' which is the organization's URL slug
       label: Name
       help_text: Name of the entity or person who created the dataset.
       required: true
@@ -250,7 +250,7 @@ dataset_fields:
       required: false
 
     # schema:name | schema:Text | ONE
-    - field_name: title # Following other fields with 'label: Name', as needed by the main dataset and creator
+    - field_name: name # Following other fields with 'label: Name', as needed by the main dataset and creator
       label: Name
       help_text: Name of the entity or person who published the dataset.
       required: false
