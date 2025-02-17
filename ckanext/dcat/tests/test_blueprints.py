@@ -598,7 +598,7 @@ class TestStructuredData():
 @pytest.mark.usefixtures('with_plugins', 'clean_db', 'clean_index')
 class TestCroissant():
 
-    @pytest.mark.ckan_config('ckan.plugins', 'croissant')
+    @pytest.mark.ckan_config('ckan.plugins', 'dcat croissant')
     def test_croissant_metadata_embedded(self, app):
 
         dataset = factories.Dataset(
@@ -613,7 +613,7 @@ class TestCroissant():
         assert '"description": "test description"' in response.body
         assert '"conformsTo": "http://mlcommons.org/croissant/1.0"' in response.body
 
-    @pytest.mark.ckan_config('ckan.plugins', 'croissant')
+    @pytest.mark.ckan_config('ckan.plugins', 'dcat croissant')
     def test_croissant_metadata_endpoint(self, app):
 
         dataset = factories.Dataset(
