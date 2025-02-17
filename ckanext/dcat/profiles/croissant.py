@@ -23,8 +23,7 @@ from .base import (
 SCHEMA = Namespace("https://schema.org/")
 
 JSONLD_CONTEXT = {
-    "@language": "en",
-    "@vocab": "https://schema.org/",
+   "@vocab": "https://schema.org/",
     "sc": "https://schema.org/",
     "cr": "http://mlcommons.org/croissant/",
     "rai": "http://mlcommons.org/croissant/RAI/",
