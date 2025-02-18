@@ -196,7 +196,7 @@ dataset_fields:
 
     # schema:name | schema:Text | ONE
     # Following schemaorg.py, this will fall back to 'organization["title"]' if not present
-    - field_name: name # In order to get 'organization["title"]' in the case of fall back, not 'organization["name"]' which is the organization's URL slug
+    - field_name: name
       label: Name
       help_text: Name of the entity or person who created the dataset.
       required: true
@@ -250,7 +250,7 @@ dataset_fields:
       required: false
 
     # schema:name | schema:Text | ONE
-    - field_name: name # Following other fields with 'label: Name', as needed by the main dataset and creator
+    - field_name: name
       label: Name
       help_text: Name of the entity or person who published the dataset.
       required: false
@@ -289,7 +289,7 @@ resource_fields:
 
 # schema:name | schema:Text | ONE
 # This is auto-populated with the slug of 'url' from above, and should therefore be the filename plus extension, but it can be manually adjusted
-- field_name: name # Default back-end field name. This is 'title' for datasets.
+- field_name: name
   label: Name
   help_text: The name of the file. As much as possible, the name should reflect the name of the file as downloaded, including the file extension. e.g. "images.zip".
   required: false

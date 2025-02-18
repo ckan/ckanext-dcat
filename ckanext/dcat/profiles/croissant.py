@@ -234,7 +234,8 @@ class CroissantProfile(RDFProfile):
                 self._get_dataset_value(dataset_dict, "organization"), dict
             ):
                 agent_dict = self._get_dataset_value(dataset_dict, "organization")
-                agent_dict["name"] = agent_dict["title"]
+                agent_dict["name"] = agent_dict["title"] # Override the existing organization["name"] field, which is the URL slug, with its title. This is in order to treat the same as the creator and publisher dictionaries when this is actually used below.
+
                 agent_dict["id_given"] = agent_dict["id"]
                 if not agent_dict.get("email") and self._get_dataset_value(
                     dataset_dict, "maintainer_email"
