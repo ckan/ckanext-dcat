@@ -302,9 +302,10 @@ class CroissantProfile(RDFProfile):
 
                 self._resource_graph(dataset_ref, resource_ref, resource_dict)
 
-    def _resource_graph(self, dataset_ref, resource_ref, resource_dict):
+    def _resource_graph(self, dataset_ref, resource_ref, resource_dict, is_subresource=False):
+
         # Basic fields
-        self._resource_basic_fields_graph(resource_ref, resource_dict)
+        self._resource_basic_fields_graph(resource_ref, resource_dict, is_subresource)
 
         # Lists
         self._resource_list_fields_graph(resource_ref, resource_dict)
@@ -321,7 +322,7 @@ class CroissantProfile(RDFProfile):
         # Subresources
         self._resource_subresources_graph(dataset_ref, resource_ref, resource_dict)
 
-    def _resource_basic_fields_graph(self, resource_ref, resource_dict):
+    def _resource_basic_fields_graph(self, resource_ref, resource_dict, is_subresource=False):
         if resource_dict.get("type") == "fileObject":
             if resource_dict.get("name"):
                 self._add_triple_from_dict(
@@ -332,7 +333,7 @@ class CroissantProfile(RDFProfile):
                     _type=Literal
                 )
 
-            if resource_dict.get("hash"):
+            if resource_dict.get("hash") and not is_subresource:
                 if len(resource_dict["hash"]) == 32:
                     predicate = SCHEMA.md5
                 elif len(resource_dict["hash"]) == 64:
@@ -413,4 +414,4 @@ class CroissantProfile(RDFProfile):
                 self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is intentionally added to the dataset_ref node, not to the resource_ref node
                 self.g.add((subresource_ref, RDF.type, subresource_type))
 
-                self._resource_graph(dataset_ref, subresource_ref, subresource_dict)
+                self._resource_graph(dataset_ref, subresource_ref, subresource_dict, is_subresource=True)

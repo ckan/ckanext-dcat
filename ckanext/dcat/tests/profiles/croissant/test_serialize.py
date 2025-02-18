@@ -212,15 +212,18 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(
             g,
             sub_resource_file_obj_ref,
-            SCHEMA.sha256,
-            sub_resource_file_obj_dict["hash"],
-        )
-        assert self._triple(
-            g,
-            sub_resource_file_obj_ref,
             SCHEMA.contentSize,
             sub_resource_file_obj_dict["size"],
         )
+
+        # Hash should not be in sub-resources
+        assert not self._triple(
+            g,
+            sub_resource_file_obj_ref,
+            SCHEMA.sha256,
+            sub_resource_file_obj_dict["hash"],
+        )
+
 
         sub_resource_file_set_dict = [
             d
