@@ -156,8 +156,11 @@ class CroissantProfile(RDFProfile):
         dataset_url = url_for("dataset.read", id=dataset_dict["name"], _external=True) # required
         self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
 
-        if 'is_live_dataset' in dataset_dict:
-            is_live_dataset = asbool(dataset_dict["is_live_dataset"])
+        if "is_live_dataset" in dataset_dict:
+            try:
+                is_live_dataset = asbool(dataset_dict["is_live_dataset"])
+            except ValueError:
+                is_live_dataset = None
         else:
             is_live_dataset = None
 
