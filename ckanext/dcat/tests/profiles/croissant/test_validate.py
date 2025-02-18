@@ -30,8 +30,6 @@ def test_valid_output():
     croissant_dict = json.loads(
         s.g.serialize(format="json-ld", auto_compact=True, context=JSONLD_CONTEXT)
     )
-    with open("graph.jsonld", "w") as f:
-        f.write(json.dumps(croissant_dict))
 
     try:
         mlc.Dataset(croissant_dict)
