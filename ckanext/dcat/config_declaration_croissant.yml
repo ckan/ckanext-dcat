@@ -1,0 +1,11 @@
+version: 1
+groups:
+  - annotation: Croissant ML settings
+
+    options:
+      - key: ckanext.dcat.croissant.profiles
+        default: 'croissant'
+        type: list
+        description: |
+          Profiles to use when creating the [Croissant](croissant.md) serializations
+        example: 'my_custom_croissant_profile'

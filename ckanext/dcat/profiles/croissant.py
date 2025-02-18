@@ -19,15 +19,11 @@ from .base import (
     RDF,
 )
 
-# The Croissant validator insists on https and will consider invalid
-# output that uses the http namespace
-
+# The Croissant validator insists on https and will consider invalid output that uses the http namespace
 SCHEMA = Namespace("https://schema.org/")
 
-
 JSONLD_CONTEXT = {
-    "@language": "en",
-    "@vocab": "https://schema.org/",
+   "@vocab": "https://schema.org/",
     "sc": "https://schema.org/",
     "cr": "http://mlcommons.org/croissant/",
     "rai": "http://mlcommons.org/croissant/RAI/",
@@ -47,6 +43,7 @@ JSONLD_CONTEXT = {
       "@id": "cr:examples",
       "@type": "@json"
     },
+    "excludes": "cr:excludes",
     "extract": "cr:extract",
     "field": "cr:field",
     "fileProperty": "cr:fileProperty",
@@ -71,9 +68,6 @@ JSONLD_CONTEXT = {
     "transform": "cr:transform"
 }
 
-
-
-
 class CroissantProfile(RDFProfile):
     """
     An RDF profile based on the schema.org Dataset, modified by Croissant.
@@ -95,9 +89,8 @@ class CroissantProfile(RDFProfile):
         # Namespaces
         self._bind_namespaces()
 
-        dataset_id_given = self._get_dict_value(dataset_dict, "id_given") # optional
-        if dataset_id_given:
-            dataset_ref = CleanedURIRef(dataset_id_given)
+        if dataset_dict.get("id_given"): # optional
+            dataset_ref = CleanedURIRef(dataset_dict["id_given"])
 
         g.add((dataset_ref, RDF.type, SCHEMA.Dataset))
 
@@ -134,24 +127,6 @@ class CroissantProfile(RDFProfile):
         # Resources
         self._resources_graph(dataset_ref, dataset_dict)
 
-    def _add_date_triple(self, subject, predicate, value, _type=Literal):
-        """
-        Adds a new triple with a date object.
-
-        Dates are parsed using dateutil, and if the date obtained is correct,
-        added to the graph as an SCHEMA.DateTime value.
-
-        If there are parsing errors, the literal string value is added.
-        """
-        if not value:
-            return
-        try:
-            default_datetime = datetime.datetime(1, 1, 1, 0, 0, 0)
-            _date = parse_date(value, default=default_datetime)
-            self.g.add((subject, predicate, _type(_date.isoformat())))
-        except ValueError:
-            self.g.add((subject, predicate, _type(value)))
-
     def _bind_namespaces(self):
         self.g.namespace_manager.bind("cr", CR, replace=True)
         self.g.namespace_manager.bind("schema", SCHEMA, replace=True)
@@ -175,15 +150,14 @@ class CroissantProfile(RDFProfile):
             ("issued", SCHEMA.datePublished, ["metadata_created"], Literal), # required
             ("modified", SCHEMA.dateModified, ["metadata_modified"], Literal), # recommended
         ]
+
         self._add_date_triples_from_dict(dataset_dict, dataset_ref, items)
 
         dataset_url = url_for("dataset.read", id=dataset_dict["name"], _external=True) # required
         self.g.add((dataset_ref, SCHEMA.url, Literal(dataset_url)))
 
-        if dataset_dict.get("is_live_dataset") == "True":
-            is_live_dataset = True
-        elif dataset_dict.get("is_live_dataset") == "False":
-            is_live_dataset = False
+        if 'is_live_dataset' in dataset_dict:
+            is_live_dataset = asbool(dataset_dict["is_live_dataset"])
         else:
             is_live_dataset = None
 
@@ -220,13 +194,14 @@ class CroissantProfile(RDFProfile):
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
-    def _agent_graph(self, dataset_ref, dataset_dict, agent_type):
+    def _agent_graph(self, dataset_ref, dataset_dict, agent_role):
         agent_dicts = []
-        if agent_type == SCHEMA.creator:
+        if agent_role == SCHEMA.creator:
             if isinstance(self._get_dataset_value(dataset_dict, "creator"), list):
                 agent_dicts = self._get_dataset_value(dataset_dict, "creator") # required
             if len(agent_dicts) == 0 and isinstance(self._get_dataset_value(dataset_dict, "organization"), dict):
                 agent_dict = self._get_dataset_value(dataset_dict, "organization")
+                agent_dict["name"] = agent_dict["title"]
                 agent_dict["id_given"] = agent_dict["id"]
                 if not agent_dict.get("email") and self._get_dataset_value(dataset_dict, "maintainer_email"):
                     agent_dict["email"] = self._get_dataset_value(dataset_dict, "maintainer_email")
@@ -235,30 +210,30 @@ class CroissantProfile(RDFProfile):
                 if not agent_dict.get("url") and config.get("ckan.site_url"):
                     agent_dict["url"] = config.get("ckan.site_url")
                 agent_dicts = [agent_dict]
-        elif agent_type == SCHEMA.publisher:
+        elif agent_role == SCHEMA.publisher:
             if isinstance(self._get_dataset_value(dataset_dict, "publisher"), list):
                 agent_dicts = self._get_dataset_value(dataset_dict, "publisher") # recommended
 
         for agent_dict in agent_dicts:
             if agent_dict.get("type") == "organization":
-                agent_type_specific = SCHEMA.Organization
+                agent_type = SCHEMA.Organization
             elif agent_dict.get("type") == "person":
-                agent_type_specific = SCHEMA.Person
+                agent_type = SCHEMA.Person
             else:
-                agent_type_specific = SCHEMA.Organization
+                agent_dict["type"] = "organization"
+                agent_type = SCHEMA.Organization
 
-            agent_id_given = self._get_dict_value(agent_dict, "id_given") # optional
-            if agent_id_given:
-                agent_ref = CleanedURIRef(agent_id_given)
+            if agent_dict.get("id_given"): # optional
+                agent_ref = CleanedURIRef(agent_dict["id_given"])
             else:
                 agent_ref = BNode()
 
-            self.g.add((dataset_ref, agent_type, agent_ref))
-            self.g.add((agent_ref, RDF.type, agent_type_specific))
+            self.g.add((dataset_ref, agent_role, agent_ref))
+            self.g.add((agent_ref, RDF.type, agent_type))
 
             items = [
                 ("identifier", SCHEMA.identifier, None, Literal),
-                ("title", SCHEMA.name, None, Literal),
+                ("name", SCHEMA.name, None, Literal),
                 ("email", SCHEMA.email, None, Literal),
                 ("url", SCHEMA.url, None, Literal),
             ]
@@ -310,23 +285,19 @@ class CroissantProfile(RDFProfile):
 
     def _resources_graph(self, dataset_ref, dataset_dict):
         for resource_dict in dataset_dict.get("resources", []):
-            if resource_dict.get("type") == "fileObject":
-                resource_type_specific = CR.FileObject
-            elif resource_dict.get("type") == "fileSet":
-                resource_type_specific = CR.FileSet
-            else:
-                resource_type_specific = CR.FileObject
+            if isinstance(resource_dict, dict):
 
-            resource_id_given = self._get_dict_value(resource_dict, "id_given") # optional
-            if resource_id_given:
-                resource_ref = CleanedURIRef(resource_id_given)
-            else:
-                resource_ref = URIRef(resource_uri(resource_dict)) # This is called 'distribution' in profiles/schemaorg.py. Changed for better internal consistency.
+                resource_dict["type"] = "fileObject" # This is so for all top-level resources and so isn't asked of the user, unlike for subresources
 
-            self.g.add((dataset_ref, SCHEMA.distribution, resource_ref))
-            self.g.add((resource_ref, RDF.type, resource_type_specific)) # This is SCHEMA.DataDownload in profiles/schemaorg.py. Changed for compliance with the Croissant specification.
+                if resource_dict.get("id_given"): # optional
+                    resource_ref = CleanedURIRef(resource_dict["id_given"])
+                else:
+                    resource_ref = URIRef(resource_uri(resource_dict)) # This is called 'distribution' in profiles/schemaorg.py. Changed for better internal consistency.
 
-            self._resource_graph(dataset_ref, resource_ref, resource_dict)
+                self.g.add((dataset_ref, SCHEMA.distribution, resource_ref))
+                self.g.add((resource_ref, RDF.type, CR.FileObject)) # This is SCHEMA.DataDownload in profiles/schemaorg.py. Changed for compliance with the Croissant specification.
+
+                self._resource_graph(dataset_ref, resource_ref, resource_dict)
 
 
     def _resource_graph(self, dataset_ref, resource_ref, resource_dict):
@@ -352,31 +323,53 @@ class CroissantProfile(RDFProfile):
         self._recordset_graph(dataset_ref, resource_ref, resource_dict)
 
     def _resource_basic_fields_graph(self, resource_ref, resource_dict):
-        items = [
-            ("name", SCHEMA.name, None, Literal),
-            ("description", SCHEMA.description, None, Literal),
-        ]
-        self._add_triples_from_dict(resource_dict, resource_ref, items)
-
-        if resource_dict.get("hash"):
-            predicate = None
-            if len(resource_dict["hash"]) == 32:
-                predicate = SCHEMA.md5
-            elif len(resource_dict["hash"]) == 64:
-                predicate = SCHEMA.sha256
-            if predicate:
+        if resource_dict.get("type") == "fileObject":
+            if resource_dict.get("name"):
                 self._add_triple_from_dict(
                     resource_dict,
                     resource_ref,
-                    predicate,
-                    "hash",
+                    SCHEMA.name,
+                    "name",
                     _type=Literal
                 )
 
+            if resource_dict.get("hash"):
+                if len(resource_dict["hash"]) == 32:
+                    predicate = SCHEMA.md5
+                elif len(resource_dict["hash"]) == 64:
+                    predicate = SCHEMA.sha256
+                else:
+                    predicate = None
+                if predicate:
+                    self._add_triple_from_dict(
+                        resource_dict,
+                        resource_ref,
+                        predicate,
+                        "hash",
+                        _type=Literal
+                    )
+
+        if resource_dict.get("description"):
+            self._add_triple_from_dict(
+                resource_dict,
+                resource_ref,
+                SCHEMA.description,
+                "description",
+                _type=Literal
+            )
+
     def _resource_list_fields_graph(self, resource_ref, resource_dict):
-        items = [
-            ("same_as", SCHEMA.sameAs, None, Literal),
-        ]
+        if resource_dict.get("type") == "fileObject":
+            items = [
+                ("same_as", SCHEMA.sameAs, None, Literal),
+            ]
+        elif resource_dict.get("type") == "fileSet":
+            items = [
+                ("includes", CR.includes, None, Literal),
+                ("excludes", CR.excludes, None, Literal),
+            ]
+        else:
+            items = []
         self._add_list_triples_from_dict(resource_dict, resource_ref, items)
 
     def _resource_format_graph(self, resource_ref, resource_dict):
@@ -386,57 +379,42 @@ class CroissantProfile(RDFProfile):
             self.g.add((resource_ref, SCHEMA.encodingFormat, Literal(resource_dict["mimetype"])))
 
     def _resource_url_graph(self, resource_ref, resource_dict):
-        if resource_dict.get("url"):
-            self.g.add((resource_ref, SCHEMA.contentUrl, Literal(resource_dict.get("url"))))
+        if (resource_dict.get("type") == "fileObject") and resource_dict.get("url"):
+            self.g.add((resource_ref, SCHEMA.contentUrl, Literal(resource_dict["url"])))
 
     def _resource_numbers_graph(self, resource_ref, resource_dict):
-        if resource_dict.get("size"):
-            self.g.add((resource_ref, SCHEMA.contentSize, Literal(str(resource_dict["size"]))))
+        if (resource_dict.get("type") == "fileObject") and resource_dict.get("size"):
+            self.g.add((resource_ref, SCHEMA.contentSize, Literal(str(resource_dict["size"])))) # This must be a string for the Croissant validator
 
     def _resource_subresources_graph(self, dataset_ref, resource_ref, resource_dict):
-        subresource_dicts = self._get_resource_value(resource_dict, "subresources")
+        for subresource_dict in resource_dict.get("subresources", []):
+            if isinstance(subresource_dict, dict):
 
-        if isinstance(subresource_dicts, list):
-            subresource_dicts = [
-                subresource_dict
-                for subresource_dict in subresource_dicts
-                if any(subresource_dict.values())
-            ]
-
-            for subresource_dict in subresource_dicts:
                 if subresource_dict.get("type") == "fileObject":
-                    subresource_type_specific = CR.FileObject
+                    subresource_type = CR.FileObject
                 elif subresource_dict.get("type") == "fileSet":
-                    subresource_type_specific = CR.FileSet
+                    subresource_type = CR.FileSet
                 else:
-                    subresource_type_specific = CR.FileObject
+                    subresource_dict["type"] = "fileObject"
+                    subresource_type = CR.FileObject
 
-                subresource_id_given = self._get_dict_value(subresource_dict, "id_given") # optional
-                if subresource_id_given:
-                    subresource_ref = CleanedURIRef(subresource_id_given)
+                if (subresource_dict.get("type") == "fileObject") and subresource_dict.get("url"):
+                    subresource_dict["name"] = subresource_dict["url"].split("/")[-1]
+
+                if subresource_dict.get("id_given"):
+                    subresource_ref = CleanedURIRef(subresource_dict["id_given"])
                 else:
                     subresource_ref = BNode()
 
-                self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is added to the dataset_ref node, not to the resource_ref node
-                self.g.add((subresource_ref, RDF.type, subresource_type_specific))
+                if subresource_dict.get("id_given_contained_in"):
+                    self.g.add((subresource_ref, SCHEMA.containedIn, CleanedURIRef(subresource_dict["id_given_contained_in"])))
+                else:
+                    self.g.add((subresource_ref, SCHEMA.containedIn, resource_ref))
 
-                # Basic fields
-                self._resource_basic_fields_graph(subresource_ref, subresource_dict)
+                self.g.add((dataset_ref, SCHEMA.distribution, subresource_ref)) # Note that this is intentionally added to the dataset_ref node, not to the resource_ref node
+                self.g.add((subresource_ref, RDF.type, subresource_type))
 
-                # Format
-                self._resource_format_graph(subresource_ref, subresource_dict)
-
-                # URL
-                self._resource_url_graph(subresource_ref, subresource_dict)
-
-                if subresource_dict.get("type") == "fileSet":
-                    items = [
-                        ("includes", CR.includes, None, Literal),
-                        ("excludes", CR.excludes, None, Literal),
-                    ]
-                    self._add_list_triples_from_dict(subresource_dict, subresource_ref, items)
-
-                self.g.add((subresource_ref, CR.containedIn, resource_ref))
+                self._resource_graph(dataset_ref, subresource_ref, subresource_dict)
 
     def _recordset_graph(self, dataset_ref, resource_ref, resource_dict):
 
@@ -502,4 +480,3 @@ class CroissantProfile(RDFProfile):
                 self.g.add((recordset_ref, SCHEMA.key, unique_field_ref))
 
         self.g.add((dataset_ref, CR.recordSet, recordset_ref))
-

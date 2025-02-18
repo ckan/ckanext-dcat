@@ -4,7 +4,7 @@ The following table provides a generic mapping between the fields of the `dcat:D
 their equivalents in the CKAN model. In most cases this mapping is deliberately a loose one. For instance, it does not try to link
 the DCAT publisher property with a CKAN dataset author, maintainer or organization, as the link between them is not straight-forward
 and may depend on a particular instance needs. When mapping from CKAN metadata to DCAT though, there are in some cases fallback fields
-that are used if the default field is not present (see [RDF Serializer](profiles.md#rdf-dcat-serializer) for more details on this).
+that are used if the default field is not present (see [RDF Serializer](writing-profiles.md#rdf-dcat-serializer) for more details on this).
 
 This mapping is compatible with **DCAT-AP** [v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), [v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210) and [v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) and **DCAT-US** [v3](https://doi-do.github.io/dcat-us/). It depends on the active [profile(s)](profiles.md#profiles) and the fields present in your custom [schema](getting-started.md#schemas) which DCAT properties are mapped.
 
@@ -276,7 +276,7 @@ If no `publisher` or `publisher_*` fields are found, the serializers will fall b
 ### Spatial coverage
 
 
-The following formats for `dct:spatial` are supported by the default [parser](profiles.md#rdf-dcat-parser). Note that the default [serializer](profiles.md#rdf-dcat-serializer) will return the single `dct:spatial` instance form by default.
+The following formats for `dct:spatial` are supported by the default [parser](writing-profiles.md#rdf-dcat-parser). Note that the default [serializer](writing-profiles.md#rdf-dcat-serializer) will return the single `dct:spatial` instance form by default.
 
   - One `dct:spatial` instance, URI only
 

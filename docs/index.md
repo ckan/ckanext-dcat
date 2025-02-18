@@ -1,11 +1,11 @@
 # ckanext-dcat
 
 
-[![Tests](https://github.com/ckan/ckanext-dcat/workflows/Tests/badge.svg?branch=master)](https://github.com/ckan/ckanext-dcat/actions)
+[![Tests](https://github.com/ckan/ckanext-dcat/actions/workflows/test.yml/badge.svg)](https://github.com/ckan/ckanext-dcat/actions)
 [![Code Coverage](http://codecov.io/github/ckan/ckanext-dcat/coverage.svg?branch=master)](http://codecov.io/github/ckan/ckanext-dcat?branch=master)
 
 
-Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data publishers expose and consume metadata as serialized RDF documents using [DCAT](https://github.com/ckan/ckan).
+Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data publishers expose and consume metadata as serialized RDF documents using [DCAT](https://www.w3.org/TR/vocab-dcat-3/), as well as others metadata formats like [Croissant ML](croissant.md) or [Schema.org](google-dataset-search.md).
 
 
 === "CKAN dataset"
@@ -109,13 +109,13 @@ In terms of CKAN features, this extension offers:
 
 * An [RDF Harvester](harvester.md) that allows importing RDF serializations from other catalogs to create CKAN datasets (`dcat_rdf_harvester` plugin).
 
-* Other features like [Command Line Interface](cli.md) or support for indexing in [Google Dataset Search](google-dataset-search.md).
+* Other features like [Command Line Interface](cli.md), support for indexing in [Google Dataset Search](google-dataset-search.md) or endpoints for exposing dataets in the [Croissant ML](croissant.md) format.
 
 
 These are implemented internally using:
 
 * A base [mapping](mapping.md) between DCAT and CKAN datasets and viceversa (compatible with **DCAT-AP** [v1.1](https://joinup.ec.europa.eu/asset/dcat_application_profile/asset_release/dcat-ap-v11), [v2.1](https://joinup.ec.europa.eu/collection/semantic-interoperability-community-semic/solution/dcat-application-profile-data-portals-europe/release/210) and [v3](https://semiceu.github.io/DCAT-AP/releases/3.0.0/) and **DCAT-US** [v3](https://doi-do.github.io/dcat-us/)).
 
-* An [RDF Parser](profiles.md#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](profiles.md#profiles).
+* An [RDF Parser](writing-profiles.md#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](profiles.md#profiles).
 
-* An [RDF Serializer](profiles.md#rdf-dcat-serializer) that allows to transform CKAN datasets metadata to different semantic formats, also allowing customizable [profiles](profiles.md#profiles).
+* An [RDF Serializer](writing-profiles.md#rdf-dcat-serializer) that allows to transform CKAN datasets metadata to different semantic formats, also allowing customizable [profiles](profiles.md#profiles).

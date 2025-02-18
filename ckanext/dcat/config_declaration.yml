@@ -6,8 +6,7 @@ groups:
       - key: ckanext.dcat.rdf.profiles
         default_callable: 'ckanext.dcat.processors:_get_default_rdf_profiles'
         description: |
-          RDF profiles to use when parsing and serializing. See https://github.com/ckan/ckanext-dcat#profiles
-          for more details.
+          RDF profiles to use when parsing and serializing. See [Profiles](profiles.md#profiles) for more details.
         example: 'euro_dcat_ap_2 my_local_ap'
 
       - key: ckanext.dcat.translate_keys
