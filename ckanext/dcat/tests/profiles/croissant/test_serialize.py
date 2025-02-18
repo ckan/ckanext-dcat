@@ -224,7 +224,6 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
             sub_resource_file_obj_dict["hash"],
         )
 
-
         sub_resource_file_set_dict = [
             d
             for d in dataset_dict["resources"][0]["subresources"]
@@ -285,7 +284,4 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
         creator = [t for t in g.triples((dataset_ref, SCHEMA.creator, None))]
         assert len(creator) == 1
         creator_ref = creator[0][2]
-        assert self._triple(
-            g, creator_ref, SCHEMA.name, org["title"]
-        )
-
+        assert self._triple(g, creator_ref, SCHEMA.name, org["title"])
