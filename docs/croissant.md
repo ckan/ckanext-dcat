@@ -4,7 +4,7 @@
 
 ## Configuration
 
-The `croissant` plugin enables exposing a CKAN site datasets metadata following the [Croissant format specification](https://docs.mlcommons.org/croissant/docs/croissant-spec.html):
+The `croissant` plugin allows a CKAN site dataset's metadata to be exposed following the [Croissant format specification](https://docs.mlcommons.org/croissant/docs/croissant-spec.html):
 
 ```ini
 ckan.plugins = [...] croissant
@@ -12,7 +12,7 @@ ckan.plugins = [...] croissant
 
 
 !!! Note
-    The `croissant` plugin can be used on its own or alongside other plugins like `dcat` or `structured_data` to provide multiple representations of a site metadata.
+    The `croissant` plugin can be used on its own or alongside other plugins like `dcat` or `structured_data` to provide multiple representations of a dataset's metadata.
     ```ini
     ckan.plugins = [...] dcat croissant structured_data
     ```
@@ -87,15 +87,14 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
     },
     "@graph": [
         {
-            "@id": "my-custom-subresource-id-2",
-            "@type": "cr:FileSet",
-            "containedIn": {
-                "@id": "my-custom-resource-id"
-            },
-            "description": "Test subresource 2",
-            "encodingFormat": "CSV",
-            "excludes": "**.txt",
-            "includes": "**.csv"
+            "@id": "my-custom-resource-id",
+            "@type": "cr:FileObject",
+            "contentSize": "12323",
+            "contentUrl": "https://example.com/data.zip",
+            "description": "Some description",
+            "encodingFormat": "ZIP",
+            "name": "Resource 1",
+            "sha256": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79"
         },
         {
             "@id": "custom-creator-id",
@@ -106,25 +105,15 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
             "url": "https://example.org"
         },
         {
-            "@id": "custom-publisher-id",
-            "@type": "Person",
-            "email": "publisher@example.org",
-            "identifier": "http://example.org/publisher-id",
-            "name": "Test Publisher",
-            "url": "https://example.org"
-        },
-        {
-            "@id": "my-custom-subresource-id-1",
-            "@type": "cr:FileObject",
+            "@id": "my-custom-subresource-id-2",
+            "@type": "cr:FileSet",
             "containedIn": {
                 "@id": "my-custom-resource-id"
             },
-            "contentSize": "890",
-            "contentUrl": "https://example.com/data2.csv",
-            "description": "Test subresource 1",
+            "description": "Test subresource 2",
             "encodingFormat": "CSV",
-            "name": "data2.csv",
-            "sha256": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79"
+            "excludes": "**.txt",
+            "includes": "**.csv"
         },
         {
             "@id": "my-custom-id",
@@ -149,22 +138,22 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
             "description": "Lorem ipsum",
             "distribution": [
                 {
-                    "@id": "my-custom-subresource-id-2"
-                },
-                {
                     "@id": "my-custom-subresource-id-1"
                 },
                 {
                     "@id": "my-custom-resource-id"
+                },
+                {
+                    "@id": "my-custom-subresource-id-2"
                 }
             ],
             "inLanguage": [
-                "en",
                 "ca",
+                "en",
                 "es"
             ],
             "includedInDataCatalog": {
-                "@id": "_:N24132c079a9e46ffba8dde28cf727967"
+                "@id": "_:N49a77c67fc9a43d9b3d7f051589d9cab"
             },
             "isLiveDataset": true,
             "keywords": [
@@ -177,31 +166,40 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
                 "@id": "custom-publisher-id"
             },
             "sameAs": [
-                "https://some.other.catalog/dataset/123",
-                "https://yet.another.catalog/dataset/xyz"
+                "https://yet.another.catalog/dataset/xyz",
+                "https://some.other.catalog/dataset/123"
             ],
             "sdLicense": "http://creativecommons.org/licenses/by/3.0/",
             "url": "http://test.ckan.net/dataset/test-dataset-croissant",
             "version": "1.0.0"
         },
         {
-            "@id": "_:N24132c079a9e46ffba8dde28cf727967",
+            "@id": "_:N49a77c67fc9a43d9b3d7f051589d9cab",
             "@type": "DataCatalog",
             "description": "",
             "name": "CKAN",
             "url": "http://test.ckan.net"
         },
         {
-            "@id": "my-custom-resource-id",
+            "@id": "custom-publisher-id",
+            "@type": "Person",
+            "email": "publisher@example.org",
+            "identifier": "http://example.org/publisher-id",
+            "name": "Test Publisher",
+            "url": "https://example.org"
+        },
+        {
+            "@id": "my-custom-subresource-id-1",
             "@type": "cr:FileObject",
-            "contentSize": "12323",
-            "contentUrl": "https://example.com/data.csv",
-            "description": "Some description",
-            "encodingFormat": "CSV",
-            "name": "Resource 1",
-            "sha256": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79"
+            "containedIn": {
+                "@id": "my-custom-resource-id"
+            },
+            "contentSize": "890",
+            "contentUrl": "data.txt",
+            "description": "Test subresource 1",
+            "encodingFormat": "TXT",
+            "name": "data.txt"
         }
     ]
 }
-
 ```
