@@ -214,14 +214,16 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(
             g,
             sub_resource_file_obj_ref,
-            SCHEMA.sha256,
-            sub_resource_file_obj_dict["hash"],
-        )
-        assert self._triple(
-            g,
-            sub_resource_file_obj_ref,
             SCHEMA.contentSize,
             sub_resource_file_obj_dict["size"],
+        )
+
+        # Hash should not be in sub-resources
+        assert not self._triple(
+            g,
+            sub_resource_file_obj_ref,
+            SCHEMA.sha256,
+            resource_dict["hash"],
         )
 
         sub_resource_file_set_dict = [
@@ -334,3 +336,27 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
             assert self._triple(
                 g, recordset_ref, SCHEMA.key, URIRef(f"{resource_id}/records/name")
             )
+
+    @pytest.mark.usefixtures("with_plugins", "clean_db")
+    def test_graph_from_dataset_org_fallback(self):
+
+        org = factories.Organization()
+
+        data_dict = {
+            "name": "test-dataset",
+            "title": "Test dataset",
+            "owner_org": org["id"],
+        }
+        dataset_dict = helpers.call_action("package_create", **data_dict)
+
+        assert dataset_dict["organization"]["title"] == org["title"]
+
+        s = RDFSerializer(profiles=["croissant"])
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset_dict)
+
+        creator = [t for t in g.triples((dataset_ref, SCHEMA.creator, None))]
+        assert len(creator) == 1
+        creator_ref = creator[0][2]
+        assert self._triple(g, creator_ref, SCHEMA.name, org["title"])

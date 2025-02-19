@@ -55,8 +55,8 @@
             "id": "568b8ac9-8c69-4475-b35e-d7f812a63c32",
             "name": "Resource 1",
             "description": "Some description",
-            "url": "https://example.com/data.csv",
-            "format": "CSV",
+            "url": "https://example.com/data.zip",
+            "format": "ZIP",
             "id_given": "my-custom-resource-id",
             "size": "12323",
             "hash": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79",
@@ -65,11 +65,10 @@
                 {
                     "type": "fileObject",
                     "id_given": "my-custom-subresource-id-1",
-                    "url": "https://example.com/data2.csv",
+                    "url": "data.txt",
                     "description": "Test subresource 1",
                     "size": "890",
-                    "hash": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79",
-                    "format": "CSV"
+                    "format": "TXT"
                 },
                 {
                     "type": "fileSet",
@@ -79,7 +78,6 @@
                     "includes": "**.csv",
                     "excludes": "**.txt"
                 }
-
             ]
         }
     ]
