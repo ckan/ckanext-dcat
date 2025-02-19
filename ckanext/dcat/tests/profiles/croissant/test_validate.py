@@ -57,6 +57,7 @@ def test_valid_output_with_recordset():
             "fields": [
                 {"id": "name", "type": "text", "schema": {"is_index": True}},
                 {"id": "age", "type": "int", "schema": {"is_index": False}},
+                {"id": "temperature", "type": "float", "schema": {"is_index": False}},
                 {"id": "timestamp", "type": "timestamp", "schema": {"is_index": False}},
             ],
         }

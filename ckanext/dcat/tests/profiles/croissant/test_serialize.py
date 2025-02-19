@@ -284,6 +284,7 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
         fields_datastore = [
             {"id": "name", "type": "text", "schema": {"is_index": True}},
             {"id": "age", "type": "int", "schema": {"is_index": False}},
+            {"id": "temperature", "type": "float", "schema": {"is_index": False}},
             {"id": "timestamp", "type": "timestamp", "schema": {"is_index": False}},
         ]
 
@@ -311,7 +312,7 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
 
             # Test fields
             fields = list(g.objects(recordset_ref, SCHEMA.field))
-            assert len(fields) == 3
+            assert len(fields) == 4
 
             for field_datastore in fields_datastore:
                 field_ref = URIRef(f"{resource_id}/records/{field_datastore['id']}")
