@@ -9,8 +9,8 @@ except ImportError:
 import pytest
 
 from ckan.tests.helpers import call_action
-from ckanext.dcat.processors import RDFSerializer
-from ckanext.dcat.profiles.croissant import JSONLD_CONTEXT
+
+from ckanext.dcat.helpers import croissant
 from ckanext.dcat.tests.utils import get_file_contents
 
 
@@ -23,13 +23,7 @@ def test_valid_output():
         get_file_contents("ckan/ckan_full_dataset_croissant.json")
     )
 
-    s = RDFSerializer(profiles=["croissant"])
-
-    s.graph_from_dataset(dataset_dict)
-
-    croissant_dict = json.loads(
-        s.g.serialize(format="json-ld", auto_compact=True, context=JSONLD_CONTEXT)
-    )
+    croissant_dict = json.loads(croissant(dataset_dict))
 
     try:
         mlc.Dataset(croissant_dict)
