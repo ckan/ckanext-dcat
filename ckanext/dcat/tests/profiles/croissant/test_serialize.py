@@ -221,7 +221,7 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
             g,
             sub_resource_file_obj_ref,
             SCHEMA.sha256,
-            sub_resource_file_obj_dict["hash"],
+            resource_dict["hash"],
         )
 
         sub_resource_file_set_dict = [
