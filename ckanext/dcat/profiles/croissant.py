@@ -65,7 +65,7 @@ CROISSANT_FIELD_TYPES = {
     "int": SCHEMA.Integer,
     "float": SCHEMA.Float,
     "numeric": SCHEMA.Float,
-    "timestamp": SCHEMA.DateTime,
+    "timestamp": SCHEMA.Date,
 }
 
 
