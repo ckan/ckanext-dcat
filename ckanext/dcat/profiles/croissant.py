@@ -68,6 +68,15 @@ JSONLD_CONTEXT = {
     "transform": "cr:transform"
 }
 
+CROISSANT_FIELD_TYPES = {
+    "text": SCHEMA.Text,
+    "int": SCHEMA.Integer,
+    "float": SCHEMA.Float,
+    "numeric": SCHEMA.Float,
+    "timestamp": SCHEMA.DateTime,
+}
+
+
 class CroissantProfile(RDFProfile):
     """
     An RDF profile based on the schema.org Dataset, modified by Croissant.
@@ -442,28 +451,19 @@ class CroissantProfile(RDFProfile):
 
         self.g.add((recordset_ref, RDF.type, CR.RecordSet))
 
-#        self.g.add((recordset_ref, RDF.type, SCHEMA.Text))
+        #        self.g.add((recordset_ref, RDF.type, SCHEMA.Text))
 
         self.g.add((recordset_ref, SCHEMA.name, Literal(recordset_ref)))
 
-        FIELD_TYPES = {
-            "text": SCHEMA.Text,
-            "int": SCHEMA.Integer,
-            "float": SCHEMA.Float,
-            "numeric": SCHEMA.Float,
-            "timestamp": SCHEMA.DateTime,
-        }
-
         unique_fields = []
         for field in datastore_info["fields"]:
-
 
             field_ref = URIRef(f"{resource_dict['id']}/records/{field['id']}")
 
             self.g.add((recordset_ref, SCHEMA.field, field_ref))
             self.g.add((field_ref, RDF.type, CR.Field))
 
-            self.g.add((field_ref, CR.dataType, FIELD_TYPES.get(field["type"])))
+            self.g.add((field_ref, CR.dataType, CROISSANT_FIELD_TYPES.get(field["type"])))
 
             source_ref = BNode()
 
