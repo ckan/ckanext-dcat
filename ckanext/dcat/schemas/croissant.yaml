@@ -1,0 +1,433 @@
+scheming_version: 2
+dataset_type: dataset
+about: Fields for Croissant 1.0 schema
+about_url: https://docs.mlcommons.org/croissant/docs/croissant-spec.html
+
+# --------------------------------------------------------------------------------------------------
+
+dataset_fields:
+
+# @context | schema:URL | ONE | required
+# Leaving this to profiles/croissant.py
+# - field_name: context
+#   label: Context
+#   help_text: A set of JSON-LD context definitions that make the rest of the Croissant description less verbose. See the recommended JSON-LD context in Appendix 1.
+#   required: true
+
+# @type | schema:Text | ONE | required
+# Leaving this to profiles/croissant.py
+# - field_name: type
+#   label: Type
+#   help_text: The type of a croissant dataset must be schema.org/Dataset.
+#   required: true
+
+# dct:conformsTo | schema:URL | ONE | required
+# Leaving this to profiles/croissant.py
+# - field_name: conforms_to
+#   label: Conforms to
+#   help_text: 'Croissant datasets must declare that they conform to the versioned schema: http://mlcommons.org/croissant/1.0'
+#   form_placeholder: http://mlcommons.org/croissant/1.0
+#   required: true
+
+# schema:name | schema:Text | ONE | required
+- field_name: title # This default back-end field name is 'title' in order not to clash with 'name' below, which must remain as it is for internal use
+  label: Name # This front-end field name is 'Name' in order to match the Croissant specification
+  help_text: The name of the dataset.
+  required: true # This is true anyway from the preset, but adding this here just to be clear
+  preset: cr_title # We have defined this preset in schemas/presets.yaml rather than use the other ckanext-scheming 'title' preset, as if this field isn't given then that other preset re-defines this field by the URL slug, which isn't really desired. As the Croissant specification says that this field is required, it's best that it actually errors if not given, and to use it to lead the URL slug rather than the other way around. The URL slug can still be set to something different, if needed.
+
+# schema:url | schema:URL | ONE | required
+- field_name: name # This default back-end field name is 'name' for internal use. If a field with back-end field name of 'name' isn't present at all, then this will result in errors. The value of this field is the URL slug i.e. not the full URL but the part after the final slash. Note that this does not have to be related to the field with front-end field name of 'Name' above.
+  label: URL
+  # help_text: The URL of the dataset. This generally corresponds to the Web page for the dataset.
+  required: true # This is true anyway from the preset, but adding this here just to be clear
+  preset: dataset_slug
+
+# @id | schema:Text | ONE | optional
+- field_name: id_given
+  label: ID
+  help_text: Unique ID of the dataset for internal graph references. Auto-generated if not provided.
+  required: false
+
+# schema:description | schema:Text | ONE | required
+- field_name: notes # Default back-end field name. This is 'description' for resources.
+  label: Description
+  help_text: Description of the dataset.
+  required: true
+  form_snippet: markdown.html
+
+# schema:keywords | schema:DefinedTerm / schema:Text / schema:URL | MANY | recommended
+- field_name: tag_string # Default back-end field name. This mustn't change, as there's a step looking for this name when this preset is applied, which will result in an error without it.
+  label: Keywords
+  help_text: A set of keywords associated with the dataset, either as free text, or a DefinedTerm with a formal definition.
+  required: false
+  preset: tag_string_autocomplete # This preset causes this field to appear in dataset_dict under the key 'tags' regardless of the chosen field_name here
+  # preset: multiple_text
+  # validators: ignore_missing scheming_multiple_text
+
+# schema:version | schema:Number / schema:Text | ONE | recommended
+- field_name: version
+  label: Version
+  help_text: The version of the dataset following the requirements at https://docs.mlcommons.org/croissant/docs/croissant-spec.html#version.
+  required: false
+
+# cr:isLiveDataset | schema:Boolean | ONE | optional
+# If the value choices here are actual booleans rather than strings, with 'boolean_validator' applied, then this causes problems as this is a non-required field and so we want a default value of None if set to blank, but:
+#   - If set to blank, this defaults to False in dataset_dict rather than None, and therefore shows up in the profile view whereas it shouldn't.
+#   - If set to False, this resets to blank. Due to the previous note, this does show up in the profile view as desired but for the wrong reason, and is blank in the info edit form and the info display table.
+# Ultimately, after a lot of experimentation, it was simpler to take these values as strings, in which format they remain in the dataset_dict, and convert to booleans in profiles/croissant.py instead.
+- field_name: is_live_dataset
+  label: Is live dataset
+  help_text: Whether the dataset is a live dataset.
+  required: false
+  preset: select
+  choices:
+  - value: 'True'
+    label: 'True'
+  - value: 'False'
+    label: 'False'
+  # validators: scheming_required boolean_validator
+  # output_validators: boolean_validator
+
+# schema:license | schema:CreativeWork / schema:URL | MANY | required
+# Following schemaorg.py, this will fall back to 'license_url' and then 'license_title' if not present
+# Ignoring Croissant cardinality of MANY in order to work as default CKAN license
+- field_name: license
+  label: License
+  help_text: The license of the dataset. Croissant recommends using the URL of a known license, e.g., one of the licenses listed at https://spdx.org/licenses/
+  form_placeholder: https://creativecommons.org/licenses/by-sa/4.0/
+  required: true
+  # preset: multiple_text
+  # validators: ignore_missing scheming_multiple_text
+
+# schema:sdLicense | schema:CreativeWork / schema:URL | MANY | recommended
+# Ignoring Croissant cardinality of MANY in order to work as default CKAN license
+- field_name: structured_data_license
+  label: Structured data license
+  help_text: A license document that applies to this structured data, typically indicated by URL.
+  form_placeholder: https://creativecommons.org/licenses/by-sa/4.0/
+  required: false
+  # preset: multiple_text
+  # validators: ignore_missing scheming_multiple_text
+
+# schema:dateCreated | schema:Date / schema:DateTime | ONE | recommended
+- field_name: created # Following 'issued' and 'modified'
+  label: Date created
+  help_text: The date the dataset was initially created.
+  required: false
+  preset: dcat_date
+
+# schema:datePublished | schema:Date / schema:DateTime | ONE | required
+# Following schemaorg.py, this will fall back to 'metadata_created' if not present
+- field_name: issued # Following dcat_ap_full.yaml and schemaorg.py
+  label: Date published
+  help_text: The date the dataset was published.
+  required: true
+  preset: dcat_date
+
+# schema:dateModified | schema:Date / schema:DateTime | ONE | recommended
+# Following schemaorg.py, this will fall back to 'metadata_modified' if not present
+- field_name: modified # Following dcat_ap_full.yaml and schemaorg.py
+  label: Date modified
+  help_text: The date the dataset was last modified.
+  required: false
+  preset: dcat_date
+
+# schema:inLanguage | schema:Language / schema:Text | MANY | recommended
+- field_name: language # Following dcat_ap_full.yaml and schemaorg.py
+  label: Languages
+  help_text: The language(s) of the content of the dataset.
+  required: false
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+
+# schema:sameAs | schema:URL | MANY | recommended
+- field_name: same_as
+  label: Same as
+  help_text: The URL of another Web resource that represents the same dataset as this one.
+  form_placeholder: http://example.com/my-organization/my-dataset/
+  required: false
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+
+# cr:citeAs | schema:Text | ONE | optional
+- field_name: cite_as
+  label: Cite as
+  help_text: A citation to the dataset itself, or a citation for a publication that describes the dataset. Ideally, citations should be expressed using the bibtex format. Note that this is different from schema.org/citation, which is used to make a citation to another publication from this dataset.
+  form_placeholder: '@Article{bloggs24data, author="Joe Bloggs and Sally Biggs"}'
+  required: false
+
+# schema:creator | schema:Organization / schema:Person | MANY | required
+# Following schemaorg.py, this will fall back to 'organization' if not present
+# TODO: The 'required: true' setting here is not honoured due to the repeating subfields. We can make one of the subfields required and that is honoured if at least one set of subfields exists, but all sets of subfields can be removed by the user via the remove button, so that's a loophole. The 'multiple_text' preset also uses a remove button but it's disabled if there's only one element in the list, which is the behaviour we really want here. This comes down to modifying the ckanext-scheming extension. The relevant code is in these two files (search for 'click'):
+#   ckanext/scheming/assets/js/scheming-multiple-text.js
+#   ckanext/scheming/assets/js/scheming-repeating-subfields.js
+- field_name: creator # Following schemaorg.py
+  label: Creators
+  help_text: The creator(s) of the dataset.
+  required: true
+  repeating_label: Creator
+  repeating_subfields:
+
+    # @type | schema:Text | ONE
+    - field_name: type
+      label: Type
+      help_text: Type of creator (e.g. Organization, Person).
+      required: false
+      preset: select
+      choices:
+      - value: organization
+        label: Organization
+      - value: person
+        label: Person
+
+    # @id | schema:Text | ONE
+    # This will fall back to 'organization["id"]' if not present
+    - field_name: id_given
+      label: ID
+      help_text: Unique ID of the creator for internal graph references. Auto-generated if not provided.
+      required: false
+
+    # schema:identifier | schema:Text | ONE
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
+      required: false
+
+    # schema:name | schema:Text | ONE
+    # Following schemaorg.py, this will fall back to 'organization["title"]' if not present
+    - field_name: name
+      label: Name
+      help_text: Name of the entity or person who created the dataset.
+      required: true
+
+    # schema:email | schema:Text | ONE
+    # Following schemaorg.py, this will fall back to 'maintainer_email' and then 'author_email' if not present
+    - field_name: email
+      label: Email
+      help_text: Contact email of the creator.
+      required: false
+      display_snippet: email.html
+
+    # schema:url | schema:URL | ONE
+    # Following schemaorg.py, this will fall back to 'config.ckan.site_url' if not present
+    - field_name: url
+      label: URL
+      help_text: URL for more information about the creator.
+      required: false
+      display_snippet: link.html
+
+# schema:publisher | schema:Organization / schema:Person | MANY | recommended
+- field_name: publisher # Following dcat_ap_full.yaml and schemaorg.py
+  label: Publishers
+  help_text: The publisher(s) of the dataset, which may be distinct from its creator(s).
+  required: false
+  repeating_label: Publisher
+  repeating_subfields:
+
+    # @type | schema:Text | ONE
+    - field_name: type
+      label: Type
+      help_text: Type of publisher (e.g. Organization, Person).
+      required: false
+      preset: select
+      choices:
+      - value: organization
+        label: Organization
+      - value: person
+        label: Person
+
+    # @id | schema:Text | ONE
+    - field_name: id_given
+      label: ID
+      help_text: Unique ID of the publisher for internal graph references. Auto-generated if not provided.
+      required: false
+
+    # schema:identifier | schema:Text | ONE
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the publisher, such as an ORCID or ROR ID.
+      required: false
+
+    # schema:name | schema:Text | ONE
+    - field_name: name
+      label: Name
+      help_text: Name of the entity or person who published the dataset.
+      required: false
+
+    # schema:email | schema:Text | ONE
+    - field_name: email
+      label: Email
+      help_text: Contact email of the publisher.
+      required: false
+      display_snippet: email.html
+
+    # schema:url | schema:URL | ONE
+    - field_name: url
+      label: URL
+      help_text: URL for more information about the publisher.
+      required: false
+      display_snippet: link.html
+
+# This is not part of the Croissant specification, but is essential for all CKAN schemas. There will be an error without it.
+- field_name: owner_org
+  label: Owner
+  help_text: The owner organization of the dataset in this instance of CKAN.
+  required: true # This is true anyway from the preset, but adding this here just to be clear
+  preset: dataset_organization # Note that this brings in an additional 'Visibility' field as a drop-down menu with 'Private' and 'Public' options
+
+# --------------------------------------------------------------------------------------------------
+
+resource_fields:
+
+# schema:contentUrl | schema:URL | ONE
+- field_name: url
+  label: URL
+  help_text: Actual bytes of the media object, for example the image file or video file.
+  required: false
+  preset: resource_url_upload
+
+# schema:name | schema:Text | ONE
+# This is auto-populated with the slug of 'url' from above, and should therefore be the filename plus extension, but it can be manually adjusted
+- field_name: name
+  label: Name
+  help_text: The name of the file. As much as possible, the name should reflect the name of the file as downloaded, including the file extension. e.g. "images.zip".
+  required: false
+
+# @id | schema:Text | ONE
+- field_name: id_given
+  label: ID
+  help_text: Unique ID of the resource for internal graph references. Auto-generated if not provided.
+  required: false
+
+# schema:description | schema:Text | ONE
+# This isn't explicitly mentioned in the Croissant specification, but is seen in some of its examples
+- field_name: description # Default back-end field name. This is 'notes' for datasets.
+  label: Description
+  help_text: Description of the resource.
+  required: false
+  form_snippet: markdown.html
+
+# schema:encodingFormat | schema:Text | ONE
+# Following schemaorg.py, this will fall back to 'mimetype' if not present
+- field_name: format
+  label: Format
+  help_text: The format of the file, given as a mime type. Guessed if not provided.
+  required: false
+  preset: resource_format_autocomplete
+
+# schema:contentSize | schema:Text | ONE
+# Leaving this to auto-generation
+# - field_name: size
+#   label: Size
+#   help_text: File size in (mega/kilo/…)bytes. Defaults to bytes if a unit is not specified.
+#   required: false
+
+# schema:sha256 | schema:Text | ONE
+- field_name: hash
+  label: Hash
+  help_text: Checksum for the file contents.
+  required: false
+
+# schema:sameAs | schema:URL | MANY
+# TODO: The Croissant spec states this as cardinality MANY, but the validator only allows ONE. Need to check which is correct. Temporarily restricting to ONE here.
+- field_name: same_as
+  label: Same as
+  help_text: URL (or local name) of a FileObject with the same content, but in a different format.
+  form_placeholder: http://example.com/my-organization/my-dataset/my-resource.csv
+  required: false
+  # preset: multiple_text
+  # validators: ignore_missing scheming_multiple_text
+
+# schema:distribution | cr:FileObject / cr:FileSet | MANY
+- field_name: subresources
+  label: Subresources
+  help_text:
+  required: false
+  repeating_label: Item
+  repeating_subfields:
+
+    # @type | schema:Text | ONE
+    - field_name: type
+      label: Type
+      help_text: Type of subresource (e.g. FileObject, FileSet).
+      required: false
+      preset: select
+      choices:
+      - value: fileObject
+        label: FileObject
+      - value: fileSet
+        label: FileSet
+
+    # schema:contentUrl | schema:URL | ONE
+    - field_name: url
+      label: URL
+      help_text: For FileObject only. The filepath of the file within the resource, excluding the name of the top-level directory, and including the file's own name and extension. For a resource called "resource.zip" which contains a file called "file.csv" at the root level, this must be entered as "file.csv", not "resource/file.csv". For a resource called "resource.zip" which contains a directory called "directory" and a file called "file.csv", this must be entered as "directory/file.csv", not "resource/directory/file.csv".
+      required: false
+
+    # schema:name | schema:Text | ONE
+    # Leaving this to profiles/croissant.py to extract from the url
+    # - field_name: name
+    #   label: Name
+    #   help_text: For FileObject only. The name of the file. As much as possible, the name should reflect the name of the file as downloaded, including the file extension. e.g. "images.zip".
+    #   required: false
+
+    # @id | schema:Text | ONE
+    - field_name: id_given
+      label: ID
+      help_text: For FileObject or FileSet. Unique ID of the subresource for internal graph references. Auto-generated if not provided. But if you have a structure like resource/parent-subresource/child-subresource, and if this is a parent subresource, then you must supply an ID here and copy it into the associated child subresource's "ID contained in" field. These relationships can't be automatically determined, so this is the only case when an ID must be manually declared and referred to.
+      required: false
+
+    # cr:containedIn | schema:Text | MANY
+    # Ignoring Croissant cardinality of MANY
+    - field_name: id_given_contained_in
+      label: ID contained in
+      help_text: For FileObject or FileSet. The ID of another FileObject or FileSet that this one is contained in. By default, this is automatically set to the ID of the containing top-level resource. But if you have a structure like resource/parent-subresource/child-subresource, and if this is a child subresource, then you must supply an ID in the associated parent subresource's "ID" field and copy it here. These relationships can't be automatically determined, so this is the only case when an ID must be manually declared and referred to.
+      required: false
+
+    # schema:description | schema:Text | ONE
+    # This isn't explicitly mentioned in the Croissant specification, but is seen in some of its examples
+    - field_name: description
+      label: Description
+      help_text: For FileObject or FileSet. Description of the subresource.
+      required: false
+      form_snippet: markdown.html
+
+    # schema:encodingFormat | schema:Text | ONE
+    - field_name: format
+      label: Format
+      help_text: For FileObject or FileSet. The format of the file, given as a mime type.
+      required: false
+      preset: resource_format_autocomplete
+
+    # schema:contentSize | schema:Text | ONE
+    - field_name: size
+      label: Size
+      help_text: For FileObject only. File size in (mega/kilo/…)bytes. Defaults to bytes if a unit is not specified.
+      required: false
+
+    # schema:sameAs | schema:URL | MANY
+    # TODO: The Croissant spec states this as cardinality MANY, but the validator only allows ONE. Need to check which is correct. Temporarily restricting to ONE here.
+    - field_name: same_as
+      label: Same as
+      help_text: For FileObject only. URL (or local name) of a FileObject with the same content, but in a different format.
+      form_placeholder: http://example.com/my-organization/my-dataset/my-resource/my-subresource.csv
+      required: false
+      # preset: multiple_text
+      # validators: ignore_missing scheming_multiple_text
+
+    # cr:includes | schema:Text | MANY
+    - field_name: includes
+      label: Includes
+      help_text: For FileSet only. A glob pattern that specifies the files to include.
+      required: false
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+
+    # cr:excludes | schema:Text | MANY
+    - field_name: excludes
+      label: Excludes
+      help_text: For FileSet only. A glob pattern that specifies the files to exclude.
+      required: false
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text

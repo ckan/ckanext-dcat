@@ -1,0 +1,13 @@
+{% ckan_extends %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  {% block croissant %}
+    <!-- Croissant ML -->
+    <script type="application/ld+json">
+      {{ h.croissant(pkg) | safe }}
+    </script>
+  {% endblock %}
+{% endblock %}
