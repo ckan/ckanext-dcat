@@ -70,7 +70,7 @@ CROISSANT_FIELD_TYPES = {
     "float8": SCHEMA.Float,
     "numeric": SCHEMA.Float,
     "double precision": SCHEMA.Float,
-    "timestamp": SCHEMA.DateTime,
+    "timestamp": SCHEMA.Date,
 }
 
 
