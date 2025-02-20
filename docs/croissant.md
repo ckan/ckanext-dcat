@@ -21,7 +21,14 @@ Once the plugin is enabled, the Croissant output will be embedded in the source 
 
     https://{ckan-instance-host}/dataset/{dataset-id}/croissant.jsonld
 
+## Schema mapping
+
 The extension includes a [schema](getting-started.md#schemas) ([`ckanext/dcat/schemas/croissant.yaml`](https://github.com/ckan/ckanext-dcat/tree/master/ckanext/dcat/schemas/croissant.yml)) for sites that want to take advantage of all the entities and properties of the Croissant spec.
+
+This maps CKAN's datasets to [schema.org Datasets](https://docs.mlcommons.org/croissant/docs/croissant-spec.html#dataset-level-information) and resources to [Croissant resources](https://docs.mlcommons.org/croissant/docs/croissant-spec.html#resources), which can have type `FileObject` or `FileSet`. For `FileSet` resources, use the "Sub-resources" repeating subfield to describe the contents of the file set.
+
+Additionally, for resources that have been imported to the CKAN [DataStore](https://docs.ckan.org/en/latest/maintaining/datastore.html), the resource will also expose Croissant's [RecordSet](https://docs.mlcommons.org/croissant/docs/croissant-spec.html#recordset) objects with information about the data fields (e.g. column names and types).
+
 
 ## Customizing
 
@@ -36,7 +43,20 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
 ## Examples
 
 * The [`examples/ckan/ckan_full_dataset_croissant.json`](https://github.com/ckan/ckanext-dcat/tree/master/examples/ckan/ckan_full_dataset_croissant.json) file contains a full CKAN dataset dict that implements the custom Croissant schema.
-* Below is the Croissant serialization resulting from the dataset above:
+* Below is the Croissant serialization resulting from the dataset above, and assuming the resource has a DataStore tableassociated with the following structure:
+
+```json
+{
+	"fields": [
+		{"id": "name", "type": "text", "schema": {"is_index": True}},
+		{"id": "age", "type": "int", "schema": {"is_index": False}},
+		{"id": "temperature", "type": "float", "schema": {"is_index": False}},
+		{"id": "timestamp", "type": "timestamp", "schema": {"is_index": False}},
+	]
+}
+
+```
+
 
 ```json
 {
@@ -171,6 +191,68 @@ ckanext.dcat.croissant.profiles = my_custom_croissant_profile
         "identifier": "http://example.org/publisher-id",
         "name": "Test Publisher",
         "url": "https://example.org"
+    },
+    "recordSet": {
+      "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/temperature",
+          "@type": "cr:Field",
+          "dataType": "Float",
+          "source": {
+            "extract": {
+              "column": "temperature"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id",
+            }
+          }
+        },
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/timestamp",
+          "@type": "cr:Field",
+          "dataType": "Date",
+          "source": {
+            "extract": {
+              "column": "timestamp"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id"
+            }
+          }
+        },
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/name",
+          "@type": "cr:Field",
+          "dataType": "Text",
+          "source": {
+            "extract": {
+              "column": "name"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id"
+            }
+          }
+        },
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/age",
+          "@type": "cr:Field",
+          "dataType": "Integer",
+          "source": {
+            "extract": {
+              "column": "age"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id"
+            }
+          }
+        }
+      ],
+      "key": {
+        "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/name"
+      },
+      "name": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records"
     },
     "sameAs": [
         "https://some.other.catalog/dataset/123",
