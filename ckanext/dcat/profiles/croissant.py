@@ -63,9 +63,14 @@ JSONLD_CONTEXT = {
 CROISSANT_FIELD_TYPES = {
     "text": SCHEMA.Text,
     "int": SCHEMA.Integer,
+    "int4": SCHEMA.Integer,
+    "int8": SCHEMA.Integer,
     "float": SCHEMA.Float,
+    "float4": SCHEMA.Float,
+    "float8": SCHEMA.Float,
     "numeric": SCHEMA.Float,
-    "timestamp": SCHEMA.Date,
+    "double precision": SCHEMA.Float,
+    "timestamp": SCHEMA.DateTime,
 }
 
 
@@ -527,14 +532,15 @@ class CroissantProfile(RDFProfile):
         self.g.add((recordset_ref, SCHEMA.name, Literal(recordset_ref)))
 
         unique_fields = []
+
         for field in datastore_info["fields"]:
 
             field_ref = URIRef(f"{resource_dict['id']}/records/{field['id']}")
 
             self.g.add((recordset_ref, SCHEMA.field, field_ref))
             self.g.add((field_ref, RDF.type, CR.Field))
-
-            self.g.add((field_ref, CR.dataType, CROISSANT_FIELD_TYPES.get(field["type"])))
+            if field_type := CROISSANT_FIELD_TYPES.get(field["type"]):
+                self.g.add((field_ref, CR.dataType, field_type))
 
             source_ref = BNode()
 
