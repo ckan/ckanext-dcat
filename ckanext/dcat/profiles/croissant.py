@@ -9,7 +9,7 @@ import datetime
 from dateutil.parser import parse as parse_date
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace
-from ckantoolkit import url_for, config, asbool
+from ckantoolkit import url_for, config, asbool, get_action
 
 from ckanext.dcat.utils import resource_uri
 from .base import RDFProfile, CleanedURIRef
@@ -57,6 +57,20 @@ JSONLD_CONTEXT = {
     "source": "cr:source",
     "subField": "cr:subField",
     "transform": "cr:transform",
+}
+
+
+CROISSANT_FIELD_TYPES = {
+    "text": SCHEMA.Text,
+    "int": SCHEMA.Integer,
+    "int4": SCHEMA.Integer,
+    "int8": SCHEMA.Integer,
+    "float": SCHEMA.Float,
+    "float4": SCHEMA.Float,
+    "float8": SCHEMA.Float,
+    "numeric": SCHEMA.Float,
+    "double precision": SCHEMA.Float,
+    "timestamp": SCHEMA.Date,
 }
 
 
@@ -377,6 +391,9 @@ class CroissantProfile(RDFProfile):
         # Subresources
         self._resource_subresources_graph(dataset_ref, resource_ref, resource_dict)
 
+        # RecordSet
+        self._recordset_graph(dataset_ref, resource_ref, resource_dict)
+
     def _resource_basic_fields_graph(
         self, resource_ref, resource_dict, is_subresource=False
     ):
@@ -486,3 +503,60 @@ class CroissantProfile(RDFProfile):
                 self._resource_graph(
                     dataset_ref, subresource_ref, subresource_dict, is_subresource=True
                 )
+
+    def _recordset_graph(self, dataset_ref, resource_ref, resource_dict):
+
+        # Skip if data not in the DataStore
+        if not resource_dict.get("id") or not asbool(resource_dict.get("datastore_active")):
+            return
+
+        # Get fields info
+        try:
+            datastore_info = get_action("datastore_info")(
+                {"ignore_auth": True},
+                {"id": resource_dict["id"]}
+            )
+        except KeyError:
+            # DataStore not enabled
+            return
+
+        if not datastore_info or not datastore_info.get("fields"):
+            return
+
+        recordset_ref = URIRef(f"{resource_dict['id']}/records")
+
+        self.g.add((recordset_ref, RDF.type, CR.RecordSet))
+
+        #        self.g.add((recordset_ref, RDF.type, SCHEMA.Text))
+
+        self.g.add((recordset_ref, SCHEMA.name, Literal(recordset_ref)))
+
+        unique_fields = []
+
+        for field in datastore_info["fields"]:
+
+            field_ref = URIRef(f"{resource_dict['id']}/records/{field['id']}")
+
+            self.g.add((recordset_ref, SCHEMA.field, field_ref))
+            self.g.add((field_ref, RDF.type, CR.Field))
+            if field_type := CROISSANT_FIELD_TYPES.get(field["type"]):
+                self.g.add((field_ref, CR.dataType, field_type))
+
+            source_ref = BNode()
+
+            self.g.add((field_ref, SCHEMA.source, source_ref))
+            self.g.add((source_ref, SCHEMA.fileObject, resource_ref))
+
+            extract_ref = BNode()
+
+            self.g.add((source_ref, SCHEMA.extract, extract_ref))
+            self.g.add((extract_ref, SCHEMA.column, Literal(field['id'])))
+
+            if field["schema"]["is_index"]:
+                unique_fields.append(field_ref)
+
+        if unique_fields:
+            for unique_field_ref in unique_fields:
+                self.g.add((recordset_ref, SCHEMA.key, unique_field_ref))
+
+        self.g.add((dataset_ref, CR.recordSet, recordset_ref))
