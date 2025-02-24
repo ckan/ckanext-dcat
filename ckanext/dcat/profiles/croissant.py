@@ -527,36 +527,32 @@ class CroissantProfile(RDFProfile):
 
         self.g.add((recordset_ref, RDF.type, CR.RecordSet))
 
-        #        self.g.add((recordset_ref, RDF.type, SCHEMA.Text))
-
-        self.g.add((recordset_ref, SCHEMA.name, Literal(recordset_ref)))
-
         unique_fields = []
 
         for field in datastore_info["fields"]:
 
             field_ref = URIRef(f"{resource_dict['id']}/records/{field['id']}")
 
-            self.g.add((recordset_ref, SCHEMA.field, field_ref))
+            self.g.add((recordset_ref, CR.field, field_ref))
             self.g.add((field_ref, RDF.type, CR.Field))
             if field_type := CROISSANT_FIELD_TYPES.get(field["type"]):
                 self.g.add((field_ref, CR.dataType, field_type))
 
             source_ref = BNode()
 
-            self.g.add((field_ref, SCHEMA.source, source_ref))
-            self.g.add((source_ref, SCHEMA.fileObject, resource_ref))
+            self.g.add((field_ref, CR.source, source_ref))
+            self.g.add((source_ref, CR.fileObject, resource_ref))
 
             extract_ref = BNode()
 
-            self.g.add((source_ref, SCHEMA.extract, extract_ref))
-            self.g.add((extract_ref, SCHEMA.column, Literal(field['id'])))
+            self.g.add((source_ref, CR.extract, extract_ref))
+            self.g.add((extract_ref, CR.column, Literal(field['id'])))
 
             if field["schema"]["is_index"]:
                 unique_fields.append(field_ref)
 
         if unique_fields:
             for unique_field_ref in unique_fields:
-                self.g.add((recordset_ref, SCHEMA.key, unique_field_ref))
+                self.g.add((recordset_ref, CR.key, unique_field_ref))
 
         self.g.add((dataset_ref, CR.recordSet, recordset_ref))
