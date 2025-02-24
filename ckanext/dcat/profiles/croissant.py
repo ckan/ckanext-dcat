@@ -439,11 +439,7 @@ class CroissantProfile(RDFProfile):
         self._add_list_triples_from_dict(resource_dict, resource_ref, items)
 
     def _resource_format_graph(self, resource_ref, resource_dict):
-        if resource_dict.get("format"):
-            self.g.add(
-                (resource_ref, SCHEMA.encodingFormat, Literal(resource_dict["format"]))
-            )
-        elif resource_dict.get("mimetype"):
+        if resource_dict.get("mimetype"):
             self.g.add(
                 (
                     resource_ref,
@@ -451,6 +447,11 @@ class CroissantProfile(RDFProfile):
                     Literal(resource_dict["mimetype"]),
                 )
             )
+        elif resource_dict.get("format"):
+            self.g.add(
+                (resource_ref, SCHEMA.encodingFormat, Literal(resource_dict["format"]))
+            )
+
 
     def _resource_url_graph(self, resource_ref, resource_dict):
         if (resource_dict.get("type") == "fileObject") and resource_dict.get("url"):
