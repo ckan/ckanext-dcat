@@ -310,31 +310,30 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
             recordset_ref = URIRef(f"{resource_id}/records")
             assert self._triple(g, dataset_ref, CR.recordSet, recordset_ref)
             assert self._triple(g, recordset_ref, RDF.type, CR.RecordSet)
-            assert self._triple(g, recordset_ref, SCHEMA.name, str(recordset_ref))
 
             # Test fields
-            fields = list(g.objects(recordset_ref, SCHEMA.field))
+            fields = list(g.objects(recordset_ref, CR.field))
             assert len(fields) == 4
 
             for field_datastore in fields_datastore:
                 field_ref = URIRef(f"{resource_id}/records/{field_datastore['id']}")
 
-                assert self._triple(g, recordset_ref, SCHEMA.field, field_ref)
+                assert self._triple(g, recordset_ref, CR.field, field_ref)
 
                 assert self._triple(
                     g, field_ref, CR.dataType, CROISSANT_FIELD_TYPES.get(field_datastore["type"])
                 )
 
-                source_ref = list(g.objects(field_ref, SCHEMA.source))[0]
+                source_ref = list(g.objects(field_ref, CR.source))[0]
 
-                assert self._triple(g, source_ref, SCHEMA.fileObject, resource_ref)
+                assert self._triple(g, source_ref, CR.fileObject, resource_ref)
 
-                extract_ref = list(g.objects(source_ref, SCHEMA.extract))[0]
+                extract_ref = list(g.objects(source_ref, CR.extract))[0]
 
-                assert self._triple(g, extract_ref, SCHEMA.column, field_datastore["id"])
+                assert self._triple(g, extract_ref, CR.column, field_datastore["id"])
 
             assert self._triple(
-                g, recordset_ref, SCHEMA.key, URIRef(f"{resource_id}/records/name")
+                g, recordset_ref, CR.key, URIRef(f"{resource_id}/records/name")
             )
 
     @pytest.mark.usefixtures("with_plugins", "clean_db")
