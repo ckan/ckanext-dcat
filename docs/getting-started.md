@@ -5,17 +5,23 @@
 
 1.  Install the extension in your virtualenv:
 
-        (pyenv) $ pip install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat
+        pip install ckanext-dcat
 
-2.  Install the extension requirements:
 
-        (pyenv) $ pip install -r ckanext-dcat/requirements.txt
+    !!! Note
 
-3.  Enable the required plugins in your ini file:
+        For versions older than **ckanext-dcat 2.3.0** use the old legacy version of the install:
+
+            pip install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat
+
+            pip install -r ckanext-dcat/requirements.txt
+
+
+2.  Enable the required plugins in your ini file:
 
         ckan.plugins = dcat dcat_rdf_harvester structured_data
 
-4. To use the pre-built schemas, install [ckanext-scheming](https://github.com/ckan/ckanext-scheming):
+3. To use the pre-built schemas, install [ckanext-scheming](https://github.com/ckan/ckanext-scheming):
 
         pip install -e "git+https://github.com/ckan/ckanext-scheming.git#egg=ckanext-scheming"
 
