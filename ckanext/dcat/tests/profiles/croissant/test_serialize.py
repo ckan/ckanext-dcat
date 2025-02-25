@@ -1,5 +1,7 @@
 from builtins import str
 import json
+from unittest import mock
+import uuid
 
 import pytest
 
@@ -14,7 +16,7 @@ from ckantoolkit.tests import helpers, factories
 from ckanext.dcat import utils
 from ckanext.dcat.profiles import XSD, DCT, FOAF
 from ckanext.dcat.processors import RDFSerializer
-from ckanext.dcat.profiles.croissant import SCHEMA, CR
+from ckanext.dcat.profiles.croissant import SCHEMA, CR, CROISSANT_FIELD_TYPES
 
 from ckanext.dcat.tests.profiles.dcat_ap.test_euro_dcatap_profile_serialize import (
     BaseSerializeTest,
@@ -261,6 +263,78 @@ class TestCroissantProfileSerializeDataset(BaseSerializeTest):
             CR.excludes,
             sub_resource_file_set_dict["excludes"],
         )
+
+    def test_graph_from_dataset_with_recordset(self):
+
+        dataset_id = str(uuid.uuid4())
+        resource_id = str(uuid.uuid4())
+
+        dataset_dict = {
+            "id": dataset_id,
+            "name": "test-dataset",
+            "title": "Test Dataset",
+            "notes": "Test description",
+            "resources": [
+                {
+                    "id": resource_id,
+                    "url": "http://example.com/data.csv",
+                    "format": "CSV",
+                    "datastore_active": True,
+                }
+            ],
+        }
+        fields_datastore = [
+            {"id": "name", "type": "text", "schema": {"is_index": True}},
+            {"id": "age", "type": "int", "schema": {"is_index": False}},
+            {"id": "temperature", "type": "float", "schema": {"is_index": False}},
+            {"id": "timestamp", "type": "timestamp", "schema": {"is_index": False}},
+        ]
+
+        def mock_datastore_info(context, data_dict):
+            return {
+                "meta": {"id": resource_id, "count": 10, "table_type": "BASE TABLE"},
+                "fields": fields_datastore,
+            }
+
+        with mock.patch(
+            "ckanext.dcat.profiles.croissant.get_action"
+        ) as mock_get_action:
+            mock_get_action.return_value = mock_datastore_info
+
+            s = RDFSerializer(profiles=["croissant"])
+            g = s.g
+
+            dataset_ref = s.graph_from_dataset(dataset_dict)
+            resource_ref = list(g.objects(dataset_ref, SCHEMA.distribution))[0]
+
+            recordset_ref = URIRef(f"{resource_id}/records")
+            assert self._triple(g, dataset_ref, CR.recordSet, recordset_ref)
+            assert self._triple(g, recordset_ref, RDF.type, CR.RecordSet)
+
+            # Test fields
+            fields = list(g.objects(recordset_ref, CR.field))
+            assert len(fields) == 4
+
+            for field_datastore in fields_datastore:
+                field_ref = URIRef(f"{resource_id}/records/{field_datastore['id']}")
+
+                assert self._triple(g, recordset_ref, CR.field, field_ref)
+
+                assert self._triple(
+                    g, field_ref, CR.dataType, CROISSANT_FIELD_TYPES.get(field_datastore["type"])
+                )
+
+                source_ref = list(g.objects(field_ref, CR.source))[0]
+
+                assert self._triple(g, source_ref, CR.fileObject, resource_ref)
+
+                extract_ref = list(g.objects(source_ref, CR.extract))[0]
+
+                assert self._triple(g, extract_ref, CR.column, field_datastore["id"])
+
+            assert self._triple(
+                g, recordset_ref, CR.key, URIRef(f"{resource_id}/records/name")
+            )
 
     @pytest.mark.usefixtures("with_plugins", "clean_db")
     def test_graph_from_dataset_org_fallback(self):

@@ -131,6 +131,68 @@
         "name": "Test Publisher",
         "url": "https://example.org"
     },
+    "recordSet": {
+      "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/temperature",
+          "@type": "cr:Field",
+          "dataType": "Float",
+          "source": {
+            "extract": {
+              "column": "temperature"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id",
+            }
+          }
+        },
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/timestamp",
+          "@type": "cr:Field",
+          "dataType": "Date",
+          "source": {
+            "extract": {
+              "column": "timestamp"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id"
+            }
+          }
+        },
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/name",
+          "@type": "cr:Field",
+          "dataType": "Text",
+          "source": {
+            "extract": {
+              "column": "name"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id"
+            }
+          }
+        },
+        {
+          "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/age",
+          "@type": "cr:Field",
+          "dataType": "Integer",
+          "source": {
+            "extract": {
+              "column": "age"
+            },
+            "fileObject": {
+              "@id": "my-custom-resource-id"
+            }
+          }
+        }
+      ],
+      "key": {
+        "@id": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records/name"
+      },
+      "name": "568b8ac9-8c69-4475-b35e-d7f812a63c32/records"
+    },
     "sameAs": [
         "https://some.other.catalog/dataset/123",
         "https://yet.another.catalog/dataset/xyz"
