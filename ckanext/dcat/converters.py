@@ -1,4 +1,3 @@
-from past.builtins import basestring
 import logging
 
 log = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ def dcat_to_ckan(dcat_dict):
     package_dict['extras'].append({'key': 'guid', 'value': dcat_dict.get('identifier')})
 
     dcat_publisher = dcat_dict.get('publisher')
-    if isinstance(dcat_publisher, basestring):
+    if isinstance(dcat_publisher, str):
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher})
     elif isinstance(dcat_publisher, dict) and dcat_publisher.get('name'):
         package_dict['extras'].append({'key': 'dcat_publisher_name', 'value': dcat_publisher.get('name')})
@@ -39,7 +38,7 @@ def dcat_to_ckan(dcat_dict):
             })
 
     dcat_creator = dcat_dict.get('creator')
-    if isinstance(dcat_creator, basestring):
+    if isinstance(dcat_creator, str):
         package_dict['extras'].append({'key': 'dcat_creator_name', 'value': dcat_creator})
     elif isinstance(dcat_creator, dict) and dcat_creator.get('name'):
         if dcat_creator.get('name'):

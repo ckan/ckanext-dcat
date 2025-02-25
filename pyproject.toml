@@ -1,6 +1,7 @@
 [project]
 name = "ckanext-dcat"
 version = "2.2.0"
+dynamic = ["dependencies", "optional-dependencies"]
 description = "Plugins for exposing and consuming DCAT metadata on CKAN"
 authors = [
     {name = "Adrià Mercader", email = "amercadero@gmail.com"}
@@ -31,7 +32,6 @@ keywords = [
     "RDF",
     "Semantic data"
     ]
-dependencies = []
 
 [project.urls]
 Documentation = "https://docs.ckan.org/projects/ckanext-dcat"
@@ -40,8 +40,12 @@ Issues = "https://github.com/ckan/ckanext-dcat/issues"
 Changelog = "https://docs.ckan.org/projects/ckanext-dcat/en/latest/changelog/"
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=62.6.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = { file = ["dev-requirements.txt"] }}
 
 [project.entry-points."ckan.plugins"]
 dcat_xml_harvester = "ckanext.dcat.harvesters:DCATXMLHarvester"
