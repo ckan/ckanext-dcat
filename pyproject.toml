@@ -1,6 +1,6 @@
 [project]
 name = "ckanext-dcat"
-version = "2.2.0"
+version = "2.3.0"
 dynamic = ["dependencies", "optional-dependencies"]
 description = "Plugins for exposing and consuming DCAT metadata on CKAN"
 authors = [
@@ -28,10 +28,11 @@ keywords = [
     "DCAT",
     "DCAT-AP",
     "Schema.org",
+    "Croissant ML",
     "Linked data",
     "RDF",
     "Semantic data"
-    ]
+]
 
 [project.urls]
 Documentation = "https://docs.ckan.org/projects/ckanext-dcat"
