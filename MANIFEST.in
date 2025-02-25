@@ -1,2 +1,6 @@
 recursive-include ckanext/dcat/i18n *
 recursive-include ckanext/dcat/templates *
+recursive-include ckanext *.yaml
+recursive-include ckanext *.yml
+include requirements.txt
+include dev-requirements.txt
