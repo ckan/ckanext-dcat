@@ -1,4 +1,3 @@
-from past.builtins import basestring
 import json
 import uuid
 import logging
