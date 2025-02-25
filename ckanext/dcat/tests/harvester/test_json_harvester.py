@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from builtins import object
-
 import responses
 import pytest
 try:

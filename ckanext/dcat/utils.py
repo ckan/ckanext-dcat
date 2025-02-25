@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from builtins import str
 import logging
 import uuid
 import simplejson as json

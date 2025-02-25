@@ -1,4 +1,3 @@
-from builtins import str
 import json
 from unittest import mock
 import uuid

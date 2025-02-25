@@ -1,4 +1,3 @@
-from builtins import str
 from past.builtins import basestring
 import json
 import uuid

@@ -1,4 +1,3 @@
-from builtins import str
 
 from ckantoolkit import config
 

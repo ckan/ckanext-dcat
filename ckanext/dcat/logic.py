@@ -1,4 +1,3 @@
-from __future__ import division
 import math
 
 from ckantoolkit import config

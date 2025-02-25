@@ -1,4 +1,3 @@
-from builtins import str
 import json
 
 import pytest
