@@ -2,12 +2,13 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.3.0...HEAD)
 
+* Add missing URIRefOrLiteral import in profiles module. ([#343](https://github.com/ckan/ckanext-dcat/pull/343))
 
 ## [v2.3.0](https://github.com/ckan/ckanext-dcat/compare/v2.2.0...v2.3.0) - 2025-02-25
 
 * New profile to support the [Croissant](https://mlcommons.org/working-groups/data/croissant/) format.
   Croissant is a community standard for describing ML datasets. The new `croissant` plugin allows a CKAN site to
-  expose its datasets using the [Croissant format specification](https://docs.mlcommons.org/croissant/docs/croissant-spec.html). Check the [documentation](https://docs.ckan.org/projects/ckanext-dcat/en/latest/croissant/) for more information on schema mapping, features supported and examples. Thanks to [@Reikyo](https://github.com/Reikyo) for their contributions ([#339](https://docs.ckan.org/projects/ckanext-dcat/en/latest/croissant://github.com/ckan/ckanext-dcat/pull/339), [#341](https://github.com/ckan/ckanext-dcat/pull/341))
+  expose its datasets using the [Croissant format specification](https://docs.mlcommons.org/croissant/docs/croissant-spec.html). Check the [documentation](https://docs.ckan.org/projects/ckanext-dcat/en/latest/croissant/) for more information on schema mapping, features supported and examples. Thanks to [@Reikyo](https://github.com/Reikyo) for their contributions ([#339](https://github.com/ckan/ckanext-dcat/pull/339), [#341](https://github.com/ckan/ckanext-dcat/pull/341))
 * Fix `has_version` in HealthDCAT schema ([#336](https://github.com/ckan/ckanext-dcat/pull/336))
 * Include dependencies in pyproject.toml, publish extension on PyPI. This means that starting from ckanext-dcat 2.3.0 the extension can be installed by running:
     ```
