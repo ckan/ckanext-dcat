@@ -1,4 +1,4 @@
-from .base import RDFProfile, CleanedURIRef
+from .base import RDFProfile, CleanedURIRef, URIRefOrLiteral
 from .base import (
     CNT,
     CR,
