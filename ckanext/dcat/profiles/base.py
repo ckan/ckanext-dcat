@@ -26,6 +26,41 @@ GSP = Namespace("http://www.opengis.net/ont/geosparql#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
 SPDX = Namespace("http://spdx.org/rdf/terms#")
 
+# NFDI4Chem and Addtionals
+BFO = Namespace('http://purl.obolibrary.org/obo/BFO_')
+CHEBI = Namespace('http://purl.obolibrary.org/obo/CHEBI_')
+CHEMINF = Namespace('http://semanticscience.org/resource/CHEMINF_')
+CHMO = Namespace('http://purl.obolibrary.org/obo/CHMO_')
+FOODON = Namespace('http://purl.obolibrary.org/obo/FOODON_')
+IAO = Namespace('http://purl.obolibrary.org/obo/IAO_')
+NCIT = Namespace('http://purl.obolibrary.org/obo/NCIT_')
+NMR = Namespace('http://nmrML.org/nmrCV#NMR_')
+OBI = Namespace('http://purl.obolibrary.org/obo/OBI_')
+PATO = Namespace('http://purl.obolibrary.org/obo/PATO_')
+RO = Namespace('http://purl.obolibrary.org/obo/RO_')
+RXNO = Namespace('http://purl.obolibrary.org/obo/RXNO_')
+SIO = Namespace( 'http://semanticscience.org/resource/SIO_')
+T4FS = Namespace('http://purl.obolibrary.org/obo/T4FS_')
+BIOLINK = Namespace( 'https://w3id.org/biolink/vocab/')
+DCTERMS = Namespace( 'http://purl.org/dc/terms/')
+DOI = Namespace( 'https://doi.org/')
+ELI = Namespace( 'http://data.europa.eu/eli/ontology#')
+EX = Namespace( 'http://example.org/')
+LINKML = Namespace( 'https://w3id.org/linkml/')
+LINKMLDCATAP = Namespace('https://stroemphi.github.io/dcat-4C-ap/dcat_ap_linkml/')
+NFDI = Namespace( 'https://stroemphi.github.io/dcat-4C-ap/dcat_4nfdi_ap/')
+NFDI4C = Namespace('https://stroemphi.github.io/dcat-4C-ap/dcat_4c_ap/')
+ODRL = Namespace('http://www.w3.org/ns/odrl/2/')
+PROV = Namespace('http://www.w3.org/ns/prov#')
+QUDT = Namespace('http://qudt.org/schema/qudt/')
+SOSA = Namespace( 'http://www.w3.org/ns/sosa/')
+RDF = Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+XSD = Namespace( 'http://www.w3.org/2001/XMLSchema#')
+RDFS =Namespace('http://www.w3.org/2000/01/rdf-schema#')
+SKOS = Namespace('http://www.w3.org/2004/02/skos/core#')
+FIX = Namespace('http://purl.obolibrary.org/obo/FIX_')
+
+
 namespaces = {
     "dct": DCT,
     "dcat": DCAT,
@@ -40,6 +75,25 @@ namespaces = {
     "gsp": GSP,
     "owl": OWL,
     "spdx": SPDX,
+    "rdf":RDF,
+    "rdfs": RDFS,
+
+
+    # nfdi4Chem additionals
+    "bfo":BFO,
+    "chebi" :CHEBI,
+    "cheminf":CHEMINF,
+    "chmo":CHMO,
+    "foodon":FOODON,
+    "iao": IAO,
+    "ncit":NCIT,
+    "nmr":NMR,
+    "obi":OBI,
+    "pato" :PATO,
+    "ro":RO,
+    "rxo":RXNO,
+    "sio":SIO,
+    "doi":DOI
 }
 
 PREFIX_MAILTO = "mailto:"

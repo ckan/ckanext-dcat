@@ -45,7 +45,9 @@ setup(
     euro_dcat_ap_2=ckanext.dcat.profiles:EuropeanDCATAP2Profile
     euro_dcat_ap_scheming=ckanext.dcat.profiles:EuropeanDCATAPSchemingProfile
     schemaorg=ckanext.dcat.profiles:SchemaOrgProfile
-
+    dcat_ap_nfdi4c=ckanext.dcat.profiles:NFDI4CAPProfile
+    dcat_ap_nfdi4c2=ckanext.dcat.profiles:DCATNFDi4ChemProfile
+    
     [babel.extractors]
     ckan = ckan.lib.extract:extract_ckan
     ''',

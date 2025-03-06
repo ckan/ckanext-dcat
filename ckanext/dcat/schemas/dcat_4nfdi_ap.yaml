@@ -1,0 +1,397 @@
+---
+id: https://stroemphi.github.io/dcat-4C-ap/dcat_4nfdi_ap/
+name: dcat-4nfdi-ap
+title: DCAT-4NFDI-AP
+description: |-
+  DCAT-AP core extension for NFDI.
+license: CC-BY 4.0
+see_also:
+  - https://github.com/StroemPhi/dcat-4C-ap
+  - https://github.com/HendrikBorgelt/DCAT-ap_as_LinkML_template/blob/main/src/dcatlinkml/schema/dcatlinkml.yaml
+  - https://gitlab.com/opensourcelab/scientificdata/scidats/-/blob/feature/linkml-schemata/schemata/metadata_model_scidats_dcat_ap.yaml?ref_type=heads
+prefixes:
+  nfdi: https://stroemphi.github.io/dcat-4C-ap/dcat_4nfdi_ap/
+  linkmldcatap: https://stroemphi.github.io/dcat-4C-ap/dcat_ap_linkml/
+  linkml: https://w3id.org/linkml/
+  biolink: https://w3id.org/biolink/vocab/
+  schema: http://schema.org/
+  dcterms: http://purl.org/dc/terms/
+  dcat: http://www.w3.org/ns/dcat#
+  prov: http://www.w3.org/ns/prov#
+  sosa: http://www.w3.org/ns/sosa/
+  vcard: http://www.w3.org/2006/vcard/ns#
+  rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  skos: http://www.w3.org/2004/02/skos/core#
+  foaf: http://xmlns.com/foaf/0.1/
+  qudt: http://qudt.org/schema/qudt/
+  RO: http://purl.obolibrary.org/obo/RO_
+  PATO: http://purl.obolibrary.org/obo/PATO_
+  OBI: http://purl.obolibrary.org/obo/OBI_
+  IAO: http://purl.obolibrary.org/obo/IAO_
+  CHEBI: http://purl.obolibrary.org/obo/CHEBI_
+  CHMO: http://purl.obolibrary.org/obo/CHMO_
+  BFO: http://purl.obolibrary.org/obo/BFO_
+  T4FS: http://purl.obolibrary.org/obo/T4FS_
+  FOODON: http://purl.obolibrary.org/obo/FOODON_
+  CHEMINF: http://semanticscience.org/resource/CHEMINF_
+  RXNO: http://purl.obolibrary.org/obo/RXNO_
+  ex: http://example.org/
+  NCIT: http://purl.obolibrary.org/obo/NCIT_
+  SIO: http://semanticscience.org/resource/SIO_
+  doi: https://doi.org/
+  NMR: "http://nmrML.org/nmrCV#NMR:"
+default_prefix: nfdi
+default_range: string
+imports:
+  - linkml:types
+  - dcat_ap_linkml
+
+classes:
+  
+  ClassifierMixin:
+    description: A mixin with which an entity of this schema can be classified via an additional rdf:type assertion.
+    mixin: true
+    abstract: true
+    slots:
+      - type
+      - rdf_type
+    slot_usage:
+      type:
+        inlined: true
+        range: DefinedTerm
+        #equals_expression: '{rdf_type}'
+      rdf_type:
+        #equals_expression: '{type}'
+
+  DefinedTerm:
+    class_uri: schema:DefinedTerm
+    description: A word, name, acronym, phrase that is defined in a controlled vocabulary (CV) and that is used to provide the rdf:type of an entity within this schema.
+    attributes:
+      from_CV:
+        slot_uri: schema:inDefinedTermSet
+        description: The URL of the controlled vocabulary.
+        range: uriorcurie
+    slots:
+      - id
+      - title
+    slot_usage:
+      title:
+        slot_uri: schema:name
+        
+  NFDIDataset:
+    is_a: Dataset
+    tree_root: true
+    class_uri: dcat:Dataset
+    description: >-
+      A collection of data, published or curated by a single agent, and available for access or download in one or more representations.
+    slots:
+      - id
+    slot_usage:
+      was_generated_by:
+        range: ResearchActivity
+        required: true
+        multivalued: true
+        inlined_as_list: true
+  
+  NFDICatalog:
+    is_a: Catalogue
+    class_uri: dcat:Catalog
+    description: A curated collection of metadata about data resources.
+    slots:
+      - id
+    slot_usage:
+      has_dataset:
+        range: NFDIDataset
+    
+  ResearchActivity:
+    mixins:
+      - ClassifierMixin
+    is_a: Activity
+    class_uri: prov:Activity
+    description: An activity (process) that has the objective to produce information about an entity by evaluating it.
+    slots:
+      - title
+      - description
+      - other_identifier
+      - evaluated_entity
+      - evaluated_activity
+      - used_tool
+      - realized_plan
+      - has_part
+      - occurred_in
+    slot_usage:
+      has_part:
+        description: The slot to specify one or more parts of the ResearchActivity that are themselves also research activities.
+        range: Activity
+        inlined: true
+      other_identifier:
+        name: other_identifier
+        description: A secondary identifier of the ActivityOfInterest
+        slot_uri: adms:identifier
+        range: Identifier
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    narrow_mappings:
+      - NCIT:C25598
+      - sosa:Observation
+      - OBI:0000070
+    
+  EntityOfInterest:
+    mixins:
+      - ClassifierMixin
+    class_uri: prov:Entity
+    description: Something (not an activity or process) that is being evaluated in a ResearchActivity.
+    slots:
+      - title
+      - description
+      - id
+      - other_identifier
+      - has_qualitative_attribute
+      - has_quantitative_attribute
+      - has_part
+    slot_usage:
+      other_identifier:
+        name: other_identifier
+        description: A secondary identifier of the EntityOfInterest
+        slot_uri: adms:identifier
+        range: Identifier
+        required: false
+        multivalued: true
+        inlined_as_list: true
+        
+  ActivityOfInterest:
+    mixins:
+      - ClassifierMixin
+    class_uri: prov:Activity
+    is_a: Activity
+    description: An activity or process that is being evaluated in a ResearchActivity.
+    slots:
+      - title
+      - description
+      - id
+      - other_identifier
+      - has_qualitative_attribute
+      - has_quantitative_attribute
+      - has_part
+    slot_usage:
+      other_identifier:
+        name: other_identifier
+        description: A secondary identifier of the ActivityOfInterest
+        slot_uri: adms:identifier
+        range: Identifier
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    
+  Tool:
+    mixins:
+      - ClassifierMixin
+    class_uri: prov:Entity
+    description: A entity with a certain function used within a ResearchActivity.
+    slots:
+      - title
+      - description
+      - other_identifier
+      - has_qualitative_attribute
+      - has_quantitative_attribute
+      - has_part
+    slot_usage:
+      has_part:
+        description: The slot to specify parts of a tool.
+        range: Tool
+        inlined: true
+        multivalued: true
+        inlined_as_list: true
+      other_identifier:
+        name: other_identifier
+        description: A secondary identifier of the ActivityOfInterest
+        slot_uri: adms:identifier
+        range: Identifier
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    broad_mappings:
+      - prov:Entity
+      
+  Environment:
+    mixins:
+      - ClassifierMixin
+    class_uri: prov:Entity
+    description: The environment in which the dataset creating Observation took place (e.g. a lab).
+    slots:
+      - title
+      - description
+      - other_identifier
+      - has_qualitative_attribute
+      - has_quantitative_attribute
+    slot_usage:
+      other_identifier:
+        name: other_identifier
+        description: A secondary identifier of the Environment
+        slot_uri: adms:identifier
+        range: Identifier
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    
+  Plan:
+    mixins:
+      - ClassifierMixin
+    class_uri: prov:Entity
+    aliases:
+      - Plan Specification
+      - Method
+    description: |-
+      A piece of information that specifies: a) how an activity has to be carried out by its agents and b) the attributes of the passive activity participants that are used by the agents in terms of their presence and magnitude.
+    slots:
+      - title
+      - description
+    examples:
+      - description: "We assigned the structure of sample CRS-37013 using a 13C NMR (CHMO:0000595) and the settings: pulse sequence: zgpg30, temperature: 298.0 K, number of scans: 1024, Solvent : chloroform-D1 (CDCl3)."
+
+           
+  
+  ###################
+  # Attribute Types #
+  ###################
+  QualitativeAttribute:
+    mixins:
+      - ClassifierMixin
+    class_uri: prov:Entity
+    description: A piece of information that is attributed to an entity of interest, tool or environment.
+    slots:
+      - title
+      - description
+      - value
+    slot_usage:
+      value:
+        description: The slot to provide the literal value of the QualitativeAttribute.
+        required: true
+  
+  QuantitativeAttribute:
+    mixins:
+      - ClassifierMixin
+    class_uri: qudt:Quantity
+    description: A quantifiable piece of information that is attributed to an entity of interest, tool or environment.
+    slots:
+      - value
+    attributes:
+      has_quantity_type:
+        range: DefinedTerm
+        description: The type of quality that is quantifiable according to the QUDT ontology.
+        slot_uri: qudt:hasQuantityKind
+        required: true
+        bindings: ## new feature not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
+          - binds_value_of: id
+            range: QUDTQuantityKindEnum
+            obligation_level: RECOMMENDED
+            description: Binds the type of a quantifiable attribute to a QUDT Quantity Kind instance from the QUDT Quantity Kind vocabulary.
+      unit:
+        slot_uri: qudt:unit
+        range: DefinedTerm
+        recommended: true
+        bindings: ## new feature not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
+          - binds_value_of: id
+            range: QUDTUnitEnum
+            obligation_level: RECOMMENDED
+            description: Restricts the allowable defined terms to the QUDT Unit vocabulary.
+    slot_usage:
+      value:
+        description: The slot to provide the literal value of the QuantitativeAttribute.
+        required: true
+        range: float
+
+# Slots
+slots:
+  id:
+    slot_uri: dcterms:identifier
+    identifier: true
+    range: uriorcurie
+  rdf_type:
+    slot_uri: rdf:type
+    description: The slot to specify the ontology class that is instantiated by an entity.
+    recommended: true
+    inlined: true
+    range: DefinedTerm
+  evaluated_entity:
+    slot_uri: prov:used
+    description: The slot to specify the entity of interest that was evaluated.
+    inlined: true
+    range: EntityOfInterest
+  evaluated_activity:
+    slot_uri: prov:wasInformedBy
+    description: The slot to specify the activity of interest that was evaluated.
+    inlined: true
+    range: ActivityOfInterest 
+  used_tool:
+    slot_uri: prov:used
+    description: The slot to specify the tool that was used.
+    recommended: true
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+    range: Tool
+  realized_plan:
+    slot_uri: prov:used
+    description: The slot to specify the Method (aka Procedure) that was realized by a ResearchActivity.
+    recommended: true
+    range: Plan
+  occurred_in:
+    slot_uri: BFO:0000066
+    description: The slot to specify the Method (aka Procedure) that was used in the ResearchActivity.
+    range: Environment
+  has_qualitative_attribute:
+    slot_uri: dcterms:relation
+    description: The slot to relate a qualitative attribute to an entity of interest, tool or environment.
+    range: QualitativeAttribute
+    inlined: true
+    multivalued: true
+    inlined_as_list: true
+  has_quantitative_attribute:
+    slot_uri: dcterms:relation
+    description: The slot to relate a quantitative  attribute to an entity of interest, tool or environment.
+    range: QuantitativeAttribute
+    inlined: true
+    multivalued: true
+    inlined_as_list: true
+  value:
+    slot_uri: prov:value
+    description: A slot to provide the literal value of an attribute.
+
+
+enums:
+  ## Dynamic enums (https://linkml.io/linkml/schemas/enums.html#dynamic-enums) should be used to constrain the range 
+  ## of the type slot instead of using the default DefinedTerm as range.
+  ## This will be done in profiles of this schema where we define ResearchActivity subclasses, e.g. NMRSpectroscopy.
+  ## seeAlso: https://github.com/linkml/linkml-model/blob/main/tests/input/examples/schema_definition-enum_bindings-1.yaml
+  QUDTQuantityKindEnum:
+    description: Possible kinds of quantifiable attribute types provided as QUDT QualityKind instances.
+    implements:
+      - owl:NamedIndividual
+    reachable_from:
+      source_ontology: http://qudt.org/2.1/vocab/quantitykind
+      source_nodes:
+        - qudt:QuantityKind
+      is_direct: true
+      relationship_types:
+        - rdf:type
+                 
+  QUDTUnitEnum:
+    description: Possible kinds of QUDT unit instances.
+    implements:
+      - owl:NamedIndividual
+    reachable_from:
+      source_ontology: https://qudt.org/vocab/unit/
+      source_nodes:
+        - qudt:Unit
+      is_direct: true
+      relationship_types:
+        - rdf:type
+    
+
+
+    
+  
