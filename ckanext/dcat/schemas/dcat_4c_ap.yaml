@@ -1,0 +1,215 @@
+---
+id: https://stroemphi.github.io/dcat-4C-ap/dcat_4c_ap
+name: dcat-4C-ap
+title: DCAT-4C-AP
+description: |-
+  This is an extension of the DCAT Application Profile in LinkML. It is intended to be used by NFDI4Chem & NFDI 4Cat as a core that can further be extended in profiles to provide domain specific metadata for a dataset.
+license: CC-BY 4.0
+see_also:
+  - https://StroemPhi.github.io/dcat-NFDI-ap
+  - https://github.com/HendrikBorgelt/DCAT-ap_as_LinkML_template/blob/main/src/dcatlinkml/schema/dcatlinkml.yaml
+  - https://gitlab.com/opensourcelab/scientificdata/scidats/-/blob/feature/linkml-schemata/schemata/metadata_model_scidats_dcat_ap.yaml?ref_type=heads
+prefixes:
+  nfdi4c: https://stroemphi.github.io/dcat-4C-ap/dcat_4c_ap/
+  nfdi: https://stroemphi.github.io/dcat-4C-ap/dcat_4nfdi_ap/
+  linkml: https://w3id.org/linkml/
+  biolink: https://w3id.org/biolink/vocab/
+  schema: http://schema.org/
+  dcterms: http://purl.org/dc/terms/
+  dcat: http://www.w3.org/ns/dcat#
+  prov: http://www.w3.org/ns/prov#
+  sosa: http://www.w3.org/ns/sosa/
+  vcard: http://www.w3.org/2006/vcard/ns#
+  rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  skos: http://www.w3.org/2004/02/skos/core#
+  foaf: http://xmlns.com/foaf/0.1/
+  qudt: http://qudt.org/schema/qudt/
+  RO: http://purl.obolibrary.org/obo/RO_
+  PATO: http://purl.obolibrary.org/obo/PATO_
+  OBI: http://purl.obolibrary.org/obo/OBI_
+  IAO: http://purl.obolibrary.org/obo/IAO_
+  CHEBI: http://purl.obolibrary.org/obo/CHEBI_
+  CHMO: http://purl.obolibrary.org/obo/CHMO_
+  BFO: http://purl.obolibrary.org/obo/BFO_
+  T4FS: http://purl.obolibrary.org/obo/T4FS_
+  FOODON: http://purl.obolibrary.org/obo/FOODON_
+  CHEMINF: http://semanticscience.org/resource/CHEMINF_
+  RXNO: http://purl.obolibrary.org/obo/RXNO_
+  ex: http://example.org/
+  NCIT: http://purl.obolibrary.org/obo/NCIT_
+  SIO: http://semanticscience.org/resource/SIO_
+  doi: https://doi.org/
+  NMR: "http://nmrML.org/nmrCV#NMR:"
+default_prefix: nfdi4c
+default_range: string
+imports:
+  - linkml:types
+  - dcat_4nfdi_ap
+
+classes:
+
+#################
+# Dataset Types #
+#################
+  
+  NMRDataset:
+    class_uri: dcat:Dataset
+    is_a: NFDIDataset
+    slot_usage: 
+      was_generated_by:
+        range: NMRSpectroscopy
+        multivalued: true
+        inlined_as_list: true
+
+###########################
+# Research Activity Types #
+###########################
+  
+  NMRSpectroscopy:
+    is_a: ResearchActivity
+    #class_uri: CHMO:0000613
+    description: Spectroscopy where the energy states of spin-active nuclei placed in a static magnetic field are interrogated by inducing transitions between the states via radio frequency irradiation. Each experiment consists of a sequence of radio frequency pulses with delay periods in between them.
+    slot_usage:
+      evaluated_entity:
+        range: ChemicalSample
+      rdf_type:
+        description: The type of NMR Spectroscopy provided as CURIE of a subclass of CHMO:0000613.
+        ## new binding feature is not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
+        ## current workaround: using NMRAssayEnum as range 
+        bindings:
+          - binds_value_of: id
+            range: NMRAssayEnum
+            obligation_level: RECOMMENDED
+            description: NMR types from the Chemical Methods Ontology
+
+##############################
+# Entities of Interest Types #
+##############################
+
+  ChemicalReaction:
+    is_a: ActivityOfInterest
+    class_uri: RXNO:0000329
+    description: An experimental procedure with the aim of producing a portion of a given compound or mixture.
+  
+  ChemicalSubstance:
+    is_a: EntityOfInterest
+    class_uri: prov:Entity
+    description: A portion of matter of constant composition, composed of molecular entities of the same type or of different types that is being evaluated in a scientific process.
+    slots:
+      - has_role
+    attributes:
+      composed_of: 
+        description: The slot to provide the chemical entities of which the chemical substance is composed of.
+        range: ChemicalEntity
+        multivalued: true
+        inlined_as_list: true
+        recommended: true
+        exact_mappings:
+          - BFO:0000051
+      #type:
+        #ifabsent: CHEBI:59999
+  
+  ChemicalEntity:
+    class_uri: CHEBI:23367
+    description: Any constitutionally or isotopically distinct atom, molecule, ion, ion pair, radical, radical ion, complex, conformer etc., identifiable as a separately distinguishable entity.
+    attributes: 
+      inchi:
+        #slot_uri: CHEMINF:000143
+        range: InChi
+        inlined: true
+        description: The slot to provide the InChi descriptor of a chemical substance.
+      inchikey:
+        #slot_uri: CHEMINF:000143
+        range: InChIKey
+        inlined: true
+        description: The slot to provide the InChiKey of a chemical substance.
+      smiles:
+        #slot_uri: CHEMINF:000143
+        range: SMILES
+        inlined: true
+        description: The slot to provide the canonical SMILES descriptor of a chemical substance.
+      iupac_formula:
+        #slot_uri: CHEMINF:000143
+        range: IUPACChemicalFormula
+        inlined: true
+        description: The slot to provide the IUPAC name of a chemical substance.
+  
+  ChemicalSample:
+    is_a: ChemicalSubstance
+    #class_uri: CHEBI:59999
+
+  ##############
+  # Tool Types #
+  ##############
+
+  HardwareTool:
+    is_a: Tool
+    aliases:
+      - Device
+    description: A hardware with a certain function.
+  
+  SoftwareTool:
+    is_a: Tool
+    description: A software with a certain function.
+
+  #####################
+  # Environment Types #
+  #####################
+
+  Laboratory:
+    is_a: Environment
+    class_uri: prov:Entity
+    description: A facility that provides controlled conditions in which scientific or technological research, experiments, and measurement may be performed.
+    
+  ############################
+  # Plan Specification Types #
+  ############################
+  
+  ###################
+  # Attribute Types #
+  ################### 
+  InChIKey:
+    class_uri: CHEMINF:000059
+    is_a: QualitativeAttribute
+  InChi:
+    class_uri: CHEMINF:000113
+    is_a: QualitativeAttribute
+    description: A structure descriptor which conforms to the InChI format specification.
+  IUPACChemicalFormula:
+    class_uri: CHEMINF:000037
+    is_a: QualitativeAttribute
+    description: A systematic name which is formulated according to the rules and recommendations for chemical nomenclature set out by the International Union of Pure and Applied Chemistry (IUPAC).
+  SMILES:
+    class_uri: CHEMINF:000018
+    is_a: QualitativeAttribute
+    description: A structure descriptor that denotes a molecular structure as a graph and conforms to the SMILES format specification.
+
+slots:
+  has_role:
+    #slot_uri: RO:0000087
+
+enums:
+  # This is a [dynamic LinkML Enum definition](https://linkml.io/linkml/schemas/enums.html#dynamic-enums) covering 
+  # pulsed NMR spectroscopy types defined in the Chemical Methods Ontology (CHMO). It was expanded (made static) using 
+  # OAK with `poetry run vskit expand -s src/dcat_4c_ap/schema/dcat-4C-ap.yaml -o src/dcat_4c_ap/schema/chmo-nmr-assay-enum.yaml`.
+  # and then copying only the enum into this schema manually.
+  NMRAssayEnum:
+    description: NMR types from the Chemical Methods Ontology
+    reachable_from:
+      source_ontology: bioregistry:chmo
+      source_nodes:
+        - CHMO:0000613   # pulsed nuclear magnetic resonance spectroscopy
+      is_direct: false
+      relationship_types:
+        - rdfs:subClassOf
+    permissible_values:
+      CHMO:0000595:
+        text: CHMO:0000595
+        description: Spectroscopy where the energy states of 13C nuclei placed in
+          a static magnetic field are interrogated by inducing transitions between
+          the states via radio frequency irradiation. Each experiment consists of
+          a sequence of radio frequency pulses with delay periods in between them.
+        meaning: CHMO:0000595
+        title: 13C nuclear magnetic resonance spectroscopy
