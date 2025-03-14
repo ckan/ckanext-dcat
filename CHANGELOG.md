@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.3.0...HEAD)
 
+* Fix TIME namespace definition to include trailing hash (`#`), ensuring compliance with W3C Time Ontology and DCAT-AP. This may require updates for custom profiles relying on the old variant. ([#344](https://github.com/ckan/ckanext-dcat/pull/344))
 * Add missing URIRefOrLiteral import in profiles module. ([#343](https://github.com/ckan/ckanext-dcat/pull/343))
 
 ## [v2.3.0](https://github.com/ckan/ckanext-dcat/compare/v2.2.0...v2.3.0) - 2025-02-25
