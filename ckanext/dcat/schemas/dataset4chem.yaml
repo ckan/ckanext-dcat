@@ -175,7 +175,7 @@ dataset_fields:
 
 resource_fields:
 
-- field_name: url
+- field_name: resource_url
   label: URL
   preset: resource_url_upload
 
