@@ -92,7 +92,9 @@ class DCATNFDi4ChemProfile(RDFProfile):
         g.add((dataset_uri, DCT.title, Literal(dataset_dict.get('title'))))
         g.add((dataset_uri, DCT.description, Literal(dataset_dict.get('notes'))))
         g.add((dataset_uri, DCT.language, Literal(dataset_dict.get('language'))))
-        g.add((dataset_uri, DCT.landingPage, URIRef(dataset_dict.get('url'))))
+        if dataset_dict.get('url'):
+            g.add((dataset_uri, DCT.landingPage, URIRef(dataset_dict.get('url'))))
+
         g.add((dataset_uri, DCT.issued, Literal(dataset_dict.get('metadata_created'))))
         g.add((dataset_uri, DCT.modified, Literal(dataset_dict.get('metadata_modified'))))
 
