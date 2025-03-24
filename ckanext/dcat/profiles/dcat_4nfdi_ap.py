@@ -148,7 +148,12 @@ class DCATNFDi4ChemProfile(RDFProfile):
                 variable_name = vm['variableMeasured_name']
 
                 # Split to get namespace
-                prefix, identifier = property_id.split(':')
+                if ':' in property_id:
+                    prefix, identifier = property_id.split(':', 1)
+                else:
+                    # Handle the case where it's not in the expected format
+                    prefix = None
+                    identifier = property_id  # or raise an error/log warning
 
                 if prefix == 'NMR':
                     prop_uri = URIRef(NMR['1000330'])
