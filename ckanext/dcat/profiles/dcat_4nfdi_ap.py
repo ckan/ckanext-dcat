@@ -85,9 +85,9 @@ class DCATNFDi4ChemProfile(RDFProfile):
             g.add((dataset_uri, DCT.identifier, Literal(dataset_dict.get('doi'), datatype=URIRef("xsd:anyURI"))))
 
         else:
-            dataset_uri = URIRef(dataset_dict.get('id'))
+            dataset_uri = URIRef(dataset_dict.get('id').strip())
             g.add((dataset_uri, RDF.type, DCAT.Dataset))
-            g.add((dataset_uri, DCT.identifier, Literal(dataset_dict.get('id'), datatype=URIRef("xsd:anyURI"))))
+            g.add((dataset_uri, DCT.identifier, Literal(dataset_dict.get('id').strip(), datatype=URIRef("xsd:anyURI"))))
 
         g.add((dataset_uri, DCT.title, Literal(dataset_dict.get('title'))))
         g.add((dataset_uri, DCT.description, Literal(dataset_dict.get('notes'))))
