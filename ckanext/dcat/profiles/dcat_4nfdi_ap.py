@@ -139,44 +139,44 @@ class DCATNFDi4ChemProfile(RDFProfile):
         g.add((used_tool, PROV.used, variable_node))
 
         # Variable Measured
-        variable_measured = dataset_dict.get('variableMeasured', [])
+        if dataset_dict.get('variableMeasured',[]):
+            variable_measured = dataset_dict.get('variableMeasured', [])
 
+            for vm in variable_measured:
+                property_id = vm['variableMeasured_propertyID']
+                value = vm['variableMeasured_value']
+                variable_name = vm['variableMeasured_name']
 
-        for vm in variable_measured:
-            property_id = vm['variableMeasured_propertyID']
-            value = vm['variableMeasured_value']
-            variable_name = vm['variableMeasured_name']
+                # Split to get namespace
+                prefix, identifier = property_id.split(':')
 
-            # Split to get namespace
-            prefix, identifier = property_id.split(':')
+                if prefix == 'NMR':
+                    prop_uri = URIRef(NMR['1000330'])
+                elif prefix == 'NCIT':
+                    prop_uri = URIRef(NCIT[identifier])
+                elif prefix == 'FIX':
+                    prop_uri = URIRef(FIX[identifier])
+                elif prefix == 'CHMO':
+                    prop_uri = URIRef(CHMO[identifier])
+                elif prefix == 'OBI':
+                    prop_uri = URIRef(OBI[identifier])
+                else:
+                    prop_uri= URIRef(IAO['0000140'])  # Skip unrecognized prefixes
 
-            if prefix == 'NMR':
-                prop_uri = URIRef(NMR['1000330'])
-            elif prefix == 'NCIT':
-                prop_uri = URIRef(NCIT[identifier])
-            elif prefix == 'FIX':
-                prop_uri = URIRef(FIX[identifier])
-            elif prefix == 'CHMO':
-                prop_uri = URIRef(CHMO[identifier])
-            elif prefix == 'OBI':
-                prop_uri = URIRef(OBI[identifier])
-            else:
-                prop_uri= URIRef(IAO['0000140'])  # Skip unrecognized prefixes
+                # Add title before the property
+                # if property_id in property_title_map:
+                used_entity = BNode()
+                g.add((variable_node, DCT.relation, used_entity))
 
-            # Add title before the property
-            # if property_id in property_title_map:
-            used_entity = BNode()
-            g.add((variable_node, DCT.relation, used_entity))
-
-            if variable_name == 'Temperature':
-                g.add((used_entity, RDF.type, QUDT.Quantity))  # Temperature
-                g.add((used_entity, QUDT.hasQuantityKind, URIRef("http://qudt.org/vocab/quantitykind/Temperature")))
-                g.add((used_entity, QUDT.unit, URIRef("https://qudt.org/vocab/unit/K")))
-                g.add((used_entity, QUDT.value, Literal(value)))
-            else:
-                g.add((used_entity, RDF.type, PROV.Entity))
-                g.add((used_entity, RDF.type, prop_uri))
-                g.add((used_entity, DCT.title, Literal(variable_name)))
-                g.add((used_entity, PROV.value, Literal(value)))# Create a blank node for Quantity
+                if variable_name == 'Temperature':
+                    g.add((used_entity, RDF.type, QUDT.Quantity))  # Temperature
+                    g.add((used_entity, QUDT.hasQuantityKind, URIRef("http://qudt.org/vocab/quantitykind/Temperature")))
+                    g.add((used_entity, QUDT.unit, URIRef("https://qudt.org/vocab/unit/K")))
+                    g.add((used_entity, QUDT.value, Literal(value)))
+                else:
+                    g.add((used_entity, RDF.type, PROV.Entity))
+                    g.add((used_entity, RDF.type, prop_uri))
+                    g.add((used_entity, DCT.title, Literal(variable_name)))
+                    g.add((used_entity, PROV.value, Literal(value)))# Create a blank node for Quantity
 
         return g
