@@ -90,6 +90,12 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
             dataset_uri = dataset_dict.get('id').strip()
             dataset_id = dataset_dict.get('id').strip()
 
+        # if dataset_dict.get('mol_formula'):
+        #     mol_formula = dataset_dict.get('mol_formula')
+        # else:
+        #     mol_formula = 'None'
+
+
         # Instantiate the evaluated sample
         # TODO: We used a fake ID, as the real one is not within the example dataset, but might be in the source data.
         # TODO: Do we need different instantiation steps/conditions based on where the metadata comes from?
@@ -119,7 +125,7 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
                         id='CHEMINF:000037',
                         title='IUPACChemicalFormula'),
                     title='assigned IUPACChemicalFormula',
-                    value=dataset_dict.get('mol_formula'))
+                    value= dataset_dict.get('mol_formula') )
             ]
         )
 
@@ -196,7 +202,7 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
         # Add modification_date attribute to the dataset
         dataset.modification_date = dataset_dict.get('metadata_modified')
 
-        schemaview = SchemaView("ckanext/dcat/schemas/dcat_4c_ap.yaml")
+        schemaview = SchemaView("/usr/lib/ckan/default/src/ckanext-dcat/ckanext/dcat/schemas/dcat_4c_ap.yaml")
 
         rdf_nfdi_dumper = RDFLibDumper()
         # nfdi_graph = rdf_nfdi_dumper.as_rdf_graph(sample, schemaview=schemaview)
