@@ -1,0 +1,2027 @@
+name: dcat-ap
+description: 'This LinkML schema representation of DCAT-AP 3.0.0 was automatically
+  created from these [JSON-LD SHACL shapes](https://github.com/SEMICeu/DCAT-AP/blob/master/releases/3.0.0/shacl/dcat-ap-SHACL.jsonld)
+  using this Python script: https://github.com/StroemPhi/dcat-4C-ap/tree/main/src/dcat-ap_shacl_2_linkml.py.
+
+  NOTE:The JSON-LD SHACL constraints published with the [Juli 3.0.0 GitHub release](https://github.com/SEMICeu/DCAT-AP/releases/tag/3.0.0)
+  and in the [3.0.0. release branch](https://github.com/SEMICeu/DCAT-AP/tree/3.0.0)
+  are different from the ones in https://github.com/SEMICeu/DCAT-AP/tree/master/releases/3.0.0.
+  Also the TTL shapes provided in the latter in the HTML folder differ from the ones
+  in the SHACL folder, in that they declare dcat:Resource and dcatap:TemporalLiteral
+  as unions of the dcat:Resource subclasses respectively different XML Schema datatypes
+  for date and time. We address this with "helper code" in the conversion script.'
+title: LinkML schema representation of DCAT-AP 3.0.0
+todos:
+- Think about how to add all the enums and their permissible values to constrain the
+  allowed instances of classes such as "Concept", "MediaType", etc. as defined in
+  https://semiceu.github.io/DCAT-AP/releases/3.0.0/#controlled-vocs. Using EnumBindings
+  (https://linkml.io/linkml-model/latest/docs/bindings/) seems best, but does not
+  yet work.
+source: https://semiceu.github.io/DCAT-AP/releases/3.0.0
+id: https://stroemphi.github.io/dcat-4C-ap/dcat_ap_linkml
+imports:
+- linkml:types
+license: CC-BY 4.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  foaf: http://xmlns.com/foaf/0.1/
+  prov: http://www.w3.org/ns/prov#
+  dcat: http://www.w3.org/ns/dcat#
+  dcterms: http://purl.org/dc/terms/
+  spdx: http://spdx.org/rdf/terms#
+  odrl: http://www.w3.org/ns/odrl/2/
+  eli: http://data.europa.eu/eli/ontology#
+  locn: http://www.w3.org/ns/locn#
+  time: http://www.w3.org/2006/time#
+  xsd: http://www.w3.org/2001/XMLSchema#
+  vcard: http://www.w3.org/2006/vcard/ns#
+  adms: http://www.w3.org/ns/adms#
+  dcatap: http://data.europa.eu/r5r/
+  qb: http://purl.org/linked-data/cube#
+  rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  sh: http://www.w3.org/ns/shacl#
+  skos: http://www.w3.org/2004/02/skos/core#
+  vl: https://purl.eu/ns/shacl#
+  iana: https://www.iana.org/assignments/
+default_prefix: linkmldcatap
+default_range: string
+types:
+  RFC4646:
+    name: RFC4646
+    conforms_to: dcterms:RFC4646
+    description: The set of tags constructed according to RFC 4646 for the identification
+      of languages.
+    base: str
+    uri: dcterms:RFC4646
+  duration:
+    name: duration
+    conforms_to: https://www.w3.org/TR/xmlschema11-2/#duration
+    description: The datatype that represents durations of time.
+    base: str
+    uri: xsd:duration
+    pattern: -?P((([0-9]+Y([0-9]+M)?([0-9]+D)?|([0-9]+M)([0-9]+D)?|([0-9]+D))(T(([0-9]+H)([0-9]+M)?([0-9]+(\.[0-9]+)?S)?|([0-9]+M)([0-9]+(\.[0-9]+)?S)?|([0-9]+(\.[0-9]+)?S)))?)|(T(([0-9]+H)([0-9]+M)?([0-9]+(\.[0-9]+)?S)?|([0-9]+M)([0-9]+(\.[0-9]+)?S)?|([0-9]+(\.[0-9]+)?S))))
+  hexBinary:
+    name: hexBinary
+    conforms_to: https://www.w3.org/TR/xmlschema11-2/#hexBinary
+    description: The datatype that represents arbitrary hex-encoded binary data.
+    base: str
+    uri: xsd:hexBinary
+    pattern: ([0-9a-fA-F]{2})*
+  nonNegativeInteger:
+    name: nonNegativeInteger
+    conforms_to: https://www.w3.org/TR/xmlschema11-2/#nonNegativeInteger
+    description: The datatype that represents non-negative integers.
+    base: int
+    uri: xsd:nonNegativeInteger
+    pattern: ([\-+]?[0-9]+)
+enums:
+  DatasetThemes:
+    name: DatasetThemes
+    see_also:
+    - https://op.europa.eu/s/zXIN
+    #enum_uri: http://publications.europa.eu/resource/authority/data-theme
+    permissible_values:
+      Agriculture, fisheries, forestry and food:
+        text: Agriculture, fisheries, forestry and food
+        meaning: http://publications.europa.eu/resource/authority/data-theme/AGRI
+      Economy and finance:
+        text: Economy and finance
+        meaning: http://publications.europa.eu/resource/authority/data-theme/ECON
+      Education, culture and sport:
+        text: Education, culture and sport
+        meaning: http://publications.europa.eu/resource/authority/data-theme/EDUC
+      Energy:
+        text: Energy
+        meaning: http://publications.europa.eu/resource/authority/data-theme/ENER
+      Environment:
+        text: Environment
+        meaning: http://publications.europa.eu/resource/authority/data-theme/ENVI
+      Government and public sector:
+        text: Government and public sector
+        meaning: http://publications.europa.eu/resource/authority/data-theme/GOVE
+      Health:
+        text: Health
+        meaning: http://publications.europa.eu/resource/authority/data-theme/HEAL
+      International issues:
+        text: International issues
+        meaning: http://publications.europa.eu/resource/authority/data-theme/INTR
+      Justice, legal system and public safety:
+        text: Justice, legal system and public safety
+        meaning: http://publications.europa.eu/resource/authority/data-theme/JUST
+      Provisional data:
+        text: Provisional data
+        meaning: http://publications.europa.eu/resource/authority/data-theme/OP_DATPRO
+      Regions and cities:
+        text: Regions and cities
+        meaning: http://publications.europa.eu/resource/authority/data-theme/REGI
+      Population and society:
+        text: Population and society
+        meaning: http://publications.europa.eu/resource/authority/data-theme/SOCI
+      Science and technology:
+        text: Science and technology
+        meaning: http://publications.europa.eu/resource/authority/data-theme/TECH
+      Transport:
+        text: Transport
+        meaning: http://publications.europa.eu/resource/authority/data-theme/TRAN
+  TopLevelMediaTypes:
+    name: TopLevelMediaTypes
+    # enum_uri: iana:top-level-media-types
+    permissible_values:
+      application:
+        text: application
+      audio:
+        text: audio
+      example:
+        text: example
+      font:
+        text: font
+      haptics:
+        text: haptics
+      image:
+        text: image
+      message:
+        text: message
+      model:
+        text: model
+      multipart:
+        text: multipart
+      text:
+        text: text
+      video:
+        text: video
+slots:
+  access_URL:
+    name: access_URL
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:accessURL
+  access_rights:
+    name: access_rights
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:accessRights
+  access_service:
+    name: access_service
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:accessService
+  algorithm:
+    name: algorithm
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: spdx:algorithm
+  applicable_legislation:
+    name: applicable_legislation
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcatap:applicableLegislation
+  application_profile:
+    name: application_profile
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:conformsTo
+  availability:
+    name: availability
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcatap:availability
+  bbox:
+    name: bbox
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:bbox
+  beginning:
+    name: beginning
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: time:hasBeginning
+  byte_size:
+    name: byte_size
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:byteSize
+  catalogue:
+    name: catalogue
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:catalog
+  centroid:
+    name: centroid
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:centroid
+  change_type:
+    name: change_type
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: adms:status
+  checksum:
+    name: checksum
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: spdx:checksum
+  checksum_value:
+    name: checksum_value
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: spdx:checksumValue
+  compression_format:
+    name: compression_format
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:compressFormat
+  conforms_to:
+    name: conforms_to
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:conformsTo
+  contact_point:
+    name: contact_point
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:contactPoint
+  creator:
+    name: creator
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:creator
+  dataset_distribution:
+    name: dataset_distribution
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:distribution
+  description:
+    name: description
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:description
+  documentation:
+    name: documentation
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: foaf:page
+  download_URL:
+    name: download_URL
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:downloadURL
+  end:
+    name: end
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: time:hasEnd
+  end_date:
+    name: end_date
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:endDate
+  endpoint_URL:
+    name: endpoint_URL
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:endpointURL
+  endpoint_description:
+    name: endpoint_description
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:endpointDescription
+  format:
+    name: format
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:format
+  frequency:
+    name: frequency
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:accrualPeriodicity
+  geographical_coverage:
+    name: geographical_coverage
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:spatial
+  geometry:
+    name: geometry
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: locn:geometry
+  had_role:
+    name: had_role
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:hadRole
+  has_dataset:
+    name: has_dataset
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:dataset
+  has_part:
+    name: has_part
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:hasPart
+  has_policy:
+    name: has_policy
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: odrl:hasPolicy
+  has_version:
+    name: has_version
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:hasVersion
+  homepage:
+    name: homepage
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: foaf:homepage
+  identifier:
+    name: identifier
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:identifier
+  in_series:
+    name: in_series
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:inSeries
+  is_referenced_by:
+    name: is_referenced_by
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:isReferencedBy
+  keyword:
+    name: keyword
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:keyword
+  landing_page:
+    name: landing_page
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:landingPage
+  language:
+    name: language
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:language
+  language_tag:
+    name: language_tag
+    description: ' A slot to provide a language tag conforming to RFC 4646'
+    slot_uri: rdf:value
+    range: RFC4646
+    required: true
+  licence:
+    name: licence
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:license
+  linked_schemas:
+    name: linked_schemas
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:conformsTo
+  listing_date:
+    name: listing_date
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:issued
+  media_type:
+    name: media_type
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:mediaType
+  modification_date:
+    name: modification_date
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:modified
+  name:
+    name: name
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: foaf:name
+  notation:
+    name: notation
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: skos:notation
+  other_identifier:
+    name: other_identifier
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: adms:identifier
+  packaging_format:
+    name: packaging_format
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:packageFormat
+  preferred_label:
+    name: preferred_label
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: skos:prefLabel
+  primary_topic:
+    name: primary_topic
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: foaf:primaryTopic
+  provenance:
+    name: provenance
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:provenance
+  publisher:
+    name: publisher
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:publisher
+  qualified_attribution:
+    name: qualified_attribution
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: prov:qualifiedAttribution
+  qualified_relation:
+    name: qualified_relation
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:qualifiedRelation
+  record:
+    name: record
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:record
+  related_resource:
+    name: related_resource
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:relation
+  relation:
+    name: relation
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:relation
+  release_date:
+    name: release_date
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:issued
+  rights:
+    name: rights
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:rights
+  sample:
+    name: sample
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: adms:sample
+  serves_dataset:
+    name: serves_dataset
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:servesDataset
+  service:
+    name: service
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:service
+  source:
+    name: source
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:source
+  source_metadata:
+    name: source_metadata
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:source
+  spatial_resolution:
+    name: spatial_resolution
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:spatialResolutionInMeters
+  start_date:
+    name: start_date
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:startDate
+  status:
+    name: status
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: adms:status
+  temporal_coverage:
+    name: temporal_coverage
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:temporal
+  temporal_resolution:
+    name: temporal_resolution
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:temporalResolution
+  theme:
+    name: theme
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:theme
+  themes:
+    name: themes
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:themeTaxonomy
+  title:
+    name: title
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:title
+  type:
+    name: type
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcterms:type
+  version:
+    name: version
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: dcat:version
+  version_notes:
+    name: version_notes
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: adms:versionNotes
+  was_generated_by:
+    name: was_generated_by
+    description: This slot is described in more detail within the class in which it
+      is used.
+    slot_uri: prov:wasGeneratedBy
+classes:
+  Activity:
+    name: Activity
+    description: See [DCAT-AP specs:Activity](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Activity)
+    class_uri: prov:Activity
+  Agent:
+    name: Agent
+    description: See [DCAT-AP specs:Agent](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Agent)
+    is_a: SupportiveEntity
+    slots:
+    - name
+    - type
+    slot_usage:
+      name:
+        name: name
+        description: A name of the agent.
+        slot_uri: foaf:name
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      type:
+        name: type
+        description: The nature of the agent.
+        slot_uri: dcterms:type
+        range: Concept
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: true
+    class_uri: foaf:Agent
+  Attribution:
+    name: Attribution
+    description: See [DCAT-AP specs:Attribution](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Attribution)
+    is_a: SupportiveEntity
+    class_uri: prov:Attribution
+  Catalogue:
+    name: Catalogue
+    description: See [DCAT-AP specs:Catalogue](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Catalogue)
+    slots:
+    - applicable_legislation
+    - catalogue
+    - creator
+    - description
+    - geographical_coverage
+    - has_dataset
+    - has_part
+    - homepage
+    - language
+    - licence
+    - modification_date
+    - publisher
+    - record
+    - release_date
+    - rights
+    - service
+    - temporal_coverage
+    - themes
+    - title
+    slot_usage:
+      applicable_legislation:
+        name: applicable_legislation
+        description: The legislation that mandates the creation or management of the
+          Catalog.
+        slot_uri: dcatap:applicableLegislation
+        range: LegalResource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      catalogue:
+        name: catalogue
+        description: A catalogue whose contents are of interest in the context of
+          this catalogue.
+        slot_uri: dcat:catalog
+        range: Catalogue
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      creator:
+        name: creator
+        description: An entity responsible for the creation of the catalogue.
+        slot_uri: dcterms:creator
+        range: Agent
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      description:
+        name: description
+        description: A free-text account of the Catalogue.
+        slot_uri: dcterms:description
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      geographical_coverage:
+        name: geographical_coverage
+        description: A geographical area covered by the Catalogue.
+        slot_uri: dcterms:spatial
+        range: Location
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      has_dataset:
+        name: has_dataset
+        description: A Dataset that is part of the Catalogue.
+        slot_uri: dcat:dataset
+        range: Dataset
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      has_part:
+        name: has_part
+        description: A related Catalogue that is part of the described Catalogue.
+        slot_uri: dcterms:hasPart
+        range: Catalogue
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      homepage:
+        name: homepage
+        description: A web page that acts as the main page for the Catalogue.
+        slot_uri: foaf:homepage
+        range: Document
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: true
+      language:
+        name: language
+        description: A language used in the textual metadata describing titles, descriptions,
+          etc. of the Datasets in the Catalogue.
+        slot_uri: dcterms:language
+        range: LinguisticSystem
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      licence:
+        name: licence
+        description: A licence under which the Catalogue can be used or reused.
+        slot_uri: dcterms:license
+        range: LicenseDocument
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      modification_date:
+        name: modification_date
+        description: The most recent date on which the Catalogue was modified.
+        slot_uri: dcterms:modified
+        range: datetime
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: false
+      publisher:
+        name: publisher
+        description: An entity (organisation) responsible for making the Catalogue
+          available.
+        slot_uri: dcterms:publisher
+        range: Agent
+        required: true
+        multivalued: false
+        inlined_as_list: true
+      record:
+        name: record
+        description: A Catalogue Record that is part of the Catalogue.
+        slot_uri: dcat:record
+        range: CatalogueRecord
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      release_date:
+        name: release_date
+        description: The date of formal issuance (e.g., publication) of the Catalogue.
+        slot_uri: dcterms:issued
+        range: datetime
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: false
+      rights:
+        name: rights
+        description: A statement that specifies rights associated with the Catalogue.
+        slot_uri: dcterms:rights
+        range: RightsStatement
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      service:
+        name: service
+        description: A site or end-point (Data Service) that is listed in the Catalogue.
+        slot_uri: dcat:service
+        range: DataService
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      temporal_coverage:
+        name: temporal_coverage
+        description: A temporal period that the Catalogue covers.
+        slot_uri: dcterms:temporal
+        range: PeriodOfTime
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      themes:
+        name: themes
+        description: A knowledge organization system used to classify the Resources
+          that are in the Catalogue.
+        slot_uri: dcat:themeTaxonomy
+        range: ConceptScheme
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      title:
+        name: title
+        description: A name given to the Catalogue.
+        slot_uri: dcterms:title
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:Catalog
+  CatalogueRecord:
+    name: CatalogueRecord
+    description: See [DCAT-AP specs:CatalogueRecord](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#CatalogueRecord)
+    slots:
+    - application_profile
+    - change_type
+    - description
+    - language
+    - listing_date
+    - modification_date
+    - primary_topic
+    - source_metadata
+    - title
+    slot_usage:
+      application_profile:
+        name: application_profile
+        description: An Application Profile that the Catalogued Resource&#39;s metadata
+          conforms to.
+        slot_uri: dcterms:conformsTo
+        range: Standard
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      change_type:
+        name: change_type
+        description: The status of the catalogue record in the context of editorial
+          flow of the dataset and data service descriptions.
+        slot_uri: adms:status
+        range: Concept
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: true
+      description:
+        name: description
+        description: A free-text account of the record. This property can be repeated
+          for parallel language versions of the description.
+        slot_uri: dcterms:description
+        range: string
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      language:
+        name: language
+        description: A language used in the textual metadata describing titles, descriptions,
+          etc. of the Catalogued Resource.
+        slot_uri: dcterms:language
+        range: LinguisticSystem
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      listing_date:
+        name: listing_date
+        description: The date on which the description of the Resource was included
+          in the Catalogue.
+        slot_uri: dcterms:issued
+        range: string
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: true
+      modification_date:
+        name: modification_date
+        description: The most recent date on which the Catalogue entry was changed
+          or modified.
+        slot_uri: dcterms:modified
+        range: datetime
+        required: true
+        multivalued: false
+        inlined_as_list: false
+      primary_topic:
+        name: primary_topic
+        description: A link to the Dataset, Data service or Catalog described in the
+          record.
+        slot_uri: foaf:primaryTopic
+        range: CataloguedResource
+        required: true
+        multivalued: false
+        inlined_as_list: false
+      source_metadata:
+        name: source_metadata
+        description: The original metadata that was used in creating metadata for
+          the Dataset, Data Service or Dataset Series.
+        slot_uri: dcterms:source
+        range: CatalogueRecord
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      title:
+        name: title
+        description: A name given to the Catalogue Record.
+        slot_uri: dcterms:title
+        range: string
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:CatalogRecord
+  CataloguedResource:
+    name: CataloguedResource
+    description: See [DCAT-AP specs:CataloguedResource](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#CataloguedResource)
+    class_uri: dcat:Resource
+  Checksum:
+    name: Checksum
+    description: See [DCAT-AP specs:Checksum](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Checksum)
+    is_a: SupportiveEntity
+    slots:
+    - algorithm
+    - checksum_value
+    slot_usage:
+      algorithm:
+        name: algorithm
+        description: The algorithm used to produce the subject Checksum.
+        slot_uri: spdx:algorithm
+        range: ChecksumAlgorithm
+        required: true
+        multivalued: false
+        inlined_as_list: true
+      checksum_value:
+        name: checksum_value
+        description: A lower case hexadecimal encoded digest value produced using
+          a specific algorithm.
+        slot_uri: spdx:checksumValue
+        range: hexBinary
+        required: true
+        multivalued: false
+        inlined_as_list: true
+    class_uri: spdx:Checksum
+  ChecksumAlgorithm:
+    name: ChecksumAlgorithm
+    description: See [DCAT-AP specs:ChecksumAlgorithm](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#ChecksumAlgorithm)
+    is_a: SupportiveEntity
+    class_uri: spdx:ChecksumAlgorithm
+  Concept:
+    name: Concept
+    description: See [DCAT-AP specs:Concept](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Concept)
+    is_a: SupportiveEntity
+    slots:
+    - preferred_label
+    slot_usage:
+      preferred_label:
+        name: preferred_label
+        description: A preferred label of the concept.
+        slot_uri: skos:prefLabel
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: skos:Concept
+  ConceptScheme:
+    name: ConceptScheme
+    description: See [DCAT-AP specs:ConceptScheme](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#ConceptScheme)
+    is_a: SupportiveEntity
+    slots:
+    - title
+    slot_usage:
+      title:
+        name: title
+        description: A name of the concept scheme.
+        slot_uri: dcterms:title
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: skos:ConceptScheme
+  DataService:
+    name: DataService
+    description: See [DCAT-AP specs:DataService](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#DataService)
+    slots:
+    - access_rights
+    - applicable_legislation
+    - conforms_to
+    - contact_point
+    - description
+    - documentation
+    - endpoint_URL
+    - endpoint_description
+    - format
+    - keyword
+    - landing_page
+    - licence
+    - publisher
+    - serves_dataset
+    - theme
+    - title
+    slot_usage:
+      access_rights:
+        name: access_rights
+        description: Information regarding access or restrictions based on privacy,
+          security, or other policies.
+        slot_uri: dcterms:accessRights
+        range: RightsStatement
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      applicable_legislation:
+        name: applicable_legislation
+        description: The legislation that mandates the creation or management of the
+          Data Service.
+        slot_uri: dcatap:applicableLegislation
+        range: LegalResource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      conforms_to:
+        name: conforms_to
+        description: An established (technical) standard to which the Data Service
+          conforms.
+        slot_uri: dcterms:conformsTo
+        range: Standard
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      contact_point:
+        name: contact_point
+        description: Contact information that can be used for sending comments about
+          the Data Service.
+        slot_uri: dcat:contactPoint
+        range: Kind
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      description:
+        name: description
+        description: A free-text account of the Data Service.
+        slot_uri: dcterms:description
+        range: string
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      documentation:
+        name: documentation
+        description: A page or document about this Data Service
+        slot_uri: foaf:page
+        range: Document
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      endpoint_URL:
+        name: endpoint_URL
+        description: The root location or primary endpoint of the service (an IRI).
+        slot_uri: dcat:endpointURL
+        range: Resource
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      endpoint_description:
+        name: endpoint_description
+        description: A description of the services available via the end-points, including
+          their operations, parameters etc.
+        slot_uri: dcat:endpointDescription
+        range: Resource
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      format:
+        name: format
+        description: The structure that can be returned by querying the endpointURL.
+        slot_uri: dcterms:format
+        range: MediaTypeOrExtent
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      keyword:
+        name: keyword
+        description: A keyword or tag describing the Data Service.
+        slot_uri: dcat:keyword
+        range: string
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      landing_page:
+        name: landing_page
+        description: A web page that provides access to the Data Service and/or additional
+          information.
+        slot_uri: dcat:landingPage
+        range: Document
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      licence:
+        name: licence
+        description: A licence under which the Data service is made available.
+        slot_uri: dcterms:license
+        range: LicenseDocument
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      publisher:
+        name: publisher
+        description: An entity (organisation) responsible for making the Data Service
+          available.
+        slot_uri: dcterms:publisher
+        range: Agent
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      serves_dataset:
+        name: serves_dataset
+        description: This property refers to a collection of data that this data service
+          can distribute.
+        slot_uri: dcat:servesDataset
+        range: Dataset
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      theme:
+        name: theme
+        description: A category of the Data Service.
+        slot_uri: dcat:theme
+        range: Concept
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      title:
+        name: title
+        description: A name given to the Data Service.
+        slot_uri: dcterms:title
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:DataService
+  Dataset:
+    name: Dataset
+    description: See [DCAT-AP specs:Dataset](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Dataset)
+    slots:
+    - access_rights
+    - applicable_legislation
+    - conforms_to
+    - contact_point
+    - creator
+    - dataset_distribution
+    - description
+    - documentation
+    - frequency
+    - geographical_coverage
+    - has_version
+    - identifier
+    - in_series
+    - is_referenced_by
+    - keyword
+    - landing_page
+    - language
+    - modification_date
+    - other_identifier
+    - provenance
+    - publisher
+    - qualified_attribution
+    - qualified_relation
+    - related_resource
+    - release_date
+    - sample
+    - source
+    - spatial_resolution
+    - temporal_coverage
+    - temporal_resolution
+    - theme
+    - title
+    - type
+    - version
+    - version_notes
+    - was_generated_by
+    slot_usage:
+      access_rights:
+        name: access_rights
+        description: Information that indicates whether the Dataset is publicly accessible,
+          has access restrictions or is not public.
+        slot_uri: dcterms:accessRights
+        range: RightsStatement
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      applicable_legislation:
+        name: applicable_legislation
+        description: The legislation that mandates the creation or management of the
+          Dataset.
+        slot_uri: dcatap:applicableLegislation
+        range: LegalResource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      conforms_to:
+        name: conforms_to
+        description: An implementing rule or other specification.
+        slot_uri: dcterms:conformsTo
+        range: Standard
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      contact_point:
+        name: contact_point
+        description: Contact information that can be used for sending comments about
+          the Dataset.
+        slot_uri: dcat:contactPoint
+        range: Kind
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      creator:
+        name: creator
+        description: An entity responsible for producing the dataset.
+        slot_uri: dcterms:creator
+        range: Agent
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      dataset_distribution:
+        name: dataset_distribution
+        description: An available Distribution for the Dataset.
+        slot_uri: dcat:distribution
+        range: Distribution
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      description:
+        name: description
+        description: A free-text account of the Dataset.
+        slot_uri: dcterms:description
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      documentation:
+        name: documentation
+        description: A page or document about this Dataset.
+        slot_uri: foaf:page
+        range: Document
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      frequency:
+        name: frequency
+        description: The frequency at which the Dataset is updated.
+        slot_uri: dcterms:accrualPeriodicity
+        range: Frequency
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      geographical_coverage:
+        name: geographical_coverage
+        description: A geographic region that is covered by the Dataset.
+        slot_uri: dcterms:spatial
+        range: Location
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      has_version:
+        name: has_version
+        description: A related Dataset that is a version, edition, or adaptation of
+          the described Dataset.
+        slot_uri: dcat:hasVersion
+        range: Dataset
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      identifier:
+        name: identifier
+        description: The main identifier for the Dataset, e.g. the URI or other unique
+          identifier in the context of the Catalogue.
+        slot_uri: dcterms:identifier
+        range: uri
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      in_series:
+        name: in_series
+        description: A dataset series of which the dataset is part.
+        slot_uri: dcat:inSeries
+        range: DatasetSeries
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      is_referenced_by:
+        name: is_referenced_by
+        description: A related resource, such as a publication, that references, cites,
+          or otherwise points to the dataset.
+        slot_uri: dcterms:isReferencedBy
+        range: Resource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      keyword:
+        name: keyword
+        description: A keyword or tag describing the Dataset.
+        slot_uri: dcat:keyword
+        range: string
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      landing_page:
+        name: landing_page
+        description: A web page that provides access to the Dataset, its Distributions
+          and/or additional information.
+        slot_uri: dcat:landingPage
+        range: Document
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      language:
+        name: language
+        description: A language of the Dataset.
+        slot_uri: dcterms:language
+        range: LinguisticSystem
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      modification_date:
+        name: modification_date
+        description: The most recent date on which the Dataset was changed or modified.
+        slot_uri: dcterms:modified
+        range: datetime
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      other_identifier:
+        name: other_identifier
+        description: A secondary identifier of the Dataset
+        slot_uri: adms:identifier
+        range: Identifier
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      provenance:
+        name: provenance
+        description: A statement about the lineage of a Dataset.
+        slot_uri: dcterms:provenance
+        range: ProvenanceStatement
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      publisher:
+        name: publisher
+        description: An entity (organisation) responsible for making the Dataset available.
+        slot_uri: dcterms:publisher
+        range: Agent
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      qualified_attribution:
+        name: qualified_attribution
+        description: An Agent having some form of responsibility for the resource.
+        slot_uri: prov:qualifiedAttribution
+        range: Attribution
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      qualified_relation:
+        name: qualified_relation
+        description: A description of a relationship with another resource.
+        slot_uri: dcat:qualifiedRelation
+        range: Relationship
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      related_resource:
+        name: related_resource
+        description: A related resource.
+        slot_uri: dcterms:relation
+        range: Resource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      release_date:
+        name: release_date
+        description: The date of formal issuance (e.g., publication) of the Dataset.
+        slot_uri: dcterms:issued
+        range: datetime
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      sample:
+        name: sample
+        description: A sample distribution of the dataset.
+        slot_uri: adms:sample
+        range: Distribution
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      source:
+        name: source
+        description: A related Dataset from which the described Dataset is derived.
+        slot_uri: dcterms:source
+        range: Dataset
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      spatial_resolution:
+        name: spatial_resolution
+        description: The minimum spatial separation resolvable in a dataset, measured
+          in meters.
+        slot_uri: dcat:spatialResolutionInMeters
+        range: decimal
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      temporal_coverage:
+        name: temporal_coverage
+        description: A temporal period that the Dataset covers.
+        slot_uri: dcterms:temporal
+        range: PeriodOfTime
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      temporal_resolution:
+        name: temporal_resolution
+        description: The minimum time period resolvable in the dataset.
+        slot_uri: dcat:temporalResolution
+        range: duration
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      theme:
+        name: theme
+        description: A category of the Dataset.
+        slot_uri: dcat:theme
+        range: Concept
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      title:
+        name: title
+        description: A name given to the Dataset.
+        slot_uri: dcterms:title
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      type:
+        name: type
+        description: A type of the Dataset.
+        slot_uri: dcterms:type
+        range: Concept
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      version:
+        name: version
+        description: The version indicator (name or identifier) of a resource.
+        slot_uri: dcat:version
+        range: string
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      version_notes:
+        name: version_notes
+        description: A description of the differences between this version and a previous
+          version of the Dataset.
+        slot_uri: adms:versionNotes
+        range: string
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      was_generated_by:
+        name: was_generated_by
+        description: An activity that generated, or provides the business context
+          for, the creation of the dataset.
+        slot_uri: prov:wasGeneratedBy
+        range: Activity
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:Dataset
+  DatasetSeries:
+    name: DatasetSeries
+    description: See [DCAT-AP specs:DatasetSeries](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#DatasetSeries)
+    slots:
+    - applicable_legislation
+    - contact_point
+    - description
+    - frequency
+    - geographical_coverage
+    - modification_date
+    - publisher
+    - release_date
+    - temporal_coverage
+    - title
+    slot_usage:
+      applicable_legislation:
+        name: applicable_legislation
+        description: The legislation that mandates the creation or management of the
+          Dataset Series.
+        slot_uri: dcatap:applicableLegislation
+        range: LegalResource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      contact_point:
+        name: contact_point
+        description: Contact information that can be used for sending comments about
+          the Dataset Series.
+        slot_uri: dcat:contactPoint
+        range: Kind
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      description:
+        name: description
+        description: A free-text account of the Dataset Series.
+        slot_uri: dcterms:description
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      frequency:
+        name: frequency
+        description: The frequency at which the Dataset Series is updated.
+        slot_uri: dcterms:accrualPeriodicity
+        range: Frequency
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      geographical_coverage:
+        name: geographical_coverage
+        description: A geographic region that is covered by the Dataset Series.
+        slot_uri: dcterms:spatial
+        range: Location
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      modification_date:
+        name: modification_date
+        description: The most recent date on which the Dataset Series was changed
+          or modified.
+        slot_uri: dcterms:modified
+        range: datetime
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      publisher:
+        name: publisher
+        description: 'An entity (organisation) responsible for ensuring the coherency
+          of the Dataset Series '
+        slot_uri: dcterms:publisher
+        range: Agent
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      release_date:
+        name: release_date
+        description: The date of formal issuance (e.g., publication) of the Dataset
+          Series.
+        slot_uri: dcterms:issued
+        range: datetime
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      temporal_coverage:
+        name: temporal_coverage
+        description: A temporal period that the Dataset Series covers.
+        slot_uri: dcterms:temporal
+        range: PeriodOfTime
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      title:
+        name: title
+        description: A name given to the Dataset Series.
+        slot_uri: dcterms:title
+        range: string
+        required: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:DatasetSeries
+  Distribution:
+    name: Distribution
+    description: See [DCAT-AP specs:Distribution](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Distribution)
+    slots:
+    - access_URL
+    - access_service
+    - applicable_legislation
+    - availability
+    - byte_size
+    - checksum
+    - compression_format
+    - description
+    - documentation
+    - download_URL
+    - format
+    - has_policy
+    - language
+    - licence
+    - linked_schemas
+    - media_type
+    - modification_date
+    - packaging_format
+    - release_date
+    - rights
+    - spatial_resolution
+    - status
+    - temporal_resolution
+    - title
+    slot_usage:
+      access_URL:
+        name: access_URL
+        description: A URL that gives access to a Distribution of the Dataset.
+        slot_uri: dcat:accessURL
+        range: Resource
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      access_service:
+        name: access_service
+        description: A data service that gives access to the distribution of the dataset.
+        slot_uri: dcat:accessService
+        range: DataService
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      applicable_legislation:
+        name: applicable_legislation
+        description: The legislation that mandates the creation or management of the
+          Distribution.
+        slot_uri: dcatap:applicableLegislation
+        range: LegalResource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      availability:
+        name: availability
+        description: An indication how long it is planned to keep the Distribution
+          of the Dataset available.
+        slot_uri: dcatap:availability
+        range: Concept
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: false
+      byte_size:
+        name: byte_size
+        description: The size of a Distribution in bytes.
+        slot_uri: dcat:byteSize
+        range: nonNegativeInteger
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      checksum:
+        name: checksum
+        description: A mechanism that can be used to verify that the contents of a
+          distribution have not changed.
+        slot_uri: spdx:checksum
+        range: Checksum
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      compression_format:
+        name: compression_format
+        description: The format of the file in which the data is contained in a compressed
+          form, e.g. to reduce the size of the downloadable file.
+        slot_uri: dcat:compressFormat
+        range: MediaType
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      description:
+        name: description
+        description: A free-text account of the Distribution.
+        slot_uri: dcterms:description
+        range: string
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+      documentation:
+        name: documentation
+        description: A page or document about this Distribution.
+        slot_uri: foaf:page
+        range: Document
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      download_URL:
+        name: download_URL
+        description: A URL that is a direct link to a downloadable file in a given
+          format.
+        slot_uri: dcat:downloadURL
+        range: Resource
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      format:
+        name: format
+        description: The file format of the Distribution.
+        slot_uri: dcterms:format
+        range: MediaTypeOrExtent
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: true
+      has_policy:
+        name: has_policy
+        description: The policy expressing the rights associated with the distribution
+          if using the [[ODRL]] vocabulary.
+        slot_uri: odrl:hasPolicy
+        range: Policy
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      language:
+        name: language
+        description: A language used in the Distribution.
+        slot_uri: dcterms:language
+        range: LinguisticSystem
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      licence:
+        name: licence
+        description: A licence under which the Distribution is made available.
+        slot_uri: dcterms:license
+        range: LicenseDocument
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      linked_schemas:
+        name: linked_schemas
+        description: An established schema to which the described Distribution conforms.
+        slot_uri: dcterms:conformsTo
+        range: Standard
+        required: false
+        multivalued: true
+        inlined_as_list: true
+      media_type:
+        name: media_type
+        description: The media type of the Distribution as defined in the official
+          register of media types managed by IANA.
+        slot_uri: dcat:mediaType
+        range: MediaType
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      modification_date:
+        name: modification_date
+        description: The most recent date on which the Distribution was changed or
+          modified.
+        slot_uri: dcterms:modified
+        range: datetime
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      packaging_format:
+        name: packaging_format
+        description: The format of the file in which one or more data files are grouped
+          together, e.g. to enable a set of related files to be downloaded together.
+        slot_uri: dcat:packageFormat
+        range: MediaType
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      release_date:
+        name: release_date
+        description: The date of formal issuance (e.g., publication) of the Distribution.
+        slot_uri: dcterms:issued
+        range: datetime
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      rights:
+        name: rights
+        description: A statement that specifies rights associated with the Distribution.
+        slot_uri: dcterms:rights
+        range: RightsStatement
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      spatial_resolution:
+        name: spatial_resolution
+        description: The minimum spatial separation resolvable in a dataset distribution,
+          measured in meters.
+        slot_uri: dcat:spatialResolutionInMeters
+        range: decimal
+        required: false
+        multivalued: false
+        inlined_as_list: false
+      status:
+        name: status
+        description: The status of the distribution in the context of maturity lifecycle.
+        slot_uri: adms:status
+        range: Concept
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      temporal_resolution:
+        name: temporal_resolution
+        description: The minimum time period resolvable in the dataset distribution.
+        slot_uri: dcat:temporalResolution
+        range: duration
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      title:
+        name: title
+        description: A name given to the Distribution.
+        slot_uri: dcterms:title
+        range: string
+        required: false
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:Distribution
+  Document:
+    name: Document
+    description: See [DCAT-AP specs:Document](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Document)
+    is_a: SupportiveEntity
+    slots:
+    - identifier
+    slot_usage:
+      identifier:
+        required: true
+        description: A slot to provide an identifier.
+        range: uriorcurie
+    class_uri: foaf:Document
+  Frequency:
+    name: Frequency
+    description: See [DCAT-AP specs:Frequency](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Frequency)
+    is_a: SupportiveEntity
+    class_uri: dcterms:Frequency
+  Geometry:
+    name: Geometry
+    description: See [DCAT-AP specs:Geometry](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Geometry)
+    is_a: SupportiveEntity
+    class_uri: locn:Geometry
+  Identifier:
+    name: Identifier
+    description: See [DCAT-AP specs:Identifier](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Identifier)
+    is_a: SupportiveEntity
+    slots:
+    - notation
+    slot_usage:
+      notation:
+        name: notation
+        description: A string that is an identifier in the context of the identifier
+          scheme referenced by its datatype.
+        slot_uri: skos:notation
+        range: uri
+        required: true
+        multivalued: false
+        inlined_as_list: false
+    class_uri: adms:Identifier
+  Kind:
+    name: Kind
+    description: See [DCAT-AP specs:Kind](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Kind)
+    is_a: SupportiveEntity
+    class_uri: vcard:Kind
+  LegalResource:
+    name: LegalResource
+    description: See [DCAT-AP specs:LegalResource](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#LegalResource)
+    is_a: SupportiveEntity
+    class_uri: eli:LegalResource
+  LicenseDocument:
+    name: LicenseDocument
+    description: See [DCAT-AP specs:LicenseDocument](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#LicenseDocument)
+    is_a: SupportiveEntity
+    slots:
+    - type
+    slot_usage:
+      type:
+        name: type
+        description: A type of licence, e.g. indicating 'public domain' or 'royalties
+          required'.
+        slot_uri: dcterms:type
+        range: Concept
+        required: false
+        recommended: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcterms:LicenseDocument
+  LinguisticSystem:
+    name: LinguisticSystem
+    description: See [DCAT-AP specs:LinguisticSystem](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#LinguisticSystem)
+    is_a: SupportiveEntity
+    slots:
+    - language_tag
+    class_uri: dcterms:LinguisticSystem
+  Location:
+    name: Location
+    description: See [DCAT-AP specs:Location](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Location)
+    is_a: SupportiveEntity
+    slots:
+    - bbox
+    - centroid
+    - geometry
+    slot_usage:
+      bbox:
+        name: bbox
+        description: The geographic bounding box of a resource.
+        slot_uri: dcat:bbox
+        range: string
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: false
+      centroid:
+        name: centroid
+        description: The geographic center (centroid) of a resource.
+        slot_uri: dcat:centroid
+        range: string
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: false
+      geometry:
+        name: geometry
+        description: The corresponding geometry for a resource.
+        slot_uri: locn:geometry
+        range: Geometry
+        required: false
+        multivalued: false
+        inlined_as_list: false
+    class_uri: dcterms:Location
+  MediaType:
+    name: MediaType
+    description: See [DCAT-AP specs:MediaType](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#MediaType)
+    is_a: SupportiveEntity
+    class_uri: dcterms:MediaType
+  MediaTypeOrExtent:
+    name: MediaTypeOrExtent
+    description: See [DCAT-AP specs:MediaTypeOrExtent](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#MediaTypeOrExtent)
+    is_a: SupportiveEntity
+    class_uri: dcterms:MediaTypeOrExtent
+  PeriodOfTime:
+    name: PeriodOfTime
+    description: See [DCAT-AP specs:PeriodOfTime](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#PeriodOfTime)
+    is_a: SupportiveEntity
+    slots:
+    - beginning
+    - end
+    - end_date
+    - start_date
+    slot_usage:
+      beginning:
+        name: beginning
+        description: The beginning of a period or interval.
+        slot_uri: time:hasBeginning
+        range: TimeInstant
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      end:
+        name: end
+        description: The end of a period or interval.
+        slot_uri: time:hasEnd
+        range: TimeInstant
+        required: false
+        multivalued: false
+        inlined_as_list: true
+      end_date:
+        name: end_date
+        description: The end of the period.
+        slot_uri: dcat:endDate
+        range: string
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: true
+      start_date:
+        name: start_date
+        description: The start of the period.
+        slot_uri: dcat:startDate
+        range: string
+        required: false
+        recommended: true
+        multivalued: false
+        inlined_as_list: false
+    class_uri: dcterms:PeriodOfTime
+  Policy:
+    name: Policy
+    description: See [DCAT-AP specs:Policy](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Policy)
+    is_a: SupportiveEntity
+    class_uri: odrl:Policy
+  ProvenanceStatement:
+    name: ProvenanceStatement
+    description: See [DCAT-AP specs:ProvenanceStatement](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#ProvenanceStatement)
+    is_a: SupportiveEntity
+    class_uri: dcterms:ProvenanceStatement
+  Relationship:
+    name: Relationship
+    description: See [DCAT-AP specs:Relationship](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Relationship)
+    is_a: SupportiveEntity
+    slots:
+    - had_role
+    - relation
+    slot_usage:
+      had_role:
+        name: had_role
+        description: A function of an entity or agent with respect to another entity
+          or resource.
+        slot_uri: dcat:hadRole
+        range: Role
+        required: true
+        multivalued: true
+        inlined_as_list: true
+      relation:
+        name: relation
+        description: A resource related to the source resource.
+        slot_uri: dcterms:relation
+        range: Resource
+        required: true
+        multivalued: true
+        inlined_as_list: true
+    class_uri: dcat:Relationship
+  Resource:
+    name: Resource
+    description: See [DCAT-AP specs:Resource](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Resource)
+    is_a: SupportiveEntity
+    class_uri: rdfs:Resource
+  RightsStatement:
+    name: RightsStatement
+    description: See [DCAT-AP specs:RightsStatement](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#RightsStatement)
+    is_a: SupportiveEntity
+    class_uri: dcterms:RightsStatement
+  Role:
+    name: Role
+    description: See [DCAT-AP specs:Role](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Role)
+    is_a: SupportiveEntity
+    class_uri: dcat:Role
+  Standard:
+    name: Standard
+    description: See [DCAT-AP specs:Standard](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#Standard)
+    is_a: SupportiveEntity
+    slots:
+    - identifier
+    slot_usage:
+      identifier:
+        required: true
+        description: A slot to provide an identifier.
+        range: uriorcurie
+    class_uri: dcterms:Standard
+  SupportiveEntity:
+    name: SupportiveEntity
+    description: The supportive entities are supporting the main entities in the Application
+      Profile. They are included in the Application Profile because they form the
+      range of properties.
+  TimeInstant:
+    name: TimeInstant
+    description: See [DCAT-AP specs:TimeInstant](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#TimeInstant)
+    is_a: SupportiveEntity
+    class_uri: time:Instant

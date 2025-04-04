@@ -1,0 +1,2 @@
+Requirement already satisfied: jinja2 in /usr/lib/ckan/default/lib/python3.7/site-packages (3.1.6)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/lib/ckan/default/lib/python3.7/site-packages (from jinja2) (2.0.1)

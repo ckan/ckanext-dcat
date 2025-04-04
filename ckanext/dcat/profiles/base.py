@@ -77,7 +77,7 @@ namespaces = {
     "spdx": SPDX,
     "rdf":RDF,
     "rdfs": RDFS,
-
+    "xsd": XSD,
 
     # nfdi4Chem additionals
     "bfo":BFO,

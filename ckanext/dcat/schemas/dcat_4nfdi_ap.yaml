@@ -42,14 +42,18 @@ prefixes:
   SIO: http://semanticscience.org/resource/SIO_
   doi: https://doi.org/
   NMR: "http://nmrML.org/nmrCV#NMR:"
+  xsd:  http://www.w3.org/2001/XMLSchema#
 default_prefix: nfdi
 default_range: string
 imports:
   - linkml:types
   - dcat_ap_linkml
+subsets:
+  domain_agnostic_core:
+    description: The elements of this subset are considered the core layer of our DCAT-AP extension.
 
 classes:
-  
+
   ClassifierMixin:
     description: A mixin with which an entity of this schema can be classified via an additional rdf:type assertion.
     mixin: true
@@ -61,13 +65,10 @@ classes:
       type:
         inlined: true
         range: DefinedTerm
-        #equals_expression: '{rdf_type}'
-      rdf_type:
-        #equals_expression: '{type}'
 
   DefinedTerm:
     class_uri: schema:DefinedTerm
-    description: A word, name, acronym, phrase that is defined in a controlled vocabulary (CV) and that is used to provide the rdf:type of an entity within this schema.
+    description: A word, name, acronym, phrase that is defined in a controlled vocabulary (CV) and that is used to provide an additional rdf:type or dcterms:type of a class within this schema.
     attributes:
       from_CV:
         slot_uri: schema:inDefinedTermSet
@@ -79,38 +80,59 @@ classes:
     slot_usage:
       title:
         slot_uri: schema:name
-        
-  NFDIDataset:
+    in_subset:
+      - domain_agnostic_core
+
+  ResearchDataset:
     is_a: Dataset
     tree_root: true
     class_uri: dcat:Dataset
     description: >-
       A collection of data, published or curated by a single agent, and available for access or download in one or more representations.
+    comments:
+      - "The name of this class is only deviating from its parent as this is needed according to the sub-classing strategy chosen here in this LinkML model to further constrain the slots of existing (imported) classes."
     slots:
       - id
+      - describes_entity
+      - describes_activity
     slot_usage:
       was_generated_by:
-        range: ResearchActivity
+        range: DataCreatingActivity
         required: true
         multivalued: true
         inlined_as_list: true
-  
-  NFDICatalog:
+    in_subset:
+      - domain_agnostic_core
+  AnalysisDataset:
+    class_uri: dcat:Dataset
+    tree_root: true
+    is_a: ResearchDataset
+    slot_usage:
+      was_generated_by:
+        range: DataAnalysis
+    in_subset:
+      - domain_agnostic_core
+
+  ResearchCatalog:
     is_a: Catalogue
     class_uri: dcat:Catalog
     description: A curated collection of metadata about data resources.
+    comments:
+      - "The name of this class is only deviating from its parent as this is needed according to the sub-classing strategy chosen here in this LinkML model to further constrain the slots of existing (imported) classes."
     slots:
       - id
     slot_usage:
       has_dataset:
-        range: NFDIDataset
-    
-  ResearchActivity:
+        range: ResearchDataset
+    in_subset:
+      - domain_agnostic_core
+
+  DataCreatingActivity:
     mixins:
       - ClassifierMixin
     is_a: Activity
     class_uri: prov:Activity
-    description: An activity (process) that has the objective to produce information about an entity by evaluating it.
+    description: An activity (process) that has the objective to produce information about an entity or activity.
     slots:
       - title
       - description
@@ -123,12 +145,12 @@ classes:
       - occurred_in
     slot_usage:
       has_part:
-        description: The slot to specify one or more parts of the ResearchActivity that are themselves also research activities.
+        description: A slot to provide an Activity that is part of the DataCreatingActivity.
         range: Activity
         inlined: true
       other_identifier:
         name: other_identifier
-        description: A secondary identifier of the ActivityOfInterest
+        description: A secondary identifier of the DataCreatingActivity
         slot_uri: adms:identifier
         range: Identifier
         required: false
@@ -138,12 +160,28 @@ classes:
       - NCIT:C25598
       - sosa:Observation
       - OBI:0000070
-    
-  EntityOfInterest:
+    in_subset:
+      - domain_agnostic_core
+
+  DataAnalysis:
+    is_a: DataCreatingActivity
+    class_uri: prov:Activity
+    description: A DataCreatingActivity that evaluates the data produced by another DataCreatingActivity.
+    slot_usage:
+      evaluated_entity:
+        range: AnalysisSourceData
+    close_mappings:
+      - http://purl.obolibrary.org/obo/NCIT_C25391
+    exact_mappings:
+      - OBI:0200000 # data transformation aka data analysis
+    in_subset:
+      - domain_agnostic_core
+
+  EvaluatedEntity:
     mixins:
       - ClassifierMixin
     class_uri: prov:Entity
-    description: Something (not an activity or process) that is being evaluated in a ResearchActivity.
+    description: A physical, digital, conceptual, or other kind of thing with some fixed aspects that is not an activity or process and that is being evaluated in a DataCreatingActivity.
     slots:
       - title
       - description
@@ -152,22 +190,43 @@ classes:
       - has_qualitative_attribute
       - has_quantitative_attribute
       - has_part
+      - was_generated_by
     slot_usage:
       other_identifier:
         name: other_identifier
-        description: A secondary identifier of the EntityOfInterest
+        description: A slot to provide a secondary identifier of the EvaluatedEntity.
         slot_uri: adms:identifier
         range: Identifier
         required: false
         multivalued: true
         inlined_as_list: true
-        
-  ActivityOfInterest:
+      was_generated_by:
+        range: Activity
+        description: A slot to provide the Activity which created the EvaluatedEntity.
+        multivalued: true
+        inlined_as_list: true
+      has_part:
+        description: A slot to provide a part of the EvaluatedEntity.
+        range: EvaluatedEntity
+    in_subset:
+      - domain_agnostic_core
+
+  AnalysisSourceData:
+    is_a: EvaluatedEntity
+    class_uri: prov:Entity
+    description: Information that was evaluated within a DataAnalysis.
+    slot_usage:
+      was_generated_by:
+        range: DataCreatingActivity
+    in_subset:
+      - domain_agnostic_core
+
+  EvaluatedActivity:
     mixins:
       - ClassifierMixin
     class_uri: prov:Activity
     is_a: Activity
-    description: An activity or process that is being evaluated in a ResearchActivity.
+    description: An activity or process that is being evaluated in a DataCreatingActivity.
     slots:
       - title
       - description
@@ -179,18 +238,23 @@ classes:
     slot_usage:
       other_identifier:
         name: other_identifier
-        description: A secondary identifier of the ActivityOfInterest
+        description: A secondary identifier of the EvaluatedActivity
         slot_uri: adms:identifier
         range: Identifier
         required: false
         multivalued: true
         inlined_as_list: true
-    
+      has_part:
+        description: A slot to provide a part of the EvaluatedActivity.
+        range: EvaluatedActivity
+    in_subset:
+      - domain_agnostic_core
+
   Tool:
     mixins:
       - ClassifierMixin
     class_uri: prov:Entity
-    description: A entity with a certain function used within a ResearchActivity.
+    description: A entity with a certain function used within a DataCreatingActivity.
     slots:
       - title
       - description
@@ -207,7 +271,7 @@ classes:
         inlined_as_list: true
       other_identifier:
         name: other_identifier
-        description: A secondary identifier of the ActivityOfInterest
+        description: A secondary identifier of the EvaluatedActivity
         slot_uri: adms:identifier
         range: Identifier
         required: false
@@ -215,18 +279,30 @@ classes:
         inlined_as_list: true
     broad_mappings:
       - prov:Entity
-      
+    in_subset:
+      - domain_agnostic_core
+  HardwareTool:
+    is_a: Tool
+    aliases:
+      - Device
+    description: A hardware device with a certain function that was used within a DataCreatingActivity.
+    in_subset:
+      - domain_agnostic_core
+  SoftwareTool:
+    is_a: Tool
+    description: A software program with a certain function that was used within a DataCreatingActivity.
+    in_subset:
+      - domain_agnostic_core
+
   Environment:
     mixins:
       - ClassifierMixin
     class_uri: prov:Entity
-    description: The environment in which the dataset creating Observation took place (e.g. a lab).
+    description: The surrounding in which the dataset creating activity took place (e.g. a lab).
     slots:
       - title
       - description
       - other_identifier
-      - has_qualitative_attribute
-      - has_quantitative_attribute
     slot_usage:
       other_identifier:
         name: other_identifier
@@ -236,7 +312,9 @@ classes:
         required: false
         multivalued: true
         inlined_as_list: true
-    
+    in_subset:
+      - domain_agnostic_core
+
   Plan:
     mixins:
       - ClassifierMixin
@@ -244,16 +322,18 @@ classes:
     aliases:
       - Plan Specification
       - Method
-    description: |-
-      A piece of information that specifies: a) how an activity has to be carried out by its agents and b) the attributes of the passive activity participants that are used by the agents in terms of their presence and magnitude.
+      - Procedure
+    description: "A piece of information that specifies how an activity has to be carried out by its agents including what kind of steps have to be taken and what kind of parameters have to be met/set."
     slots:
       - title
       - description
     examples:
       - description: "We assigned the structure of sample CRS-37013 using a 13C NMR (CHMO:0000595) and the settings: pulse sequence: zgpg30, temperature: 298.0 K, number of scans: 1024, Solvent : chloroform-D1 (CDCl3)."
+    in_subset:
+      - domain_agnostic_core
 
-           
-  
+
+
   ###################
   # Attribute Types #
   ###################
@@ -270,13 +350,17 @@ classes:
       value:
         description: The slot to provide the literal value of the QualitativeAttribute.
         required: true
-  
+    in_subset:
+      - domain_agnostic_core
+
   QuantitativeAttribute:
     mixins:
       - ClassifierMixin
     class_uri: qudt:Quantity
     description: A quantifiable piece of information that is attributed to an entity of interest, tool or environment.
     slots:
+      - title
+      - description
       - value
     attributes:
       has_quantity_type:
@@ -284,25 +368,28 @@ classes:
         description: The type of quality that is quantifiable according to the QUDT ontology.
         slot_uri: qudt:hasQuantityKind
         required: true
-        bindings: ## new feature not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
-          - binds_value_of: id
-            range: QUDTQuantityKindEnum
-            obligation_level: RECOMMENDED
-            description: Binds the type of a quantifiable attribute to a QUDT Quantity Kind instance from the QUDT Quantity Kind vocabulary.
+        # range: QUDTQuantityKindEnum
+        #bindings: ## new feature not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
+          #- binds_value_of: id
+
+        #    obligation_level: RECOMMENDED
+        # description: Binds the type of a quantifiable attribute to a QUDT Quantity Kind instance from the QUDT Quantity Kind vocabulary.
       unit:
         slot_uri: qudt:unit
         range: DefinedTerm
         recommended: true
-        bindings: ## new feature not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
-          - binds_value_of: id
-            range: QUDTUnitEnum
-            obligation_level: RECOMMENDED
-            description: Restricts the allowable defined terms to the QUDT Unit vocabulary.
+#        bindings: ## new feature not yet implemented, see: https://github.com/linkml/linkml-model/releases/tag/v1.8.0
+#          - binds_value_of: id
+#            range: QUDTUnitEnum
+#            obligation_level: RECOMMENDED
+#            description: Restricts the allowable defined terms to the QUDT Unit vocabulary.
     slot_usage:
       value:
         description: The slot to provide the literal value of the QuantitativeAttribute.
         required: true
         range: float
+    in_subset:
+      - domain_agnostic_core
 
 # Slots
 slots:
@@ -310,22 +397,35 @@ slots:
     slot_uri: dcterms:identifier
     identifier: true
     range: uriorcurie
+    description: A slot to provide an URI for an entity within this schema.
+    in_subset:
+      - domain_agnostic_core
   rdf_type:
     slot_uri: rdf:type
     description: The slot to specify the ontology class that is instantiated by an entity.
     recommended: true
     inlined: true
     range: DefinedTerm
+    in_subset:
+      - domain_agnostic_core
   evaluated_entity:
     slot_uri: prov:used
     description: The slot to specify the entity of interest that was evaluated.
-    inlined: true
-    range: EntityOfInterest
+    multivalued: true
+    inlined_as_list: true
+    recommended: true
+    range: EvaluatedEntity
+    in_subset:
+      - domain_agnostic_core
   evaluated_activity:
     slot_uri: prov:wasInformedBy
     description: The slot to specify the activity of interest that was evaluated.
-    inlined: true
-    range: ActivityOfInterest 
+    multivalued: true
+    inlined_as_list: true
+    recommended: true
+    range: EvaluatedActivity
+    in_subset:
+      - domain_agnostic_core
   used_tool:
     slot_uri: prov:used
     description: The slot to specify the tool that was used.
@@ -334,15 +434,21 @@ slots:
     inlined: true
     inlined_as_list: true
     range: Tool
+    in_subset:
+      - domain_agnostic_core
   realized_plan:
     slot_uri: prov:used
-    description: The slot to specify the Method (aka Procedure) that was realized by a ResearchActivity.
+    description: The slot to specify the Method (aka Procedure) that was realized by a DataCreatingActivity.
     recommended: true
     range: Plan
+    in_subset:
+      - domain_agnostic_core
   occurred_in:
     slot_uri: BFO:0000066
-    description: The slot to specify the Method (aka Procedure) that was used in the ResearchActivity.
+    description: The slot to specify the Method (aka Procedure) that was used in the DataCreatingActivity.
     range: Environment
+    in_subset:
+      - domain_agnostic_core
   has_qualitative_attribute:
     slot_uri: dcterms:relation
     description: The slot to relate a qualitative attribute to an entity of interest, tool or environment.
@@ -350,6 +456,8 @@ slots:
     inlined: true
     multivalued: true
     inlined_as_list: true
+    in_subset:
+      - domain_agnostic_core
   has_quantitative_attribute:
     slot_uri: dcterms:relation
     description: The slot to relate a quantitative  attribute to an entity of interest, tool or environment.
@@ -357,41 +465,75 @@ slots:
     inlined: true
     multivalued: true
     inlined_as_list: true
+    in_subset:
+      - domain_agnostic_core
   value:
     slot_uri: prov:value
     description: A slot to provide the literal value of an attribute.
-
+    in_subset:
+      - domain_agnostic_core
+  describes_entity:
+    slot_uri: dcterms:relation
+    range: EvaluatedEntity
+    description: A slot to provide the EvaluatedEntity that is described by a Dataset.
+    multivalued: true
+    inlined_as_list: true
+    recommended: true
+    in_subset:
+      - domain_agnostic_core
+  describes_activity:
+    slot_uri: dcterms:relation
+    range: EvaluatedActivity
+    description: A slot to provide the EvaluatedActivity that is described by a Dataset.
+    multivalued: true
+    inlined_as_list: true
+    recommended: true
+    in_subset:
+      - domain_agnostic_core
 
 enums:
-  ## Dynamic enums (https://linkml.io/linkml/schemas/enums.html#dynamic-enums) should be used to constrain the range 
+  ## Dynamic enums (https://linkml.io/linkml/schemas/enums.html#dynamic-enums) should be used to constrain the range
   ## of the type slot instead of using the default DefinedTerm as range.
-  ## This will be done in profiles of this schema where we define ResearchActivity subclasses, e.g. NMRSpectroscopy.
+  ## This will be done in profiles of this schema where we define DataCreatingActivity subclasses, e.g. NMRSpectroscopy.
   ## seeAlso: https://github.com/linkml/linkml-model/blob/main/tests/input/examples/schema_definition-enum_bindings-1.yaml
   QUDTQuantityKindEnum:
     description: Possible kinds of quantifiable attribute types provided as QUDT QualityKind instances.
-    implements:
-      - owl:NamedIndividual
-    reachable_from:
-      source_ontology: http://qudt.org/2.1/vocab/quantitykind
-      source_nodes:
-        - qudt:QuantityKind
-      is_direct: true
-      relationship_types:
-        - rdf:type
-                 
+#    implements:
+#      - owl:NamedIndividual
+#    reachable_from:
+#      source_ontology: http://qudt.org/2.1/vocab/quantitykind
+#      source_nodes:
+#        - qudt:QuantityKind
+#      is_direct: true
+#      relationship_types:
+#        - rdf:type
+    in_subset:
+      - domain_agnostic_core
+
+    permissible_values:
+      qudt:QuantityKind:
+        text: qudt:QuantityKind
+        description: A type of quantifiable attribute from the QUDT vocabulary.
+        meaning: qudt:QuantityKind
+        title: Quantity Kind
+
+
   QUDTUnitEnum:
     description: Possible kinds of QUDT unit instances.
-    implements:
-      - owl:NamedIndividual
-    reachable_from:
-      source_ontology: https://qudt.org/vocab/unit/
-      source_nodes:
-        - qudt:Unit
-      is_direct: true
-      relationship_types:
-        - rdf:type
-    
-
-
-    
-  
+#    implements:
+#      - owl:NamedIndividual
+#    reachable_from:
+#      source_ontology: https://qudt.org/vocab/unit/
+#      source_nodes:
+#        - qudt:Unit
+#      is_direct: true
+#      relationship_types:
+#        - rdf:type
+    permissible_values:
+      qudt:Unit:
+        text: qudt:Unit
+        description: A unit from the QUDT Unit vocabulary.
+        meaning: qudt:Unit
+        title: Unit
+    in_subset:
+      - domain_agnostic_core
