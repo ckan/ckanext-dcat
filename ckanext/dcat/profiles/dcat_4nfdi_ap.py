@@ -90,12 +90,6 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
             dataset_uri = dataset_dict.get('id').strip()
             dataset_id = dataset_dict.get('id').strip()
 
-        # if dataset_dict.get('mol_formula'):
-        #     mol_formula = dataset_dict.get('mol_formula')
-        # else:
-        #     mol_formula = 'None'
-
-
         # Instantiate the evaluated sample
         # TODO: We used a fake ID, as the real one is not within the example dataset, but might be in the source data.
         # TODO: Do we need different instantiation steps/conditions based on where the metadata comes from?
@@ -158,10 +152,13 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
                 title='peak identification'),
             evaluated_entity=[spectrum])
 
+
+# TODO: Empty Values are to be tested, to check if it is NONE or not
+
         if dataset_dict.get('notes'):
             description = dataset_dict.get('notes')
         else:
-            description= 'None'
+            description= 'No description'
 
         dataset = AnalysisDataset(id=dataset_uri,
                                   title=dataset_dict.get('title'),
@@ -178,9 +175,12 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
         creators = []
         # Dirty parsing workaround for the above nmrXiv example
         try:
-            for creator in dataset_dict.get('author').replace('., ', '.|').split('|'):
-                creators.append(Agent(name=creator))
-                dataset.creator = creators
+            if dataset_dict.get('author'):
+                for creator in dataset_dict.get('author').replace('., ', '.|').split('|'):
+                    creators.append(Agent(name=creator))
+                    dataset.creator = creators
+            else:
+                dataset.creator = creators.append(Agent(name='NA'))
         except Exception as e:
             log.error(e)
 
@@ -192,6 +192,9 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
             else:
                 dataset.language.append(LinguisticSystem(language_tag=dataset_dict.get('language')))
 
+        else:
+            dataset.language.append(LinguisticSystem(language_tag='en'))
+
         # Add landing_page attribute to the dataset
         if dataset_dict.get('url'):
             dataset.landing_page = Document(identifier=dataset_dict.get('url'))
@@ -202,7 +205,8 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
         # Add modification_date attribute to the dataset
         dataset.modification_date = dataset_dict.get('metadata_modified')
 
-        schemaview = SchemaView("/usr/lib/ckan/default/src/ckanext-dcat/ckanext/dcat/schemas/dcat_4c_ap.yaml")
+        schemaview = SchemaView(schema ="/usr/lib/ckan/default/src/ckanext-dcat/ckanext/dcat/schemas/dcat_4c_ap.yaml"
+                                )
 
         rdf_nfdi_dumper = RDFLibDumper()
         # nfdi_graph = rdf_nfdi_dumper.as_rdf_graph(sample, schemaview=schemaview)
@@ -213,7 +217,6 @@ class DCATNFDi4ChemProfile(EuropeanDCATAPProfile):
 
         for triple in nfdi_graph:
             self.g.add(triple)
-
 
 
 
