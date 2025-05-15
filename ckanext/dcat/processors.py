@@ -1,7 +1,3 @@
-from __future__ import print_function
-
-from builtins import str
-from builtins import object
 import sys
 import argparse
 import xml
@@ -286,12 +282,14 @@ class RDFSerializer(RDFProcessor):
 
         return catalog_ref
 
-    def serialize_dataset(self, dataset_dict, _format='xml'):
+    def serialize_dataset(self, dataset_dict, _format='xml', context=None):
         '''
         Given a CKAN dataset dict, returns an RDF serialization
 
         The serialization format can be defined using the `_format` parameter.
         It must be one of the ones supported by RDFLib, defaults to `xml`.
+
+        Additionally a custom context may be provided (JSON-LD only)
 
         Returns a string with the serialized dataset
         '''
@@ -303,24 +301,30 @@ class RDFSerializer(RDFProcessor):
         _format = url_to_rdflib_format(_format)
 
         if _format == 'json-ld':
-            output = self.g.serialize(format=_format, auto_compact=True)
+            output = self.g.serialize(
+                format=_format,
+                auto_compact=True,
+                context=context
+            )
         else:
             output = self.g.serialize(format=_format)
 
         return output
 
-    def serialize_datasets(self, dataset_dicts, _format='xml'):
+    def serialize_datasets(self, dataset_dicts, _format='xml', context=None):
         '''
         Given a list of CKAN dataset dicts, returns an RDF serialization
 
         The serialization format can be defined using the `_format` parameter.
         It must be one of the ones supported by RDFLib, defaults to `xml`.
 
+        Additionally a custom context may be provided (JSON-LD only)
+
         Returns a string with the serialized datasets
         '''
         out = []
         for dataset_dict in dataset_dicts:
-            out.append(self.serialize_dataset(dataset_dict, _format))
+            out.append(self.serialize_dataset(dataset_dict, _format, context))
         return '\n'.join(out)
 
 

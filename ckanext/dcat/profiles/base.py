@@ -14,6 +14,7 @@ from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.validators import is_date, is_year, is_year_month
 
 CNT = Namespace("http://www.w3.org/2011/content#")
+CR = Namespace("http://mlcommons.org/croissant/")
 DCT = Namespace("http://purl.org/dc/terms/")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
 DCATAP = Namespace("http://data.europa.eu/r5r/")
@@ -22,7 +23,7 @@ ADMS = Namespace("http://www.w3.org/ns/adms#")
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 SCHEMA = Namespace("http://schema.org/")
-TIME = Namespace("http://www.w3.org/2006/time")
+TIME = Namespace("http://www.w3.org/2006/time#")
 LOCN = Namespace("http://www.w3.org/ns/locn#")
 GSP = Namespace("http://www.opengis.net/ont/geosparql#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
@@ -30,6 +31,7 @@ SPDX = Namespace("http://spdx.org/rdf/terms#")
 
 namespaces = {
     "cnt": CNT,
+    "cr": CR,
     "dct": DCT,
     "dcat": DCAT,
     "dcatap": DCATAP,

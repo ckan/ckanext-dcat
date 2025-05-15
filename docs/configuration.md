@@ -1,5 +1,3 @@
-<!-- start-config -->
-
 ### General settings
 
 #### ckanext.dcat.rdf.profiles
@@ -10,10 +8,9 @@ Example:
 ckanext.dcat.rdf.profiles = euro_dcat_ap_2 my_local_ap
 ```
 
-Default value: `euro_dcat_ap_2`
+Default value: `euro_dcat_ap_3`
 
-RDF profiles to use when parsing and serializing. See https://github.com/ckan/ckanext-dcat#profiles
-for more details.
+RDF profiles to use when parsing and serializing. See [Profiles](profiles.md#profiles) for more details.
 
 
 #### ckanext.dcat.translate_keys
@@ -71,15 +68,19 @@ Default value: `True`
 Whether to expose the catalog and dataset endpoints with the RDF DCAT
 serializations.
 
+
 #### ckanext.dcat.base_uri
 
 Example:
 
 ```
-https://my-site.org/uris/
+ckanext.dcat.base_uri = https://my-site.org/uri/
 ```
 
+Default value: none
+
 Base URI to use when generating URIs for all entities. It needs to be a valid URI value.
+
 
 #### ckanext.dcat.catalog_endpoint
 
@@ -144,6 +145,34 @@ Default value: `/dcat.json`
 Custom route to expose the legacy JSON endpoint
 
 
+### Structured data settings
 
-<!-- end-config -->
+#### ckanext.dcat.structured_data.profiles
+
+Example:
+
+```
+ckanext.dcat.structured_data.profiles = my_custom_structured_data_profile
+```
+
+Default value: `schemaorg`
+
+Profiles to use when creating the [Structured Data](google-dataset-search.md) serializations
+
+
+### Croissant ML settings
+
+#### ckanext.dcat.croissant.profiles
+
+Example:
+
+```
+ckanext.dcat.croissant.profiles = my_custom_croissant_profile
+```
+
+Default value: `croissant`
+
+Profiles to use when creating the [Croissant](croissant.md) serializations
+
+
 

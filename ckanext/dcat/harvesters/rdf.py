@@ -1,5 +1,3 @@
-from builtins import str
-from past.builtins import basestring
 import json
 import uuid
 import logging
@@ -136,7 +134,7 @@ class DCATRDFHarvester(DCATHarvester):
         source_config_obj = json.loads(source_config)
         if 'rdf_format' in source_config_obj:
             rdf_format = source_config_obj['rdf_format']
-            if not isinstance(rdf_format, basestring):
+            if not isinstance(rdf_format, str):
                 raise ValueError('rdf_format must be a string')
             supported_formats = RDFParser().supported_formats()
             if rdf_format not in supported_formats:

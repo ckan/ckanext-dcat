@@ -1,4 +1,3 @@
-from builtins import str
 import json
 import logging
 from hashlib import sha1

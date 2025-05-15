@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from builtins import str
-from builtins import object
 import os
 import json
 
@@ -46,7 +44,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">
@@ -173,7 +171,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">
@@ -219,7 +217,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">
@@ -285,7 +283,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">
@@ -403,7 +401,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">
@@ -512,7 +510,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">
@@ -622,7 +620,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
          xmlns:schema="http://schema.org/"
-         xmlns:time="http://www.w3.org/2006/time"
+         xmlns:time="http://www.w3.org/2006/time#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <dcat:Dataset rdf:about="http://example.org">

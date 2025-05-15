@@ -1,4 +1,4 @@
-rdflib>=6.1.1,<7.2.0
+rdflib>=6.1.1
+pyld>=2.0.4
 geomet>=0.2.0
 ckantoolkit>=0.0.7
-future>=0.18.2

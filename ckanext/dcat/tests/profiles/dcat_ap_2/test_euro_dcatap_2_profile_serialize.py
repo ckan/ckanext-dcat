@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from builtins import str
-from builtins import object
 import json
 from decimal import Decimal
 import six

@@ -1,0 +1,84 @@
+{
+    "id": "05469327-3d64-4e54-a23b-e97e0a0b9c81",
+    "name": "test-dataset-croissant",
+    "title": "Test Croissant dataset",
+    "notes": "Lorem ipsum",
+    "id_given": "my-custom-id",
+    "is_live_dataset": true,
+    "url": "http://example.org/ds1",
+    "version": "1.0.0",
+    "tags": [
+        {
+            "name": "Tag 1"
+        },
+        {
+            "name": "Tag 2"
+        }
+    ],
+    "created": "2024-05-01",
+    "issued": "2024-05-02",
+    "modified": "2024-05-05",
+    "license": "http://creativecommons.org/licenses/by/3.0/",
+    "structured_data_license": "http://creativecommons.org/licenses/by/3.0/",
+    "language": [
+        "en",
+        "ca",
+        "es"
+    ],
+    "creator": [
+        {
+            "name": "Test Creator",
+            "email": "creator@example.org",
+            "url": "https://example.org",
+            "identifier": "http://example.org/creator-id",
+            "type": "person",
+            "id_given": "custom-creator-id"
+        }
+    ],
+    "publisher": [
+        {
+            "name": "Test Publisher",
+            "email": "publisher@example.org",
+            "url": "https://example.org",
+            "identifier": "http://example.org/publisher-id",
+            "type": "person",
+            "id_given": "custom-publisher-id"
+        }
+    ],
+    "same_as": [
+        "https://some.other.catalog/dataset/123",
+        "https://yet.another.catalog/dataset/xyz"
+    ],
+    "cite_as": "@Article{bloggs24data, author=\"Joe Bloggs and Sally Biggs\"}",
+    "resources": [
+        {
+            "id": "568b8ac9-8c69-4475-b35e-d7f812a63c32",
+            "name": "Resource 1",
+            "description": "Some description",
+            "url": "https://example.com/data.zip",
+            "format": "ZIP",
+            "id_given": "my-custom-resource-id",
+            "size": "12323",
+            "hash": "b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79",
+            "datastore_active": true,
+            "subresources": [
+                {
+                    "type": "fileObject",
+                    "id_given": "my-custom-subresource-id-1",
+                    "url": "data.txt",
+                    "description": "Test subresource 1",
+                    "size": "890",
+                    "format": "TXT"
+                },
+                {
+                    "type": "fileSet",
+                    "id_given": "my-custom-subresource-id-2",
+                    "description": "Test subresource 2",
+                    "format": "CSV",
+                    "includes": "**.csv",
+                    "excludes": "**.txt"
+                }
+            ]
+        }
+    ]
+}

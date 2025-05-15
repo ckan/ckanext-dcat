@@ -1,11 +1,28 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.2.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.3.0...HEAD)
+
+* Fix TIME namespace definition to include trailing hash (`#`), ensuring compliance with W3C Time Ontology and DCAT-AP. This may require updates for custom profiles relying on the old variant. ([#344](https://github.com/ckan/ckanext-dcat/pull/344))
+* Add missing URIRefOrLiteral import in profiles module. ([#343](https://github.com/ckan/ckanext-dcat/pull/343))
+
+## [v2.3.0](https://github.com/ckan/ckanext-dcat/compare/v2.2.0...v2.3.0) - 2025-02-25
+
+* New profile to support the [Croissant](https://mlcommons.org/working-groups/data/croissant/) format.
+  Croissant is a community standard for describing ML datasets. The new `croissant` plugin allows a CKAN site to
+  expose its datasets using the [Croissant format specification](https://docs.mlcommons.org/croissant/docs/croissant-spec.html). Check the [documentation](https://docs.ckan.org/projects/ckanext-dcat/en/latest/croissant/) for more information on schema mapping, features supported and examples. Thanks to [@Reikyo](https://github.com/Reikyo) for their contributions ([#339](https://github.com/ckan/ckanext-dcat/pull/339), [#341](https://github.com/ckan/ckanext-dcat/pull/341))
+* Fix `has_version` in HealthDCAT schema ([#336](https://github.com/ckan/ckanext-dcat/pull/336))
+* Include dependencies in pyproject.toml, publish extension on PyPI. This means that starting from ckanext-dcat 2.3.0 the extension can be installed by running:
+    ```
+      pip install ckanext-dcat
+    ```
+  The requirements files (`requirements.txt` and `dev-requirements.txt`) have been kept in place, so all
+  existing installation workflows should keep working.
+
 
 ## [v2.2.0](https://github.com/ckan/ckanext-dcat/compare/v2.1.0...v2.2.0) - 2025-01-30
 
 * New profile for the [HealthDCAT-AP](https://healthdcat-ap.github.io/) application profile. Check the
-  [documentation]() for all details. Thanks to folks at Health-RI for the contribution
+  [documentation](https://docs.ckan.org/projects/ckanext-dcat/en/latest/application-profiles/#healthdcat-ap) for all details. Thanks to folks at Health-RI for the contribution
   ([#326](https://github.com/ckan/ckanext-dcat/pull/326))
 * Support for Qualified relations at the `dcat:Dataset` level in all DCAT base profiles ([97ca441](https://github.com/ckan/ckanext-dcat/commit/97ca441ec80bd68060638da9e84662da0c656de6))
 * Fix parsing of spatial properties when using scheming ([#327](https://github.com/ckan/ckanext-dcat/pull/327))
