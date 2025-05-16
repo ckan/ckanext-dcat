@@ -27,6 +27,10 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_multilingual.yaml"
 )
 @pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml ckanext.fluent:presets.json",
+)
+@pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
 class TestSchemingFluentSerializeSupport(BaseSerializeTest):
@@ -185,6 +189,10 @@ class TestSchemingFluentSerializeSupport(BaseSerializeTest):
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets fluent")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_multilingual.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml ckanext.fluent:presets.json",
 )
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"

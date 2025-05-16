@@ -187,7 +187,15 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
         if schema:
             for field in schema['dataset_fields']:
                 if field['field_name'] in dataset_dict and 'repeating_subfields' in field:
-                    for item in dataset_dict[field['field_name']]:
+                    # Check value because of ckan/ckan#8953
+                    value = dataset_dict[field['field_name']]
+                    if isinstance(value, str):
+                        try:
+                            value = json.loads(value)
+                        except ValueError:
+                            continue
+
+                    for item in value:
                         for key in item:
                             value = item[key]
                             if not isinstance(value, dict):
@@ -218,7 +226,15 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
             return value
 
         if spatial and not dataset_dict.get('spatial'):
+            # Check value because of ckan/ckan#8953
+            if isinstance(spatial, str):
+                try:
+                    spatial = json.loads(spatial)
+                except ValueError:
+                    pass
+
             for item in spatial:
+
                 value = _check_for_a_geom(item)
                 if value:
                     dataset_dict['spatial'] = value
