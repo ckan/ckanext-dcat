@@ -36,6 +36,10 @@ DCAT_AP_PROFILES = ["euro_dcat_ap_3"]
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:health_dcat_ap.yaml"
 )
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_health_dcat_ap")
 class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
     def test_e2e_ckan_to_dcat(self):

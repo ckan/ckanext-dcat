@@ -36,6 +36,10 @@ from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
 class TestSchemingSerializeSupport(BaseSerializeTest):
@@ -630,6 +634,10 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
 )
 class TestSchemingValidators:
@@ -656,6 +664,10 @@ class TestSchemingValidators:
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
 )
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"
@@ -699,14 +711,14 @@ class TestSchemingParseSupport(BaseParseTest):
 
         # Standard fields
         assert dataset["version_notes"] == "New schema added"
-        assert dataset["identifier"] == u"9df8df51-63db-37a8-e044-0003ba9b0d98"
+        assert dataset["identifier"] == "9df8df51-63db-37a8-e044-0003ba9b0d98"
         assert dataset["frequency"] == "http://purl.org/cld/freq/daily"
         assert dataset["access_rights"] == "public"
         assert dataset["provenance"] == "Some statement about provenance"
         assert dataset["dcat_type"] == "test-type"
 
-        assert dataset["issued"] == u"2012-05-10"
-        assert dataset["modified"] == u"2012-05-10T21:04:00"
+        assert dataset["issued"] == "2012-05-10"
+        assert dataset["modified"] == "2012-05-10T21:04:00"
         assert dataset["temporal_resolution"] == "PT15M"
         assert dataset["spatial_resolution_in_meters"] == "1.5"
 
@@ -767,7 +779,6 @@ class TestSchemingParseSupport(BaseParseTest):
             dataset["qualified_relation"][0]["role"]
             == "http://www.iana.org/assignments/relation/related"
         )
-
 
         resource = dataset["resources"][0]
 
@@ -1007,6 +1018,10 @@ class TestSchemingParseSupport(BaseParseTest):
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
 )
 @pytest.mark.ckan_config(
     "ckanext.dcat.rdf.profiles", "euro_dcat_ap_2 euro_dcat_ap_scheming"

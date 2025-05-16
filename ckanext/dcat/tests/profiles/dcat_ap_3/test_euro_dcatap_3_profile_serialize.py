@@ -30,13 +30,17 @@ from ckanext.dcat.profiles import (
 DCAT_AP_PROFILES = ["euro_dcat_ap_3"]
 
 
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
 class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
-    @pytest.mark.usefixtures("with_plugins", "clean_db")
-    @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
-    @pytest.mark.ckan_config(
-        "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
-    )
-    @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
     def test_e2e_ckan_to_dcat(self):
         """
         Create a dataset using the scheming schema, check that fields
@@ -149,7 +153,10 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             dataset_dict["contact"][0]["identifier"],
         )
         assert self._triple(
-            g, contact_details[0][2], VCARD.hasURL, URIRef(dataset_dict["contact"][0]["url"])
+            g,
+            contact_details[0][2],
+            VCARD.hasURL,
+            URIRef(dataset_dict["contact"][0]["url"]),
         )
         assert self._triple(
             g, contact_details[1][2], VCARD.fn, dataset_dict["contact"][1]["name"]
@@ -242,8 +249,8 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
 
         # Statements
         for item in [
-            ('access_rights', DCT.accessRights),
-            ('provenance', DCT.provenance),
+            ("access_rights", DCT.accessRights),
+            ("provenance", DCT.provenance),
         ]:
             statement = [s for s in g.objects(dataset_ref, item[1])][0]
             assert self._triple(g, statement, RDFS.label, dataset[item[0]])
@@ -376,7 +383,7 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
 
         # Resources: statements
         statement = [s for s in g.objects(distribution_ref, DCT.rights)][0]
-        assert self._triple(g, statement, RDFS.label, resource['rights'])
+        assert self._triple(g, statement, RDFS.label, resource["rights"])
 
     def test_byte_size_non_negative_integer(self):
 
