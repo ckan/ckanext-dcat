@@ -35,7 +35,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
     def _parse_health_fields(self, dataset_dict, dataset_ref):
         self.__parse_healthdcat_stringvalues(dataset_dict, dataset_ref)
-
+        self.__parse_healthdcat_booleanvalues(dataset_dict, dataset_ref)
         self.__parse_healthdcat_intvalues(dataset_dict, dataset_ref)
 
         # Add the HDAB. There should only ever be one but you never know
@@ -113,6 +113,15 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
+        if "trusted_data_holder" in dataset_dict:
+            self.g.add(
+                (
+                    dataset_ref,
+                    HEALTHDCATAP.trustedDataHolder,
+                    Literal(bool(dataset_dict["trusted_data_holder"]), datatype=XSD.boolean),
+                )
+            )
+
         items = [
             ("min_typical_age", HEALTHDCATAP.minTypicalAge),
             ("max_typical_age", HEALTHDCATAP.maxTypicalAge),
@@ -147,6 +156,14 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 )
             except (ValueError, TypeError):
                 self.g.add((dataset_ref, predicate, Literal(value)))
+                
+    def __parse_healthdcat_booleanvalues(self, dataset_dict, dataset_ref):
+        for key, predicate in (
+            ("trusted_data_holder", HEALTHDCATAP.trustedDataHolder),
+        ):
+            value = self._object_value(dataset_ref, predicate)
+            if value is not None:
+                dataset_dict[key] = value.lower() == "true"
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)

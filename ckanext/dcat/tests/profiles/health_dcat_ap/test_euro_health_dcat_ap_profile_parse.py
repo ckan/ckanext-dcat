@@ -172,6 +172,7 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["publisher_type"] == [
             "http://example.com/publisherType/undefined"
         ]
+        assert dataset["trusted_data_holder"] is True
 
         assert dataset["purpose"] == ["https://w3id.org/dpv#AcademicResearch"]
 
