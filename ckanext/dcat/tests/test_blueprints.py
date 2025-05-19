@@ -641,6 +641,10 @@ class TestCroissant():
     "scheming.presets",
     "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
 )
+@pytest.mark.skipif(
+    not p.toolkit.check_ckan_version(min_version="2.10.0"),
+    reason="ckanext-dataset-series requires CKAN>=2.10"
+)
 class TestDatasetSeries:
     def test_dataset_series_ttl(self, app):
 

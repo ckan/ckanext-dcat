@@ -2,6 +2,10 @@
 
 Ckanext-dcat integrates seamlessly with [ckanext-dataset-series](https://github.com/ckan/ckanext-dataset-series), a light-way extensions that implements Dataset Series in a fast and efficient way. Ckanext-dataset-series takes care of all the underlying management of the series, and ckanext-dcat exposes them using [`dcat:DatasetSeries`](https://www.w3.org/TR/vocab-dcat-3/#Class:Dataset_Series) classes.
 
+!!! Note
+    ckanext-dataset-series requires at least CKAN 2.10
+
+
 ### Requirements
 
 You will need to install ckanext-dataset-series:

@@ -3,6 +3,7 @@ import json
 import pytest
 from rdflib.term import URIRef
 
+from ckan.plugins.toolkit import check_ckan_version
 from ckan.tests import factories
 from ckan.tests.helpers import call_action
 from ckanext.dcat.tests.utils import BaseSerializeTest
@@ -22,6 +23,10 @@ from ckanext.dcat.profiles import RDF, DCAT, DCT
     "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
 )
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
+@pytest.mark.skipif(
+    not check_ckan_version(min_version="2.10.0"),
+    reason="ckanext-dataset-series requires CKAN>=2.10"
+)
 class TestEuroDCATAP3ProfileSerializeDatasetSeries(BaseSerializeTest):
     def test_e2e_ckan_to_dcat(self):
         """
