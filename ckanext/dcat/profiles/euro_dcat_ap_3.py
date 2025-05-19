@@ -113,7 +113,7 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
                             self.g.add(
                                 (
                                     dataset_ref,
-                                    DCAT.previous,
+                                    DCAT.prev,
                                     URIRef(dataset_uri(series_nav["previous"])),
                                 )
                             )
