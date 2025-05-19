@@ -285,6 +285,13 @@ dataset_fields:
       help_text: The function of an entity or agent with respect to another entity or resource.
   help_text: A description of a relationship with another resource.
 
+# Series fields
+
+- field_name: in_series
+  label: Dataset Series
+  preset: multiple_text
+  # TODO: snippet
+
 #- field_name: hvd_category
 #  label: HVD Category
 #  preset: multiple_text

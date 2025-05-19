@@ -1,0 +1,49 @@
+{
+    "name": "test-dataset-series",
+    "type": "dataset_series",
+    "title": "Test DCAT Dataset Series",
+    "notes": "Lorem ipsum",
+    "tags": [
+        {
+            "name": "Tag 1"
+        },
+        {
+            "name": "Tag 2"
+        }
+    ],
+    "theme": [
+        "https://example.org/uri/theme1",
+        "https://example.org/uri/theme2",
+        "https://example.org/uri/theme3"
+    ],
+    "applicable_legislation": [
+        "http://data.europa.eu/eli/reg_impl/2023/138/oj",
+        "http://data.europa.eu/eli/reg_impl/2023/138/oj_alt"
+    ],
+    "contact": [
+        {
+            "name": "Contact 1",
+            "email": "contact1@example.org"
+        },
+        {
+            "name": "Contact 2",
+            "email": "contact2@example.org"
+        }
+    ],
+    "publisher": [
+        {
+            "name": "Test Publisher",
+            "email": "publisher@example.org",
+            "url": "https://example.org",
+            "type": "http://publications.europa.eu/resource/authority/corporate-body-classification/CB_INT"
+        }
+    ],
+    "temporal_coverage": [
+        {
+            "start": "1905-03-01",
+            "end": "2013-01-05"
+        }
+    ],
+    "series_order_field": "issued",
+    "resources": []
+}
