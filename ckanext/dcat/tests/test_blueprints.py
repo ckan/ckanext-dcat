@@ -9,10 +9,11 @@ import pytest
 
 from ckan import plugins as p
 
-from rdflib import Graph
+from rdflib import Graph, ConjunctiveGraph, URIRef
 from ckantoolkit import url_for
 from ckantoolkit.tests import factories
 
+from ckanext.dcat.utils import dataset_uri
 from ckanext.dcat.processors import RDFParser
 from ckanext.dcat.profiles import RDF, DCAT
 from ckanext.dcat.processors import HYDRA
@@ -223,6 +224,9 @@ class TestEndpoints():
         content = response.body
 
         assert '<input id="field-title"' in content
+
+
+
 
     def test_catalog_default(self, app):
 
@@ -625,3 +629,124 @@ class TestCroissant():
 
         assert croissant_dict["description"] == "test description"
         assert croissant_dict["conformsTo"] == "http://mlcommons.org/croissant/1.0"
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets dataset_series")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas",
+    "ckanext.dcat.schemas:dcat_ap_dataset_series.yaml ckanext.dcat.schemas:dcat_ap_full.yaml",
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+)
+class TestDatasetSeries:
+    def test_dataset_series_ttl(self, app):
+
+        dataset_series = factories.Dataset(
+            type="dataset_series",
+            title="Test Dataset Series",
+            notes="Some Dataset Series",
+            series_order_field="metadata_created",
+            series_order_type="date",
+        )
+
+        datasets_in_series = []
+        for x in range(1, 4):
+
+            datasets_in_series.append(
+                factories.Dataset(
+                    title=f"Test dataset {x}",
+                    notes=f"Test dataset {x}",
+                    in_series=dataset_series["id"],
+                )
+            )
+
+        # Test dataset series (first / last)
+
+        url = url_for("dcat.read_dataset", _id=dataset_series["name"], _format="ttl")
+
+        response = app.get(url)
+
+        assert response.headers["Content-Type"] == "text/turtle"
+
+        content = response.body
+
+        dataset_series_ref = URIRef(dataset_uri(dataset_series))
+        g = ConjunctiveGraph()
+
+        # Parse the contents to check it's an actual serialization
+        g.parse(data=content, format="turtle")
+
+        assert [
+            t for t in g.triples((dataset_series_ref, RDF.type, DCAT.DatasetSeries))
+        ]
+
+        assert [
+            t
+            for t in g.triples(
+                (
+                    dataset_series_ref,
+                    DCAT.first,
+                    URIRef(dataset_uri(datasets_in_series[0])),
+                )
+            )
+        ]
+
+        assert [
+            t
+            for t in g.triples(
+                (
+                    dataset_series_ref,
+                    DCAT.last,
+                    URIRef(dataset_uri(datasets_in_series[-1])),
+                )
+            )
+        ]
+
+        # Test dataset series member (prev / next)
+
+        url = url_for("dcat.read_dataset", _id=datasets_in_series[1]["name"], _format="ttl")
+
+        response = app.get(url)
+
+        assert response.headers["Content-Type"] == "text/turtle"
+
+        content = response.body
+
+        dataset_ref = URIRef(dataset_uri(datasets_in_series[1]))
+        g = ConjunctiveGraph()
+
+        # Parse the contents to check it's an actual serialization
+        g.parse(data=content, format="turtle")
+
+        assert [
+            t for t in g.triples((dataset_ref, RDF.type, DCAT.Dataset))
+        ]
+
+        assert [
+            t for t in g.triples((dataset_ref, DCAT.inSeries, dataset_series_ref))
+        ]
+
+        assert [
+            t
+            for t in g.triples(
+                (
+                    dataset_ref,
+                    DCAT.prev,
+                    URIRef(dataset_uri(datasets_in_series[0])),
+                )
+            )
+        ]
+
+        assert [
+            t
+            for t in g.triples(
+                (
+                    dataset_ref,
+                    DCAT.next,
+                    URIRef(dataset_uri(datasets_in_series[-1])),
+                )
+            )
+        ]
