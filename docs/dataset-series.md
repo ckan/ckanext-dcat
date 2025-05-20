@@ -27,17 +27,11 @@ In addition to that, there are two changes needed at the schema level:
 	# [...]
 
     - field_name: series_order_field
-      label: Series order field
+      preset: dataset_series_order
       help_text: If the series is ordered, the field in the member datasets that will be used for sorting.
 
     - field_name: series_order_type
-      label: Series order type
-      preset: select
-      choices:
-        - value: text
-          label: Text / Numeric
-        - value: date
-          label: Date
+      preset: dataset_series_order_type
       help_text: The type of sorting that needs to be performed on series members.
     ```
 	!!! Note
@@ -50,8 +44,7 @@ In addition to that, there are two changes needed at the schema level:
     # Series fields
 
     - field_name: in_series
-      label: Dataset Series
-      preset: multiple_text
+      preset: dataset_series_in_series
 
     ```
 

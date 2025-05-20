@@ -289,8 +289,7 @@ dataset_fields:
 
 - field_name: in_series
   label: Dataset Series
-  preset: multiple_text
-  # TODO: snippet
+  preset: dataset_series_in_series
 
 #- field_name: hvd_category
 #  label: HVD Category

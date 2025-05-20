@@ -123,17 +123,11 @@ dataset_fields:
 # Series fields
 #
 - field_name: series_order_field
-  label: Series order field
+  preset: dataset_series_order
   help_text: If the series is ordered, the field in the member datasets that will be used for sorting.
 
 - field_name: series_order_type
-  label: Series order type
-  preset: select
-  choices:
-    - value: text
-      label: Text / Numeric
-    - value: date
-      label: Date
+  preset: dataset_series_order_type
   help_text: The type of sorting that needs to be performed on series members.
 
 
