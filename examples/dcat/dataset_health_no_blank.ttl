@@ -51,6 +51,7 @@
     healthdcatap:populationCoverage "This example includes a very non-descript population" ;
     healthdcatap:publisherNote "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation." ;
     healthdcatap:publisherType <http://example.com/publisherType/undefined> ;
+    healthdcatap:trustedDataHolder "true"^^xsd:boolean ;
     dct:accessRights <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
     dct:accrualPeriodicity <http://publications.europa.eu/resource/authority/frequency/DAILY> ;
     dct:conformsTo <http://www.wikidata.org/entity/Q19597236> ;

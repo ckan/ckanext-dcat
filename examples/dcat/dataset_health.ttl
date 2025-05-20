@@ -46,6 +46,8 @@
                 "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation.";
         <http://healthdataportal.eu/ns/health#publisherType>
                 <http://example.com/publisherType/undefined>;
+         <http://healthdataportal.eu/ns/health#trustedDataHolder>
+                "true"^^<http://www.w3.org/2001/XMLSchema#boolean>;
         <http://healthdataportal.eu/ns/health#retentionPeriod>
                 [ a               dct:PeriodOfTime;
                   rdfs:comment    "As stated in the CSI deliberation";
