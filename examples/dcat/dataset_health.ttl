@@ -47,7 +47,7 @@
         <http://healthdataportal.eu/ns/health#publisherType>
                 <http://example.com/publisherType/undefined>;
          <http://healthdataportal.eu/ns/health#trustedDataHolder>
-                "true"^^<http://www.w3.org/2001/XMLSchema#boolean>;  # Added this line
+                "true"^^<http://www.w3.org/2001/XMLSchema#boolean>;
         <http://healthdataportal.eu/ns/health#retentionPeriod>
                 [ a               dct:PeriodOfTime;
                   rdfs:comment    "As stated in the CSI deliberation";
