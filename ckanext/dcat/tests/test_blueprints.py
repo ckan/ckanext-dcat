@@ -635,11 +635,14 @@ class TestCroissant():
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets dataset_series")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas",
-    "ckanext.dcat.schemas:dcat_ap_dataset_series.yaml ckanext.dcat.schemas:dcat_ap_full.yaml",
+    "ckanext.dcat.schemas:dcat_ap_dataset_series.yaml "
+    "ckanext.dcat.schemas:dcat_ap_in_series.yaml",
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+    "ckanext.scheming:presets.json "
+    "ckanext.dcat.schemas:presets.yaml "
+    "ckanext.dataset_series.schemas:presets.yaml",
 )
 @pytest.mark.skipif(
     not p.toolkit.check_ckan_version(min_version="2.10.0"),

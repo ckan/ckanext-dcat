@@ -1,4 +1,3 @@
-## Dataset Series
 
 Ckanext-dcat integrates seamlessly with [ckanext-dataset-series](https://github.com/ckan/ckanext-dataset-series), a light-way extensions that implements Dataset Series in a fast and efficient way. Ckanext-dataset-series takes care of all the underlying management of the series, and ckanext-dcat exposes them using [`dcat:DatasetSeries`](https://www.w3.org/TR/vocab-dcat-3/#Class:Dataset_Series) classes.
 
@@ -6,13 +5,18 @@ Ckanext-dcat integrates seamlessly with [ckanext-dataset-series](https://github.
     ckanext-dataset-series requires at least CKAN 2.10
 
 
-### Requirements
+## Requirements
 
 You will need to install ckanext-dataset-series:
 
     pip install ckanext-dataset-series
 
-In addition to that, there are two changes needed at the schema level:
+In addition to that, there are two changes needed at the schema level. Both will require that you load the ckanext-dataset-series presets in your ini file:
+
+    scheming.presets =
+        ckanext.scheming:presets.json
+        ckanext.dcat.schemas:presets.yaml
+        ckanext.dataset_series.schemas:presets.yaml
 
 1. You will need a separate schema for Dataset Series. Internally these are just a type of CKAN dataset and can have any properties. Both [DCAT-AP](https://semiceu.github.io/DCAT-AP/releases/3.0.0/#DatasetSeries) and [DCAT-US](https://doi-do.github.io/dcat-us/#properties-for-dataset-series) have recommended properties for Dataset Series, and you can find an example in [`examples/ckan/ckan_dcat_ap_dataset_series.json`](https://github.com/ckan/ckanext-dcat/blob/master/examples/ckan/ckan_dcat_ap_dataset_series.json). But if you plan on using **ordered** Dataset Series, the schema must contain the following series management fields:
 
@@ -35,7 +39,7 @@ In addition to that, there are two changes needed at the schema level:
       help_text: The type of sorting that needs to be performed on series members.
     ```
 	!!! Note
-		dataset_type config: TODO
+		Currently the dataset type value needs to be `dataset_type`. Other values might be allowed in the future.
 
 2. The Dataset schema (or schemas) must contain the field used to link datasets to series:
 
