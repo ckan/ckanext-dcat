@@ -363,6 +363,19 @@ dataset_fields:
   help_text: >
      A type of organisation that makes the Dataset available.
 
+- field_name: trusted_data_holder
+  label: Trusted Data Holder
+  preset: select
+  choices:
+  - value: false
+    label: "No"
+  - value: true
+    label: "Yes"
+  validators: ignore_missing boolean_validator
+  help_text: >
+    Indicates whether the dataset is held by a trusted data holder.
+  output_validators: boolean_validator
+
 - field_name: population_coverage
   label: Population coverage
   preset: multiple_text

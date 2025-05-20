@@ -87,6 +87,7 @@
         "publisher_type": [
             "http://example.com/publisherType/undefined"
         ],
+        "trusted_data_holder": true, 
         "purpose": [
             "https://w3id.org/dpv#AcademicResearch"
         ],
