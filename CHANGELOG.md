@@ -1,7 +1,14 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.3.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.0...HEAD)
 
+
+## [v2.4.0](https://github.com/ckan/ckanext-dcat/compare/v2.3.0...v2.4.0) - 2025-05-20
+
+* Add support for [Dataset Series](https://docs.ckan.org/projects/ckanext-dcat/en/latest/dataset-series/) via integration with [ckanext-dataset-series](https://github.com/ckan/ckanext-dataset-series).
+  Ckanext-dataset-series takes care of all the underlying management of the series, and ckanext-dcat exposes them
+  using `dcat:DatasetSeries` classes. Check the [documentation](https://docs.ckan.org/projects/ckanext-dcat/en/latest/dataset-series/) for all details on how to set them up.
+* Add `trusted_data_holder` field to HealthDCAT-AP schema ([#345](https://github.com/ckan/ckanext-dcat/pull/345))
 * Fix TIME namespace definition to include trailing hash (`#`), ensuring compliance with W3C Time Ontology and DCAT-AP. This may require updates for custom profiles relying on the old variant. ([#344](https://github.com/ckan/ckanext-dcat/pull/344))
 * Add missing URIRefOrLiteral import in profiles module. ([#343](https://github.com/ckan/ckanext-dcat/pull/343))
 
