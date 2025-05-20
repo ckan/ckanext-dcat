@@ -16,16 +16,19 @@ from ckanext.dcat.profiles import RDF, DCAT, DCT
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets dataset_series")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas",
-    "ckanext.dcat.schemas:dcat_ap_dataset_series.yaml ckanext.dcat.schemas:dcat_ap_full.yaml",
+    "ckanext.dcat.schemas:dcat_ap_dataset_series.yaml "
+    "ckanext.dcat.schemas:dcat_ap_in_series.yaml",
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+    "ckanext.scheming:presets.json "
+    "ckanext.dcat.schemas:presets.yaml "
+    "ckanext.dataset_series.schemas:presets.yaml",
 )
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
 @pytest.mark.skipif(
     not check_ckan_version(min_version="2.10.0"),
-    reason="ckanext-dataset-series requires CKAN>=2.10"
+    reason="ckanext-dataset-series requires CKAN>=2.10",
 )
 class TestEuroDCATAP3ProfileSerializeDatasetSeries(BaseSerializeTest):
     def test_e2e_ckan_to_dcat(self):
