@@ -1,4 +1,4 @@
-from rdflib import Literal, BNode
+from rdflib import Literal, BNode, URIRef
 
 from ckanext.dcat.profiles import (
     DCAT,
@@ -8,6 +8,7 @@ from ckanext.dcat.profiles import (
     RDF,
 )
 
+from ckanext.dcat.utils import dataset_uri
 from .euro_dcat_ap_2 import EuropeanDCATAP2Profile
 from .euro_dcat_ap_scheming import EuropeanDCATAPSchemingProfile
 
@@ -50,6 +51,14 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
 
     def _graph_from_dataset_v3(self, dataset_dict, dataset_ref):
 
+        dataset_series = False
+
+        # TODO: support custom type names (ckan/ckanext-dataset-series#6)
+        if dataset_dict.get("type") == "dataset_series":
+            dataset_series = True
+            self.g.remove((dataset_ref, RDF.type, None))
+            self.g.add((dataset_ref, RDF.type, DCAT.DatasetSeries))
+
         # byteSize decimal -> nonNegativeInteger
         for subject, predicate, object in self.g.triples((None, DCAT.byteSize, None)):
             if object and object.datatype == XSD.decimal:
@@ -72,3 +81,47 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
                 self.g.add((dataset_ref, ADMS.identifier, identifier))
                 self.g.add((identifier, RDF.type, ADMS.Identifier))
                 self.g.add((identifier, SKOS.notation, Literal(item)))
+
+        # Dataset Series
+        if dataset_series and dataset_dict.get("series_navigation"):
+
+            if dataset_dict["series_navigation"].get("first"):
+                self.g.add(
+                    (
+                        dataset_ref,
+                        DCAT.first,
+                        URIRef(dataset_uri(dataset_dict["series_navigation"]["first"])),
+                    )
+                )
+            if dataset_dict["series_navigation"].get("last"):
+                self.g.add(
+                    (
+                        dataset_ref,
+                        DCAT.last,
+                        URIRef(dataset_uri(dataset_dict["series_navigation"]["last"])),
+                    )
+                )
+        elif dataset_dict.get("in_series"):
+            for series_id in dataset_dict["in_series"]:
+                # TODO: dataset type?
+                self.g.add(
+                    (dataset_ref, DCAT.inSeries, URIRef(dataset_uri({"id": series_id})))
+                )
+                for series_nav in dataset_dict.get("series_navigation", []):
+                    if series_nav["id"] == series_id:
+                        if series_nav.get("previous"):
+                            self.g.add(
+                                (
+                                    dataset_ref,
+                                    DCAT.prev,
+                                    URIRef(dataset_uri(series_nav["previous"])),
+                                )
+                            )
+                        if series_nav.get("next"):
+                            self.g.add(
+                                (
+                                    dataset_ref,
+                                    DCAT.next,
+                                    URIRef(dataset_uri(series_nav["next"])),
+                                )
+                            )

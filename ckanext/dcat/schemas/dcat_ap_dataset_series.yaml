@@ -1,0 +1,138 @@
+scheming_version: 2
+dataset_type: dataset_series
+about: Recommended properties for the DCAT AP 3 Dataset Series
+about_url: http://github.com/ckan/ckanext-dcat
+
+dataset_fields:
+
+- field_name: title
+  label: Title
+  preset: title
+  required: true
+  help_text: A descriptive title for the dataset series.
+
+- field_name: name
+  label: URL
+  preset: dataset_slug
+  form_placeholder: eg. my-dataset-series
+
+- field_name: notes
+  label: Description
+  required: true
+  form_snippet: markdown.html
+  help_text: A free-text account of the dataset series.
+
+- field_name: tag_string
+  label: Keywords
+  preset: tag_string_autocomplete
+  form_placeholder: eg. economy, mental health, government
+  help_text: Keywords or tags describing the dataset series. Use commas to separate multiple values.
+
+- field_name: contact
+  label: Contact points
+  repeating_label: Contact point
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+    
+    - field_name: url
+      label: URL
+      help_text: A URL associated with the contact
+  help_text: Contact information for enquiries about the dataset series.
+
+- field_name: publisher
+  label: Publisher
+  repeating_label: Publisher
+  repeating_once: true
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+
+    - field_name: type
+      label: Type
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the publisher, such as a ROR ID.
+  help_text: Entity responsible for ensuring the coherency of the dataset series available.
+
+- field_name: owner_org
+  label: Organization
+  preset: dataset_organization
+  help_text: The CKAN organization the dataset series belongs to.
+
+- field_name: applicable_legislation
+  label: Applicable legislation
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: The legislation that mandates the creation or management of the resource.
+
+- field_name: temporal_coverage
+  label: Temporal coverage
+  repeating_subfields:
+
+    - field_name: start
+      label: Start
+      preset: dcat_date
+
+    - field_name: end
+      label: End
+      preset: dcat_date
+  help_text: The temporal period or periods the dataset series covers.
+
+- field_name: spatial_coverage
+  label: Spatial coverage
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: text
+      label: Label
+
+    - field_name: geom
+      label: Geometry
+
+    - field_name: bbox
+      label: Bounding Box
+
+    - field_name: centroid
+      label: Centroid
+  help_text: A geographic region that is covered by the dataset series.
+
+# Series fields
+#
+- field_name: series_order_field
+  preset: dataset_series_order
+  help_text: If the series is ordered, the field in the member datasets that will be used for sorting.
+
+- field_name: series_order_type
+  preset: dataset_series_order_type
+  help_text: The type of sorting that needs to be performed on series members.
+
+
+resource_fields:
+
+- field_name: url
+  label: URL
+  preset: resource_url_upload
