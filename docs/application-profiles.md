@@ -49,6 +49,11 @@ scheming.dataset_schemas = ckanext.dcat.schemas:health_dcat_ap.yaml
 
 This profile has currently no additional settings. 
 
+### Field Mapping
+
+For a full overview of how CKAN dataset fields map to HealthDCAT-AP properties (including DPV fields), refer to the [mapping table](mapping-healthdcat.md#mapping-between-ckan-fields-and-healthdcat-ap). This table documents the semantic relationship between CKAN schema fields and RDF predicates used in the `euro_health_dcat_ap` profile implementation.
+
+
 ### Limitations and deviations
 
 As HealthDCAT-AP is still a draft, it is bound to change. There are currently still some
