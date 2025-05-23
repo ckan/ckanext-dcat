@@ -22,7 +22,7 @@ In terms of CKAN features, this extension offers:
 
 * An [RDF Harvester](https://docs.ckan.org/projects/ckanext-dcat/en/latest/harvester) that allows importing RDF serializations from other catalogs to create CKAN datasets (`dcat_rdf_harvester` plugin).
 
-* Other features like [Command Line Interface](https://docs.ckan.org/projects/ckanext-dcat/en/latest/cli) or support for indexing in [Google Dataset Search](https://docs.ckan.org/projects/ckanext-dcat/en/latest/google-dataset-search).
+* Other features like [Command Line Interface](https://docs.ckan.org/projects/ckanext-dcat/en/latest/cli), support for indexing in [Google Dataset Search](https://docs.ckan.org/projects/ckanext-dcat/en/latest/google-dataset-search) or endpoints for exposing datasets in the [Croissant ML](https://docs.ckan.org/projects/ckanext-dcat/en/latest/croissant) format.
 
 
 These are implemented internally using:
