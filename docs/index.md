@@ -5,7 +5,7 @@
 [![Code Coverage](http://codecov.io/github/ckan/ckanext-dcat/coverage.svg?branch=master)](http://codecov.io/github/ckan/ckanext-dcat?branch=master)
 
 
-Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data publishers expose and consume metadata as serialized RDF documents using [DCAT](https://www.w3.org/TR/vocab-dcat-3/), as well as others metadata formats like [Croissant ML](croissant.md) or [Schema.org](google-dataset-search.md).
+Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data publishers expose and consume metadata as serialized RDF documents using [DCAT](https://www.w3.org/TR/vocab-dcat-3/), as well as other metadata formats like [Croissant ML](croissant.md) or [Schema.org](google-dataset-search.md).
 
 
 === "CKAN dataset"
