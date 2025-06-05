@@ -119,6 +119,16 @@ class RDFParser(RDFProcessor):
         for dataset in self.g.subjects(RDF.type, DCAT.Dataset):
             yield dataset
 
+    def _dataset_series(self):
+        '''
+        Generator that returns all DCAT dataset series on the graph
+
+        Yields rdflib.term.URIRef objects that can be used on graph lookups
+        and queries
+        '''
+        for dataset_series in self.g.subjects(RDF.type, DCAT.DatasetSeries):
+            yield dataset_series
+
     def next_page(self):
         '''
         Returns the URL of the next page or None if there is no next page
@@ -173,7 +183,7 @@ class RDFParser(RDFProcessor):
                        for plugin
                        in rdflib.plugin.plugins(kind=rdflib.parser.Parser)])
 
-    def datasets(self):
+    def datasets(self, series_mapping=None):
         '''
         Generator that returns CKAN datasets parsed from the RDF graph
 
@@ -184,6 +194,43 @@ class RDFParser(RDFProcessor):
         or `package_update`
         '''
         for dataset_ref in self._datasets():
+            dataset_dict = {}
+            for profile_class in self._profiles:
+                profile = profile_class(
+                    self.g,
+                    dataset_type=self.dataset_type,
+                    compatibility_mode=self.compatibility_mode
+                )
+                profile.parse_dataset(dataset_dict, dataset_ref)
+
+            # Add in_series if present in RDF and mapped
+            in_series = []
+            for series_ref in self.g.objects(dataset_ref, DCAT.inSeries):
+                key = str(series_ref)
+                if series_mapping and key in series_mapping:
+                    in_series.append(series_mapping[key]["id"])
+                else:
+                    # fallback to URI
+                    in_series.append(key)
+
+            if in_series:
+                dataset_dict["in_series"] = in_series
+
+            yield dataset_dict
+
+            
+            
+    def dataset_series(self):
+        '''
+        Generator that returns CKAN dataset series parsed from the RDF graph
+
+        Each dataset series is passed to all the loaded profiles before being
+        yielded, so it can be further modified by each one of them.
+
+        Returns a dataset series dict that can be passed to eg `package_create`
+        or `package_update`
+        '''
+        for dataset_ref in self._dataset_series():
             dataset_dict = {}
             for profile_class in self._profiles:
                 profile = profile_class(

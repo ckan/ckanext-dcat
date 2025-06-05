@@ -87,6 +87,16 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             if values:
                 dataset_dict[key] = values
 
+    def __parse_healthdcat_booleanvalues(self, dataset_dict, dataset_ref):
+        for key, predicate in (
+            ("trusted_data_holder", HEALTHDCATAP.trustedDataHolder),
+        ):
+            value = self._object_value(dataset_ref, predicate)
+            if value is not None:
+                lowered = value.lower()
+                if lowered in ("true", "false"):
+                    dataset_dict[key] = lowered == "true"
+
     def graph_from_dataset(self, dataset_dict, dataset_ref):
         super().graph_from_dataset(dataset_dict, dataset_ref)
         for prefix, namespace in namespaces.items():
@@ -156,14 +166,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 )
             except (ValueError, TypeError):
                 self.g.add((dataset_ref, predicate, Literal(value)))
-                
-    def __parse_healthdcat_booleanvalues(self, dataset_dict, dataset_ref):
-        for key, predicate in (
-            ("trusted_data_holder", HEALTHDCATAP.trustedDataHolder),
-        ):
-            value = self._object_value(dataset_ref, predicate)
-            if value is not None:
-                dataset_dict[key] = value.lower() == "true"
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)
