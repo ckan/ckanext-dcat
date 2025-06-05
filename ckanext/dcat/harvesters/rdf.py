@@ -210,39 +210,18 @@ class DCATRDFHarvester(DCATHarvester):
                 return []
 
             try:
-
-                source_dataset = model.Package.get(harvest_job.source.id)
-
-                for dataset in parser.datasets():
-                    if not dataset.get('name'):
-                        dataset['name'] = self._gen_new_name(dataset['title'])
-                    if dataset['name'] in self._names_taken:
-                        suffix = len([i for i in self._names_taken if i.startswith(dataset['name'] + '-')]) + 1
-                        dataset['name'] = '{}-{}'.format(dataset['name'], suffix)
-                    self._names_taken.append(dataset['name'])
-
-                    # Unless already set by the parser, get the owner organization (if any)
-                    # from the harvest source dataset
-                    if not dataset.get('owner_org'):
-                        if source_dataset.owner_org:
-                            dataset['owner_org'] = source_dataset.owner_org
-
-                    # Try to get a unique identifier for the harvested dataset
-                    guid = self._get_guid(dataset, source_url=source_dataset.url)
-
-                    if not guid:
-                        self._save_gather_error('Could not get a unique identifier for dataset: {0}'.format(dataset),
-                                                harvest_job)
-                        continue
-
-                    dataset['extras'].append({'key': 'guid', 'value': guid})
-                    guids_in_source.append(guid)
-
-                    obj = HarvestObject(guid=guid, job=harvest_job,
-                                        content=json.dumps(dataset))
-
-                    obj.save()
-                    object_ids.append(obj.id)
+                source_dataset = model.Package.get(harvest_job.source.id)                
+                
+                series_ids, series_mapping = self._parse_and_collect(
+                    parser.dataset_series(),
+                    source_dataset,
+                    harvest_job,
+                    guids_in_source,
+                    is_series=True,
+                    collect_series_mapping=True
+                )
+                object_ids += series_ids
+                object_ids += self._parse_and_collect(parser.datasets(series_mapping), source_dataset, harvest_job, guids_in_source, is_series=False)
             except Exception as e:
                 self._save_gather_error('Error when processsing dataset: %r / %s' % (e, traceback.format_exc()),
                                         harvest_job)
@@ -422,3 +401,70 @@ class DCATRDFHarvester(DCATHarvester):
             model.Session.commit()
 
         return True
+        
+    def _parse_and_collect(
+        self,
+        items,
+        source_dataset,
+        harvest_job,
+        guids_in_source,
+        is_series=False,
+        collect_series_mapping=False
+    ):
+        object_ids = []
+        label = "dataset series" if is_series else "dataset"
+        series_mapping = {} if collect_series_mapping else None
+
+        for item in items:
+            original_title = item.get("title", label)
+            if not item.get("name"):
+                item["name"] = self._gen_new_name(original_title)
+
+            if item["name"] in self._names_taken:
+                suffix = len([i for i in self._names_taken if i.startswith(item["name"] + "-")]) + 1
+                item["name"] = f"{item['name']}-{suffix}"
+
+            self._names_taken.append(item["name"])
+
+            if not item.get("owner_org") and source_dataset.owner_org:
+                item["owner_org"] = source_dataset.owner_org
+
+            guid = self._get_guid(item, source_url=source_dataset.url)
+            if not guid:
+                self._save_gather_error(f"Could not get a unique identifier for {label}: {item}", harvest_job)
+                continue
+
+            item.setdefault("extras", []).append({"key": "guid", "value": guid})
+            guids_in_source.append(guid)
+
+            obj = HarvestObject(guid=guid, job=harvest_job, content=json.dumps(item))
+            obj.save()
+            object_ids.append(obj.id)
+
+            # Store mapping of RDF URI to dataset name if requested
+            if collect_series_mapping:
+                series_uri = item.get("uri") or item.get("identifier")
+                if series_uri:
+                    # Try to find an existing active dataset series by 'guid' match
+                    existing = model.Session.query(model.Package).\
+                        join(model.PackageExtra).\
+                        filter(model.PackageExtra.key == 'guid').\
+                        filter(model.PackageExtra.value == series_uri).\
+                        filter(model.Package.type == 'dataset_series').\
+                        filter(model.Package.state == 'active').\
+                        first()
+
+                    if existing:
+                        item["name"] = existing.name
+
+                    series_mapping[str(series_uri)] = {
+                        "id": existing.id if existing else item.get("id"),
+                        "name": item["name"]
+                    }
+
+
+        if collect_series_mapping:
+            return object_ids, series_mapping
+
+        return object_ids
+
