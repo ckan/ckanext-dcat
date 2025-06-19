@@ -209,9 +209,6 @@ class RDFParser(RDFProcessor):
                 key = str(series_ref)
                 if series_mapping and key in series_mapping:
                     in_series.append(series_mapping[key]["id"])
-                else:
-                    # fallback to URI
-                    in_series.append(key)
 
             if in_series:
                 dataset_dict["in_series"] = in_series
