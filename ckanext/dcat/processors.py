@@ -215,8 +215,7 @@ class RDFParser(RDFProcessor):
 
             yield dataset_dict
 
-            
-            
+               
     def dataset_series(self):
         '''
         Generator that returns CKAN dataset series parsed from the RDF graph
