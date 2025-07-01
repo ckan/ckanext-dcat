@@ -1,5 +1,5 @@
 import json
-
+import ckan
 import pytest
 
 from ckan.tests.helpers import call_action
