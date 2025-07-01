@@ -1,5 +1,5 @@
 import json
-import pkg_resources
+
 import pytest
 
 from ckan.tests.helpers import call_action
@@ -20,10 +20,6 @@ from ckanext.dcat.profiles import (
 )
 from ckanext.dcat.tests.utils import BaseSerializeTest, BaseParseTest
 
-@pytest.mark.skipif(
-    pkg_resources.get_distribution("ckan").version.startswith("2.9"),
-    reason="Fluent plugin is not compatible with CKAN 2.9"
-)
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets fluent")
 @pytest.mark.ckan_config(
