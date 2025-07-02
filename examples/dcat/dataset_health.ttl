@@ -223,7 +223,7 @@
         a             prov:Attribution;
         dcat:hadRole  <https://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/processor>;
         prov:agent    [ a              foaf:Organization;
-                        foaf:homepage  <https://healhdata.be>;
+                        foaf:homepage  <https://healthdata.be>;
                         foaf:mbox      <mailto:healthdata@sciensano.be>;
                         foaf:name      "Contact Point"
                       ] .

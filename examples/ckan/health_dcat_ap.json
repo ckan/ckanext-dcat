@@ -1,5 +1,24 @@
 [
     {
+        "qualified_attribution": [
+          {
+            "agent": [{
+              "name": "Contact Point",
+              "email": "healthdata@sciensano.be",
+              "homepage": "https://healthdata.be",
+              "type": "",
+              "identifier": ""
+            }],
+            "role": "https://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/processor"
+          }
+        ],
+        "quality_annotation": [
+          {
+            "motivated_by": "http://www.w3.org/ns/dqv#qualityAssessment",
+            "body": "https://acertificateserver.eu/mycertificate",
+            "target": "https://fair.healthdata.be/dataset/d43a158e-7d13-4660-bbc3-9d3f8d5501e5"
+          }
+        ],
         "access_rights": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
         "analytics": [
             "http://example.com/analytics"
@@ -145,6 +164,27 @@
                 "type": "",
                 "uri": "",
                 "url": "https://www.example.com/hdab"
+            }
+        ],
+        "provenance_activity": [
+            {
+                "dct_type": "http://dbpedia.org/resource/Record_linkage",
+                "label": "http://dbpedia.org/resource/Record_linkage",
+                "seeAlso": "https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp",
+                "startedAtTime": "2021-01-01T00:00:00+00:00",
+                "uri": "internalURI:wasGeneratedBy0",
+                "wasAssociatedWith": [
+                    {
+                        "homepage": "https://www.sciensano.be/fr/people/joris-van-loenhout",
+                        "email": "mailto:Joris.VanLoenhout@sciensano.be",
+                        "name": "Dr. Joris van Loenhout",
+                        "actedOnBehalfOf": [
+                            {
+                                "name": "Contact Point"
+                            }
+                        ]
+                    }
+                ]
             }
         ],
         "publisher": [
