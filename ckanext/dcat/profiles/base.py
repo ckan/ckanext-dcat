@@ -7,7 +7,7 @@ from ckan.model.license import LicenseRegister
 from ckantoolkit import ObjectNotFound, asbool, aslist, config, get_action, url_for
 from dateutil.parser import parse as parse_date
 from geomet import InvalidGeoJSONException, wkt
-from rdflib import BNode, Literal, URIRef, term
+from rdflib import BNode, Literal, URIRef, term, PROV
 from rdflib.namespace import ORG, RDF, RDFS, SKOS, XSD, Namespace
 
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
@@ -94,7 +94,6 @@ class URIRefOrLiteral(object):
         except Exception:
             # In case something goes wrong: use Literal
             return Literal(value, lang=lang)
-
 
 class CleanedURIRef(object):
     """Performs some basic URL encoding on value before creating an URIRef object.
@@ -547,9 +546,13 @@ class RDFProfile(object):
                 )
             agent_details["url"] = self._object_value(agent, FOAF.homepage)
             agent_details["type"] = self._object_value(agent, DCT.type)
-            agent_details['identifier'] = self._object_value(agent, DCT.identifier)
-            agents.append(agent_details)
+            agent_details["identifier"] = self._object_value(agent, DCT.identifier)
 
+            acted_orgs = self._agents_details(agent, PROV.actedOnBehalfOf)
+            if acted_orgs:
+                agent_details["actedOnBehalfOf"] = acted_orgs
+
+            agents.append(agent_details)
         return agents
 
     def _contact_details(self, subject, predicate):
@@ -818,6 +821,48 @@ class RDFProfile(object):
             items = [value]  # number
 
         return items
+
+    def _add_agent_to_graph(self, subject_ref, predicate, agent_dict):
+        """
+        Serializes a foaf:Agent or foaf:Organization with optional subfields into the RDF graph.
+
+        Parameters:
+        - subject_ref: The RDF subject (dataset, activity, etc.)
+        - predicate: The RDF predicate (e.g., dct:publisher, prov:wasAssociatedWith, dcat:agent)
+        - agent_dict: A dict with agent metadata (e.g., name, email, homepage, type, identifier, actedOnBehalfOf)
+        """
+        uri = agent_dict.get("uri", "").strip()
+
+        agent_ref = URIRefOrLiteral(uri) if uri else BNode()
+
+        self.g.add((subject_ref, predicate, agent_ref))
+        self.g.add((agent_ref, RDF.type, FOAF.Organization))
+        self.g.add((agent_ref, RDF.type, FOAF.Agent))
+
+        if agent_dict.get("name"):
+            self.g.add((agent_ref, FOAF.name, Literal(agent_dict["name"])))
+        if agent_dict.get("email"):
+            email = agent_dict["email"]
+            if not email.startswith("mailto:"):
+                email = f"mailto:{email}"
+            self.g.add((agent_ref, FOAF.mbox, URIRef(email)))
+        if agent_dict.get("url"):
+            self.g.add((agent_ref, FOAF.homepage, URIRef(agent_dict["url"])))
+        if agent_dict.get("homepage"):
+            self.g.add((agent_ref, FOAF.homepage, URIRef(agent_dict["homepage"])))
+        if agent_dict.get("type"):
+            self.g.add((agent_ref, DCT.type, URIRef(agent_dict["type"])))
+        if agent_dict.get("identifier"):
+            self.g.add((agent_ref, DCT.identifier, Literal(agent_dict["identifier"])))
+
+        for sub_org in agent_dict.get("actedOnBehalfOf", []):
+            if sub_org.get("name"):
+                org_ref = BNode()
+                self.g.add((agent_ref, PROV.actedOnBehalfOf, org_ref))
+                self.g.add((org_ref, RDF.type, PROV.Organization))
+                self.g.add((org_ref, FOAF.name, Literal(sub_org["name"])))
+
+        return agent_ref
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
         """

@@ -112,6 +112,11 @@ dataset_fields:
       label: Identifier
       help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
 
+- field_name: homepage
+  label: Homepage
+  display_snippet: link.html
+  help_text: A web page that acts as the homepage for the dataset.
+
 - field_name: license_id
   label: License
   form_snippet: license.html
@@ -284,6 +289,85 @@ dataset_fields:
       label: Role
       help_text: The function of an entity or agent with respect to another entity or resource.
   help_text: A description of a relationship with another resource.
+
+- field_name: provenance_activity
+  label: Provenance Activity
+  repeating_label: Provenance Activity
+  repeating_once: true
+  repeating_subfields:
+    - field_name: uri
+      label: Activity URI
+      help_text: URI of the provenance activity (if available).
+    - field_name: label
+      label: Label
+      help_text: Human-readable label for the activity.
+    - field_name: seeAlso
+      label: See Also
+      help_text: Related link for the activity.
+    - field_name: dct_type
+      label: Type
+      help_text: Type of the activity (URI).
+    - field_name: startedAtTime
+      label: Started At Time
+      help_text: When the activity started (ISO 8601).
+    - field_name: wasAssociatedWith
+      label: Associated Agent
+      repeating_label: Agent
+      repeating_once: true
+      repeating_subfields:
+        - field_name: uri
+          label: URI
+        - field_name: name
+          label: Name
+        - field_name: email
+          label: Email
+        - field_name: homepage
+          label: Homepage
+        - field_name: type
+          label: Type
+        - field_name: identifier
+          label: Identifier
+        - field_name: url
+          label: URL
+        - field_name: actedOnBehalfOf
+          label: Acted On Behalf Of
+          repeating_label: Organization
+          repeating_once: true
+          repeating_subfields:
+            - field_name: name
+              label: Organization Name
+  help_text: Structured provenance activity information, including agent and organization.
+
+# Add qualified_attribution field here, just before the commented-out hvd_category field
+- field_name: qualified_attribution
+  label: Qualified Attribution
+  repeating_label: Attribution
+  repeating_once: true
+  repeating_subfields:
+    - field_name: agent
+      label: Agent
+      repeating_label: Agent
+      repeating_once: true
+      repeating_subfields:
+        - field_name: uri
+          label: URI
+        - field_name: name
+          label: Name
+        - field_name: email
+          label: Email
+        - field_name: homepage
+          label: Homepage
+        - field_name: type
+          label: Type
+        - field_name: identifier
+          label: Identifier
+        - field_name: url
+          label: URL
+    - field_name: role
+      label: Role
+      help_text: Role of the agent (e.g., data processor, contributor).
+  help_text: Structured qualified attribution information including agent and role.
+
 
 #- field_name: hvd_category
 #  label: HVD Category

@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal, DecimalException
 
-from rdflib import URIRef, BNode, Literal, Namespace
+from rdflib import URIRef, BNode, Literal, Namespace, FOAF, PROV, RDF, RDFS
 from ckanext.dcat.utils import resource_uri
 
 from .base import URIRefOrLiteral, CleanedURIRef
@@ -17,7 +17,6 @@ from .base import (
 )
 
 from .euro_dcat_ap_base import BaseEuropeanDCATAPProfile
-
 
 ELI = Namespace("http://data.europa.eu/eli/ontology#")
 
@@ -65,6 +64,32 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
         # Call base super method for common properties
         super().parse_dataset(dataset_dict, dataset_ref)
 
+        # --- Provenance deserialization ---
+        was_generated_by = self.g.value(dataset_ref, PROV.wasGeneratedBy)
+        if was_generated_by:
+            activity_dict = {}
+            activity_dict["uri"] = str(was_generated_by)
+            activity_dict["type"] = [
+                str(t) for t in self.g.objects(was_generated_by, RDF.type)
+            ]
+            activity_dict["label"] = self._object_value(was_generated_by, RDFS.label)
+            activity_dict["seeAlso"] = self._object_value(was_generated_by, RDFS.seeAlso)
+            activity_dict["dct_type"] = self._object_value(was_generated_by, DCT.type)
+            activity_dict["startedAtTime"] = self._object_value(
+                was_generated_by, PROV.startedAtTime
+            )
+
+            agents = self._agents_details(was_generated_by, PROV.wasAssociatedWith)
+            if agents:
+                activity_dict["wasAssociatedWith"] = [agents[0]] # Only take the first agent
+
+            dataset_dict["provenance_activity"] = [activity_dict]
+
+        # --- Qualified Attribution ---
+        qualified_attributions = self._parse_qualified_attributions(dataset_ref)
+        if qualified_attributions:
+            dataset_dict["qualified_attribution"] = qualified_attributions
+        
         # Standard values
         value = self._object_value(dataset_ref, DCAT.temporalResolution)
         if value:
@@ -246,6 +271,44 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                 _datatype=datatype,
                 _class=_class,
             )
+            
+        # --- Provenance serialization ---
+        activities = dataset_dict.get("provenance_activity", [])
+
+        for activity in activities:
+            activity_uri = URIRef(activity.get("uri")) if activity.get("uri") else BNode()
+            self.g.add((dataset_ref, PROV.wasGeneratedBy, activity_uri))
+            self.g.add((activity_uri, RDF.type, PROV.Activity))
+            
+            if activity.get("label"):
+                self.g.add((activity_uri, RDFS.label, Literal(activity["label"])))
+            if activity.get("seeAlso"):
+                self.g.add((activity_uri, RDFS.seeAlso, URIRef(activity["seeAlso"])))
+            if activity.get("dct_type"):
+                self.g.add((activity_uri, DCT.type, URIRef(activity["dct_type"])))
+            if activity.get("startedAtTime"):
+                self.g.add((activity_uri, PROV.startedAtTime, Literal(activity["startedAtTime"], datatype=XSD.dateTime)))
+
+            for agent_dict in activity.get("wasAssociatedWith", []):
+                self._add_agent_to_graph(activity_uri, PROV.wasAssociatedWith, agent_dict)
+
+        # Qualified Attribution 
+        qualified_attributions = dataset_dict.get("qualified_attribution", [])
+        for attr in qualified_attributions:
+            attr_ref = BNode()
+            self.g.add((dataset_ref, DCAT.qualifiedAttribution, attr_ref))
+            self.g.add((attr_ref, RDF.type, DCAT.Attribution))
+
+            agent_list = attr.get("agent", [])
+            for agent_dict in agent_list:
+                if isinstance(agent_dict, dict):
+                    self._add_agent_to_graph(attr_ref, DCAT.agent, agent_dict)
+                elif isinstance(agent_dict, str):
+                    self.g.add((attr_ref, DCAT.agent, URIRef(agent_dict)))
+            role = attr.get("role")
+            if role:
+                self.g.add((attr_ref, DCAT.hadRole, URIRef(role)))
+                
 
         # Temporal
 
@@ -448,3 +511,23 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             _type=URIRefOrLiteral,
             _class=ADMS.Identifier,
         )
+        
+    def _parse_qualified_attributions(self, dataset_ref):
+        attributions = []
+        for qual_attr_ref in self.g.objects(dataset_ref, PROV.qualifiedAttribution):
+            attr = {}
+
+            # Get role
+            for role_ref in self.g.objects(qual_attr_ref, DCAT.hadRole):
+                attr["role"] = str(role_ref)
+                break
+
+            # Get agent (using shared logic)
+            agent_details = self._agents_details(qual_attr_ref, PROV.agent)
+            if agent_details:
+                attr["agent"] = agent_details
+
+            if attr:
+                attributions.append(attr)
+
+        return attributions
