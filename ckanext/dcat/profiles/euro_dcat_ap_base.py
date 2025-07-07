@@ -206,6 +206,13 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 src_data = self._extract_catalog_dict(catalog_src)
                 dataset_dict["extras"].extend(src_data)
 
+        
+        homepage = self._object_value(dataset_ref, FOAF.homepage)
+        if homepage:
+            dataset_dict["homepage"] = homepage
+        elif config.get("ckan.site_url"):
+            dataset_dict["homepage"] = config.get("ckan.site_url")
+
         # Resources
         for distribution in self._distributions(dataset_ref):
 

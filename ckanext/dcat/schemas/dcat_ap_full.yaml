@@ -112,6 +112,11 @@ dataset_fields:
       label: Identifier
       help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
 
+- field_name: homepage
+  label: Homepage
+  display_snippet: link.html
+  help_text: A web page that acts as the homepage for the dataset.
+
 - field_name: license_id
   label: License
   form_snippet: license.html
