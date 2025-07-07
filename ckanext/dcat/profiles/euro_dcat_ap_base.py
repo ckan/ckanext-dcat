@@ -209,9 +209,13 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         
         homepage = self._object_value(dataset_ref, FOAF.homepage)
         if homepage:
-            dataset_dict["homepage"] = homepage
+            dataset_dict["extras"].append(
+                {"key": "homepage", "value": homepage}
+            )
         elif config.get("ckan.site_url"):
-            dataset_dict["homepage"] = config.get("ckan.site_url")
+            dataset_dict["extras"].append(
+                {"key": "homepage", "value": config.get("ckan.site_url")}
+            )
 
         # Resources
         for distribution in self._distributions(dataset_ref):
