@@ -1,11 +1,10 @@
 from rdflib import XSD, Literal, URIRef, RDF, BNode
 from rdflib.namespace import Namespace
+from rdflib.namespace import DCTERMS as DCT
+from .base import CleanedURIRef, resource_uri, SCHEMA
 
 from ckanext.dcat.profiles.base import URIRefOrLiteral
 from ckanext.dcat.profiles.euro_dcat_ap_3 import EuropeanDCATAP3Profile
-
-# HealthDCAT-AP namespace. Note: not finalized yet
-HEALTHDCATAP = Namespace("http://healthdataportal.eu/ns/health#")
 
 # HealthDCAT-AP namespace. Note: not finalized yet
 HEALTHDCATAP = Namespace("http://healthdataportal.eu/ns/health#")
@@ -51,22 +50,19 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         agents = self._agents_details(dataset_ref, HEALTHDCATAP.hdab)
         if agents:
             dataset_dict["hdab"] = agents
-
-        # Retention period
-        retention_start, retention_end = self._time_interval(
-            dataset_ref, HEALTHDCATAP.retentionPeriod, dcat_ap_version=2
-        )
-        retention_dict = {}
-        if retention_start is not None:
-            retention_dict["start"] = retention_start
-        if retention_end is not None:
-            retention_dict["end"] = retention_end
-        if retention_dict:
-            dataset_dict["retention_period"] = [retention_dict]
-            
+        # Add the quality annotations            
         quality_annotations = self._parse_quality_annotation(dataset_ref)
         if quality_annotations:
             dataset_dict["quality_annotation"] = quality_annotations
+            
+        # Dataset-level retention
+        dataset_dict["retention_period"] = self._parse_retention_period(dataset_ref)
+
+        # Distribution-level retention
+        for distribution_ref in self._distributions(dataset_ref):
+            for resource_dict in dataset_dict.get("resources", []):
+                if resource_dict["distribution_ref"] == str(distribution_ref):
+                    resource_dict["retention_period"] = self._parse_retention_period(distribution_ref)
 
         return dataset_dict
 
@@ -146,6 +142,25 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
         return quality_annotation
 
+    def _parse_retention_period(self, subject_ref):
+        """
+        Parses the HEALTHDCATAP.retentionPeriod from the RDF graph for a given subject
+        (e.g., dataset or distribution).
+
+        Returns a list with a single dict, e.g.,
+        [{"start": "2023-01-01", "end": "2025-01-01"}]
+        or an empty list if no values are found.
+        """
+        retention_start, retention_end = self._time_interval(
+            subject_ref, HEALTHDCATAP.retentionPeriod, dcat_ap_version=2
+        )
+        retention_dict = {}
+        if retention_start is not None:
+            retention_dict["start"] = retention_start
+        if retention_end is not None:
+            retention_dict["end"] = retention_end
+
+        return [retention_dict] if retention_dict else []
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
         super().graph_from_dataset(dataset_dict, dataset_ref)
@@ -193,6 +208,29 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
         self._add_agents(dataset_ref, dataset_dict, "hdab", HEALTHDCATAP.hdab)
         self._add_quality_annotation(dataset_dict, dataset_ref)
+
+        # Dataset-level retention period
+        self._add_retention_period(dataset_ref, dataset_dict.get("retention_period", []))
+
+        for resource_dict in dataset_dict.get("resources", []):
+            distribution_ref = CleanedURIRef(resource_uri(resource_dict))
+            self._add_retention_period(distribution_ref, resource_dict.get("retention_period", []))
+
+
+    def _add_retention_period(self, subject_ref, retention_list):
+        for retention in retention_list:
+            start = retention.get("start")
+            end = retention.get("end")
+
+            if start or end:
+                period_node = BNode()
+                self.g.add((subject_ref, HEALTHDCATAP.retentionPeriod, period_node))
+                self.g.add((period_node, RDF.type, DCT.PeriodOfTime))
+
+                if start:
+                    self.g.add((period_node, SCHEMA.startDate, Literal(start, datatype=XSD.date)))
+                if end:
+                    self.g.add((period_node, SCHEMA.endDate, Literal(end, datatype=XSD.date)))
 
     def _add_nonneg_integer_triple(self, dataset_dict, dataset_ref, key, predicate):
         """

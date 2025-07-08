@@ -173,4 +173,27 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             assert value is not None, f"Missing {field} in annotation"
             assert self._triple(g, annotation_node, URIRef(predicate_uri),
                                 URIRef(value)), f"QualityAnnotation {field} mismatch"
+            
+        # Extract the distribution node
+        distributions = list(g.objects(dataset_ref, DCAT.distribution))
+        assert len(distributions) > 0, "No distributions found"
+        distribution_node = distributions[0]
+
+        distribution_details = dataset_dict["resources"][0]
+
+        assert self._triple(g, distribution_node, RDF.type, DCAT.Distribution)
+        assert self._triple(g, distribution_node, DCT.format, URIRef(distribution_details["format"]))
+        assert self._triple(g, distribution_node, DCT.identifier, Literal(distribution_details["uri"]))
+        assert self._triple(g, distribution_node, DCT.license, URIRef(distribution_details["license"]))
+        assert self._triple(g, distribution_node, DCT.title, Literal(distribution_details["title"]))
+        assert self._triple(g, distribution_node, DCAT.accessURL, URIRef(distribution_details["access_url"]))
+        assert self._triple(g, distribution_node, DCAT.downloadURL, URIRef(distribution_details["download_url"]))
+
+        # Check retention period
+        retention_nodes = list(g.objects(distribution_node, HEALTHDCATAP.retentionPeriod))
+        assert len(retention_nodes) == 1, "Expected one retentionPeriod node on distribution"
+        retention_node = retention_nodes[0]
+        assert self._triple(g, retention_node, DCT.type, DCT.PeriodOfTime)
+        assert self._triple(g, retention_node, DCT.startDate, Literal(distribution_details["retention_period"]["start"], datatype=XSD.date))
+        assert self._triple(g, retention_node, DCT.endDate, Literal(distribution_details["retention_period"]["end"], datatype=XSD.date))
 

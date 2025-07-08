@@ -232,7 +232,16 @@
                 "start": "2020-03-01"
             }
         ],
-        "resources": [],
+        "resources": [
+            {
+                "retention_period": [
+                    {
+                        "end": "2034-12-31",
+                        "start": "2020-03-01"
+                    }
+                ]
+            }
+        ],
         "groups": [],
         "relationships_as_subject": [],
         "relationships_as_object": []
