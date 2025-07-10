@@ -40,6 +40,11 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
             if "series_order_type" not in dataset_dict:
                 dataset_dict["series_order_type"] = "date"
 
+        # DCAT AP v3: hasVersion
+        values = self._object_value_list(dataset_ref, DCAT.hasVersion)
+        if values:
+            dataset_dict["has_version"] = values
+
         return dataset_dict
 
     def graph_from_dataset(self, dataset_dict, dataset_ref):
@@ -55,6 +60,13 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
 
         # DCAT AP v3 properties also applied to higher versions
         self._graph_from_dataset_v3(dataset_dict, dataset_ref)
+
+        # DCAT AP v3: hasVersion
+        value = self._get_dict_value(dataset_dict, "has_version")
+        if value:
+            items = self._read_list_value(value)
+            for item in items:
+                self.g.add((dataset_ref, DCAT.hasVersion, URIRef(item)))
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
