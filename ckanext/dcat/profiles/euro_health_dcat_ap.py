@@ -1,7 +1,7 @@
-from rdflib import XSD, Literal, URIRef, RDF, BNode
+from rdflib import XSD, Literal, URIRef, RDF, BNode, DCAT, RDFS
 from rdflib.namespace import Namespace
 from rdflib.namespace import DCTERMS as DCT
-from .base import CleanedURIRef, SCHEMA
+from .base import CleanedURIRef
 from ckanext.dcat.utils import resource_uri
 from ckanext.dcat.profiles.base import URIRefOrLiteral
 from ckanext.dcat.profiles.euro_dcat_ap_3 import EuropeanDCATAP3Profile
@@ -216,21 +216,23 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             distribution_ref = CleanedURIRef(resource_uri(resource_dict))
             self._add_retention_period(distribution_ref, resource_dict.get("retention_period", []))
 
-
     def _add_retention_period(self, subject_ref, retention_list):
         for retention in retention_list:
             start = retention.get("start")
             end = retention.get("end")
+            comment = retention.get("comment")
 
-            if start or end:
+            if start or end or comment:
                 period_node = BNode()
                 self.g.add((subject_ref, HEALTHDCATAP.retentionPeriod, period_node))
                 self.g.add((period_node, RDF.type, DCT.PeriodOfTime))
 
                 if start:
-                    self.g.add((period_node, SCHEMA.startDate, Literal(start, datatype=XSD.date)))
+                    self.g.add((period_node, DCAT.startDate, Literal(start, datatype=XSD.date)))
                 if end:
-                    self.g.add((period_node, SCHEMA.endDate, Literal(end, datatype=XSD.date)))
+                    self.g.add((period_node, DCAT.endDate, Literal(end, datatype=XSD.date)))
+                if comment:
+                    self.g.add((period_node, RDFS.comment, Literal(comment, lang="en")))
 
     def _add_nonneg_integer_triple(self, dataset_dict, dataset_ref, key, predicate):
         """

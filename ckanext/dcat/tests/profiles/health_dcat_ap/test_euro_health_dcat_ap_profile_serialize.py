@@ -187,7 +187,17 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
         retention_nodes = list(g.objects(distribution_node, HEALTHDCATAP.retentionPeriod))
         assert len(retention_nodes) == 1, "Expected one retentionPeriod node on distribution"
         retention_node = retention_nodes[0]
-        assert self._triple(g, retention_node, DCT.type, DCT.PeriodOfTime)
-        assert self._triple(g, retention_node, DCT.startDate, Literal(distribution_details["retention_period"]["start"], datatype=XSD.date))
-        assert self._triple(g, retention_node, DCT.endDate, Literal(distribution_details["retention_period"]["end"], datatype=XSD.date))
+        assert self._triple(g, retention_node, RDF.type, DCT.PeriodOfTime)
+        assert self._triple(
+            g,
+            retention_node,
+            DCAT.startDate,
+            Literal(distribution_details["retention_period"][0]["start"], datatype=XSD.date)
+        )
+        assert self._triple(
+            g,
+            retention_node,
+            DCAT.endDate,
+            Literal(distribution_details["retention_period"][0]["end"], datatype=XSD.date)
+        )
 
