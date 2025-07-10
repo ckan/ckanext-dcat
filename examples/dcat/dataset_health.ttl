@@ -94,7 +94,7 @@
         adms:sample                     <http://example.com/sample>;
         adms:versionNotes               "Dataset continuously updated";
         dcat:contactPoint               <internalURI:contactPoint0>;
-        # dcat:distribution               <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>;
+        dcat:distribution <http://example.com/analytics> ;
         dcat:hasVersion                 <http://example.com/dataset/1234567890>;
         dcat:keyword                    "Test 1" , "Test 2" , "Test 3";
         dcat:spatialResolutionInMeters  "10"^^<http://www.w3.org/2001/XMLSchema#decimal>;
@@ -247,23 +247,6 @@
 
 <http://publications.europa.eu/resource/authority/file-type/CSV>
         a       dct:MediaTypeOrExtent .
-
-# <http://piveau.io/set/distribution/df4193e7-37e3-4d72-a865-ee5b8b96021d>
-#         a                             dcat:Distribution;
-#         dcatap:applicableLegislation  <http://data.europa.eu/eli/reg/2022/868/oj>;
-#         dct:description               "EU Health Data Access Body  For better Healthcare, Research & Policy Making";
-#         dct:format                    <http://publications.europa.eu/resource/authority/file-type/CSV>;
-#         dct:identifier                "http://ehelse.healthdataportal.eu/distribution/13a3851d-6cdf-4570-a7f0-7f03015d1925";
-#         dct:isPartOf                  <http://piveau.io/set/data/16e16149-bf41-42f6-8741-225e8c97a35e>;
-#         dct:issued                    "2024-06-03T08:51:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
-#         dct:license                   <http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>;
-#         dct:modified                  "2024-06-04T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
-#         dct:rights                    [ a           dct:RightsStatement;
-#                                         rdfs:label  "Access to data is conditional on the issuance of a permit by the HDAB after submission of a data request application (English)"
-#                                       ];
-#         dct:title                     "EU Health Data Access Body";
-#         dcat:accessURL                <https://www.example.com/hdab/>;
-#         dcat:byteSize                 "80000"^^<http://www.w3.org/2001/XMLSchema#decimal> .
 
 <internalURI:wasGeneratedBy0>
         a                       prov:Activity;

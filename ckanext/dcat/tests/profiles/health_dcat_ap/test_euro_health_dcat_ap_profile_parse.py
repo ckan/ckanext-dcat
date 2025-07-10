@@ -182,10 +182,12 @@ class TestSchemingParseSupport(BaseParseTest):
                 "end": "2034-12-31",
             }
         ]
-        assert dataset["resources"][0]["retention_period"] == {
-            "start": "2020-03-01",
-            "end": "2034-12-31",
-        }
+        assert dataset["resources"][0]["retention_period"] == [
+            {
+                "start": "2020-03-01",
+                "end": "2034-12-31",
+            }
+        ]
         
         assert dataset["provenance_activity"] == [{
             "uri": "internalURI:wasGeneratedBy0",

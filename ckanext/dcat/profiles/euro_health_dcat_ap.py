@@ -1,8 +1,8 @@
 from rdflib import XSD, Literal, URIRef, RDF, BNode
 from rdflib.namespace import Namespace
 from rdflib.namespace import DCTERMS as DCT
-from .base import CleanedURIRef, resource_uri, SCHEMA
-
+from .base import CleanedURIRef, SCHEMA
+from ckanext.dcat.utils import resource_uri
 from ckanext.dcat.profiles.base import URIRefOrLiteral
 from ckanext.dcat.profiles.euro_dcat_ap_3 import EuropeanDCATAP3Profile
 

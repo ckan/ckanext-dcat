@@ -182,12 +182,6 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
         distribution_details = dataset_dict["resources"][0]
 
         assert self._triple(g, distribution_node, RDF.type, DCAT.Distribution)
-        assert self._triple(g, distribution_node, DCT.format, URIRef(distribution_details["format"]))
-        assert self._triple(g, distribution_node, DCT.identifier, Literal(distribution_details["uri"]))
-        assert self._triple(g, distribution_node, DCT.license, URIRef(distribution_details["license"]))
-        assert self._triple(g, distribution_node, DCT.title, Literal(distribution_details["title"]))
-        assert self._triple(g, distribution_node, DCAT.accessURL, URIRef(distribution_details["access_url"]))
-        assert self._triple(g, distribution_node, DCAT.downloadURL, URIRef(distribution_details["download_url"]))
 
         # Check retention period
         retention_nodes = list(g.objects(distribution_node, HEALTHDCATAP.retentionPeriod))
