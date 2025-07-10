@@ -24,6 +24,49 @@ DCAT_AP_PROFILES = [DCAT_AP_2_PROFILE]
 
 
 class TestEuroDCATAP2ProfileParsing(BaseParseTest):
+    def test_parse_access_service_extra_fields(self):
+        rdf_data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+              <dcat:Distribution>
+                <dcat:accessService>
+                  <dcat:DataService>
+                    <dct:conformsTo rdf:resource="http://example.org/spec"/>
+                    <dct:format rdf:resource="http://example.org/format"/>
+                    <dct:identifier>service-123</dct:identifier>
+                    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/ENG"/>
+                    <dct:rights>open use</dct:rights>
+                    <dcat:landingPage rdf:resource="http://example.org/landing"/>
+                    <dcat:keyword>keyword1</dcat:keyword>
+                    <dcat:keyword>keyword2</dcat:keyword>
+                  </dcat:DataService>
+                </dcat:accessService>
+              </dcat:Distribution>
+            </dcat:distribution>
+          </dcat:Dataset>
+        </rdf:RDF>
+        '''
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+        p.parse(rdf_data)
+        datasets = list(p.datasets())
+        assert len(datasets) == 1
+        resources = datasets[0]['resources']
+        assert len(resources) == 1
+        access_services = json.loads(resources[0]['access_services'])
+        assert len(access_services) == 1
+        access_service = access_services[0]
+        assert access_service['conforms_to'] == 'http://example.org/spec'
+        assert access_service['format'] == 'http://example.org/format'
+        assert access_service['identifier'] == 'service-123'
+        assert access_service['language'] == 'http://publications.europa.eu/resource/authority/language/ENG'
+        assert access_service['rights'] == 'open use'
+        assert access_service['landing_page'] == 'http://example.org/landing'
+        assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
 
     def test_dataset_all_fields(self):
 

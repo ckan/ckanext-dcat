@@ -205,6 +205,34 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                             if values:
                                 access_service_dict[key] = values
 
+                        value = self._object_value(access_service, DCT.conformsTo)
+                        if value:
+                            access_service_dict["conforms_to"] = value
+
+                        value = self._object_value(access_service, DCT["format"])
+                        if value:
+                            access_service_dict["format"] = value
+
+                        value = self._object_value(access_service, DCT.identifier)
+                        if value:
+                            access_service_dict["identifier"] = value
+
+                        value = self._object_value(access_service, DCT.language)
+                        if value:
+                            access_service_dict["language"] = value
+
+                        value = self._object_value(access_service, DCT.rights)
+                        if value:
+                            access_service_dict["rights"] = value
+
+                        value = self._object_value(access_service, DCAT.landingPage)
+                        if value:
+                            access_service_dict["landing_page"] = value
+
+                        values = self._object_value_list(access_service, DCAT.keyword)
+                        if values:
+                            access_service_dict["keyword"] = values
+
                         # Access service URI (explicitly show the missing ones)
                         access_service_dict["uri"] = (
                             str(access_service)
@@ -271,7 +299,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                 _datatype=datatype,
                 _class=_class,
             )
-            
+
         # --- Provenance serialization ---
         activities = dataset_dict.get("provenance_activity", [])
 
@@ -279,7 +307,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             activity_uri = URIRef(activity.get("uri")) if activity.get("uri") else BNode()
             self.g.add((dataset_ref, PROV.wasGeneratedBy, activity_uri))
             self.g.add((activity_uri, RDF.type, PROV.Activity))
-            
+
             if activity.get("label"):
                 self.g.add((activity_uri, RDFS.label, Literal(activity["label"])))
             if activity.get("seeAlso"):
@@ -292,7 +320,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             for agent_dict in activity.get("wasAssociatedWith", []):
                 self._add_agent_to_graph(activity_uri, PROV.wasAssociatedWith, agent_dict)
 
-        # Qualified Attribution 
+        # Qualified Attribution
         qualified_attributions = dataset_dict.get("qualified_attribution", [])
         for attr in qualified_attributions:
             attr_ref = BNode()
@@ -308,7 +336,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             role = attr.get("role")
             if role:
                 self.g.add((attr_ref, DCAT.hadRole, URIRef(role)))
-                
+
 
         # Temporal
 
@@ -475,6 +503,27 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
 
                 self._add_triples_from_dict(
                     access_service_dict, access_service_node, items
+                )
+
+                # Extra simple values for access services
+                extra_items = [
+                    ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral),
+                    ("format", DCT["format"], None, URIRefOrLiteral),
+                    ("identifier", DCT.identifier, None, URIRefOrLiteral),
+                    ("language", DCT.language, None, URIRefOrLiteral),
+                    ("rights", DCT.rights, None, URIRefOrLiteral),
+                    ("landing_page", DCAT.landingPage, None, URIRefOrLiteral),
+                ]
+                self._add_triples_from_dict(access_service_dict, access_service_node, extra_items)
+
+                # Add keyword list
+                self._add_triple_from_dict(
+                    access_service_dict,
+                    access_service_node,
+                    DCAT.keyword,
+                    "keyword",
+                    list_value=True,
+                    _type=Literal
                 )
 
                 #  Lists

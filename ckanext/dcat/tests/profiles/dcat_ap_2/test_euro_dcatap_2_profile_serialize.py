@@ -418,7 +418,14 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
                     'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 1',
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
-                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
+                    'conforms_to': 'http://example.org/spec',
+                    'format': 'http://example.org/format',
+                    'identifier': 'service-123',
+                    'language': 'http://publications.europa.eu/resource/authority/language/ENG',
+                    'rights': 'open use',
+                    'landing_page': 'http://example.org/landing',
+                    'keyword': ['keyword1', 'keyword2']
                 },
                 {
                     'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
@@ -428,7 +435,14 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'access_rights': 'http://publications.europa.eu/resource/authority/access-right/OP_DATPRO',
                     'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 2',
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
-                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
+                    'conforms_to': 'http://example.org/spec',
+                    'format': 'http://example.org/format',
+                    'identifier': 'service-123',
+                    'language': 'http://publications.europa.eu/resource/authority/language/ENG',
+                    'rights': 'open use',
+                    'landing_page': 'http://example.org/landing',
+                    'keyword': ['keyword1', 'keyword2']
                 }
             ])
         }
@@ -482,6 +496,38 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                                   Literal(access_service.get('description')))
             self._assert_simple_value(g, object[2], DCAT.endpointDescription,
                                   Literal(access_service.get('endpoint_description')))
+
+
+            self._assert_simple_value(
+                g, object[2], DCT.conformsTo,
+                URIRef(access_service.get('conforms_to')) if access_service.get('conforms_to') else None
+            )
+            self._assert_simple_value(
+                g, object[2], DCT["format"],
+                URIRef(access_service.get('format')) if access_service.get('format') else None
+            )
+            self._assert_simple_value(
+                g, object[2], DCT.identifier,
+                Literal(access_service.get('identifier')) if access_service.get('identifier') else None
+            )
+            self._assert_simple_value(
+                g, object[2], DCT.language,
+                URIRef(access_service.get('language')) if access_service.get('language') else None
+            )
+            self._assert_simple_value(
+                g, object[2], DCT.rights,
+                Literal(access_service.get('rights')) if access_service.get('rights') else None
+            )
+            self._assert_simple_value(
+                g, object[2], DCAT.landingPage,
+                URIRef(access_service.get('landing_page')) if access_service.get('landing_page') else None
+            )
+
+            if access_service.get('keyword'):
+                self._assert_values_list(
+                    g, object[2], DCAT.keyword,
+                    self._get_typed_list(access_service.get('keyword'), Literal)
+                )
 
             # Lists
             self._assert_values_list(g, object[2], DCAT.endpointURL,
