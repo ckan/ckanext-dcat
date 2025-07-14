@@ -8,6 +8,7 @@ from ckanext.dcat.profiles import (
     RDF,
 )
 
+from .base import URIRefOrLiteral
 from ckanext.dcat.utils import dataset_uri
 from .euro_dcat_ap_2 import EuropeanDCATAP2Profile
 from .euro_dcat_ap_scheming import EuropeanDCATAPSchemingProfile
