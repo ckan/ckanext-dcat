@@ -119,3 +119,5 @@ These are implemented internally using:
 * An [RDF Parser](writing-profiles.md#rdf-dcat-parser) that allows to read RDF serializations in different formats and extract CKAN dataset dicts, using customizable [profiles](profiles.md#profiles).
 
 * An [RDF Serializer](writing-profiles.md#rdf-dcat-serializer) that allows to transform CKAN datasets metadata to different semantic formats, also allowing customizable [profiles](profiles.md#profiles).
+
+* [URI Customization Interface](uri-customization.md) that allows plugins to customize how URIs are generated for catalogs, datasets, resources, and publishers in RDF serializations.
