@@ -26,6 +26,7 @@ Example value could be: dpv:ResearchAndDevelopment. |
 | dcat:Dataset   | healthdcatap:numberOfUniqueIndividuals | number_of_unique_individuals       | integer   | This property is not mandatory, since not all datasets might include data from individuals. |
 | dcat:Dataset   | healthdcatap:hdab                      | hdab                                | agent     | Health Data Access Body responsible. |
 | dcat:Dataset   | healthdcatap:retentionPeriod           | retention_period                    | interval  | This property makes use of the class dct:PeriodOfTime, in which a start and end date should be provided. |
+| dcat:Distribution | healthdcatap:retentionPeriod     | resources_retention_period       | interval  | This property makes use of the class dct:PeriodOfTime, in which a start and end date should be provided. |
 
 ### Notes
 
