@@ -209,7 +209,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                         if value:
                             access_service_dict["conforms_to"] = value
 
-                        value = self._object_value(access_service, DCT.format)
+                        value = self._object_value(access_service, DCT["format"])
                         if value:
                             access_service_dict["format"] = value
 
@@ -508,7 +508,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                 # Extra simple values for access services
                 extra_items = [
                     ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral),
-                    ("format", DCT.format, None, URIRefOrLiteral),
+                    ("format", DCT["format"], None, URIRefOrLiteral),
                     ("identifier", DCT.identifier, None, URIRefOrLiteral),
                     ("language", DCT.language, None, URIRefOrLiteral),
                     ("rights", DCT.rights, None, URIRefOrLiteral),

@@ -503,7 +503,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                 URIRef(access_service.get('conforms_to')) if access_service.get('conforms_to') else None
             )
             self._assert_simple_value(
-                g, object[2], DCT.format,
+                g, object[2], DCT["format"],
                 URIRef(access_service.get('format')) if access_service.get('format') else None
             )
             self._assert_simple_value(
