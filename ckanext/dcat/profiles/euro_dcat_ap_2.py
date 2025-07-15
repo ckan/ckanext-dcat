@@ -205,29 +205,29 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                             if values:
                                 access_service_dict[key] = values
 
-                        value = self._object_value(access_service, DCT.conformsTo)
-                        if value:
-                            access_service_dict["conforms_to"] = value
+                        values = self._object_value_list(access_service, DCT.conformsTo)
+                        if values:
+                            access_service_dict["conforms_to"] = values
 
-                        value = self._object_value(access_service, DCT["format"])
-                        if value:
-                            access_service_dict["format"] = value
+                        values = self._object_value_list(access_service, DCT["format"])
+                        if values:
+                            access_service_dict["format"] = values
 
                         value = self._object_value(access_service, DCT.identifier)
                         if value:
                             access_service_dict["identifier"] = value
 
-                        value = self._object_value(access_service, DCT.language)
-                        if value:
-                            access_service_dict["language"] = value
+                        values = self._object_value_list(access_service, DCT.language)
+                        if values:
+                            access_service_dict["language"] = values
 
-                        value = self._object_value(access_service, DCT.rights)
-                        if value:
-                            access_service_dict["rights"] = value
+                        values = self._object_value_list(access_service, DCT.rights)
+                        if values:
+                            access_service_dict["rights"] = values
 
-                        value = self._object_value(access_service, DCAT.landingPage)
-                        if value:
-                            access_service_dict["landing_page"] = value
+                        values = self._object_value_list(access_service, DCAT.landingPage)
+                        if values:
+                            access_service_dict["landing_page"] = values
 
                         values = self._object_value_list(access_service, DCAT.keyword)
                         if values:
@@ -505,16 +505,24 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     access_service_dict, access_service_node, items
                 )
 
-                # Extra simple values for access services
+                # Extra list values for access services
                 extra_items = [
                     ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral),
                     ("format", DCT["format"], None, URIRefOrLiteral),
-                    ("identifier", DCT.identifier, None, URIRefOrLiteral),
                     ("language", DCT.language, None, URIRefOrLiteral),
                     ("rights", DCT.rights, None, URIRefOrLiteral),
                     ("landing_page", DCAT.landingPage, None, URIRefOrLiteral),
                 ]
-                self._add_triples_from_dict(access_service_dict, access_service_node, extra_items)
+                self._add_list_triples_from_dict(access_service_dict, access_service_node, extra_items)
+
+                # Add single-value triple for identifier
+                self._add_triple_from_dict(
+                    access_service_dict,
+                    access_service_node,
+                    DCT.identifier,
+                    "identifier",
+                    _type=URIRefOrLiteral
+                )
 
                 # Add keyword list
                 self._add_triple_from_dict(

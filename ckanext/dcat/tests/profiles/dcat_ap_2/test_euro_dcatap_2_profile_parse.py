@@ -61,11 +61,11 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert len(access_services) == 1
         access_service = access_services[0]
         assert access_service['conforms_to'] == 'http://example.org/spec'
-        assert access_service['format'] == 'http://example.org/format'
+        assert access_service['format'] == ['http://example.org/format']
         assert access_service['identifier'] == 'service-123'
-        assert access_service['language'] == 'http://publications.europa.eu/resource/authority/language/ENG'
-        assert access_service['rights'] == 'open use'
-        assert access_service['landing_page'] == 'http://example.org/landing'
+        assert access_service['language'] == ['http://publications.europa.eu/resource/authority/language/ENG']
+        assert access_service['rights'] == ['open use']
+        assert access_service['landing_page'] == ['http://example.org/landing']
         assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
 
     def test_dataset_all_fields(self):

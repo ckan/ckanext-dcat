@@ -542,23 +542,33 @@ resource_fields:
 
     - field_name: conforms_to
       label: Conforms to
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
 
     - field_name: format
       label: Format
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
 
     - field_name: identifier
       label: Identifier
 
     - field_name: language
       label: Language
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
 
     - field_name: rights
       label: Rights
       form_snippet: markdown.html
       display_snippet: markdown.html
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
 
     - field_name: landing_page
       label: Landing page
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
 
     - field_name: keyword
       label: Keywords

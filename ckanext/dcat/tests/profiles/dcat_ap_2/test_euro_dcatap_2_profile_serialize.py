@@ -497,30 +497,30 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             self._assert_simple_value(g, object[2], DCAT.endpointDescription,
                                   Literal(access_service.get('endpoint_description')))
 
-
-            self._assert_simple_value(
-                g, object[2], DCT.conformsTo,
-                URIRef(access_service.get('conforms_to')) if access_service.get('conforms_to') else None
-            )
-            self._assert_simple_value(
-                g, object[2], DCT["format"],
-                URIRef(access_service.get('format')) if access_service.get('format') else None
-            )
             self._assert_simple_value(
                 g, object[2], DCT.identifier,
                 Literal(access_service.get('identifier')) if access_service.get('identifier') else None
             )
-            self._assert_simple_value(
+            self._assert_values_list(
+                g, object[2], DCT.conformsTo,
+                URIRef(access_service.get('conforms_to')) if access_service.get('conforms_to') else None
+            )
+            self._assert_values_list(
+                g, object[2], DCT["format"],
+                self._get_typed_list([access_service.get('format')], URIRef) if access_service.get('format') else []
+            )
+            self._assert_values_list(
                 g, object[2], DCT.language,
-                URIRef(access_service.get('language')) if access_service.get('language') else None
+                self._get_typed_list([access_service.get('language')], URIRef) if access_service.get('language') else []
             )
-            self._assert_simple_value(
+            self._assert_values_list(
                 g, object[2], DCT.rights,
-                Literal(access_service.get('rights')) if access_service.get('rights') else None
+                self._get_typed_list([access_service.get('rights')], Literal) if access_service.get('rights') else []
             )
-            self._assert_simple_value(
+            self._assert_values_list(
                 g, object[2], DCAT.landingPage,
-                URIRef(access_service.get('landing_page')) if access_service.get('landing_page') else None
+                self._get_typed_list([access_service.get('landing_page')], URIRef) if access_service.get(
+                    'landing_page') else []
             )
 
             if access_service.get('keyword'):
