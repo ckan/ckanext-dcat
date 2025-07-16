@@ -148,8 +148,9 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
         Add triples to the graph from new repeating subfields
         """
         contact = dataset_dict.get("contact")
-        for item in contact:
-            self._add_contact_to_graph(dataset_ref, DCAT.contactPoint, item)
+        if contact:
+            for item in contact:
+                self._add_contact_to_graph(dataset_ref, DCAT.contactPoint, item)
 
         self._add_agents(dataset_ref, dataset_dict, "publisher", DCT.publisher)
         self._add_agents(dataset_ref, dataset_dict, "creator", DCT.creator)
