@@ -420,6 +420,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
                     'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
                     'conforms_to': ['http://example.org/spec'],
+                    'applicable_legislation': ['http://data.europa.eu/eli/reg_impl/2023/138/oj'],
                     'format': ['http://example.org/format'],
                     'identifier': 'service-123',
                     'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
@@ -437,6 +438,7 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
                     'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
                     'conforms_to': ['http://example.org/spec'],
+                    'applicable_legislation': ['http://data.europa.eu/eli/reg_impl/2023/138/oj'],
                     'format': ['http://example.org/format'],
                     'identifier': 'service-123',
                     'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
@@ -522,6 +524,10 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                 g, object[2], DCAT.landingPage,
                 self._get_typed_list(access_service.get('landing_page'), URIRef) if access_service.get(
                     'landing_page') else []
+            )
+            self._assert_values_list(
+                g, object[2], DCATAP.applicableLegislation,
+                self._get_typed_list(access_service.get('applicable_legislation'), URIRef) if access_service.get('applicable_legislation') else []
             )
 
             if access_service.get('keyword'):

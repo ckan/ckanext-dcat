@@ -44,6 +44,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dcat:landingPage rdf:resource="http://example.org/landing"/>
                     <dcat:keyword>keyword1</dcat:keyword>
                     <dcat:keyword>keyword2</dcat:keyword>
+                    <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
                   </dcat:DataService>
                 </dcat:accessService>
               </dcat:Distribution>
@@ -66,6 +67,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert access_service['language'] == ['http://publications.europa.eu/resource/authority/language/ENG']
         assert access_service['rights'] == ['open use']
         assert access_service['landing_page'] == ['http://example.org/landing']
+        assert access_service['applicable_legislation'] == ['http://data.europa.eu/eli/reg_impl/2023/138/oj']
         assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
 
     def test_dataset_all_fields(self):
@@ -125,6 +127,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                             <dcat:endpointDescription>SPARQL url description</dcat:endpointDescription>
                             <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/COM_REUSE"/>
                             <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+                            <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
                         </dcat:DataService>
                     </dcat:accessService>
                 </dcat:Distribution>
