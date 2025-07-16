@@ -47,6 +47,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dcat:keyword>keyword1</dcat:keyword>
                     <dcat:keyword>keyword2</dcat:keyword>
                     <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+                    <dct:description>This SPARQL end point allow to directly query the EU Whoiswho content</dct:description>
                     <dct:creator>
                       <foaf:Agent>
                         <foaf:name>European Commission</foaf:name>
@@ -82,6 +83,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert access_service['landing_page'] == ['http://example.org/landing']
         assert access_service['applicable_legislation'] == ['http://data.europa.eu/eli/reg_impl/2023/138/oj']
         assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
+        assert access_service['description'] == 'This SPARQL end point allow to directly query the EU Whoiswho content'
         
         contact_point = access_service.get("contact")
         assert isinstance(contact_point, dict)

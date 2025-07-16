@@ -691,6 +691,11 @@ resource_fields:
     - field_name: title
       label: Title
 
+    - field_name: description
+      label: Description
+      form_snippet: markdown.html
+      help_text: A free-text account of the resource.
+
     - field_name: endpoint_description
       label: Endpoint description
 

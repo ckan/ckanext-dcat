@@ -496,8 +496,9 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                                   URIRef(access_service.get('license')))
             self._assert_simple_value(g, object[2], DCT.title,
                                   Literal(access_service.get('title')))
-            self._assert_simple_value(g, object[2], DCT.description,
-                                  Literal(access_service.get('description')))
+            if access_service.get('description'):
+                self._assert_simple_value(g, object[2], DCT.description,
+                                      Literal(access_service.get('description')))
             self._assert_simple_value(g, object[2], DCAT.endpointDescription,
                                   Literal(access_service.get('endpoint_description')))
 
