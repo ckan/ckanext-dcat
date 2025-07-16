@@ -53,6 +53,11 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                         <foaf:name>European Commission</foaf:name>
                       </foaf:Agent>
                     </dct:creator>
+                    <dct:publisher>
+                      <foaf:Agent>
+                        <foaf:name>Publications Office of the European Union</foaf:name>
+                      </foaf:Agent>
+                    </dct:publisher>
                     <dcat:contactPoint>
                       <vcard:Kind>
                         <vcard:fn>John Doe</vcard:fn>
@@ -93,6 +98,10 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         creator = access_service.get("creator")
         assert isinstance(creator, list)
         assert creator[0].get("name") == "European Commission"
+
+        publisher = access_service.get("publisher")
+        assert isinstance(publisher, dict)
+        assert publisher.get("name") == "Publications Office of the European Union"
 
     def test_dataset_all_fields(self):
 
@@ -152,6 +161,9 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                             <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/COM_REUSE"/>
                             <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
                             <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
+                            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-01T00:04:06</dct:modified>
+                            <dcat:theme rdf:resource="http://example.org/theme/environment"/>
+                            <dcat:theme rdf:resource="http://example.org/theme/transport"/>
                         </dcat:DataService>
                     </dcat:accessService>
                 </dcat:Distribution>
@@ -225,11 +237,15 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert access_service.get('license') == 'http://publications.europa.eu/resource/authority/licence/COM_REUSE'
         assert access_service.get('access_rights') == 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
         assert access_service.get('description') == 'This SPARQL end point allow to directly query the EU Whoiswho content (organization / membership / person)'
+        assert access_service.get('modified') == '2012-05-01T00:04:06'
 
         # List
         endpoint_url_list = access_service.get('endpoint_url')
         assert len(endpoint_url_list) == 1
         assert 'http://publications.europa.eu/webapi/rdf/sparql' in endpoint_url_list
+        theme_list = access_service.get('theme')
+        assert isinstance(theme_list, list)
+        assert sorted(theme_list) == ['http://example.org/theme/environment', 'http://example.org/theme/transport']
 
     def test_availability_distibutions_without_uri(self):
 

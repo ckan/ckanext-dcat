@@ -429,6 +429,9 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'keyword': ['keyword1', 'keyword2'],
                     'contact': {'name': 'John Doe', 'email': 'john@example.org'},
                     'creator': [{'name': 'European Commission'}],
+                    'publisher': {'name': 'Publications Office of the European Union'},
+                    'modified': '2024-01-01T12:00:00',
+                    'theme': ['http://example.org/theme/environment', 'http://example.org/theme/transport'],
                 },
                 {
                     'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
@@ -547,6 +550,22 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             if access_service.get('creator'):
                 creators = self._triples(g, object[2], DCT.creator, None)
                 assert any(self._triple(g, c[2], FOAF.name, Literal('European Commission')) for c in creators)
+
+            if access_service.get('publisher'):
+                publishers = self._triples(g, object[2], DCT.publisher, None)
+                assert any(self._triple(g, p[2], FOAF.name, Literal('Publications Office of the European Union')) for p in publishers)
+
+            if access_service.get('modified'):
+                assert self._triple(
+                    g, object[2], DCT.modified,
+                    Literal(access_service.get('modified'), datatype=XSD.dateTime)
+                )
+
+            if access_service.get('theme'):
+                self._assert_values_list(
+                    g, object[2], DCAT.theme,
+                    self._get_typed_list(access_service.get('theme'), URIRef)
+                )
 
             # Lists
             self._assert_values_list(g, object[2], DCAT.endpointURL,

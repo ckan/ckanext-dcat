@@ -194,6 +194,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                             ("description", DCT.description),
                             ("identifier", DCT.identifier),
                             ("description", DCT.description),
+                            ("modified", DCT.modified),
                         ):
                             value = self._object_value(access_service, predicate)
                             if value:
@@ -210,6 +211,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                             ("landing_page", DCAT.landingPage),
                             ("keyword", DCAT.keyword),
                             ("applicable_legislation", DCATAP.applicableLegislation),
+                            ("theme", DCAT.theme),
                         ):
                             values = self._object_value_list(access_service, predicate)
                             if values:
@@ -218,6 +220,10 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                         contact_points = self._contact_details(access_service, DCAT.contactPoint)
                         if contact_points:
                             access_service_dict["contact"] = contact_points[0]
+                            
+                        publishers = self._agents_details(access_service, DCT.publisher)
+                        if publishers:
+                            access_service_dict["publisher"] = publishers[0]
 
                         creators = self._agents_details(access_service, DCT.creator)
                         if creators:
@@ -489,15 +495,23 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                         RDFS.Resource,
                     ),
                     ("description", DCT.description, None, Literal),
+                    ("modified", DCT.modified, None, Literal),
                 ]
-
                 self._add_triples_from_dict(
                     access_service_dict, access_service_node, items
                 )
 
+                if access_service_dict.get("modified"):
+                    self._add_date_triple(access_service_node, DCT.modified, access_service_dict.get("modified"))
+
+
                 contact_point_dict = access_service_dict.get("contact")
                 if contact_point_dict:
                     self._add_contact_to_graph(access_service_node, DCAT.contactPoint, contact_point_dict)
+
+                publisher_dict = access_service_dict.get("publisher")
+                if publisher_dict:
+                    self._add_agent_to_graph(access_service_node, DCT.publisher, publisher_dict)
 
                 for creator_dict in access_service_dict.get("creator", []):
                     self._add_agent_to_graph(access_service_node, DCT.creator, creator_dict)
@@ -510,6 +524,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     ("rights", DCT.rights, None, URIRefOrLiteral),
                     ("landing_page", DCAT.landingPage, None, URIRefOrLiteral),
                     ("applicable_legislation", DCATAP.applicableLegislation, None, URIRefOrLiteral, ELI.LegalResource),
+                    ("theme", DCAT.theme, None, URIRefOrLiteral),
                 ]
                 self._add_list_triples_from_dict(access_service_dict, access_service_node, extra_items)
 
