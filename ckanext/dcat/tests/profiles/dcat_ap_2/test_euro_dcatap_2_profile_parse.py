@@ -60,7 +60,7 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         access_services = json.loads(resources[0]['access_services'])
         assert len(access_services) == 1
         access_service = access_services[0]
-        assert access_service['conforms_to'] == 'http://example.org/spec'
+        assert access_service['conforms_to'] == ['http://example.org/spec']
         assert access_service['format'] == ['http://example.org/format']
         assert access_service['identifier'] == 'service-123'
         assert access_service['language'] == ['http://publications.europa.eu/resource/authority/language/ENG']

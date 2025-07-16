@@ -419,12 +419,12 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 1',
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
                     'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
-                    'conforms_to': 'http://example.org/spec',
-                    'format': 'http://example.org/format',
+                    'conforms_to': ['http://example.org/spec'],
+                    'format': ['http://example.org/format'],
                     'identifier': 'service-123',
-                    'language': 'http://publications.europa.eu/resource/authority/language/ENG',
-                    'rights': 'open use',
-                    'landing_page': 'http://example.org/landing',
+                    'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
+                    'rights': ['open use'],
+                    'landing_page': ['http://example.org/landing'],
                     'keyword': ['keyword1', 'keyword2']
                 },
                 {
@@ -436,12 +436,12 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 2',
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
                     'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
-                    'conforms_to': 'http://example.org/spec',
-                    'format': 'http://example.org/format',
+                    'conforms_to': ['http://example.org/spec'],
+                    'format': ['http://example.org/format'],
                     'identifier': 'service-123',
-                    'language': 'http://publications.europa.eu/resource/authority/language/ENG',
-                    'rights': 'open use',
-                    'landing_page': 'http://example.org/landing',
+                    'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
+                    'rights': ['open use'],
+                    'landing_page': ['http://example.org/landing'],
                     'keyword': ['keyword1', 'keyword2']
                 }
             ])
@@ -503,23 +503,24 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
             )
             self._assert_values_list(
                 g, object[2], DCT.conformsTo,
-                URIRef(access_service.get('conforms_to')) if access_service.get('conforms_to') else None
+                self._get_typed_list(access_service.get('conforms_to'), URIRef) if access_service.get(
+                    'conforms_to') else []
             )
             self._assert_values_list(
                 g, object[2], DCT["format"],
-                self._get_typed_list([access_service.get('format')], URIRef) if access_service.get('format') else []
+                self._get_typed_list(access_service.get('format'), URIRef) if access_service.get('format') else []
             )
             self._assert_values_list(
                 g, object[2], DCT.language,
-                self._get_typed_list([access_service.get('language')], URIRef) if access_service.get('language') else []
+                self._get_typed_list(access_service.get('language'), URIRef) if access_service.get('language') else []
             )
             self._assert_values_list(
                 g, object[2], DCT.rights,
-                self._get_typed_list([access_service.get('rights')], Literal) if access_service.get('rights') else []
+                self._get_typed_list(access_service.get('rights'), Literal) if access_service.get('rights') else []
             )
             self._assert_values_list(
                 g, object[2], DCAT.landingPage,
-                self._get_typed_list([access_service.get('landing_page')], URIRef) if access_service.get(
+                self._get_typed_list(access_service.get('landing_page'), URIRef) if access_service.get(
                     'landing_page') else []
             )
 
