@@ -863,6 +863,41 @@ class RDFProfile(object):
                 self.g.add((org_ref, FOAF.name, Literal(sub_org["name"])))
 
         return agent_ref
+    
+    def _add_contact_to_graph(self, subject, predicate, contact):
+        contact_uri = contact.get("uri")
+        if contact_uri:
+            contact_details = CleanedURIRef(contact_uri)
+        else:
+            contact_details = BNode()
+
+        self.g.add((contact_details, RDF.type, VCARD.Kind))
+        self.g.add((subject, predicate, contact_details))
+
+        self._add_triple_from_dict(contact, contact_details, VCARD.fn, "name")
+        self._add_triple_from_dict(
+            contact,
+            contact_details,
+            VCARD.hasEmail,
+            "email",
+            _type=URIRef,
+            value_modifier=self._add_mailto,
+        )
+        self._add_triple_from_dict(
+            contact,
+            contact_details,
+            VCARD.hasUID,
+            "identifier",
+            _type=URIRefOrLiteral,
+        )
+        self._add_triple_from_dict(
+            contact,
+            contact_details,
+            VCARD.hasURL,
+            "url",
+            _type=URIRef,
+        )
+    
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
         """

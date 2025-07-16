@@ -148,45 +148,8 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
         Add triples to the graph from new repeating subfields
         """
         contact = dataset_dict.get("contact")
-        if (
-            isinstance(contact, list)
-            and len(contact)
-            and self._not_empty_dict(contact[0])
-        ):
-            for item in contact:
-                contact_uri = item.get("uri")
-                if contact_uri:
-                    contact_details = CleanedURIRef(contact_uri)
-                else:
-                    contact_details = BNode()
-
-                self.g.add((contact_details, RDF.type, VCARD.Kind))
-                self.g.add((dataset_ref, DCAT.contactPoint, contact_details))
-
-                self._add_triple_from_dict(item, contact_details, VCARD.fn, "name")
-                # Add mail address as URIRef, and ensure it has a mailto: prefix
-                self._add_triple_from_dict(
-                    item,
-                    contact_details,
-                    VCARD.hasEmail,
-                    "email",
-                    _type=URIRef,
-                    value_modifier=self._add_mailto,
-                )
-                self._add_triple_from_dict(
-                    item,
-                    contact_details,
-                    VCARD.hasUID,
-                    "identifier",
-                    _type=URIRefOrLiteral,
-                )
-                self._add_triple_from_dict(
-                    item,
-                    contact_details,
-                    VCARD.hasURL,
-                    "url",
-                    _type=URIRef,
-                )
+        for item in contact:
+            self._add_contact_to_graph(dataset_ref, DCAT.contactPoint, item)
 
         self._add_agents(dataset_ref, dataset_dict, "publisher", DCT.publisher)
         self._add_agents(dataset_ref, dataset_dict, "creator", DCT.creator)

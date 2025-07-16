@@ -214,6 +214,14 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                             if values:
                                 access_service_dict[key] = values
 
+                        contact_points = self._contact_details(access_service, DCAT.contactPoint)
+                        if contact_points:
+                            access_service_dict["contact"] = contact_points[0]
+
+                        creators = self._agents_details(access_service, DCT.creator)
+                        if creators:
+                            access_service_dict["creator"] = creators
+
                         # Access service URI (explicitly show the missing ones)
                         access_service_dict["uri"] = (
                             str(access_service)
@@ -485,6 +493,13 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                 self._add_triples_from_dict(
                     access_service_dict, access_service_node, items
                 )
+
+                contact_point_dict = access_service_dict.get("contact")
+                if contact_point_dict:
+                    self._add_contact_to_graph(access_service_node, DCAT.contactPoint, contact_point_dict)
+
+                for creator_dict in access_service_dict.get("creator", []):
+                    self._add_agent_to_graph(access_service_node, DCT.creator, creator_dict)
 
                 # Extra list values for access services
                 extra_items = [

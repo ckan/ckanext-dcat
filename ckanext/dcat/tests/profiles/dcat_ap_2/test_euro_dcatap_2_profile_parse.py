@@ -30,7 +30,9 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
          xmlns:dct="http://purl.org/dc/terms/"
          xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dcatap="http://data.europa.eu/r5r/"
-         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
           <dcat:Dataset rdf:about="http://example.org">
             <dcat:distribution>
               <dcat:Distribution>
@@ -45,6 +47,17 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                     <dcat:keyword>keyword1</dcat:keyword>
                     <dcat:keyword>keyword2</dcat:keyword>
                     <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+                    <dct:creator>
+                      <foaf:Agent>
+                        <foaf:name>European Commission</foaf:name>
+                      </foaf:Agent>
+                    </dct:creator>
+                    <dcat:contactPoint>
+                      <vcard:Kind>
+                        <vcard:fn>John Doe</vcard:fn>
+                        <vcard:hasEmail rdf:resource="mailto:john@example.org"/>
+                      </vcard:Kind>
+                    </dcat:contactPoint>
                   </dcat:DataService>
                 </dcat:accessService>
               </dcat:Distribution>
@@ -69,6 +82,15 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert access_service['landing_page'] == ['http://example.org/landing']
         assert access_service['applicable_legislation'] == ['http://data.europa.eu/eli/reg_impl/2023/138/oj']
         assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
+        
+        contact_point = access_service.get("contact")
+        assert isinstance(contact_point, dict)
+        assert contact_point.get("name") == "John Doe"
+        assert contact_point.get("email") == "john@example.org"
+
+        creator = access_service.get("creator")
+        assert isinstance(creator, list)
+        assert creator[0].get("name") == "European Commission"
 
     def test_dataset_all_fields(self):
 

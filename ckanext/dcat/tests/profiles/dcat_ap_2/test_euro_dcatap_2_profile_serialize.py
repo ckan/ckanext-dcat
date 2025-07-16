@@ -426,7 +426,9 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
                     'rights': ['open use'],
                     'landing_page': ['http://example.org/landing'],
-                    'keyword': ['keyword1', 'keyword2']
+                    'keyword': ['keyword1', 'keyword2'],
+                    'contact': {'name': 'John Doe', 'email': 'john@example.org'},
+                    'creator': [{'name': 'European Commission'}],
                 },
                 {
                     'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
@@ -535,6 +537,15 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     g, object[2], DCAT.keyword,
                     self._get_typed_list(access_service.get('keyword'), Literal)
                 )
+
+            if access_service.get('contact'):
+                contact = self._triple(g, object[2], DCAT.contactPoint, None)[2]
+                assert self._triple(g, contact, VCARD.fn, Literal('John Doe'))
+                assert self._triple(g, contact, VCARD.hasEmail, URIRef('mailto:john@example.org'))
+
+            if access_service.get('creator'):
+                creators = self._triples(g, object[2], DCT.creator, None)
+                assert any(self._triple(g, c[2], FOAF.name, Literal('European Commission')) for c in creators)
 
             # Lists
             self._assert_values_list(g, object[2], DCAT.endpointURL,
