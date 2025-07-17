@@ -1,200 +1,299 @@
 [
-    {
-        "access_rights": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
-        "analytics": [
-            "http://example.com/analytics"
+  {
+    "qualified_attribution": [
+      {
+        "agent": [
+          {
+            "name": "Contact Point",
+            "email": "healthdata@sciensano.be",
+            "homepage": "https://healthdata.be",
+            "type": "",
+            "identifier": ""
+          }
         ],
-        "alternate_identifier": [
-            "internalURI:admsIdentifier0"
-        ],
-        "applicable_legislation": [
-            "http://data.europa.eu/eli/reg/2022/868/oj"
-        ],
-        "author": null,
-        "author_email": null,
-        "code_values": [
-            "http://example.com/code1",
-            "http://example.com/code2"
-        ],
-        "coding_system": [
-            "http://www.wikidata.org/entity/P1690",
-            "http://www.wikidata.org/entity/P4229"
-        ],
-        "conforms_to": [
-            "http://www.wikidata.org/entity/Q19597236"
-        ],
-        "creator_user_id": null,
-        "dcat_type": "n1049372e768c4429a6b2200c22f5f1a4b7",
-        "documentation": [
-            "n1049372e768c4429a6b2200c22f5f1a4b9"
-        ],
-        "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
-        "health_category": [
-            "http://example.com/ontology/resource/authority/healthcategories/PHDR",
-            "http://example.com/ontology/resource/authority/healthcategories/IDHP",
-            "http://example.com/ontology/resource/authority/healthcategories/DIOH",
-            "http://example.com/ontology/resource/authority/healthcategories/EHRS"
-        ],
-        "health_theme": [
-            "http://www.wikidata.org/entity/Q7907952",
-            "http://www.wikidata.org/entity/Q58624061"
-        ],
-        "id": "e7ccf79d-705c-427f-8e96-f87bcd6e5318",
-        "identifier": "http://example.com/dataset/1234567890",
-        "is_referenced_by": [
-            "https://doi.org/10.1038/sdata.2016.18",
-            "https://dx.doi.org/10.1002/jmri.28679"
-        ],
-        "isopen": false,
-        "issued": "2024-01-01T00:00:00+00:00",
-        "language": [
-            "http://publications.europa.eu/resource/authority/language/ENG",
-            "http://publications.europa.eu/resource/authority/language/NLD",
-            "http://publications.europa.eu/resource/authority/language/FRA"
-        ],
-        "legal_basis": [
-            "https://w3id.org/dpv#Consent"
-        ],
-        "license_id": "",
-        "license_title": "",
-        "maintainer": null,
-        "maintainer_email": null,
-        "max_typical_age": "110",
-        "metadata_created": "2024-12-02T19:00:30.897399",
-        "metadata_modified": "2024-12-02T19:00:30.897406",
-        "min_typical_age": "0",
-        "modified": "2024-12-31T23:59:59+00:00",
-        "name": "test-dcat-1",
-        "notes": "This dataset is an example of using HealthDCAT-AP in CKAN",
-        "num_resources": 0,
-        "num_tags": 3,
-        "number_of_records": "123456789",
-        "number_of_unique_individuals": "7654321",
-        "organization": null,
-        "personal_data": [
-            "https://w3id.org/dpv/dpv-pd#Age",
-            "https://w3id.org/dpv/dpv-pd#Gender",
-            "https://w3id.org/dpv/dpv-pd#HealthRecord"
-        ],
-        "population_coverage": [
-            "This example includes a very non-descript population"
-        ],
-        "private": false,
-        "provenance": "This example dataset is partly sourced from TEHDAS2",
-        "publisher_note": [
-            "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation."
-        ],
-        "publisher_type": [
-            "http://example.com/publisherType/undefined"
-        ],
-        "trusted_data_holder": true, 
-        "purpose": [
-            "https://w3id.org/dpv#AcademicResearch"
-        ],
-        "qualified_relation": [
-            {
-                "uri": "",
-                "relation": "http://example.com/dataset/3.141592",
-                "role": "http://www.iana.org/assignments/relation/related"
-            }
-        ],
-        "state": "active",
-        "temporal_resolution": "P1D",
-        "theme": [
-            "http://publications.europa.eu/resource/authority/data-theme/HEAL"
-        ],
-        "title": "HealthDCAT-AP test dataset",
-        "type": "dataset",
-        "uri": "http://example.healthdata.nl/set/dataset",
-        "version_notes": "Dataset continuously updated",
-        "contact": [
-            {
-                "email": "covacsurv@sciensano.be",
-                "identifier": "",
+        "role": "https://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/processor"
+      }
+    ],
+    "quality_annotation": [
+      {
+        "motivated_by": "http://www.w3.org/ns/dqv#qualityAssessment",
+        "body": "https://acertificateserver.eu/mycertificate",
+        "target": "https://fair.healthdata.be/dataset/d43a158e-7d13-4660-bbc3-9d3f8d5501e5"
+      }
+    ],
+    "access_rights": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+    "analytics": [
+      "http://example.com/analytics"
+    ],
+    "alternate_identifier": [
+      "internalURI:admsIdentifier0"
+    ],
+    "applicable_legislation": [
+      "http://data.europa.eu/eli/reg/2022/868/oj"
+    ],
+    "author": null,
+    "author_email": null,
+    "code_values": [
+      "http://example.com/code1",
+      "http://example.com/code2"
+    ],
+    "coding_system": [
+      "http://www.wikidata.org/entity/P1690",
+      "http://www.wikidata.org/entity/P4229"
+    ],
+    "conforms_to": [
+      "http://www.wikidata.org/entity/Q19597236"
+    ],
+    "creator_user_id": null,
+    "dcat_type": "n1049372e768c4429a6b2200c22f5f1a4b7",
+    "documentation": [
+      "n1049372e768c4429a6b2200c22f5f1a4b9"
+    ],
+    "frequency": "http://publications.europa.eu/resource/authority/frequency/DAILY",
+    "health_category": [
+      "http://example.com/ontology/resource/authority/healthcategories/PHDR",
+      "http://example.com/ontology/resource/authority/healthcategories/IDHP",
+      "http://example.com/ontology/resource/authority/healthcategories/DIOH",
+      "http://example.com/ontology/resource/authority/healthcategories/EHRS"
+    ],
+    "health_theme": [
+      "http://www.wikidata.org/entity/Q7907952",
+      "http://www.wikidata.org/entity/Q58624061"
+    ],
+    "id": "e7ccf79d-705c-427f-8e96-f87bcd6e5318",
+    "identifier": "http://example.com/dataset/1234567890",
+    "is_referenced_by": [
+      "https://doi.org/10.1038/sdata.2016.18",
+      "https://dx.doi.org/10.1002/jmri.28679"
+    ],
+    "isopen": false,
+    "issued": "2024-01-01T00:00:00+00:00",
+    "language": [
+      "http://publications.europa.eu/resource/authority/language/ENG",
+      "http://publications.europa.eu/resource/authority/language/NLD",
+      "http://publications.europa.eu/resource/authority/language/FRA"
+    ],
+    "legal_basis": [
+      "https://w3id.org/dpv#Consent"
+    ],
+    "license_id": "",
+    "license_title": "",
+    "maintainer": null,
+    "maintainer_email": null,
+    "max_typical_age": "110",
+    "metadata_created": "2024-12-02T19:00:30.897399",
+    "metadata_modified": "2024-12-02T19:00:30.897406",
+    "min_typical_age": "0",
+    "modified": "2024-12-31T23:59:59+00:00",
+    "name": "test-dcat-1",
+    "notes": "This dataset is an example of using HealthDCAT-AP in CKAN",
+    "num_resources": 0,
+    "num_tags": 3,
+    "number_of_records": "123456789",
+    "number_of_unique_individuals": "7654321",
+    "organization": null,
+    "personal_data": [
+      "https://w3id.org/dpv/dpv-pd#Age",
+      "https://w3id.org/dpv/dpv-pd#Gender",
+      "https://w3id.org/dpv/dpv-pd#HealthRecord"
+    ],
+    "population_coverage": [
+      "This example includes a very non-descript population"
+    ],
+    "private": false,
+    "provenance": "This example dataset is partly sourced from TEHDAS2",
+    "publisher_note": [
+      "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation."
+    ],
+    "publisher_type": [
+      "http://example.com/publisherType/undefined"
+    ],
+    "trusted_data_holder": true,
+    "purpose": [
+      "https://w3id.org/dpv#AcademicResearch"
+    ],
+    "qualified_relation": [
+      {
+        "uri": "",
+        "relation": "http://example.com/dataset/3.141592",
+        "role": "http://www.iana.org/assignments/relation/related"
+      }
+    ],
+    "state": "active",
+    "temporal_resolution": "P1D",
+    "theme": [
+      "http://publications.europa.eu/resource/authority/data-theme/HEAL"
+    ],
+    "title": "HealthDCAT-AP test dataset",
+    "type": "dataset",
+    "uri": "http://example.healthdata.nl/set/dataset",
+    "version_notes": "Dataset continuously updated",
+    "contact": [
+      {
+        "email": "covacsurv@sciensano.be",
+        "identifier": "",
+        "name": "Contact Point"
+      }
+    ],
+    "creator": [
+      {
+        "email": "info@example.com",
+        "identifier": "",
+        "name": "Contact Point",
+        "type": "",
+        "url": "https:/example.com/homepage"
+      }
+    ],
+    "extras": [
+      {
+        "key": "related_resource",
+        "value": "[\"http://example.com/dataset/9876543210\"]"
+      },
+      {
+        "key": "sample",
+        "value": "[\"http://example.com/sample\"]"
+      },
+      {
+        "key": "spatial_uri",
+        "value": "http://publications.europa.eu/resource/authority/country/BEL"
+      }
+    ],
+    "hdab": [
+      {
+        "email": "hdab@example.com",
+        "identifier": "",
+        "name": "EU Health Data Access Body",
+        "type": "",
+        "uri": "",
+        "url": "https://www.example.com/hdab"
+      }
+    ],
+    "provenance_activity": [
+      {
+        "dct_type": "http://dbpedia.org/resource/Record_linkage",
+        "label": "http://dbpedia.org/resource/Record_linkage",
+        "seeAlso": "https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp",
+        "startedAtTime": "2021-01-01T00:00:00+00:00",
+        "uri": "internalURI:wasGeneratedBy0",
+        "wasAssociatedWith": [
+          {
+            "homepage": "https://www.sciensano.be/fr/people/joris-van-loenhout",
+            "email": "mailto:Joris.VanLoenhout@sciensano.be",
+            "name": "Dr. Joris van Loenhout",
+            "actedOnBehalfOf": [
+              {
                 "name": "Contact Point"
-            }
-        ],
-        "creator": [
-            {
-                "email": "info@example.com",
-                "identifier": "",
-                "name": "Contact Point",
-                "type": "",
-                "url": "https:/example.com/homepage"
-            }
-        ],
-        "extras": [
-            {
-                "key": "related_resource",
-                "value": "[\"http://example.com/dataset/9876543210\"]"
-            },
-            {
-                "key": "sample",
-                "value": "[\"http://example.com/sample\"]"
-            },
-            {
-                "key": "spatial_uri",
-                "value": "http://publications.europa.eu/resource/authority/country/BEL"
-            }
-        ],
-        "hdab": [
-            {
-                "email": "hdab@example.com",
-                "identifier": "",
-                "name": "EU Health Data Access Body",
-                "type": "",
-                "uri": "",
-                "url": "https://www.example.com/hdab"
-            }
-        ],
-        "publisher": [
-            {
-                "email": "info@example.com",
-                "identifier": "",
-                "name": "Contact Point",
-                "type": "",
-                "uri": "",
-                "url": "https://healthdata.nl"
-            }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "publisher": [
+      {
+        "email": "info@example.com",
+        "identifier": "",
+        "name": "Contact Point",
+        "type": "",
+        "uri": "",
+        "url": "https://healthdata.nl"
+      }
+    ],
+    "retention_period": [
+      {
+        "end": "2034-12-31",
+        "start": "2020-03-01"
+      }
+    ],
+    "tags": [
+      {
+        "display_name": "Test 1",
+        "id": "5c418ec2-cb41-4c42-9b9c-f5d1e3a831e5",
+        "name": "Test 1",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "Test 2",
+        "id": "c4117ace-2114-470d-b6e9-0df7580a12d8",
+        "name": "Test 2",
+        "state": "active",
+        "vocabulary_id": null
+      },
+      {
+        "display_name": "Test 3",
+        "id": "d5a5288d-3bff-431e-be94-12c71d25d75b",
+        "name": "Test 3",
+        "state": "active",
+        "vocabulary_id": null
+      }
+    ],
+    "temporal_coverage": [
+      {
+        "end": "2024-12-31",
+        "start": "2020-03-01"
+      }
+    ],
+    "resources": [
+      {
+        "access_url": "",
+        "applicable_legislation": [],
+        "availability": "",
+        "cache_last_updated": null,
+        "cache_url": null,
+        "compress_format": "",
+        "conforms_to": [],
+        "created": "2025-07-10T18:19:32.840953",
+        "description": "",
+        "documentation": [],
+        "download_url": "",
+        "format": null,
+        "hash": "",
+        "hash_algorithm": "",
+        "id": "7e65aeba-136d-48d6-a824-782176c63104",
+        "issued_date": "",
+        "issued_time": "",
+        "language": null,
+        "last_modified": null,
+        "license": "",
+        "metadata_modified": "2025-07-10T18:19:32.838228",
+        "mimetype": "",
+        "mimetype_inner": null,
+        "modified_date": "",
+        "modified_time": "",
+        "name": "",
+        "package_format": "",
+        "package_id": "16a60ea2-965a-4b5a-9a65-1284354c256e",
+        "position": 0,
+        "resource_type": null,
+        "rights": "",
+        "spatial_resolution_in_meters": "",
+        "state": "active",
+        "status": "",
+        "temporal_resolution": "",
+        "uri": "",
+        "url": "",
+        "url_type": "",
+        "access_services": [
+          {
+            "access_rights": "",
+            "endpoint_description": "",
+            "endpoint_url": [],
+            "serves_dataset": [],
+            "title": "",
+            "uri": ""
+          }
         ],
         "retention_period": [
-            {
-                "end": "2034-12-31",
-                "start": "2020-03-01"
-            }
-        ],
-        "tags": [
-            {
-                "display_name": "Test 1",
-                "id": "5c418ec2-cb41-4c42-9b9c-f5d1e3a831e5",
-                "name": "Test 1",
-                "state": "active",
-                "vocabulary_id": null
-            },
-            {
-                "display_name": "Test 2",
-                "id": "c4117ace-2114-470d-b6e9-0df7580a12d8",
-                "name": "Test 2",
-                "state": "active",
-                "vocabulary_id": null
-            },
-            {
-                "display_name": "Test 3",
-                "id": "d5a5288d-3bff-431e-be94-12c71d25d75b",
-                "name": "Test 3",
-                "state": "active",
-                "vocabulary_id": null
-            }
-        ],
-        "temporal_coverage": [
-            {
-                "end": "2024-12-31",
-                "start": "2020-03-01"
-            }
-        ],
-        "resources": [],
-        "groups": [],
-        "relationships_as_subject": [],
-        "relationships_as_object": []
-    }
+          {
+            "end": "2025-07-18",
+            "start": "2025-07-10"
+          }
+        ]
+      }
+    ],
+    "groups": [],
+    "relationships_as_subject": [],
+    "relationships_as_object": []
+  }
 ]

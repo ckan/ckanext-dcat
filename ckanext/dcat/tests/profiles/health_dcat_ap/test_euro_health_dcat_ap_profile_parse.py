@@ -182,3 +182,43 @@ class TestSchemingParseSupport(BaseParseTest):
                 "end": "2034-12-31",
             }
         ]
+        assert dataset["resources"][0]["retention_period"] == [
+            {
+                "start": "2020-03-01",
+                "end": "2034-12-31",
+            }
+        ]
+        
+        assert dataset["provenance_activity"] == [{
+            "uri": "internalURI:wasGeneratedBy0",
+            "label": "http://dbpedia.org/resource/Record_linkage",
+            "seeAlso": "https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp",
+            "dct_type": "http://dbpedia.org/resource/Record_linkage",
+            "startedAtTime": "2021-01-01T00:00:00+00:00",
+            "wasAssociatedWith": [{
+                "name": "Dr. Joris van Loenhout",
+                "url": "https://www.sciensano.be/fr/people/joris-van-loenhout",
+                "email": "Joris.VanLoenhout@sciensano.be",
+                "type": "", 
+                "uri": "",
+                "identifier": "",
+                "actedOnBehalfOf": [{
+                    "name": "Contact Point"
+                }]
+            }]
+        }]
+
+        assert dataset["qualified_attribution"][0]["role"] == "https://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/processor"
+
+        agent = dataset["qualified_attribution"][0]["agent"][0]
+        assert agent["name"] == "Contact Point"
+        assert agent["email"] == "healthdata@sciensano.be"
+        assert agent["url"] == "https://healthdata.be"
+        assert agent["type"] == ""
+        assert agent["identifier"] == ""
+        
+        # DQV Quality Annotation
+        assert len(dataset["quality_annotation"]) == 1
+        assert dataset["quality_annotation"][0]["body"] == "https://certificates.theodi.org/en/datasets/393/certificate"
+        assert dataset["quality_annotation"][0]["target"] == "https://certificates.theodi.org/en/datasets/393"
+        assert dataset["quality_annotation"][0]["motivated_by"] == "http://www.w3.org/ns/dqv#qualityAssessment"
