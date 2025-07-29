@@ -8,6 +8,10 @@
 Ckanext-dcat is a [CKAN](https://github.com/ckan/ckan) extension that helps data publishers expose and consume metadata as serialized RDF documents using [DCAT](https://www.w3.org/TR/vocab-dcat-3/), as well as other metadata formats like [Croissant ML](croissant.md) or [Schema.org](google-dataset-search.md).
 
 
+This extension is currently supported in CKAN 2.10 and CKAN 2.11.
+
+
+
 === "CKAN dataset"
 
     ``` json
