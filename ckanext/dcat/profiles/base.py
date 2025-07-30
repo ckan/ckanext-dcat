@@ -1305,6 +1305,21 @@ class RDFProfile(object):
         )
         return out
 
+    def graph_from_catalog_record(self, dataset_dict, dataset_ref, catalog_record_ref):
+        """
+        Creates an RDF graph for the catalog record
+
+        The class RDFLib graph (accessible via `self.g`) should be updated on
+        this method
+
+        `dataset_dict` is a dict with the dataset metadata like the one
+        returned by `package_show`. `dataset_ref` is an rdflib URIRef object
+        that must be used to reference the dataset when working with the graph.
+        `catalog_record_ref` is an rdflib URIRef object
+        that must be used to reference the catalog record when working with the graph.
+        """
+        pass
+
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         """
         Creates an RDF graph for the whole catalog (site)

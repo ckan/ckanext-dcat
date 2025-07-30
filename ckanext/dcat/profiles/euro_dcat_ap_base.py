@@ -779,3 +779,18 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
         modified = self._last_catalog_modification()
         if modified:
             self._add_date_triple(catalog_ref, DCT.modified, modified)
+
+    def _graph_from_catalog_record_base(self, dataset_dict, dataset_ref, catalog_record_ref):
+        g = self.g
+
+        for prefix, namespace in namespaces.items():
+            g.bind(prefix, namespace)
+
+        g.add((catalog_record_ref, RDF.type, DCAT.CatalogRecord))
+        g.add((catalog_record_ref, FOAF.primaryTopic, dataset_ref))
+        # NOTE: _graph_from_dataset_base sets dct:modified for dcat:Dataset with metadata_modified too
+        # This might be semanctically incorrect, as this should pertain to the content of the dataset according to MobilityDCAT's interpretation of DCAT-AP2
+        items =[
+            ('metadata_modified', DCT.modified, None, Literal),
+        ]
+        self._add_date_triples_from_dict(dataset_dict, catalog_record_ref, items)
