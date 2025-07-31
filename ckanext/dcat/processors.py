@@ -374,9 +374,9 @@ class RDFSerializer(RDFProcessor):
         if dataset_dicts:
             for dataset_dict in dataset_dicts:
                 dataset_ref = self.graph_from_dataset(dataset_dict)
-                dataset_record_ref = self.graph_from_catalog_record(dataset_dict, dataset_ref, catalog_ref)
-                if self.g.triples((dataset_record_ref, RDF.type, DCAT.CatalogRecord)):
-                    self.g.add((catalog_ref, DCAT.record, dataset_record_ref))
+                catalog_record_ref = self.graph_from_catalog_record(dataset_dict, dataset_ref, catalog_ref)
+                if self.g.triples((catalog_record_ref, RDF.type, DCAT.CatalogRecord)):
+                    self.g.add((catalog_ref, DCAT.record, catalog_record_ref))
 
                 cat_ref = self._add_source_catalog(catalog_ref, dataset_dict, dataset_ref)
                 if not cat_ref:
