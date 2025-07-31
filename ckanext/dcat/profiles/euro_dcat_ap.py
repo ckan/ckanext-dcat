@@ -31,6 +31,10 @@ class EuropeanDCATAPProfile(BaseEuropeanDCATAPProfile):
 
         self._graph_from_catalog_base(catalog_dict, catalog_ref)
 
+    def graph_from_catalog_record(self, dataset_dict, dataset_ref, catalog_record_ref):
+
+        self._graph_from_catalog_record_base(dataset_dict, dataset_ref, catalog_record_ref)
+
     def _graph_from_dataset_v1_only(self, dataset_dict, dataset_ref):
         """
         CKAN -> DCAT v1 specific properties (not applied to higher versions)

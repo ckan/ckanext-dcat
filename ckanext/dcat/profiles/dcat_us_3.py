@@ -62,6 +62,10 @@ class DCATUS3Profile(EuropeanDCATAP3Profile):
 
         self._graph_from_catalog_base(catalog_dict, catalog_ref)
 
+    def graph_from_catalog_record(self, dataset_dict, dataset_ref, catalog_record_ref):
+
+        self._graph_from_catalog_record_base(dataset_dict, dataset_ref, catalog_record_ref)
+
     def _data_dictionary_parse(self, data_dict, subject):
 
         g = self.g

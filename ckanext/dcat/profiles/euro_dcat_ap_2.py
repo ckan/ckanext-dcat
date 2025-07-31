@@ -57,6 +57,10 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
 
         self._graph_from_catalog_base(catalog_dict, catalog_ref)
 
+    def graph_from_catalog_record(self, dataset_dict, dataset_ref, catalog_record_ref):
+
+        self._graph_from_catalog_record_base(dataset_dict, dataset_ref, catalog_record_ref)
+
     def _parse_dataset_v2(self, dataset_dict, dataset_ref):
         """
         DCAT -> CKAN properties carried forward to higher DCAT-AP versions

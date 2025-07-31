@@ -182,6 +182,24 @@ def dataset_uri(dataset_dict):
 
     return uri
 
+def catalog_record_uri(dataset_dict):
+    '''
+    Returns an URI for the catalog record
+
+    This will be used to uniquely reference the catalog record on the RDF
+    serializations.
+
+    Returns a string with the catalog record URI.
+    '''
+    if dataset_dict.get('id'):
+        uri = '{0}/catalog-record/{1}'.format(catalog_uri().rstrip('/'),
+                                       dataset_dict['id'])
+    else:
+        uri = '{0}/catalog-record/{1}'.format(catalog_uri().rstrip('/'),
+                                       str(uuid.uuid4()))
+        log.warning('Using a random id for catalog record URI')
+
+    return uri
 
 def resource_uri(resource_dict):
     '''

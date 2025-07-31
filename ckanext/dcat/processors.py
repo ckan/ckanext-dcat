@@ -13,7 +13,7 @@ from rdflib.namespace import Namespace, RDF
 
 import ckan.plugins as p
 
-from ckanext.dcat.utils import catalog_uri, dataset_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
+from ckanext.dcat.utils import catalog_uri, dataset_uri, catalog_record_uri, url_to_rdflib_format, DCAT_EXPOSE_SUBCATALOGS
 from ckanext.dcat.profiles import DCAT, DCT, FOAF
 from ckanext.dcat.exceptions import RDFProfileException, RDFParserException
 
@@ -264,6 +264,24 @@ class RDFSerializer(RDFProcessor):
 
         return dataset_ref
 
+    def graph_from_catalog_record(self, dataset_dict, dataset_ref, catalog_ref):
+        '''
+        Creates a graph for the catalog record using the loaded profiles
+
+        The class RDFLib graph (accessible via `serializer.g`) will be updated
+        by the loaded profiles.
+
+        Returns the reference to the catalog record, which will be an rdflib URIRef.
+        '''
+
+        catalog_record_ref = URIRef(catalog_record_uri(dataset_dict))
+
+        for profile_class in self._profiles:
+            profile = profile_class(self.g, compatibility_mode=self.compatibility_mode)
+            profile.graph_from_catalog_record(dataset_dict, dataset_ref, catalog_record_ref)
+
+        return catalog_record_ref
+
     def graph_from_catalog(self, catalog_dict=None):
         '''
         Creates a graph for the catalog (CKAN site) using the loaded profiles
@@ -356,6 +374,9 @@ class RDFSerializer(RDFProcessor):
         if dataset_dicts:
             for dataset_dict in dataset_dicts:
                 dataset_ref = self.graph_from_dataset(dataset_dict)
+                catalog_record_ref = self.graph_from_catalog_record(dataset_dict, dataset_ref, catalog_ref)
+                if self.g.triples((catalog_record_ref, RDF.type, DCAT.CatalogRecord)):
+                    self.g.add((catalog_ref, DCAT.record, catalog_record_ref))
 
                 cat_ref = self._add_source_catalog(catalog_ref, dataset_dict, dataset_ref)
                 if not cat_ref:
