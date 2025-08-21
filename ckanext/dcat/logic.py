@@ -20,6 +20,8 @@ def dcat_dataset_show(context, data_dict):
 
     toolkit.check_access('dcat_dataset_show', context, data_dict)
 
+    toolkit.check_access('package_show', context, data_dict)
+
     dataset_dict = toolkit.get_action('package_show')(context, data_dict)
 
     serializer = RDFSerializer(profiles=data_dict.get('profiles'))
