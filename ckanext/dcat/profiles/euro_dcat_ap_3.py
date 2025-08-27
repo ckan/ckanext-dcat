@@ -30,17 +30,6 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
         # DCAT AP v2 scheming fields
         dataset_dict = self._parse_dataset_v2_scheming(dataset_dict, dataset_ref)
 
-
-        # Check if it's a dataset series
-        if (dataset_ref, RDF.type, DCAT.DatasetSeries) in self.g:
-            dataset_dict["type"] = "dataset_series"
-
-            # Example defaulting logic (adjust based on RDF vocab if you have it)
-            if "series_order_field" not in dataset_dict:
-                dataset_dict["series_order_field"] = "metadata_created"
-            if "series_order_type" not in dataset_dict:
-                dataset_dict["series_order_type"] = "date"
-
         # DCAT AP v3: hasVersion
         values = self._object_value_list(dataset_ref, DCAT.hasVersion)
         if values:
