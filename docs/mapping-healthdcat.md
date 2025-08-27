@@ -32,4 +32,5 @@ Example value could be: dpv:ResearchAndDevelopment. |
 - `hdab` is parsed as an `foaf:Agent` and may include structured details.
 - `retention_period` expects a nested dictionary like `{ "start": <date>, "end": <date> }`.
 
-> See [EuropeanHealthDCATAPProfile](../ckanext/dcat/profiles/euro_health_dcat_ap.py) for implementation details.
+!!! Note
+    See [EuropeanHealthDCATAPProfile](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/profiles/euro_health_dcat_ap.py) for implementation details.
