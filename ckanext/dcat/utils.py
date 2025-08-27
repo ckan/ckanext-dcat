@@ -13,8 +13,10 @@ from ckan.exceptions import HelperError
 
 from ckan import model
 import ckan.plugins.toolkit as toolkit
+import ckan.plugins as plugins
 
 from ckanext.dcat.exceptions import RDFProfileException
+from ckanext.dcat.interfaces import IDCATURIGenerator
 
 from ckan.views.home import index as index_endpoint
 from ckan.views.dataset import read as read_endpoint
@@ -128,6 +130,13 @@ def catalog_uri():
                          'the `ckanext.dcat.base_uri` or `ckan.site_url` ' +
                          'option')
 
+    # Allow plugins to modify the catalog URI
+    for plugin in plugins.PluginImplementations(IDCATURIGenerator):
+        result = plugin.catalog_uri(uri)
+        if result is not None:
+            uri = result
+            break
+
     return uri
 
 
@@ -164,6 +173,13 @@ def dataset_uri(dataset_dict):
                                        str(uuid.uuid4()))
         log.warning('Using a random id for dataset URI')
 
+    # Allow plugins to modify the dataset URI
+    for plugin in plugins.PluginImplementations(IDCATURIGenerator):
+        result = plugin.dataset_uri(dataset_dict, uri)
+        if result is not None:
+            uri = result
+            break
+
     return uri
 
 
@@ -194,6 +210,13 @@ def resource_uri(resource_dict):
                                                     dataset_id,
                                                     resource_dict['id'])
 
+    # Allow plugins to modify the resource URI
+    for plugin in plugins.PluginImplementations(IDCATURIGenerator):
+        result = plugin.resource_uri(resource_dict, uri)
+        if result is not None:
+            uri = result
+            break
+
     return uri
 
 
@@ -208,11 +231,19 @@ def publisher_uri_organization_fallback(dataset_dict):
     Returns a string with the publisher URI, or None if no URI could be
     generated.
     '''
+    uri = None
     if dataset_dict.get('organization'):
-        return '{0}/organization/{1}'.format(catalog_uri().rstrip('/'),
+        uri = '{0}/organization/{1}'.format(catalog_uri().rstrip('/'),
                                             dataset_dict['organization']['id'])
 
-    return None
+    # Allow plugins to modify the publisher or organization URI
+    for plugin in plugins.PluginImplementations(IDCATURIGenerator):
+        result = plugin.publisher_uri(dataset_dict, uri)
+        if result is not None:
+            uri = result
+            break
+
+    return uri
 
 def dataset_id_from_resource(resource_dict):
     '''
