@@ -293,7 +293,7 @@ class EuropeanDCATAPProfile(RDFProfile):
             g.add((dataset_ref, DCAT.keyword, Literal(tag["name"])))
 
         inchi = dataset_dict.get("inchi")
-        log.debug(f'inchi type: {type(inchi)}')
+        # log.debug(f'inchi type: {type(inchi)}')
         if inchi is not None:
             # Check if the value is an int and convert it to a string
             if isinstance(inchi, int):
