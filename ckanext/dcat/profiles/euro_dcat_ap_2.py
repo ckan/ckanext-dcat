@@ -219,11 +219,11 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
 
                         contact_points = self._contact_details(access_service, DCAT.contactPoint)
                         if contact_points:
-                            access_service_dict["contact"] = contact_points[0]
+                            access_service_dict["contact"] = contact_points
                             
                         publishers = self._agents_details(access_service, DCT.publisher)
                         if publishers:
-                            access_service_dict["publisher"] = publishers[0]
+                            access_service_dict["publisher"] = publishers
 
                         creators = self._agents_details(access_service, DCT.creator)
                         if creators:
