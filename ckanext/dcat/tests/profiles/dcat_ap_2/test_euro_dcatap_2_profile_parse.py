@@ -90,18 +90,18 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
         assert access_service['description'] == 'This SPARQL end point allow to directly query the EU Whoiswho content'
         
-        contact_point = access_service.get("contact")
-        assert isinstance(contact_point, dict)
-        assert contact_point.get("name") == "John Doe"
-        assert contact_point.get("email") == "john@example.org"
+        contact_points = access_service.get("contact")
+        assert isinstance(contact_points, list)
+        assert contact_points[0].get("name") == "John Doe"
+        assert contact_points[0].get("email") == "john@example.org"
 
         creator = access_service.get("creator")
         assert isinstance(creator, list)
         assert creator[0].get("name") == "European Commission"
 
-        publisher = access_service.get("publisher")
-        assert isinstance(publisher, dict)
-        assert publisher.get("name") == "Publications Office of the European Union"
+        publishers = access_service.get("publisher")
+        assert isinstance(publishers, list)
+        assert publishers[0].get("name") == "Publications Office of the European Union"
 
     def test_dataset_all_fields(self):
 
