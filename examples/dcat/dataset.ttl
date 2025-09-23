@@ -26,7 +26,7 @@
                 [ a              foaf:Organization;
                   foaf:homepage  <https://www.example.com/hdab>;
                   foaf:mbox      <mailto:hdab@example.com>;
-                  foaf:name      "EU Health Data Access Body"@en
+                  foaf:name      "EU Health Data Access Body"@en, "EU Health Data Access Body"@nl ;
                 ];
         <http://healthdataportal.eu/ns/health#healthCategory>
                 <http://example.com/ontology/resource/authority/healthcategories/PHDR> , <http://example.com/ontology/resource/authority/healthcategories/IDHP> , <http://example.com/ontology/resource/authority/healthcategories/DIOH> , <http://example.com/ontology/resource/authority/healthcategories/EHRS>;
@@ -41,9 +41,10 @@
         <http://healthdataportal.eu/ns/health#numberOfUniqueIndividuals>
                 "7654321"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>;
         <http://healthdataportal.eu/ns/health#populationCoverage>
-                "This example includes a very non-descript population";
+                "This example includes a very non-descript population"@en, "Dit voorbeeld bevat een zeer nietszeggende populatie"@nl ;
         <http://healthdataportal.eu/ns/health#publisherNote>
-                "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation.";
+                "Health-RI is the Dutch health care initiative to build an integrated health data infrastructure for research and innovation."@en,
+                "Health-RI is het Nederlandse gezondheidszorginitiatief om een geïntegreerde gezondheidsdatainfrastructuur voor onderzoek en innovatie op te bouwen."@nl ;
         <http://healthdataportal.eu/ns/health#publisherType>
                 <http://example.com/publisherType/undefined>;
          <http://healthdataportal.eu/ns/health#trustedDataHolder>
@@ -59,7 +60,8 @@
         dct:alternative                 "TEST-DATASET";
         dct:conformsTo                  <http://www.wikidata.org/entity/Q19597236>;
         dct:creator                     <internalURI:creator0>;
-        dct:description                 "This dataset is an example of using HealthDCAT-AP in CKAN";
+        dct:description                 "This dataset is an example of using HealthDCAT-AP in CKAN"@en,
+                                        "Deze dataset is een voorbeeld van het gebruik van HealthDCAT-AP in CKAN"@nl ;
         dct:identifier                  "http://example.com/dataset/1234567890"^^<http://www.w3.org/2001/XMLSchema#anyURI>;
         dct:isPartOf                    <http://example.com/catalog/abcdefghijklmnopqrstuvwxyz>;
         dct:isReferencedBy              <https://doi.org/10.1038/sdata.2016.18> , <https://dx.doi.org/10.1002/jmri.28679>;
@@ -72,8 +74,7 @@
         dct:publisher                   [ a              foaf:Organization , foaf:Agent;
                                           foaf:homepage  <https://healthdata.nl>;
                                           foaf:mbox      <mailto:info@example.com>;
-                                          foaf:name      "Contact Point"@en ,
-                                                         "Contactpunt"@nl
+                                          foaf:name      "Contact Point"@en, "Contactpunt"@nl ;
                                         ];
         dct:relation                    <http://example.com/dataset/9876543210>;
         dcat:qualifiedRelation [
@@ -86,18 +87,18 @@
                                           dcat:endDate    "2024-12-31"^^<http://www.w3.org/2001/XMLSchema#date>;
                                           dcat:startDate  "2020-03-01"^^<http://www.w3.org/2001/XMLSchema#date>
                                         ];
-        dct:title                       "HealthDCAT-AP test dataset";
+        dct:title                       "HealthDCAT-AP test dataset"@en, "HealthDCAT-AP test dataset"@nl ;
         dct:type                        [ a               skos:Concept;
                                           skos:inScheme   <http://publications.europa.eu/resource/authority/dataset-type/PERSONAL_DATA>;
                                           skos:prefLabel  "Personal Data"
                                         ];
         adms:identifier                 <internalURI:admsIdentifier0>;
         adms:sample                     <http://example.com/sample>;
-        adms:versionNotes               "Dataset continuously updated";
+        adms:versionNotes               "Dataset continuously updated"@en, "Dataset continue bijgewerkt"@nl ;
         dcat:contactPoint               <internalURI:contactPoint0>;
         dcat:distribution <http://example.com/analytics> ;
         dcat:hasVersion                 <http://example.com/dataset/1234567890>;
-        dcat:keyword                    "Test 1" , "Test 2" , "Test 3";
+        dcat:keyword                    "Test 1"@en , "Test 2"@en , "Test 3"@nl ;
         dcat:spatialResolutionInMeters  "10"^^<http://www.w3.org/2001/XMLSchema#decimal>;
         dcat:temporalResolution         "P1D"^^<http://www.w3.org/2001/XMLSchema#duration>;
         dcat:theme                      <http://publications.europa.eu/resource/authority/data-theme/HEAL>;
@@ -121,7 +122,42 @@
                 <https://w3id.org/dpv/dpv-pd#Gender>,
                 <https://w3id.org/dpv/dpv-pd#HealthRecord>;
         <https://w3id.org/dpv#hasPurpose>
-                <https://w3id.org/dpv#AcademicResearch>.
+                <https://w3id.org/dpv#AcademicResearch> ;
+        adms:status <http://publications.europa.eu/resource/authority/dataset-status/DEVELOP> ;
+        dcat:inSeries <http://example.com/series> .
+# still to add:        dct:source
+
+<http://example.com/series>
+        a dcat:DatasetSeries ;
+        dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2022/868/oj> ;
+        dcat:contactPoint [
+                a vcard:Kind ;
+                vcard:hasURL <http://example.com/text> ;
+                vcard:hasEmail <mailto:test@example.com> ;
+                vcard:fn "Test Example" ;
+        ] ;
+        dct:description "This is an example dataset series with dummy data" ;
+        dct:accrualPeriodicity <http://publications.europa.eu/resource/authority/frequency/DAILY> ;
+        dct:spatial <http://publications.europa.eu/resource/authority/country/BEL> ;
+        dct:modified "2025-09-10T15:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        dct:publisher [
+                a foaf:Agent ;
+                dct:spatial <http://publications.europa.eu/resource/authority/country/BEL> ;
+                foaf:mbox <mailto:test@example.com> ;
+                dct:identifier "test" ;
+                foaf:name "Test Example" ;
+                healthdcatap:publisherNote "Example note" ;
+                healthdcatap:publisherType <http://purl.org/adms/publishertype/NationalAuthority> ;
+                dct:type <http://purl.org/adms/publishertype/NationalAuthority> ;
+                foaf:homepage <http://example.com/> ;
+        ] ;
+        dct:issued "2025-09-01T12:00:00Z"^^<<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        dct:temporal [
+                a dct:PeriodOfTime;
+                dcat:endDate "2024-12-31"^^<http://www.w3.org/2001/XMLSchema#date>;
+                dcat:startDate "2020-03-01"^^<http://www.w3.org/2001/XMLSchema#date>
+        ];
+        dct:title "Example dataset series"@en, "Voorbeeld dataset serie"@nl .
 
 <http://example.com/analytics>
         a                             dcat:Distribution;
@@ -135,7 +171,8 @@
         dct:rights                    [ a           dct:RightsStatement;
                                         rdfs:label  "_g_L202C11377" , "internalURI:wasGeneratedBy0" , "_g_L123C7733"
                                       ];
-        dct:title                     "Technical report number of unique study subjects available by environment for project HDBP0250";
+        dct:title                     "Technical report number of unique study subjects available by environment for project HDBP0250"@en,
+                                      "Technisch rapport aantal unieke studiepersonen beschikbaar per omgeving voor project HDBP0250"@nl ;
         dcat:accessURL                <https://www.dummy.com/>;
         <http://healthdataportal.eu/ns/health#retentionPeriod>
         [ a               dct:PeriodOfTime;
@@ -144,7 +181,37 @@
           dcat:startDate  "2020-03-01"^^<http://www.w3.org/2001/XMLSchema#date>
         ];
         dcat:downloadURL              <https://fair.healthdata.be/sites/default/files/distribution/d43a158e-7d13-4660-bbc3-9d3f8d5501e5/Technical_report_number_of_unique_study_subjects_available_by_environment_for_project_HDBP0250.csv>;
-        dcat:mediaType                <http://www.iana.org/assignments/media-types/text/csv> .
+        dcat:mediaType                <http://www.iana.org/assignments/media-types/text/csv> ;
+        dcat:accessService [
+          a dcat:DataService;
+          dct:conformsTo   <http://example.org/spec>;
+          dct:format       <http://example.org/format>;
+          dct:identifier   "service-123";
+          dct:language     <http://publications.europa.eu/resource/authority/language/ENG>;
+          dct:rights       "open use";
+          dcat:landingPage <http://example.org/landing>;
+          dcat:keyword     "keyword1"@en, "trefwoord2"@nl ;
+          dcat:contactPoint [
+                a vcard:Kind ;
+                vcard:hasURL <http://example.com/text> ;
+                vcard:hasEmail <mailto:test@example.com> ;
+                vcard:fn "Test Example" ;
+          ] ;
+          dct:creator [
+                a foaf:Agent ;
+                dct:spatial <http://publications.europa.eu/resource/authority/country/BEL> ;
+                foaf:mbox <mailto:test@example.com> ;
+                dct:identifier "test" ;
+                foaf:name "Test Example" ;
+                healthdcatap:publisherNote "Example note" ;
+                healthdcatap:publisherType <http://purl.org/adms/publishertype/NationalAuthority> ;
+                dct:type <http://purl.org/adms/publishertype/NationalAuthority> ;
+                foaf:homepage <http://example.com/> ;
+          ] ;
+        ] ;
+        foaf:page <http://example.com/test> ;
+        dct:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+        dct:conformsTo <http://example.org/spec> .
 
 <http://www.iana.org/assignments/media-types/text/csv>
         a       dct:MediaType .
@@ -153,7 +220,7 @@
         a              foaf:Agent;
         foaf:homepage  <https:/example.com/homepage>;
         foaf:mbox      <mailto:info@example.com>;
-        foaf:name      "Contact Point"@en , "Contactpunt"@nl .
+        foaf:name      "Contact Point"@en, "Contactpunt"@nl .
 
 <internalURI:admsIdentifier0>
         a                  adms:Identifier;
@@ -204,7 +271,8 @@
         dct:rights                    [ a           dct:RightsStatement;
                                         rdfs:label  "Free access."
                                       ];
-        dct:title                     "Proxy data generating for the EHDS2 Pilot project Sciensano Use Case";
+        dct:title                     "Proxy data generating for the EHDS2 Pilot project Sciensano Use Case"@en,
+                                      "Proxygegevens gegenereerd voor het EHDS2-pilotproject Sciensano Use Case"@nl;
         dcat:accessURL                <https://www.dummy.com/>;
         dcat:downloadURL              <https://github.com/CAVDgit/EHDS2_UC_Sciensano/blob/main/use_case_1_synthetic_data_10K_individuals.csv>;
         dcat:mediaType                <http://www.iana.org/assignments/media-types/text/csv> .
@@ -232,8 +300,7 @@
         prov:agent    [ a              foaf:Organization;
                         foaf:homepage  <https://healthdata.be>;
                         foaf:mbox      <mailto:healthdata@sciensano.be>;
-                        foaf:name      "Contact Point"@en ,
-                                         "Contactpunt"@nl
+                        foaf:name      "Contact Point"@en, "Contactpunt"@nl ;
                       ] .
 
 <http://publications.europa.eu/resource/authority/country/BEL>
@@ -258,13 +325,11 @@
         prov:startedAtTime      "2021-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
         prov:wasAssociatedWith  [ a                     prov:Agent;
                                   prov:actedOnBehalfOf  [ a          prov:Organization , prov:Agent;
-                                                          foaf:name  "Contact Point"@en ,
-                                                                     "Contactpunt"@nl
+                                                          foaf:name  "Contact Point"@en, "Contactpunt"@nl ;
                                                         ];
                                   foaf:homepage         <https://www.sciensano.be/fr/people/joris-van-loenhout>;
                                   foaf:mbox             <mailto:Joris.VanLoenhout@sciensano.be>;
-                                  foaf:name             "Dr. Joris van Loenhout"@en ,
-                                                         "Dr. Joris van Loenhout"@nl
+                                  foaf:name             "Dr. Joris van Loenhout"
                                 ];
         foaf:page               <https://www.sciensano.be/sites/default/files/information_letter_linkvacc_20221010_en.pdf> .
 
@@ -285,6 +350,8 @@
         skos:notation       "U07.1";
         skos:prefLabel      "Test 1" .
 
-<http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>
-        a           dct:LicenseDocument;
-        rdfs:label  "Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported" .
+#<http://publications.europa.eu/resource/authority/licence/CC_BYNCND_3_0>
+#        a           dct:LicenseDocument;
+#        rdfs:label  "Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported" .
+
+<http://publications.europa.eu/resource/authority/dataset-status/DEVELOP> a skos:Concept .
