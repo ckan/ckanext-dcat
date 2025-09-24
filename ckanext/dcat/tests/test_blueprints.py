@@ -66,6 +66,28 @@ class TestEndpoints():
         assert dcat_dataset['title'] == dataset['title']
         assert dcat_dataset['notes'] == dataset['notes']
 
+    def test_dataset_default_private(self, app):
+        user = factories.UserWithToken()
+        org = factories.Organization(users=[{"name": user["name"], "capacity": "admin"}])
+        dataset = factories.Dataset(
+            notes='Test dataset',
+            owner_org=org['id'],
+            private=True
+        )
+
+        url = url_for('dcat.read_dataset', _id=dataset['name'], _format='rdf')
+
+
+        # Unauthenticated request
+        response = app.get(url)
+        assert response.status_code == 403
+
+        # Authenticated request
+        headers = {"Authorization": user["token"]}
+        response = app.get(url, headers=headers)
+
+        assert response.headers['Content-Type'] == 'application/rdf+xml'
+
     def test_dataset_xml(self, app):
 
         dataset = factories.Dataset(
