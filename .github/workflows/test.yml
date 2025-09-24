@@ -68,7 +68,8 @@ jobs:
         pip install -r ckanext-harvest/requirements.txt
         git clone https://github.com/ckan/ckanext-scheming
         pip install -e ckanext-scheming
-        pip install git+https://github.com/ckan/ckanext-fluent.git@4e9340a#egg=ckanext-fluent
+        git clone https://github.com/ckan/ckanext-fluent
+        pip install -e ckanext-fluent
         git clone https://github.com/ckan/ckanext-dataset-series
         pip install -e ckanext-dataset-series
     - name: Setup extension

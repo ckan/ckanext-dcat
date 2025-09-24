@@ -733,8 +733,6 @@ resource_fields:
 
     - field_name: rights
       label: Rights
-      form_snippet: markdown.html
-      display_snippet: markdown.html
       preset: multiple_text
       validators: ignore_missing scheming_multiple_text
 

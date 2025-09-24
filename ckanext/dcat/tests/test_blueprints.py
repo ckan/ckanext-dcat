@@ -66,6 +66,28 @@ class TestEndpoints():
         assert dcat_dataset['title'] == dataset['title']
         assert dcat_dataset['notes'] == dataset['notes']
 
+    def test_dataset_default_private(self, app):
+        user = factories.UserWithToken()
+        org = factories.Organization(users=[{"name": user["name"], "capacity": "admin"}])
+        dataset = factories.Dataset(
+            notes='Test dataset',
+            owner_org=org['id'],
+            private=True
+        )
+
+        url = url_for('dcat.read_dataset', _id=dataset['name'], _format='rdf')
+
+
+        # Unauthenticated request
+        response = app.get(url)
+        assert response.status_code == 403
+
+        # Authenticated request
+        headers = {"Authorization": user["token"]}
+        response = app.get(url, headers=headers)
+
+        assert response.headers['Content-Type'] == 'application/rdf+xml'
+
     def test_dataset_xml(self, app):
 
         dataset = factories.Dataset(
@@ -612,8 +634,8 @@ class TestCroissant():
         response = app.get(url)
 
         assert '<script type="application/ld+json">' in response.body
-        assert '"description": "test description"' in response.body
-        assert '"conformsTo": "http://mlcommons.org/croissant/1.0"' in response.body
+        assert '"@value": "test description"' in response.body
+        assert '"@value": "http://mlcommons.org/croissant/1.0"' in response.body
 
     @pytest.mark.ckan_config('ckan.plugins', 'dcat croissant')
     def test_croissant_metadata_endpoint(self, app):
@@ -627,8 +649,8 @@ class TestCroissant():
         response = app.get(url)
         croissant_dict = json.loads(response.body)
 
-        assert croissant_dict["description"] == "test description"
-        assert croissant_dict["conformsTo"] == "http://mlcommons.org/croissant/1.0"
+        assert croissant_dict["description"] == {"@value": "test description"}
+        assert croissant_dict["conformsTo"] == {"@value": "http://mlcommons.org/croissant/1.0"}
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")

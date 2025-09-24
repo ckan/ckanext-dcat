@@ -183,6 +183,7 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
         return [retention_dict] if retention_dict else []
 
+
     def graph_from_dataset(self, dataset_dict, dataset_ref):
         super().graph_from_dataset(dataset_dict, dataset_ref)
         for prefix, namespace in namespaces.items():
