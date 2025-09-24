@@ -24,6 +24,7 @@ SCHEMA = Namespace("https://schema.org/")
 
 JSONLD_CONTEXT = {
     "@vocab": "https://schema.org/",
+    "@language": config.get("ckan.locale_default"),
     "sc": "https://schema.org/",
     "cr": "http://mlcommons.org/croissant/",
     "rai": "http://mlcommons.org/croissant/RAI/",
