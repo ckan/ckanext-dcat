@@ -124,6 +124,7 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert _get_extra_value('access_rights') == 'public'
         assert _get_extra_value('provenance') == 'Some statement about provenance'
         assert _get_extra_value('dcat_type') == 'test-type'
+        assert _get_extra_value('homepage') == 'http://dataset.info.org/home'
 
         #  Lists
         assert sorted(_get_extra_value_as_list('language')) == [u'ca', u'en', u'es']

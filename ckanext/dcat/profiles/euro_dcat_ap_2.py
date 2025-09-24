@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal, DecimalException
 
-from rdflib import URIRef, BNode, Literal, Namespace
+from rdflib import URIRef, BNode, Literal, Namespace, FOAF, PROV, RDF, RDFS
 from ckanext.dcat.utils import resource_uri
 
 from .base import URIRefOrLiteral, CleanedURIRef
@@ -17,7 +17,6 @@ from .base import (
 )
 
 from .euro_dcat_ap_base import BaseEuropeanDCATAPProfile
-
 
 ELI = Namespace("http://data.europa.eu/eli/ontology#")
 
@@ -65,6 +64,32 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
         # Call base super method for common properties
         super().parse_dataset(dataset_dict, dataset_ref)
 
+        # --- Provenance deserialization ---
+        was_generated_by = self.g.value(dataset_ref, PROV.wasGeneratedBy)
+        if was_generated_by:
+            activity_dict = {}
+            activity_dict["uri"] = str(was_generated_by)
+            activity_dict["type"] = [
+                str(t) for t in self.g.objects(was_generated_by, RDF.type)
+            ]
+            activity_dict["label"] = self._object_value(was_generated_by, RDFS.label)
+            activity_dict["seeAlso"] = self._object_value(was_generated_by, RDFS.seeAlso)
+            activity_dict["dct_type"] = self._object_value(was_generated_by, DCT.type)
+            activity_dict["startedAtTime"] = self._object_value(
+                was_generated_by, PROV.startedAtTime
+            )
+
+            agents = self._agents_details(was_generated_by, PROV.wasAssociatedWith)
+            if agents:
+                activity_dict["wasAssociatedWith"] = [agents[0]] # Only take the first agent
+
+            dataset_dict["provenance_activity"] = [activity_dict]
+
+        # --- Qualified Attribution ---
+        qualified_attributions = self._parse_qualified_attributions(dataset_ref)
+        if qualified_attributions:
+            dataset_dict["qualified_attribution"] = qualified_attributions
+        
         # Standard values
         value = self._object_value(dataset_ref, DCAT.temporalResolution)
         if value:
@@ -159,7 +184,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     ):
                         access_service_dict = {}
 
-                        #  Simple values
+                        # Simple values
                         for key, predicate in (
                             ("availability", DCATAP.availability),
                             ("title", DCT.title),
@@ -167,18 +192,42 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                             ("license", DCT.license),
                             ("access_rights", DCT.accessRights),
                             ("description", DCT.description),
+                            ("identifier", DCT.identifier),
+                            ("description", DCT.description),
+                            ("modified", DCT.modified),
                         ):
                             value = self._object_value(access_service, predicate)
                             if value:
                                 access_service_dict[key] = value
-                        #  List
+
+                        # List values
                         for key, predicate in (
                             ("endpoint_url", DCAT.endpointURL),
                             ("serves_dataset", DCAT.servesDataset),
+                            ("conforms_to", DCT.conformsTo),
+                            ("format", DCT["format"]),
+                            ("language", DCT.language),
+                            ("rights", DCT.rights),
+                            ("landing_page", DCAT.landingPage),
+                            ("keyword", DCAT.keyword),
+                            ("applicable_legislation", DCATAP.applicableLegislation),
+                            ("theme", DCAT.theme),
                         ):
                             values = self._object_value_list(access_service, predicate)
                             if values:
                                 access_service_dict[key] = values
+
+                        contact_points = self._contact_details(access_service, DCAT.contactPoint)
+                        if contact_points:
+                            access_service_dict["contact"] = contact_points
+                            
+                        publishers = self._agents_details(access_service, DCT.publisher)
+                        if publishers:
+                            access_service_dict["publisher"] = publishers
+
+                        creators = self._agents_details(access_service, DCT.creator)
+                        if creators:
+                            access_service_dict["creator"] = creators
 
                         # Access service URI (explicitly show the missing ones)
                         access_service_dict["uri"] = (
@@ -246,6 +295,44 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                 _datatype=datatype,
                 _class=_class,
             )
+
+        # --- Provenance serialization ---
+        activities = dataset_dict.get("provenance_activity", [])
+
+        for activity in activities:
+            activity_uri = URIRef(activity.get("uri")) if activity.get("uri") else BNode()
+            self.g.add((dataset_ref, PROV.wasGeneratedBy, activity_uri))
+            self.g.add((activity_uri, RDF.type, PROV.Activity))
+
+            if activity.get("label"):
+                self.g.add((activity_uri, RDFS.label, Literal(activity["label"])))
+            if activity.get("seeAlso"):
+                self.g.add((activity_uri, RDFS.seeAlso, URIRef(activity["seeAlso"])))
+            if activity.get("dct_type"):
+                self.g.add((activity_uri, DCT.type, URIRef(activity["dct_type"])))
+            if activity.get("startedAtTime"):
+                self.g.add((activity_uri, PROV.startedAtTime, Literal(activity["startedAtTime"], datatype=XSD.dateTime)))
+
+            for agent_dict in activity.get("wasAssociatedWith", []):
+                self._add_agent_to_graph(activity_uri, PROV.wasAssociatedWith, agent_dict)
+
+        # Qualified Attribution
+        qualified_attributions = dataset_dict.get("qualified_attribution", [])
+        for attr in qualified_attributions:
+            attr_ref = BNode()
+            self.g.add((dataset_ref, DCAT.qualifiedAttribution, attr_ref))
+            self.g.add((attr_ref, RDF.type, DCAT.Attribution))
+
+            agent_list = attr.get("agent", [])
+            for agent_dict in agent_list:
+                if isinstance(agent_dict, dict):
+                    self._add_agent_to_graph(attr_ref, DCAT.agent, agent_dict)
+                elif isinstance(agent_dict, str):
+                    self.g.add((attr_ref, DCAT.agent, URIRef(agent_dict)))
+            role = attr.get("role")
+            if role:
+                self.g.add((attr_ref, DCAT.hadRole, URIRef(role)))
+
 
         # Temporal
 
@@ -408,10 +495,56 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                         RDFS.Resource,
                     ),
                     ("description", DCT.description, None, Literal),
+                    ("modified", DCT.modified, None, Literal),
                 ]
-
                 self._add_triples_from_dict(
                     access_service_dict, access_service_node, items
+                )
+
+                if access_service_dict.get("modified"):
+                    self._add_date_triple(access_service_node, DCT.modified, access_service_dict.get("modified"))
+
+
+                contact_point_dict = access_service_dict.get("contact")
+                if contact_point_dict:
+                    self._add_contact_to_graph(access_service_node, DCAT.contactPoint, contact_point_dict)
+
+                publisher_dict = access_service_dict.get("publisher")
+                if publisher_dict:
+                    self._add_agent_to_graph(access_service_node, DCT.publisher, publisher_dict)
+
+                for creator_dict in access_service_dict.get("creator", []):
+                    self._add_agent_to_graph(access_service_node, DCT.creator, creator_dict)
+
+                # Extra list values for access services
+                extra_items = [
+                    ("conforms_to", DCT.conformsTo, None, URIRefOrLiteral),
+                    ("format", DCT["format"], None, URIRefOrLiteral),
+                    ("language", DCT.language, None, URIRefOrLiteral),
+                    ("rights", DCT.rights, None, URIRefOrLiteral),
+                    ("landing_page", DCAT.landingPage, None, URIRefOrLiteral),
+                    ("applicable_legislation", DCATAP.applicableLegislation, None, URIRefOrLiteral, ELI.LegalResource),
+                    ("theme", DCAT.theme, None, URIRefOrLiteral),
+                ]
+                self._add_list_triples_from_dict(access_service_dict, access_service_node, extra_items)
+
+                # Add single-value triple for identifier
+                self._add_triple_from_dict(
+                    access_service_dict,
+                    access_service_node,
+                    DCT.identifier,
+                    "identifier",
+                    _type=URIRefOrLiteral
+                )
+
+                # Add keyword list
+                self._add_triple_from_dict(
+                    access_service_dict,
+                    access_service_node,
+                    DCAT.keyword,
+                    "keyword",
+                    list_value=True,
+                    _type=Literal
                 )
 
                 #  Lists
@@ -448,3 +581,23 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
             _type=URIRefOrLiteral,
             _class=ADMS.Identifier,
         )
+        
+    def _parse_qualified_attributions(self, dataset_ref):
+        attributions = []
+        for qual_attr_ref in self.g.objects(dataset_ref, PROV.qualifiedAttribution):
+            attr = {}
+
+            # Get role
+            for role_ref in self.g.objects(qual_attr_ref, DCAT.hadRole):
+                attr["role"] = str(role_ref)
+                break
+
+            # Get agent (using shared logic)
+            agent_details = self._agents_details(qual_attr_ref, PROV.agent)
+            if agent_details:
+                attr["agent"] = agent_details
+
+            if attr:
+                attributions.append(attr)
+
+        return attributions

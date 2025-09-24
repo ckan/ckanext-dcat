@@ -112,6 +112,11 @@ dataset_fields:
       label: Identifier
       help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
 
+- field_name: homepage
+  label: Homepage
+  display_snippet: link.html
+  help_text: A web page that acts as the homepage for the dataset.
+
 - field_name: license_id
   label: License
   form_snippet: license.html
@@ -285,6 +290,85 @@ dataset_fields:
       help_text: The function of an entity or agent with respect to another entity or resource.
   help_text: A description of a relationship with another resource.
 
+- field_name: provenance_activity
+  label: Provenance Activity
+  repeating_label: Provenance Activity
+  repeating_once: true
+  repeating_subfields:
+    - field_name: uri
+      label: Activity URI
+      help_text: URI of the provenance activity (if available).
+    - field_name: label
+      label: Label
+      help_text: Human-readable label for the activity.
+    - field_name: seeAlso
+      label: See Also
+      help_text: Related link for the activity.
+    - field_name: dct_type
+      label: Type
+      help_text: Type of the activity (URI).
+    - field_name: startedAtTime
+      label: Started At Time
+      help_text: When the activity started (ISO 8601).
+    - field_name: wasAssociatedWith
+      label: Associated Agent
+      repeating_label: Agent
+      repeating_once: true
+      repeating_subfields:
+        - field_name: uri
+          label: URI
+        - field_name: name
+          label: Name
+        - field_name: email
+          label: Email
+        - field_name: homepage
+          label: Homepage
+        - field_name: type
+          label: Type
+        - field_name: identifier
+          label: Identifier
+        - field_name: url
+          label: URL
+        - field_name: actedOnBehalfOf
+          label: Acted On Behalf Of
+          repeating_label: Organization
+          repeating_once: true
+          repeating_subfields:
+            - field_name: name
+              label: Organization Name
+  help_text: Structured provenance activity information, including agent and organization.
+
+# Add qualified_attribution field here, just before the commented-out hvd_category field
+- field_name: qualified_attribution
+  label: Qualified Attribution
+  repeating_label: Attribution
+  repeating_once: true
+  repeating_subfields:
+    - field_name: agent
+      label: Agent
+      repeating_label: Agent
+      repeating_once: true
+      repeating_subfields:
+        - field_name: uri
+          label: URI
+        - field_name: name
+          label: Name
+        - field_name: email
+          label: Email
+        - field_name: homepage
+          label: Homepage
+        - field_name: type
+          label: Type
+        - field_name: identifier
+          label: Identifier
+        - field_name: url
+          label: URL
+    - field_name: role
+      label: Role
+      help_text: Role of the agent (e.g., data processor, contributor).
+  help_text: Structured qualified attribution information including agent and role.
+
+
 #- field_name: hvd_category
 #  label: HVD Category
 #  preset: multiple_text
@@ -439,6 +523,11 @@ resource_fields:
     - field_name: title
       label: Title
 
+    - field_name: description
+      label: Description
+      form_snippet: markdown.html
+      help_text: A free-text account of the resource.
+
     - field_name: endpoint_description
       label: Endpoint description
 
@@ -455,6 +544,147 @@ resource_fields:
       label: Access rights
       validators: ignore_missing unicode_safe
       help_text: Information regarding access or restrictions based on privacy, security, or other policies.
+
+    - field_name: conforms_to
+      label: Conforms to
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+
+    - field_name: format
+      label: Format
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+
+    - field_name: identifier
+      label: Identifier
+
+    - field_name: language
+      label: Language
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+
+    - field_name: rights
+      label: Rights
+      form_snippet: markdown.html
+      display_snippet: markdown.html
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+
+    - field_name: landing_page
+      label: Landing page
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+
+    - field_name: keyword
+      label: Keywords
+      preset: tag_string_autocomplete
+      form_placeholder: eg. economy, mental health, government
+      help_text: Keywords or tags describing the dataservice. Use commas to separate multiple values.
+    
+    - field_name: applicable_legislation
+      label: Applicable legislation
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+      help_text: The legislation that mandates the creation or management of the dataset.
+
+    - field_name: contact
+      label: Contact point
+      repeating_label: Contact point
+      repeating_once: true
+      repeating_subfields:
+
+        - field_name: uri
+          label: URI
+
+        - field_name: name
+          label: Name
+
+        - field_name: email
+          label: Email
+          display_snippet: email.html
+
+        - field_name: identifier
+          label: Identifier
+          help_text: Unique identifier for the contact point. Such as a ROR ID.
+        
+        - field_name: url
+          label: URL
+          help_text: A URL associated with the contact
+      help_text: Contact information for enquiries about the dataservice.
+
+    - field_name: creator
+      label: Creator
+      repeating_label: Creator
+      repeating_subfields:
+
+        - field_name: uri
+          label: URI
+          help_text: URI of the creator, if available.
+
+        - field_name: name
+          label: Name
+          help_text: Name of the entity or person who created the dataservice.
+
+        - field_name: email
+          label: Email
+          display_snippet: email.html
+          help_text: Contact email of the creator.
+
+        - field_name: url
+          label: URL
+          display_snippet: link.html
+          help_text: URL for more information about the creator.
+
+        - field_name: type
+          label: Type
+          help_text: Type of creator (e.g., Organization, Person).
+
+        - field_name: identifier
+          label: Identifier
+          help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
+
+    - field_name: publisher
+      label: Publisher
+      repeating_label: Publisher
+      repeating_once: true
+      repeating_subfields:
+
+        - field_name: uri
+          label: URI
+
+        - field_name: name
+          label: Name
+
+        - field_name: email
+          label: Email
+          display_snippet: email.html
+
+        - field_name: url
+          label: URL
+          display_snippet: link.html
+
+        - field_name: type
+          label: Type
+
+        - field_name: identifier
+          label: Identifier
+          help_text: Unique identifier for the publisher, such as a ROR ID.
+      help_text: Entity responsible for making the dataset available.
+
+    - field_name: license
+      label: License
+      help_text: License in which the resource is made available. If not provided will be inherited from the dataset.
+
+    - field_name: modified
+      label: Modification date
+      preset: dcat_date
+      help_text: Most recent date on which the dataset was changed, updated or modified.
+
+    - field_name: theme
+      label: Theme
+      preset: multiple_text
+      validators: ignore_missing scheming_multiple_text
+      help_text: A category of the dataservice. A Dataservice may be associated with multiple themes.
 
   help_text: A data service that gives access to the resource.
 

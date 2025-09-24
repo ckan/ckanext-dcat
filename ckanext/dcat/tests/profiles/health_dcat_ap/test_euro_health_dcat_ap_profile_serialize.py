@@ -3,9 +3,9 @@ import json
 import pytest
 from ckan.tests.helpers import call_action
 from geomet import wkt
-from rdflib import Graph
-from rdflib.namespace import RDF
+from rdflib import Graph, PROV, Literal
 from rdflib.term import URIRef
+from rdflib.namespace import Namespace
 
 from ckanext.dcat import utils
 from ckanext.dcat.processors import RDFSerializer
@@ -30,6 +30,8 @@ from ckanext.dcat.tests.utils import BaseSerializeTest
 
 DCAT_AP_PROFILES = ["euro_dcat_ap_3"]
 
+# Open Annotation namespace
+OA = Namespace("http://www.w3.org/ns/oa#")
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
 @pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
@@ -103,3 +105,99 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             assert self._triple(
                 g, relation[0][2], predicate, value
             ), f"relation Predicate {predicate} does not have value {value}"
+
+        # Test provenance activity
+        provenance = [t for t in g.triples((dataset_ref, PROV.wasGeneratedBy, None))]
+        assert len(provenance) == 1
+        activity_node = provenance[0][2]
+        activity_items = [
+            (RDF.type, PROV.Activity),
+            (RDFS.label, Literal(dataset_dict["provenance_activity"][0]["label"])),
+            (RDFS.seeAlso, URIRef(dataset_dict["provenance_activity"][0]["seeAlso"])),
+            (DCT.type, URIRef(dataset_dict["provenance_activity"][0]["dct_type"])),
+            (PROV.startedAtTime, Literal(dataset_dict["provenance_activity"][0]["startedAtTime"], datatype=XSD.dateTime)),
+        ]
+        for predicate, value in activity_items:
+            assert self._triple(g, activity_node, predicate, value), f"Provenance {predicate} mismatch"
+
+        agent_triple = list(g.objects(activity_node, PROV.wasAssociatedWith))
+        assert len(agent_triple) == 1
+        agent_node = agent_triple[0]
+        agent_items = [
+            (RDF.type, PROV.Agent),
+            (FOAF.name, Literal(dataset_dict["provenance_activity"][0]["wasAssociatedWith"][0]["name"])),
+            (FOAF.homepage, URIRef(dataset_dict["provenance_activity"][0]["wasAssociatedWith"][0]["homepage"])),
+            (FOAF.mbox, URIRef(dataset_dict["provenance_activity"][0]["wasAssociatedWith"][0]["email"])),
+        ]
+
+        acted_on = list(g.objects(agent_node, PROV.actedOnBehalfOf))
+        assert len(acted_on) == 1
+        org_node = acted_on[0]
+        assert self._triple(g, org_node, FOAF.name, Literal(dataset_dict["provenance_activity"][0]["wasAssociatedWith"][0]["actedOnBehalfOf"][0]["name"]))
+
+        # Test qualified attribution
+        attributions = [t for t in g.triples((dataset_ref, DCAT.qualifiedAttribution, None))]
+        assert len(attributions) == 1
+        attr_node = attributions[0][2]
+        assert self._triple(g, attr_node, RDF.type, DCAT.Attribution)
+        assert self._triple(g, attr_node, DCAT.hadRole, URIRef(dataset_dict["qualified_attribution"][0]["role"]))
+
+        agent_node = list(g.objects(attr_node, DCAT.agent))[0]
+        agent_details = dataset_dict["qualified_attribution"][0]["agent"][0]
+        agent_items = [
+            (RDF.type, FOAF.Organization),
+            (FOAF.name, Literal(agent_details["name"])),
+            (FOAF.mbox, URIRef("mailto:" + agent_details["email"])),
+            (FOAF.homepage, URIRef(agent_details["homepage"])),
+        ]
+        for predicate, value in agent_items:
+            assert self._triple(g, agent_node, predicate, value), f"QualifiedAttribution Agent {predicate} mismatch"
+
+        # Test qualified annotation
+        annotations = [t for t in
+                       g.triples((dataset_ref, URIRef("http://www.w3.org/ns/dqv#hasQualityAnnotation"), None))]
+        assert len(annotations) == 1, "Expected one dqv:hasQualityAnnotation triple"
+
+        annotation_node = annotations[0][2]
+        assert self._triple(g, annotation_node, RDF.type, URIRef("http://www.w3.org/ns/oa#Annotation"))
+
+        annotation_details = dataset_dict["quality_annotation"][0]
+
+        # Assert URI-based fields
+        for field, predicate_uri in [
+            ("motivated_by", OA.motivatedBy),
+            ("body", OA.hasBody),
+            ("target", OA.hasTarget),
+        ]:
+            value = annotation_details.get(field)
+            assert value is not None, f"Missing {field} in annotation"
+            assert self._triple(g, annotation_node, URIRef(predicate_uri),
+                                URIRef(value)), f"QualityAnnotation {field} mismatch"
+            
+        # Extract the distribution node
+        distributions = list(g.objects(dataset_ref, DCAT.distribution))
+        assert len(distributions) > 0, "No distributions found"
+        distribution_node = distributions[0]
+
+        distribution_details = dataset_dict["resources"][0]
+
+        assert self._triple(g, distribution_node, RDF.type, DCAT.Distribution)
+
+        # Check retention period
+        retention_nodes = list(g.objects(distribution_node, HEALTHDCATAP.retentionPeriod))
+        assert len(retention_nodes) == 1, "Expected one retentionPeriod node on distribution"
+        retention_node = retention_nodes[0]
+        assert self._triple(g, retention_node, RDF.type, DCT.PeriodOfTime)
+        assert self._triple(
+            g,
+            retention_node,
+            DCAT.startDate,
+            Literal(distribution_details["retention_period"][0]["start"], datatype=XSD.date)
+        )
+        assert self._triple(
+            g,
+            retention_node,
+            DCAT.endDate,
+            Literal(distribution_details["retention_period"][0]["end"], datatype=XSD.date)
+        )
+

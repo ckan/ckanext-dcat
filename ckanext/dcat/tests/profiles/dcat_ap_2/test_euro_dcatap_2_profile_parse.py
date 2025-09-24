@@ -24,6 +24,84 @@ DCAT_AP_PROFILES = [DCAT_AP_2_PROFILE]
 
 
 class TestEuroDCATAP2ProfileParsing(BaseParseTest):
+    def test_parse_access_service_extra_fields(self):
+        rdf_data = '''<?xml version="1.0" encoding="utf-8" ?>
+        <rdf:RDF
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dcatap="http://data.europa.eu/r5r/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+          <dcat:Dataset rdf:about="http://example.org">
+            <dcat:distribution>
+              <dcat:Distribution>
+                <dcat:accessService>
+                  <dcat:DataService>
+                    <dct:conformsTo rdf:resource="http://example.org/spec"/>
+                    <dct:format rdf:resource="http://example.org/format"/>
+                    <dct:identifier>service-123</dct:identifier>
+                    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/ENG"/>
+                    <dct:rights>open use</dct:rights>
+                    <dcat:landingPage rdf:resource="http://example.org/landing"/>
+                    <dcat:keyword>keyword1</dcat:keyword>
+                    <dcat:keyword>keyword2</dcat:keyword>
+                    <dcatap:applicableLegislation rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+                    <dct:description>This SPARQL end point allow to directly query the EU Whoiswho content</dct:description>
+                    <dct:creator>
+                      <foaf:Agent>
+                        <foaf:name>European Commission</foaf:name>
+                      </foaf:Agent>
+                    </dct:creator>
+                    <dct:publisher>
+                      <foaf:Agent>
+                        <foaf:name>Publications Office of the European Union</foaf:name>
+                      </foaf:Agent>
+                    </dct:publisher>
+                    <dcat:contactPoint>
+                      <vcard:Kind>
+                        <vcard:fn>John Doe</vcard:fn>
+                        <vcard:hasEmail rdf:resource="mailto:john@example.org"/>
+                      </vcard:Kind>
+                    </dcat:contactPoint>
+                  </dcat:DataService>
+                </dcat:accessService>
+              </dcat:Distribution>
+            </dcat:distribution>
+          </dcat:Dataset>
+        </rdf:RDF>
+        '''
+        p = RDFParser(profiles=DCAT_AP_PROFILES)
+        p.parse(rdf_data)
+        datasets = list(p.datasets())
+        assert len(datasets) == 1
+        resources = datasets[0]['resources']
+        assert len(resources) == 1
+        access_services = json.loads(resources[0]['access_services'])
+        assert len(access_services) == 1
+        access_service = access_services[0]
+        assert access_service['conforms_to'] == ['http://example.org/spec']
+        assert access_service['format'] == ['http://example.org/format']
+        assert access_service['identifier'] == 'service-123'
+        assert access_service['language'] == ['http://publications.europa.eu/resource/authority/language/ENG']
+        assert access_service['rights'] == ['open use']
+        assert access_service['landing_page'] == ['http://example.org/landing']
+        assert access_service['applicable_legislation'] == ['http://data.europa.eu/eli/reg_impl/2023/138/oj']
+        assert sorted(access_service['keyword']) == ['keyword1', 'keyword2']
+        assert access_service['description'] == 'This SPARQL end point allow to directly query the EU Whoiswho content'
+        
+        contact_points = access_service.get("contact")
+        assert isinstance(contact_points, list)
+        assert contact_points[0].get("name") == "John Doe"
+        assert contact_points[0].get("email") == "john@example.org"
+
+        creator = access_service.get("creator")
+        assert isinstance(creator, list)
+        assert creator[0].get("name") == "European Commission"
+
+        publishers = access_service.get("publisher")
+        assert isinstance(publishers, list)
+        assert publishers[0].get("name") == "Publications Office of the European Union"
 
     def test_dataset_all_fields(self):
 
@@ -82,6 +160,10 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
                             <dcat:endpointDescription>SPARQL url description</dcat:endpointDescription>
                             <dct:license rdf:resource="http://publications.europa.eu/resource/authority/licence/COM_REUSE"/>
                             <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+                            <dcatap:applicableLegislation rdf:resource="{applicable_legislation}"/>
+                            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-05-01T00:04:06</dct:modified>
+                            <dcat:theme rdf:resource="http://example.org/theme/environment"/>
+                            <dcat:theme rdf:resource="http://example.org/theme/transport"/>
                         </dcat:DataService>
                     </dcat:accessService>
                 </dcat:Distribution>
@@ -155,11 +237,15 @@ class TestEuroDCATAP2ProfileParsing(BaseParseTest):
         assert access_service.get('license') == 'http://publications.europa.eu/resource/authority/licence/COM_REUSE'
         assert access_service.get('access_rights') == 'http://publications.europa.eu/resource/authority/access-right/PUBLIC'
         assert access_service.get('description') == 'This SPARQL end point allow to directly query the EU Whoiswho content (organization / membership / person)'
+        assert access_service.get('modified') == '2012-05-01T00:04:06'
 
         # List
         endpoint_url_list = access_service.get('endpoint_url')
         assert len(endpoint_url_list) == 1
         assert 'http://publications.europa.eu/webapi/rdf/sparql' in endpoint_url_list
+        theme_list = access_service.get('theme')
+        assert isinstance(theme_list, list)
+        assert sorted(theme_list) == ['http://example.org/theme/environment', 'http://example.org/theme/transport']
 
     def test_availability_distibutions_without_uri(self):
 

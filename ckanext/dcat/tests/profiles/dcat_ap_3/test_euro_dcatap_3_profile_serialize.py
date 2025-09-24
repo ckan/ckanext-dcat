@@ -31,13 +31,13 @@ DCAT_AP_PROFILES = ["euro_dcat_ap_3"]
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db")
-@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets dataset_series")
 @pytest.mark.ckan_config(
     "scheming.dataset_schemas", "ckanext.dcat.schemas:dcat_ap_full.yaml"
 )
 @pytest.mark.ckan_config(
     "scheming.presets",
-    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml ckanext.dataset_series.schemas:presets.yaml "
 )
 @pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_dcat_ap_3")
 class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
