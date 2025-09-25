@@ -66,6 +66,16 @@ class TestEndpoints():
         assert dcat_dataset['title'] == dataset['title']
         assert dcat_dataset['notes'] == dataset['notes']
 
+    def test_dataset_default_no_redirects(self, app):
+
+        dataset = factories.Dataset(
+            notes='Test dataset'
+        )
+
+        url = url_for('dcat.read_dataset', _id=dataset['name'], _format='rdf')
+
+        assert url.startswith('/dataset/')
+
     def test_dataset_default_private(self, app):
         user = factories.UserWithToken()
         org = factories.Organization(users=[{"name": user["name"], "capacity": "admin"}])

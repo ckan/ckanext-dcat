@@ -36,8 +36,9 @@ if endpoints_enabled():
                       view_func=read_catalog)
 
     # TODO: Generalize for all dataset types
-    dcat.add_url_rule('/dataset_series/<_id>.<_format>', view_func=read_dataset)
-    dcat.add_url_rule('/dataset/<_id>.<_format>', view_func=read_dataset)
+    dcat.add_url_rule('/dataset_series/<_id>.<_format>', view_func=read_dataset, endpoint="read_dataset_series")
+    dcat.add_url_rule('/dataset/<_id>.<_format>', view_func=read_dataset, endpoint="read_dataset")
+
 
 
 if toolkit.asbool(config.get(utils.ENABLE_CONTENT_NEGOTIATION_CONFIG)):
