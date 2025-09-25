@@ -1,6 +1,18 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.0...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.1...HEAD)
+
+## [v2.4.1](https://github.com/ckan/ckanext-dcat/compare/v2.4.0...v2.4.1) - 2025-09-25
+
+* Fix regression redirect from /dataset to /dataset_series ([#362](https://github.com/ckan/ckanext-dcat/pull/362))
+* Provide default language in Croissant JSON-LD context ([#361](https://github.com/ckan/ckanext-dcat/pull/361))
+* Added [`IDCATURIGenerator`](https://docs.ckan.org/projects/ckanext-dcat/en/latest/uri-customization/)
+  plugin interface to allow customization of the URIs generation ([#351](https://github.com/ckan/ckanext-dcat/pull/351))
+* Added support for new fields to DCAT classes: `dcat:Dataset` (`prov:wasGeneratedBy`, `prov:qualifiedAttribution`,
+  `dcat:hasVersion`), `dcat:Catalog` (`foaf:homepage`), `dcat:DataService` (`dct:conformsTo`, `dct:format`, 
+  `dct:identifier`, `dct:language`, `dct:rights`, `dcat:landingPage`, `dcat:keyword`) ([#352](https://github.com/ckan/ckanext-dcat/pull/352))
+* Add HealthDCAT-AP mapping to CKAN field mapping table ([#347](https://github.com/ckan/ckanext-dcat/pull/347))
+* Docs: Add HealthDCAT-AP mapping to CKAN field mapping table ([#347](https://github.com/ckan/ckanext-dcat/pull/347))
 
 
 ## [v2.4.0](https://github.com/ckan/ckanext-dcat/compare/v2.3.0...v2.4.0) - 2025-05-20
