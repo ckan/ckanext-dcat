@@ -33,6 +33,7 @@ Example value could be: dpv:ResearchAndDevelopment. |
 - All `list` values are exported using `rdf:List`, supporting multi-valued entries.
 - `hdab` is parsed as an `foaf:Agent` and may include structured details.
 - `retention_period` expects a nested dictionary like `{ "start": <date>, "end": <date> }`.
+- When language-specific literals are needed (eg `population_coverage`, `publisher_note`, `title`, resource `rights`), enable the Fluent-aware schema `ckanext.dcat.schemas:health_dcat_ap_multilingual.yaml` together with the `fluent` plugin and include `ckanext.fluent:presets.json` in `scheming.presets`. This ensures translated values round-trip when harvesting and serializing HealthDCAT-AP content.
 
 !!! Note
     See [EuropeanHealthDCATAPProfile](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/profiles/euro_health_dcat_ap.py) for implementation details.

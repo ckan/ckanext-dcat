@@ -533,10 +533,36 @@ class RDFProfile(object):
         """
 
         agents = []
+        default_locale = config.get("ckan.locale_default", "") or ""
+        default_lang = default_locale.split("_")[0] if default_locale else None
+
         for agent in self.g.objects(subject, predicate):
             agent_details = {}
             agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
-            agent_details["name"] = self._object_value(agent, FOAF.name)
+
+            names = list(self.g.objects(agent, FOAF.name))
+            translations = {}
+            fallback_name = ""
+            for name_literal in names:
+                if isinstance(name_literal, Literal):
+                    value = str(name_literal)
+                    lang = name_literal.language
+                    if lang:
+                        translations[lang] = value
+                    elif not fallback_name:
+                        fallback_name = value
+                elif not fallback_name:
+                    fallback_name = str(name_literal)
+
+            if translations:
+                agent_details["name_translated"] = translations
+                if default_lang and translations.get(default_lang):
+                    agent_details["name"] = translations[default_lang]
+                else:
+                    agent_details["name"] = fallback_name or next(iter(translations.values()))
+            else:
+                agent_details["name"] = fallback_name
+
             agent_details["email"] = self._without_mailto(
                 self._object_value(agent, FOAF.mbox)
             )
@@ -839,8 +865,25 @@ class RDFProfile(object):
         self.g.add((agent_ref, RDF.type, FOAF.Organization))
         self.g.add((agent_ref, RDF.type, FOAF.Agent))
 
+        name_translated = agent_dict.get("name_translated")
+        translated_values = set()
+        if isinstance(name_translated, dict):
+            for lang, values in name_translated.items():
+                if not values:
+                    continue
+                if isinstance(values, (list, tuple)):
+                    iterable = values
+                else:
+                    iterable = [values]
+                for value in iterable:
+                    if value:
+                        self.g.add((agent_ref, FOAF.name, Literal(value, lang=lang)))
+                        translated_values.add((lang, value))
+
         if agent_dict.get("name"):
-            self.g.add((agent_ref, FOAF.name, Literal(agent_dict["name"])))
+            name_value = agent_dict["name"]
+            if not translated_values or all(val != name_value for _, val in translated_values):
+                self.g.add((agent_ref, FOAF.name, Literal(name_value)))
         if agent_dict.get("email"):
             email = agent_dict["email"]
             if not email.startswith("mailto:"):
@@ -856,11 +899,26 @@ class RDFProfile(object):
             self.g.add((agent_ref, DCT.identifier, Literal(agent_dict["identifier"])))
 
         for sub_org in agent_dict.get("actedOnBehalfOf", []):
-            if sub_org.get("name"):
+            if sub_org.get("name") or sub_org.get("name_translated"):
                 org_ref = BNode()
                 self.g.add((agent_ref, PROV.actedOnBehalfOf, org_ref))
                 self.g.add((org_ref, RDF.type, PROV.Organization))
-                self.g.add((org_ref, FOAF.name, Literal(sub_org["name"])))
+
+                sub_translations = sub_org.get("name_translated", {}) or {}
+                if isinstance(sub_translations, dict):
+                    for lang, values in sub_translations.items():
+                        if not values:
+                            continue
+                        if isinstance(values, (list, tuple)):
+                            iterable = values
+                        else:
+                            iterable = [values]
+                        for value in iterable:
+                            if value:
+                                self.g.add((org_ref, FOAF.name, Literal(value, lang=lang)))
+
+                if sub_org.get("name"):
+                    self.g.add((org_ref, FOAF.name, Literal(sub_org["name"])))
 
         return agent_ref
     

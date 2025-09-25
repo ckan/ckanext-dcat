@@ -1,0 +1,47 @@
+@prefix adms:   <http://www.w3.org/ns/adms#> .
+@prefix dcat:   <http://www.w3.org/ns/dcat#> .
+@prefix dct:    <http://purl.org/dc/terms/> .
+@prefix foaf:   <http://xmlns.com/foaf/0.1/> .
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.test/dataset/1>
+        a dcat:Dataset ;
+        dct:title               "Health dataset"@en , "Gezondheidsdataset"@nl ;
+        dct:description         "A dataset with multilingual metadata"@en ,
+                                 "Een dataset met meertalige metadata"@nl ;
+        dcat:keyword            "health"@en , "gezondheid"@nl ;
+        healthdcatap:populationCoverage
+                "Population coverage in English"@en ,
+                "Populatiedekking in het Nederlands"@nl ;
+        healthdcatap:publisherNote
+                "Publisher note in English"@en ,
+                "Notitie van de uitgever in het Nederlands"@nl ;
+        dct:identifier          "http://example.test/dataset/1" ;
+        dct:issued              "2024-01-01T00:00:00Z"^^xsd:dateTime ;
+        dct:modified            "2024-06-01T00:00:00Z"^^xsd:dateTime ;
+        dct:publisher           [ a              foaf:Organization ;
+                                  foaf:name     "Health Institute"@en ,
+                                               "Gezondheidsinstituut"@nl ;
+                                  foaf:mbox     <mailto:info@example.com> ;
+                                  foaf:homepage <https://healthdata.nl>
+                                ] ;
+        dct:creator             [ a              foaf:Agent ;
+                                  foaf:name     "Health Creator"@en ,
+                                               "Gezondheidsmaker"@nl ;
+                                  foaf:mbox     <mailto:creator@example.com>
+                                ] ;
+        dcat:distribution       <http://example.test/dataset/1/resource/1> .
+
+<http://example.test/dataset/1/resource/1>
+        a dcat:Distribution ;
+        dct:title               "CSV extract"@en , "CSV-uitvoer"@nl ;
+        dct:description         "Distribution description in English"@en ,
+                                 "Beschrijving van de distributie in het Nederlands"@nl ;
+        dct:rights              [ a dct:RightsStatement ;
+                                  rdfs:label "Rights statement"@en ,
+                                              "Rechtenverklaring"@nl
+                                ] ;
+        dcat:downloadURL        <http://example.test/dataset/1/resource/1.csv> ;
+        dct:format              <http://publications.europa.eu/resource/authority/file-type/CSV> .

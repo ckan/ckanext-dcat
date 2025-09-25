@@ -201,3 +201,169 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             Literal(distribution_details["retention_period"][0]["end"], datatype=XSD.date)
         )
 
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets fluent")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas",
+    "ckanext.dcat.schemas:health_dcat_ap_multilingual.yaml",
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml ckanext.fluent:presets.json",
+)
+@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_health_dcat_ap")
+class TestEuroDCATAP3ProfileSerializeDatasetFluent(BaseSerializeTest):
+    def test_e2e_ckan_to_dcat_multilingual(self):
+        dataset_dict = {
+            "name": "health-dcat-fluent",
+            "title_translated": {
+                "en": "Health dataset",
+                "nl": "Gezondheidsdataset",
+            },
+            "notes_translated": {
+                "en": "A dataset with multilingual metadata",
+                "nl": "Een dataset met meertalige metadata",
+            },
+            "tags_translated": {
+                "en": ["health"],
+                "nl": ["gezondheid"],
+            },
+            "population_coverage": {
+                "en": "Population coverage in English",
+                "nl": "Populatiedekking in het Nederlands",
+            },
+            "publisher_note": {
+                "en": "Publisher note in English",
+                "nl": "Notitie van de uitgever in het Nederlands",
+            },
+            "publisher": [
+                {
+                    "name": "Health Institute",
+                    "name_translated": {
+                        "en": "Health Institute",
+                        "nl": "Gezondheidsinstituut",
+                    },
+                    "email": "info@example.com",
+                    "url": "https://healthdata.nl",
+                }
+            ],
+            "creator": [
+                {
+                    "name": "Health Creator",
+                    "name_translated": {
+                        "en": "Health Creator",
+                        "nl": "Gezondheidsmaker",
+                    },
+                    "email": "creator@example.com",
+                }
+            ],
+            "resources": [
+                {
+                    "url": "http://example.test/dataset/1/resource.csv",
+                    "name_translated": {
+                        "en": "CSV extract",
+                        "nl": "CSV-uitvoer",
+                    },
+                    "description_translated": {
+                        "en": "Distribution description in English",
+                        "nl": "Beschrijving van de distributie in het Nederlands",
+                    },
+                    "rights": {
+                        "en": "Rights statement",
+                        "nl": "Rechtenverklaring",
+                    },
+                }
+            ],
+        }
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        serializer = RDFSerializer()
+        graph = serializer.g
+        dataset_ref = serializer.graph_from_dataset(dataset)
+
+        assert self._triple(graph, dataset_ref, DCT.title, "Health dataset", lang="en")
+        assert self._triple(
+            graph, dataset_ref, DCT.title, "Gezondheidsdataset", lang="nl"
+        )
+
+        assert self._triple(
+            graph,
+            dataset_ref,
+            HEALTHDCATAP.populationCoverage,
+            "Population coverage in English",
+            lang="en",
+        )
+        assert self._triple(
+            graph,
+            dataset_ref,
+            HEALTHDCATAP.populationCoverage,
+            "Populatiedekking in het Nederlands",
+            lang="nl",
+        )
+
+        assert self._triple(
+            graph,
+            dataset_ref,
+            HEALTHDCATAP.publisherNote,
+            "Publisher note in English",
+            lang="en",
+        )
+        assert self._triple(
+            graph,
+            dataset_ref,
+            HEALTHDCATAP.publisherNote,
+            "Notitie van de uitgever in het Nederlands",
+            lang="nl",
+        )
+
+        publisher_ref = next(graph.objects(dataset_ref, DCT.publisher))
+        assert self._triple(
+            graph, publisher_ref, FOAF.name, "Health Institute", lang="en"
+        )
+        assert self._triple(
+            graph, publisher_ref, FOAF.name, "Gezondheidsinstituut", lang="nl"
+        )
+
+        creator_ref = next(graph.objects(dataset_ref, DCT.creator))
+        assert self._triple(
+            graph, creator_ref, FOAF.name, "Health Creator", lang="en"
+        )
+        assert self._triple(
+            graph, creator_ref, FOAF.name, "Gezondheidsmaker", lang="nl"
+        )
+
+        distribution_ref = self._triple(
+            graph, dataset_ref, DCAT.distribution, None
+        )[2]
+
+        assert self._triple(
+            graph, distribution_ref, DCT.title, "CSV extract", lang="en"
+        )
+        assert self._triple(
+            graph, distribution_ref, DCT.title, "CSV-uitvoer", lang="nl"
+        )
+
+        assert self._triple(
+            graph,
+            distribution_ref,
+            DCT.description,
+            "Distribution description in English",
+            lang="en",
+        )
+        assert self._triple(
+            graph,
+            distribution_ref,
+            DCT.description,
+            "Beschrijving van de distributie in het Nederlands",
+            lang="nl",
+        )
+
+        rights_node = next(graph.objects(distribution_ref, DCT.rights))
+        assert self._triple(
+            graph, rights_node, RDFS.label, "Rights statement", lang="en"
+        )
+        assert self._triple(
+            graph, rights_node, RDFS.label, "Rechtenverklaring", lang="nl"
+        )
