@@ -16,9 +16,4 @@ build/*
 tmp/*
 package/DEBIAN/control
 *.swp
-.idea/.gitignore
-.idea/ckanext-dcat.iml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
+.idea
