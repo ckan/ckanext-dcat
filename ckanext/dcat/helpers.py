@@ -72,7 +72,7 @@ def structured_data(dataset_dict, profiles=None):
     return _get_serialization(dataset_dict, profiles, "jsonld")
 
 
-def croissant(dataset_dict, profiles=None):
+def croissant(dataset_dict, profiles=None, jsonld_context=None):
     """
     Returns a string containing the Croissant ML representation of the given
     dataset using the `croissant` profile.
@@ -82,8 +82,10 @@ def croissant(dataset_dict, profiles=None):
     if not profiles:
         profiles = config.get("ckanext.dcat.croissant.profiles", ["croissant"])
 
-    frame = {"@context": JSONLD_CONTEXT, "@type": "sc:Dataset"}
+    context = jsonld_context or JSONLD_CONTEXT
+
+    frame = {"@context": context, "@type": "sc:Dataset"}
 
     return _get_serialization(
-        dataset_dict, profiles, "jsonld", context=JSONLD_CONTEXT, frame=frame
+        dataset_dict, profiles, "jsonld", context=context, frame=frame
     )
