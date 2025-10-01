@@ -70,6 +70,29 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     except ValueError:
                         pass
 
+        def _supports_agent_translations(field_name):
+            schema_field = self._schema_field(field_name)
+            if schema_field and "repeating_subfields" in schema_field:
+                return any(
+                    subfield.get("field_name") == "name_translated"
+                    for subfield in schema_field["repeating_subfields"]
+                )
+            return False
+
+        def _prune_agent_translations(agent_list):
+            pruned = []
+            for agent_entry in agent_list:
+                if isinstance(agent_entry, dict):
+                    agent_entry = dict(agent_entry)
+                    agent_entry.pop("name_translated", None)
+                    acted_lists = agent_entry.get("actedOnBehalfOf")
+                    if isinstance(acted_lists, list):
+                        agent_entry["actedOnBehalfOf"] = _prune_agent_translations(acted_lists)
+                    pruned.append(agent_entry)
+                else:
+                    pruned.append(agent_entry)
+            return pruned
+
         for field_name in dataset_dict.keys():
             _parse_list_value(dataset_dict, field_name)
 
@@ -117,6 +140,8 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
             key, predicate = item
             agents = self._agents_details(dataset_ref, predicate)
             if agents:
+                if not _supports_agent_translations(key):
+                    agents = _prune_agent_translations(agents)
                 dataset_dict[key] = agents
 
         # Add any qualifiedRelations
@@ -239,7 +264,25 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 self.g.add((agent_ref, RDF.type, FOAF.Agent))
                 self.g.add((dataset_ref, rdf_predicate, agent_ref))
 
-                self._add_triple_from_dict(agent, agent_ref, FOAF.name, "name")
+                name_translated = agent.get("name_translated")
+                translated_values = set()
+                if isinstance(name_translated, dict):
+                    for lang, values in name_translated.items():
+                        if not values:
+                            continue
+                        if isinstance(values, (list, tuple)):
+                            iterable = values
+                        else:
+                            iterable = [values]
+                        for value in iterable:
+                            if value:
+                                self.g.add((agent_ref, FOAF.name, Literal(value, lang=lang)))
+                                translated_values.add((lang, value))
+
+                if agent.get("name"):
+                    name_value = agent["name"]
+                    if not translated_values or all(val != name_value for _, val in translated_values):
+                        self.g.add((agent_ref, FOAF.name, Literal(name_value)))
                 self._add_triple_from_dict(
                     agent, agent_ref, FOAF.homepage, "url", _type=URIRef
                 )
