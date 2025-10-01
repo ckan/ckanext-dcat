@@ -8,6 +8,7 @@ from ckanext.dcat.profiles import (
     RDF,
 )
 
+from .base import URIRefOrLiteral
 from ckanext.dcat.utils import dataset_uri
 from .euro_dcat_ap_2 import EuropeanDCATAP2Profile
 from .euro_dcat_ap_scheming import EuropeanDCATAPSchemingProfile
@@ -29,16 +30,10 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
         # DCAT AP v2 scheming fields
         dataset_dict = self._parse_dataset_v2_scheming(dataset_dict, dataset_ref)
 
-
-        # Check if it's a dataset series
-        if (dataset_ref, RDF.type, DCAT.DatasetSeries) in self.g:
-            dataset_dict["type"] = "dataset_series"
-
-            # Example defaulting logic (adjust based on RDF vocab if you have it)
-            if "series_order_field" not in dataset_dict:
-                dataset_dict["series_order_field"] = "metadata_created"
-            if "series_order_type" not in dataset_dict:
-                dataset_dict["series_order_type"] = "date"
+        # DCAT AP v3: hasVersion
+        values = self._object_value_list(dataset_ref, DCAT.hasVersion)
+        if values:
+            dataset_dict["has_version"] = values
 
         return dataset_dict
 
@@ -55,6 +50,12 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
 
         # DCAT AP v3 properties also applied to higher versions
         self._graph_from_dataset_v3(dataset_dict, dataset_ref)
+
+        # DCAT AP v3: List triples
+        items = [
+            ("has_version", DCAT.hasVersion, None, URIRefOrLiteral),
+        ]
+        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 

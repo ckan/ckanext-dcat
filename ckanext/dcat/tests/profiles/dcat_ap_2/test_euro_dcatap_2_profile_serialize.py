@@ -418,7 +418,20 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'access_rights': 'http://publications.europa.eu/resource/authority/access-right/PUBLIC',
                     'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 1',
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
-                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
+                    'conforms_to': ['http://example.org/spec'],
+                    'applicable_legislation': ['http://data.europa.eu/eli/reg_impl/2023/138/oj'],
+                    'format': ['http://example.org/format'],
+                    'identifier': 'service-123',
+                    'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
+                    'rights': ['open use'],
+                    'landing_page': ['http://example.org/landing'],
+                    'keyword': ['keyword1', 'keyword2'],
+                    'contact': {'name': 'John Doe', 'email': 'john@example.org'},
+                    'creator': [{'name': 'European Commission'}],
+                    'publisher': {'name': 'Publications Office of the European Union'},
+                    'modified': '2024-01-01T12:00:00',
+                    'theme': ['http://example.org/theme/environment', 'http://example.org/theme/transport'],
                 },
                 {
                     'availability': 'http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL',
@@ -428,7 +441,15 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                     'access_rights': 'http://publications.europa.eu/resource/authority/access-right/OP_DATPRO',
                     'description': 'This SPARQL end point allow to directly query the EU Whoiswho content 2',
                     'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
-                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union']
+                    'serves_dataset': ['http://data.europa.eu/88u/dataset/eu-whoiswho-the-official-directory-of-the-european-union'],
+                    'conforms_to': ['http://example.org/spec'],
+                    'applicable_legislation': ['http://data.europa.eu/eli/reg_impl/2023/138/oj'],
+                    'format': ['http://example.org/format'],
+                    'identifier': 'service-123',
+                    'language': ['http://publications.europa.eu/resource/authority/language/ENG'],
+                    'rights': ['open use'],
+                    'landing_page': ['http://example.org/landing'],
+                    'keyword': ['keyword1', 'keyword2']
                 }
             ])
         }
@@ -478,10 +499,73 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
                                   URIRef(access_service.get('license')))
             self._assert_simple_value(g, object[2], DCT.title,
                                   Literal(access_service.get('title')))
-            self._assert_simple_value(g, object[2], DCT.description,
-                                  Literal(access_service.get('description')))
+            if access_service.get('description'):
+                self._assert_simple_value(g, object[2], DCT.description,
+                                      Literal(access_service.get('description')))
             self._assert_simple_value(g, object[2], DCAT.endpointDescription,
                                   Literal(access_service.get('endpoint_description')))
+
+            self._assert_simple_value(
+                g, object[2], DCT.identifier,
+                Literal(access_service.get('identifier')) if access_service.get('identifier') else None
+            )
+            self._assert_values_list(
+                g, object[2], DCT.conformsTo,
+                self._get_typed_list(access_service.get('conforms_to'), URIRef) if access_service.get(
+                    'conforms_to') else []
+            )
+            self._assert_values_list(
+                g, object[2], DCT["format"],
+                self._get_typed_list(access_service.get('format'), URIRef) if access_service.get('format') else []
+            )
+            self._assert_values_list(
+                g, object[2], DCT.language,
+                self._get_typed_list(access_service.get('language'), URIRef) if access_service.get('language') else []
+            )
+            self._assert_values_list(
+                g, object[2], DCT.rights,
+                self._get_typed_list(access_service.get('rights'), Literal) if access_service.get('rights') else []
+            )
+            self._assert_values_list(
+                g, object[2], DCAT.landingPage,
+                self._get_typed_list(access_service.get('landing_page'), URIRef) if access_service.get(
+                    'landing_page') else []
+            )
+            self._assert_values_list(
+                g, object[2], DCATAP.applicableLegislation,
+                self._get_typed_list(access_service.get('applicable_legislation'), URIRef) if access_service.get('applicable_legislation') else []
+            )
+
+            if access_service.get('keyword'):
+                self._assert_values_list(
+                    g, object[2], DCAT.keyword,
+                    self._get_typed_list(access_service.get('keyword'), Literal)
+                )
+
+            if access_service.get('contact'):
+                contact = self._triple(g, object[2], DCAT.contactPoint, None)[2]
+                assert self._triple(g, contact, VCARD.fn, Literal('John Doe'))
+                assert self._triple(g, contact, VCARD.hasEmail, URIRef('mailto:john@example.org'))
+
+            if access_service.get('creator'):
+                creators = self._triples(g, object[2], DCT.creator, None)
+                assert any(self._triple(g, c[2], FOAF.name, Literal('European Commission')) for c in creators)
+
+            if access_service.get('publisher'):
+                publishers = self._triples(g, object[2], DCT.publisher, None)
+                assert any(self._triple(g, p[2], FOAF.name, Literal('Publications Office of the European Union')) for p in publishers)
+
+            if access_service.get('modified'):
+                assert self._triple(
+                    g, object[2], DCT.modified,
+                    Literal(access_service.get('modified'), datatype=XSD.dateTime)
+                )
+
+            if access_service.get('theme'):
+                self._assert_values_list(
+                    g, object[2], DCAT.theme,
+                    self._get_typed_list(access_service.get('theme'), URIRef)
+                )
 
             # Lists
             self._assert_values_list(g, object[2], DCAT.endpointURL,

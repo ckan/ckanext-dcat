@@ -7,7 +7,7 @@ from ckan.model.license import LicenseRegister
 from ckantoolkit import ObjectNotFound, asbool, aslist, config, get_action, url_for
 from dateutil.parser import parse as parse_date
 from geomet import InvalidGeoJSONException, wkt
-from rdflib import BNode, Literal, URIRef, term
+from rdflib import BNode, Literal, URIRef, term, PROV
 from rdflib.namespace import ORG, RDF, RDFS, SKOS, XSD, Namespace
 
 from ckanext.dcat.utils import DCAT_EXPOSE_SUBCATALOGS
@@ -94,7 +94,6 @@ class URIRefOrLiteral(object):
         except Exception:
             # In case something goes wrong: use Literal
             return Literal(value, lang=lang)
-
 
 class CleanedURIRef(object):
     """Performs some basic URL encoding on value before creating an URIRef object.
@@ -534,10 +533,36 @@ class RDFProfile(object):
         """
 
         agents = []
+        default_locale = config.get("ckan.locale_default", "") or ""
+        default_lang = default_locale.split("_")[0] if default_locale else None
+
         for agent in self.g.objects(subject, predicate):
             agent_details = {}
             agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
-            agent_details["name"] = self._object_value(agent, FOAF.name)
+
+            names = list(self.g.objects(agent, FOAF.name))
+            translations = {}
+            fallback_name = ""
+            for name_literal in names:
+                if isinstance(name_literal, Literal):
+                    value = str(name_literal)
+                    lang = name_literal.language
+                    if lang:
+                        translations[lang] = value
+                    elif not fallback_name:
+                        fallback_name = value
+                elif not fallback_name:
+                    fallback_name = str(name_literal)
+
+            if translations:
+                agent_details["name_translated"] = translations
+                if default_lang and translations.get(default_lang):
+                    agent_details["name"] = translations[default_lang]
+                else:
+                    agent_details["name"] = fallback_name or next(iter(translations.values()))
+            else:
+                agent_details["name"] = fallback_name
+
             agent_details["email"] = self._without_mailto(
                 self._object_value(agent, FOAF.mbox)
             )
@@ -547,9 +572,13 @@ class RDFProfile(object):
                 )
             agent_details["url"] = self._object_value(agent, FOAF.homepage)
             agent_details["type"] = self._object_value(agent, DCT.type)
-            agent_details['identifier'] = self._object_value(agent, DCT.identifier)
-            agents.append(agent_details)
+            agent_details["identifier"] = self._object_value(agent, DCT.identifier)
 
+            acted_orgs = self._agents_details(agent, PROV.actedOnBehalfOf)
+            if acted_orgs:
+                agent_details["actedOnBehalfOf"] = acted_orgs
+
+            agents.append(agent_details)
         return agents
 
     def _contact_details(self, subject, predicate):
@@ -818,6 +847,115 @@ class RDFProfile(object):
             items = [value]  # number
 
         return items
+
+    def _add_agent_to_graph(self, subject_ref, predicate, agent_dict):
+        """
+        Serializes a foaf:Agent or foaf:Organization with optional subfields into the RDF graph.
+
+        Parameters:
+        - subject_ref: The RDF subject (dataset, activity, etc.)
+        - predicate: The RDF predicate (e.g., dct:publisher, prov:wasAssociatedWith, dcat:agent)
+        - agent_dict: A dict with agent metadata (e.g., name, email, homepage, type, identifier, actedOnBehalfOf)
+        """
+        uri = agent_dict.get("uri", "").strip()
+
+        agent_ref = URIRefOrLiteral(uri) if uri else BNode()
+
+        self.g.add((subject_ref, predicate, agent_ref))
+        self.g.add((agent_ref, RDF.type, FOAF.Organization))
+        self.g.add((agent_ref, RDF.type, FOAF.Agent))
+
+        name_translated = agent_dict.get("name_translated")
+        translated_values = set()
+        if isinstance(name_translated, dict):
+            for lang, values in name_translated.items():
+                if not values:
+                    continue
+                if isinstance(values, (list, tuple)):
+                    iterable = values
+                else:
+                    iterable = [values]
+                for value in iterable:
+                    if value:
+                        self.g.add((agent_ref, FOAF.name, Literal(value, lang=lang)))
+                        translated_values.add((lang, value))
+
+        if agent_dict.get("name"):
+            name_value = agent_dict["name"]
+            if not translated_values or all(val != name_value for _, val in translated_values):
+                self.g.add((agent_ref, FOAF.name, Literal(name_value)))
+        if agent_dict.get("email"):
+            email = agent_dict["email"]
+            if not email.startswith("mailto:"):
+                email = f"mailto:{email}"
+            self.g.add((agent_ref, FOAF.mbox, URIRef(email)))
+        if agent_dict.get("url"):
+            self.g.add((agent_ref, FOAF.homepage, URIRef(agent_dict["url"])))
+        if agent_dict.get("homepage"):
+            self.g.add((agent_ref, FOAF.homepage, URIRef(agent_dict["homepage"])))
+        if agent_dict.get("type"):
+            self.g.add((agent_ref, DCT.type, URIRef(agent_dict["type"])))
+        if agent_dict.get("identifier"):
+            self.g.add((agent_ref, DCT.identifier, Literal(agent_dict["identifier"])))
+
+        for sub_org in agent_dict.get("actedOnBehalfOf", []):
+            if sub_org.get("name") or sub_org.get("name_translated"):
+                org_ref = BNode()
+                self.g.add((agent_ref, PROV.actedOnBehalfOf, org_ref))
+                self.g.add((org_ref, RDF.type, PROV.Organization))
+
+                sub_translations = sub_org.get("name_translated", {}) or {}
+                if isinstance(sub_translations, dict):
+                    for lang, values in sub_translations.items():
+                        if not values:
+                            continue
+                        if isinstance(values, (list, tuple)):
+                            iterable = values
+                        else:
+                            iterable = [values]
+                        for value in iterable:
+                            if value:
+                                self.g.add((org_ref, FOAF.name, Literal(value, lang=lang)))
+
+                if sub_org.get("name"):
+                    self.g.add((org_ref, FOAF.name, Literal(sub_org["name"])))
+
+        return agent_ref
+    
+    def _add_contact_to_graph(self, subject, predicate, contact):
+        contact_uri = contact.get("uri")
+        if contact_uri:
+            contact_details = CleanedURIRef(contact_uri)
+        else:
+            contact_details = BNode()
+
+        self.g.add((contact_details, RDF.type, VCARD.Kind))
+        self.g.add((subject, predicate, contact_details))
+
+        self._add_triple_from_dict(contact, contact_details, VCARD.fn, "name")
+        self._add_triple_from_dict(
+            contact,
+            contact_details,
+            VCARD.hasEmail,
+            "email",
+            _type=URIRef,
+            value_modifier=self._add_mailto,
+        )
+        self._add_triple_from_dict(
+            contact,
+            contact_details,
+            VCARD.hasUID,
+            "identifier",
+            _type=URIRefOrLiteral,
+        )
+        self._add_triple_from_dict(
+            contact,
+            contact_details,
+            VCARD.hasURL,
+            "url",
+            _type=URIRef,
+        )
+    
 
     def _add_spatial_value_to_graph(self, spatial_ref, predicate, value):
         """

@@ -1,13 +1,15 @@
 scheming_version: 2
 dataset_type: dataset
-about: Full DCAT AP (2 and 3) schema
+about: Schema for HealthDCAT-AP with Fluent multilingual fields
 about_url: http://github.com/ckan/ckanext-dcat
+
+form_languages: [en, nl]
 
 dataset_fields:
 
-- field_name: title
+- field_name: title_translated
   label: Title
-  preset: title
+  preset: fluent_core_translated
   required: true
   help_text: A descriptive title for the dataset.
 
@@ -16,15 +18,17 @@ dataset_fields:
   preset: dataset_slug
   form_placeholder: eg. my-dataset
 
-- field_name: notes
+- field_name: notes_translated
   label: Description
   required: true
-  form_snippet: markdown.html
+  preset: fluent_core_translated
+  form_snippet: fluent_markdown.html
+  display_snippet: fluent_markdown.html
   help_text: A free-text account of the dataset.
 
-- field_name: tag_string
+- field_name: tags_translated
   label: Keywords
-  preset: tag_string_autocomplete
+  preset: fluent_tags
   form_placeholder: eg. economy, mental health, government
   help_text: Keywords or tags describing the dataset. Use commas to separate multiple values.
 
@@ -39,6 +43,11 @@ dataset_fields:
     - field_name: name
       label: Name
 
+    - field_name: name_translated
+      label: Name (translations)
+      preset: fluent_core_translated
+      help_text: Name of the entity or person who published the dataset in each language.
+
     - field_name: email
       label: Email
       display_snippet: email.html
@@ -46,10 +55,7 @@ dataset_fields:
     - field_name: identifier
       label: Identifier
       help_text: Unique identifier for the contact point. Such as a ROR ID.
-    
-    - field_name: url
-      label: URL
-      help_text: A URL associated with the contact
+
   help_text: Contact information for enquiries about the dataset.
 
 - field_name: publisher
@@ -63,6 +69,11 @@ dataset_fields:
 
     - field_name: name
       label: Name
+
+    - field_name: name_translated
+      label: Name (translations)
+      preset: fluent_core_translated
+      help_text: Name of the entity or person who published the dataset in each language.
 
     - field_name: email
       label: Email
@@ -94,6 +105,11 @@ dataset_fields:
       label: Name
       help_text: Name of the entity or person who created the dataset.
 
+    - field_name: name_translated
+      label: Name (translations)
+      preset: fluent_core_translated
+      help_text: Name of the entity or person who created the dataset in each language.
+
     - field_name: email
       label: Email
       display_snippet: email.html
@@ -111,11 +127,6 @@ dataset_fields:
     - field_name: identifier
       label: Identifier
       help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
-
-- field_name: homepage
-  label: Homepage
-  display_snippet: link.html
-  help_text: A web page that acts as the homepage for the dataset.
 
 - field_name: license_id
   label: License
@@ -152,9 +163,7 @@ dataset_fields:
 
 - field_name: version_notes
   label: Version notes
-  validators: ignore_missing unicode_safe
-  form_snippet: markdown.html
-  display_snippet: markdown.html
+  preset: fluent_markdown
   help_text: A description of the differences between this version and a previous version of the dataset.
 
   # Note: CKAN will generate a unique identifier for each dataset
@@ -168,8 +177,7 @@ dataset_fields:
 
 - field_name: provenance
   label: Provenance
-  form_snippet: markdown.html
-  display_snippet: markdown.html
+  preset: fluent_markdown
   help_text: A statement about the lineage of the dataset.
 
 - field_name: dcat_type
@@ -260,6 +268,17 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_text: A related resource, such as a publication, that references, cites, or otherwise points to the dataset.
 
+- field_name: analytics
+  label: Analytics
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+    An analytics distribution of the dataset.
+    Publishers are encouraged to provide URLs pointing to API endpoints or document
+    repositories where users can access or request associated resources such as
+    technical reports of the dataset, quality measurements, usability indicators,...
+    or analytics services.
+
 - field_name: applicable_legislation
   label: Applicable legislation
   preset: multiple_text
@@ -272,6 +291,160 @@ dataset_fields:
   validators: ignore_missing scheming_multiple_text
   help_inline: true
   help_text: This property refers to a related Dataset that is a version, edition, or adaptation of the described Dataset.
+
+
+- field_name: code_values
+  label: Code values
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:  Health classifications and their codes associated with the dataset.
+
+- field_name: coding_system
+  label: Coding system
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+    Coding systems in use (e.g. ICD-10-CM, DGRs, SNOMED CT, ...).
+    To comply with HealthDCAT-AP, Wikidata URIs MUST be used.
+
+- field_name: purpose
+  label: Purpose
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: A free text statement of the purpose of the processing of data or personal data.
+
+- field_name: health_category
+  label: Health category
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+     The health category to which this dataset belongs as described in the Commission Regulation on
+     the European Health Data Space laying down a list of categories of electronic data for
+     secondary use, Art.33.
+
+- field_name: health_theme
+  label: Health theme
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+    A category of the Dataset or tag describing the Dataset.
+
+- field_name: legal_basis
+  label: Legal basis
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text:  The legal basis used to justify processing of personal data.
+
+- field_name: min_typical_age
+  label: Minimum typical age
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text:  Minimum typical age of the population within the dataset.
+
+- field_name: max_typical_age
+  label: Maximum typical age
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text:  Maximum typical age of the population within the dataset.
+
+- field_name: number_of_records
+  label: Number of records
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text: Size of the dataset in terms of the number of records
+
+- field_name: number_of_unique_individuals
+  label: Number of records for unique individuals.
+  validators: ignore_missing int_validator
+  form_snippet: number.html
+  help_text:  Number of records for unique individuals.
+
+- field_name: personal_data
+  label: Personal data
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: Key elements that represent an individual in the dataset.
+
+- field_name: publisher_note
+  label: Publisher note
+  preset: fluent_markdown
+  help_text: >
+    A description of the publisher activities.
+
+- field_name: publisher_type
+  label: Publisher type
+  preset: multiple_text
+  validators: ignore_missing scheming_multiple_text
+  help_text: >
+     A type of organisation that makes the Dataset available.
+
+- field_name: trusted_data_holder
+  label: Trusted Data Holder
+  preset: select
+  choices:
+  - value: false
+    label: "No"
+  - value: true
+    label: "Yes"
+  validators: ignore_missing boolean_validator
+  help_text: >
+    Indicates whether the dataset is held by a trusted data holder.
+  output_validators: boolean_validator
+
+- field_name: population_coverage
+  label: Population coverage
+  preset: fluent_markdown
+  help_text: >
+    A definition of the population within the dataset.
+
+- field_name: retention_period
+  label: Retention period
+  repeating_subfields:
+
+    - field_name: start
+      label: Start
+      preset: dcat_date
+
+    - field_name: end
+      label: End
+      preset: dcat_date
+
+  help_text:  A temporal period which the dataset is available for secondary use.
+
+
+# Officially there can only be one HDAB for now, but keep it repeating subfield just in case
+- field_name: hdab
+  label: Health data access body
+  repeating_label: Health data access body
+  repeating_once: true
+  repeating_subfields:
+
+    - field_name: uri
+      label: URI
+
+    - field_name: name
+      label: Name
+
+    - field_name: name_translated
+      label: Name (translations)
+      preset: fluent_core_translated
+      help_text: Name of the health data access body in each language.
+
+    - field_name: email
+      label: Email
+      display_snippet: email.html
+
+    - field_name: url
+      label: URL
+      display_snippet: link.html
+
+    - field_name: type
+      label: Type
+
+    - field_name: identifier
+      label: Identifier
+      help_text: Unique identifier for the HDAB, such as a ROR ID.
+  help_text:  Health Data Access Body supporting access to data in the Member State.
 
 - field_name: qualified_relation
   label: Qualified relation
@@ -290,91 +463,6 @@ dataset_fields:
       help_text: The function of an entity or agent with respect to another entity or resource.
   help_text: A description of a relationship with another resource.
 
-- field_name: provenance_activity
-  label: Provenance Activity
-  repeating_label: Provenance Activity
-  repeating_once: true
-  repeating_subfields:
-    - field_name: uri
-      label: Activity URI
-      help_text: URI of the provenance activity (if available).
-    - field_name: label
-      label: Label
-      help_text: Human-readable label for the activity.
-    - field_name: seeAlso
-      label: See Also
-      help_text: Related link for the activity.
-    - field_name: dct_type
-      label: Type
-      help_text: Type of the activity (URI).
-    - field_name: startedAtTime
-      label: Started At Time
-      help_text: When the activity started (ISO 8601).
-    - field_name: wasAssociatedWith
-      label: Associated Agent
-      repeating_label: Agent
-      repeating_once: true
-      repeating_subfields:
-        - field_name: uri
-          label: URI
-        - field_name: name
-          label: Name
-        - field_name: email
-          label: Email
-        - field_name: homepage
-          label: Homepage
-        - field_name: type
-          label: Type
-        - field_name: identifier
-          label: Identifier
-        - field_name: url
-          label: URL
-        - field_name: actedOnBehalfOf
-          label: Acted On Behalf Of
-          repeating_label: Organization
-          repeating_once: true
-          repeating_subfields:
-            - field_name: name
-              label: Organization Name
-  help_text: Structured provenance activity information, including agent and organization.
-
-# Add qualified_attribution field here, just before the commented-out hvd_category field
-- field_name: qualified_attribution
-  label: Qualified Attribution
-  repeating_label: Attribution
-  repeating_once: true
-  repeating_subfields:
-    - field_name: agent
-      label: Agent
-      repeating_label: Agent
-      repeating_once: true
-      repeating_subfields:
-        - field_name: uri
-          label: URI
-        - field_name: name
-          label: Name
-        - field_name: email
-          label: Email
-        - field_name: homepage
-          label: Homepage
-        - field_name: type
-          label: Type
-        - field_name: identifier
-          label: Identifier
-        - field_name: url
-          label: URL
-    - field_name: role
-      label: Role
-      help_text: Role of the agent (e.g., data processor, contributor).
-  help_text: Structured qualified attribution information including agent and role.
-
-
-#- field_name: hvd_category
-#  label: HVD Category
-#  preset: multiple_text
-#  validators: ignore_missing scheming_multiple_text
-# TODO: implement separately as part of wider HVD support
-
 # Note: if not provided, this will be autogenerated
 - field_name: uri
   label: URI
@@ -388,14 +476,16 @@ resource_fields:
   label: URL
   preset: resource_url_upload
 
-- field_name: name
+- field_name: name_translated
   label: Name
-  form_placeholder:
+  preset: fluent_core_translated
   help_text: A descriptive title for the resource.
 
-- field_name: description
+- field_name: description_translated
   label: Description
-  form_snippet: markdown.html
+  preset: fluent_core_translated
+  form_snippet: fluent_markdown.html
+  display_snippet: fluent_markdown.html
   help_text: A free-text account of the resource.
 
 - field_name: format
@@ -433,8 +523,7 @@ resource_fields:
 
 - field_name: rights
   label: Rights
-  form_snippet: markdown.html
-  display_snippet: markdown.html
+  preset: fluent_markdown
   help_text: Some statement about the rights associated with the resource.
 
 - field_name: availability
@@ -523,11 +612,6 @@ resource_fields:
     - field_name: title
       label: Title
 
-    - field_name: description
-      label: Description
-      form_snippet: markdown.html
-      help_text: A free-text account of the resource.
-
     - field_name: endpoint_description
       label: Endpoint description
 
@@ -539,152 +623,11 @@ resource_fields:
       label: Serves dataset
       preset: multiple_text
       validators: ignore_missing scheming_multiple_text
-
+  
     - field_name: access_rights
       label: Access rights
       validators: ignore_missing unicode_safe
       help_text: Information regarding access or restrictions based on privacy, security, or other policies.
-
-    - field_name: conforms_to
-      label: Conforms to
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-
-    - field_name: format
-      label: Format
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-
-    - field_name: identifier
-      label: Identifier
-
-    - field_name: language
-      label: Language
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-
-    - field_name: rights
-      label: Rights
-      form_snippet: markdown.html
-      display_snippet: markdown.html
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-
-    - field_name: landing_page
-      label: Landing page
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-
-    - field_name: keyword
-      label: Keywords
-      preset: tag_string_autocomplete
-      form_placeholder: eg. economy, mental health, government
-      help_text: Keywords or tags describing the dataservice. Use commas to separate multiple values.
-    
-    - field_name: applicable_legislation
-      label: Applicable legislation
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-      help_text: The legislation that mandates the creation or management of the dataset.
-
-    - field_name: contact
-      label: Contact point
-      repeating_label: Contact point
-      repeating_once: true
-      repeating_subfields:
-
-        - field_name: uri
-          label: URI
-
-        - field_name: name
-          label: Name
-
-        - field_name: email
-          label: Email
-          display_snippet: email.html
-
-        - field_name: identifier
-          label: Identifier
-          help_text: Unique identifier for the contact point. Such as a ROR ID.
-        
-        - field_name: url
-          label: URL
-          help_text: A URL associated with the contact
-      help_text: Contact information for enquiries about the dataservice.
-
-    - field_name: creator
-      label: Creator
-      repeating_label: Creator
-      repeating_subfields:
-
-        - field_name: uri
-          label: URI
-          help_text: URI of the creator, if available.
-
-        - field_name: name
-          label: Name
-          help_text: Name of the entity or person who created the dataservice.
-
-        - field_name: email
-          label: Email
-          display_snippet: email.html
-          help_text: Contact email of the creator.
-
-        - field_name: url
-          label: URL
-          display_snippet: link.html
-          help_text: URL for more information about the creator.
-
-        - field_name: type
-          label: Type
-          help_text: Type of creator (e.g., Organization, Person).
-
-        - field_name: identifier
-          label: Identifier
-          help_text: Unique identifier for the creator, such as an ORCID or ROR ID.
-
-    - field_name: publisher
-      label: Publisher
-      repeating_label: Publisher
-      repeating_once: true
-      repeating_subfields:
-
-        - field_name: uri
-          label: URI
-
-        - field_name: name
-          label: Name
-
-        - field_name: email
-          label: Email
-          display_snippet: email.html
-
-        - field_name: url
-          label: URL
-          display_snippet: link.html
-
-        - field_name: type
-          label: Type
-
-        - field_name: identifier
-          label: Identifier
-          help_text: Unique identifier for the publisher, such as a ROR ID.
-      help_text: Entity responsible for making the dataset available.
-
-    - field_name: license
-      label: License
-      help_text: License in which the resource is made available. If not provided will be inherited from the dataset.
-
-    - field_name: modified
-      label: Modification date
-      preset: dcat_date
-      help_text: Most recent date on which the dataset was changed, updated or modified.
-
-    - field_name: theme
-      label: Theme
-      preset: multiple_text
-      validators: ignore_missing scheming_multiple_text
-      help_text: A category of the dataservice. A Dataservice may be associated with multiple themes.
 
   help_text: A data service that gives access to the resource.
 

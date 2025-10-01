@@ -182,3 +182,119 @@ class TestSchemingParseSupport(BaseParseTest):
                 "end": "2034-12-31",
             }
         ]
+
+        assert dataset["resources"][0]["retention_period"] == [
+            {
+                "start": "2020-03-01",
+                "end": "2034-12-31",
+            }
+        ]
+
+        provenance_activity = dataset["provenance_activity"]
+        assert len(provenance_activity) == 1
+
+        activity = provenance_activity[0]
+        assert activity["uri"] == "internalURI:wasGeneratedBy0"
+        assert activity["label"] == "http://dbpedia.org/resource/Record_linkage"
+        assert activity["seeAlso"] == (
+            "https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp"
+        )
+        assert activity["dct_type"] == "http://dbpedia.org/resource/Record_linkage"
+        assert activity["startedAtTime"] == "2021-01-01T00:00:00+00:00"
+
+        associated = activity["wasAssociatedWith"]
+        assert len(associated) == 1
+
+        agent = associated[0]
+        assert agent["name"] == "Dr. Joris van Loenhout"
+        if agent.get("name_translated"):
+            assert agent["name_translated"].get("en") == "Dr. Joris van Loenhout"
+        assert agent["url"] == "https://www.sciensano.be/fr/people/joris-van-loenhout"
+        assert agent["email"] == "Joris.VanLoenhout@sciensano.be"
+
+        acted_on_behalf = agent.get("actedOnBehalfOf", [])
+        assert len(acted_on_behalf) == 1
+        acted_agent = acted_on_behalf[0]
+        assert acted_agent["name"] == "Contact Point"
+        if acted_agent.get("name_translated"):
+            assert acted_agent["name_translated"].get("en") == "Contact Point"
+
+        assert dataset["qualified_attribution"][0]["role"] == "https://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/processor"
+
+        agent = dataset["qualified_attribution"][0]["agent"][0]
+        assert agent["name"] == "Contact Point"
+        assert agent["email"] == "healthdata@sciensano.be"
+        assert agent["url"] == "https://healthdata.be"
+        assert agent["type"] == ""
+        assert agent["identifier"] == ""
+        
+        # DQV Quality Annotation
+        assert len(dataset["quality_annotation"]) == 1
+        assert dataset["quality_annotation"][0]["body"] == "https://certificates.theodi.org/en/datasets/393/certificate"
+        assert dataset["quality_annotation"][0]["target"] == "https://certificates.theodi.org/en/datasets/393"
+        assert dataset["quality_annotation"][0]["motivated_by"] == "http://www.w3.org/ns/dqv#qualityAssessment"
+
+
+
+@pytest.mark.usefixtures("with_plugins", "clean_db")
+@pytest.mark.ckan_config("ckan.plugins", "dcat scheming_datasets fluent")
+@pytest.mark.ckan_config(
+    "scheming.dataset_schemas",
+    "ckanext.dcat.schemas:health_dcat_ap_multilingual.yaml",
+)
+@pytest.mark.ckan_config(
+    "scheming.presets",
+    "ckanext.scheming:presets.json ckanext.dcat.schemas:presets.yaml ckanext.fluent:presets.json",
+)
+@pytest.mark.ckan_config("ckanext.dcat.rdf.profiles", "euro_health_dcat_ap")
+class TestSchemingFluentParseSupport(BaseParseTest):
+    def test_e2e_dcat_to_ckan_multilingual(self):
+        contents = self._get_file_contents("dcat/dataset_health_multilingual.ttl")
+
+        parser = RDFParser()
+        parser.parse(contents, _format="turtle")
+
+        datasets = list(parser.datasets())
+        assert len(datasets) == 1
+
+        dataset_dict = datasets[0]
+        dataset_dict["name"] = "test-dcat-health-multilingual"
+
+        dataset = call_action("package_create", **dataset_dict)
+
+        assert dataset["title_translated"]["en"] == "Health dataset"
+        assert dataset["title_translated"]["nl"] == "Gezondheidsdataset"
+
+        assert dataset["notes_translated"]["en"] == "A dataset with multilingual metadata"
+        assert dataset["notes_translated"]["nl"] == "Een dataset met meertalige metadata"
+
+        assert dataset["tags_translated"]["en"] == ["health"]
+        assert dataset["tags_translated"]["nl"] == ["gezondheid"]
+
+        assert dataset["population_coverage"]["en"] == "Population coverage in English"
+        assert dataset["population_coverage"]["nl"] == "Populatiedekking in het Nederlands"
+
+        assert dataset["publisher_note"]["en"] == "Publisher note in English"
+        assert dataset["publisher_note"]["nl"] == "Notitie van de uitgever in het Nederlands"
+
+        publisher = dataset["publisher"][0]
+        assert publisher["name_translated"]["en"] == "Health Institute"
+        assert publisher["name_translated"]["nl"] == "Gezondheidsinstituut"
+
+        creator = dataset["creator"][0]
+        assert creator["name_translated"]["en"] == "Health Creator"
+        assert creator["name_translated"]["nl"] == "Gezondheidsmaker"
+
+        resource = dataset["resources"][0]
+
+        assert resource["name_translated"]["en"] == "CSV extract"
+        assert resource["name_translated"]["nl"] == "CSV-uitvoer"
+
+        assert resource["description_translated"]["en"] == "Distribution description in English"
+        assert (
+            resource["description_translated"]["nl"]
+            == "Beschrijving van de distributie in het Nederlands"
+        )
+
+        assert resource["rights"]["en"] == "Rights statement"
+        assert resource["rights"]["nl"] == "Rechtenverklaring"

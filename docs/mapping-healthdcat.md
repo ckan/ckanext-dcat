@@ -5,6 +5,7 @@ This section defines how CKAN fields map to the [HealthDCAT-AP](http://healthdat
 | DCAT Class     | RDF Property                           | CKAN Dataset Field                  | Stored as | Notes |
 |----------------|----------------------------------------|-------------------------------------|-----------|-------|
 | dcat:Dataset   | healthdcatap:analytics                 | analytics                           | list      | Publishers are encouraged to provide URLs pointing to document repositories where users can access or request associated resources such as technical reports of the dataset, quality measurements, usability indicators,... Note that HealthDCAT-AP mentions also API endpoints or analytics services, but these would not be Distriutions but rather DatasetServices. |
+| dcat:Dataset   | healthdcatap:qualityAnnotation         | quality_annotation                  | list      | This field allows annotations or notes about the quality of the dataset, such as data completeness, known issues, or validation methods. |
 | dcat:Dataset   | healthdcatap:hasCodeValues             | code_values                         | list      | Inside this property, you can provide the coding system of the dataset in the form of wikidata URI (example: https://www.wikidata.org/entity/P494 for ICD-10 ID) and the URI of the value that describes the dataset (example: https://icd.who.int/browse10/2019/en#/Y59.0 for viral vaccines) |
 | dcat:Dataset   | healthdcatap:hasCodingSystem           | coding_system                       | list      | This property provides informatio on which coding systems are in use inside your dataset. For this, wikidata URIs must be used.|
 | dcat:Dataset   | healthdcatap:healthCategory            | health_category                     | list      | Health-specific category values. |
@@ -25,12 +26,14 @@ Example value could be: dpv:ResearchAndDevelopment. |
 | dcat:Dataset   | healthdcatap:numberOfUniqueIndividuals | number_of_unique_individuals       | integer   | This property is not mandatory, since not all datasets might include data from individuals. |
 | dcat:Dataset   | healthdcatap:hdab                      | hdab                                | agent     | Health Data Access Body responsible. |
 | dcat:Dataset   | healthdcatap:retentionPeriod           | retention_period                    | interval  | This property makes use of the class dct:PeriodOfTime, in which a start and end date should be provided. |
+| dcat:Distribution | healthdcatap:retentionPeriod     | resources_retention_period       | interval  | This property makes use of the class dct:PeriodOfTime, in which a start and end date should be provided. |
 
 ### Notes
 
 - All `list` values are exported using `rdf:List`, supporting multi-valued entries.
 - `hdab` is parsed as an `foaf:Agent` and may include structured details.
 - `retention_period` expects a nested dictionary like `{ "start": <date>, "end": <date> }`.
+- When language-specific literals are needed (eg `population_coverage`, `publisher_note`, `title`, resource `rights`), enable the Fluent-aware schema `ckanext.dcat.schemas:health_dcat_ap_multilingual.yaml` together with the `fluent` plugin and include `ckanext.fluent:presets.json` in `scheming.presets`. This ensures translated values round-trip when harvesting and serializing HealthDCAT-AP content.
 
 !!! Note
     See [EuropeanHealthDCATAPProfile](https://github.com/ckan/ckanext-dcat/blob/master/ckanext/dcat/profiles/euro_health_dcat_ap.py) for implementation details.
