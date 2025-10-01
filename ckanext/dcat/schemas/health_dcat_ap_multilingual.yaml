@@ -3,7 +3,7 @@ dataset_type: dataset
 about: Schema for HealthDCAT-AP with Fluent multilingual fields
 about_url: http://github.com/ckan/ckanext-dcat
 
-form_languages: [en, nl, fr]
+form_languages: [en, nl]
 
 dataset_fields:
 

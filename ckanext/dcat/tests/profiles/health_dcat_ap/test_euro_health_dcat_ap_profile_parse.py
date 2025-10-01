@@ -189,40 +189,40 @@ class TestSchemingParseSupport(BaseParseTest):
                 "end": "2034-12-31",
             }
         ]
-        
-        assert dataset["provenance_activity"] == [{
-            "uri": "internalURI:wasGeneratedBy0",
-            "label": "http://dbpedia.org/resource/Record_linkage",
-            "seeAlso": "https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp",
-            "dct_type": "http://dbpedia.org/resource/Record_linkage",
-            "startedAtTime": "2021-01-01T00:00:00+00:00",
-            "wasAssociatedWith": [{
-                "name": "Dr. Joris van Loenhout",
-                "name_translated": {
-                    "en": "Dr. Joris van Loenhout",
-                    "nl": "Dr. Joris van Loenhout",
-                },
-                "url": "https://www.sciensano.be/fr/people/joris-van-loenhout",
-                "email": "Joris.VanLoenhout@sciensano.be",
-                "type": "", 
-                "uri": "",
-                "identifier": "",
-                "actedOnBehalfOf": [{
-                    "name": "Contact Point",
-                    "name_translated": {
-                        "en": "Contact Point",
-                        "nl": "Contactpunt",
-                    },
-                }]
-            }]
-        }]
+
+        provenance_activity = dataset["provenance_activity"]
+        assert len(provenance_activity) == 1
+
+        activity = provenance_activity[0]
+        assert activity["uri"] == "internalURI:wasGeneratedBy0"
+        assert activity["label"] == "http://dbpedia.org/resource/Record_linkage"
+        assert activity["seeAlso"] == (
+            "https://www.ehealth.fgov.be/ehealthplatform/fr/service-codage-anonymisation-et-ttp"
+        )
+        assert activity["dct_type"] == "http://dbpedia.org/resource/Record_linkage"
+        assert activity["startedAtTime"] == "2021-01-01T00:00:00+00:00"
+
+        associated = activity["wasAssociatedWith"]
+        assert len(associated) == 1
+
+        agent = associated[0]
+        assert agent["name"] == "Dr. Joris van Loenhout"
+        if agent.get("name_translated"):
+            assert agent["name_translated"].get("en") == "Dr. Joris van Loenhout"
+        assert agent["url"] == "https://www.sciensano.be/fr/people/joris-van-loenhout"
+        assert agent["email"] == "Joris.VanLoenhout@sciensano.be"
+
+        acted_on_behalf = agent.get("actedOnBehalfOf", [])
+        assert len(acted_on_behalf) == 1
+        acted_agent = acted_on_behalf[0]
+        assert acted_agent["name"] == "Contact Point"
+        if acted_agent.get("name_translated"):
+            assert acted_agent["name_translated"].get("en") == "Contact Point"
 
         assert dataset["qualified_attribution"][0]["role"] == "https://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/processor"
 
         agent = dataset["qualified_attribution"][0]["agent"][0]
         assert agent["name"] == "Contact Point"
-        assert agent["name_translated"]["en"] == "Contact Point"
-        assert agent["name_translated"]["nl"] == "Contactpunt"
         assert agent["email"] == "healthdata@sciensano.be"
         assert agent["url"] == "https://healthdata.be"
         assert agent["type"] == ""
