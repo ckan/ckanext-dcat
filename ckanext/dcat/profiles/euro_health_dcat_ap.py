@@ -23,6 +23,12 @@ namespaces = {
     "dpv": DPV,
 }
 
+# HealthDCAT-AP fields that can contain language-tagged literals
+MULTILINGUAL_LITERAL_FIELDS = {
+    "population_coverage": HEALTHDCATAP.populationCoverage,
+    "publisher_note": HEALTHDCATAP.publisherNote,
+}
+
 
 class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
     """
@@ -42,7 +48,11 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         return dataset_dict
 
     def _parse_health_fields(self, dataset_dict, dataset_ref):
-        self.__parse_healthdcat_stringvalues(dataset_dict, dataset_ref)
+        multilingual_fields = set(self._multilingual_dataset_fields())
+
+        self.__parse_healthdcat_stringvalues(
+            dataset_dict, dataset_ref, multilingual_fields
+        )
         self.__parse_healthdcat_booleanvalues(dataset_dict, dataset_ref)
         self.__parse_healthdcat_intvalues(dataset_dict, dataset_ref)
 
@@ -78,7 +88,9 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             if value is not None:
                 dataset_dict[key] = value
 
-    def __parse_healthdcat_stringvalues(self, dataset_dict, dataset_ref):
+    def __parse_healthdcat_stringvalues(
+        self, dataset_dict, dataset_ref, multilingual_fields
+    ):
         for (key, predicate,) in (
             ("analytics", HEALTHDCATAP.analytics),
             ("code_values", HEALTHDCATAP.hasCodeValues),
@@ -92,9 +104,18 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             ("publisher_type", HEALTHDCATAP.publisherType),
             ("purpose", DPV.hasPurpose),
         ):
-            values = self._object_value_list(dataset_ref, predicate)
-            if values:
-                dataset_dict[key] = values
+            if (
+                key in MULTILINGUAL_LITERAL_FIELDS
+                and key in multilingual_fields
+            ):
+                value = self._object_value(
+                    dataset_ref, predicate, multilingual=True
+                )
+            else:
+                value = self._object_value_list(dataset_ref, predicate)
+
+            if value:
+                dataset_dict[key] = value
 
     def __parse_healthdcat_booleanvalues(self, dataset_dict, dataset_ref):
         for key, predicate in (
@@ -169,25 +190,45 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
             self.g.bind(prefix, namespace)
 
         # key, predicate, fallbacks, _type, _class
-        items = [
+        list_items = [
             ("analytics", HEALTHDCATAP.analytics, None, URIRefOrLiteral),
             ("code_values", HEALTHDCATAP.hasCodeValues, None, URIRefOrLiteral),
             ("coding_system", HEALTHDCATAP.hasCodingSystem, None, URIRefOrLiteral),
             ("health_category", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
             ("health_theme", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
             ("legal_basis", DPV.hasLegalBasis, None, URIRefOrLiteral),
-            (
-                "population_coverage",
-                HEALTHDCATAP.populationCoverage,
-                None,
-                URIRefOrLiteral,
-            ),
             ("personal_data", DPV.hasPersonalData, None, URIRef),
-            ("publisher_note", HEALTHDCATAP.publisherNote, None, URIRefOrLiteral),
             ("publisher_type", HEALTHDCATAP.publisherType, None, URIRefOrLiteral),
             ("purpose", DPV.hasPurpose, None, URIRefOrLiteral),
         ]
-        self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
+        self._add_list_triples_from_dict(dataset_dict, dataset_ref, list_items)
+
+        multilingual_fields = set(self._multilingual_dataset_fields())
+        for key, predicate in MULTILINGUAL_LITERAL_FIELDS.items():
+            value = self._get_dataset_value(dataset_dict, key)
+            if not value:
+                continue
+
+            if key in multilingual_fields and isinstance(value, dict):
+                for lang, translated_value in value.items():
+                    if translated_value:
+                        self.g.add(
+                            (
+                                dataset_ref,
+                                predicate,
+                                Literal(translated_value, lang=lang),
+                            )
+                        )
+                continue
+
+            self._add_triple_from_dict(
+                dataset_dict,
+                dataset_ref,
+                predicate,
+                key,
+                list_value=True,
+                _type=URIRefOrLiteral,
+            )
 
         if "trusted_data_holder" in dataset_dict:
             self.g.add(
