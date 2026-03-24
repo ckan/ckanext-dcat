@@ -1,8 +1,11 @@
 import pytest
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import RDF
 
 from ckan.tests.helpers import call_action
 
 from ckanext.dcat.processors import RDFParser
+from ckanext.dcat.profiles import DCAT, DCT, XSD
 from ckanext.dcat.tests.utils import BaseParseTest
 
 
@@ -159,4 +162,67 @@ class TestSchemingParseSupport(BaseParseTest):
         assert resource["access_services"][0]["title"] == "Sparql-end Point"
         assert resource["access_services"][0]["endpoint_url"] == [
             "http://publications.europa.eu/webapi/rdf/sparql"
+        ]
+
+    def test_multiple_temporal_periods_are_parsed_into_temporal_coverage(self):
+        g = Graph()
+
+        dataset_ref = URIRef("http://example.com/datasets/temporal-multi")
+        first_period = BNode()
+        second_period = BNode()
+
+        g.add((dataset_ref, RDF.type, DCAT.Dataset))
+        g.add((dataset_ref, DCT.title, Literal("Dataset with multiple periods")))
+        g.add((dataset_ref, DCT.description, Literal("Test dataset")))
+        g.add((dataset_ref, DCT.temporal, first_period))
+        g.add((dataset_ref, DCT.temporal, second_period))
+        g.add(
+            (
+                first_period,
+                DCAT.startDate,
+                Literal("2021-01-01T00:00:00Z", datatype=XSD.dateTime),
+            )
+        )
+        g.add(
+            (
+                first_period,
+                DCAT.endDate,
+                Literal("2021-12-31T00:00:00Z", datatype=XSD.dateTime),
+            )
+        )
+        g.add(
+            (
+                second_period,
+                DCAT.startDate,
+                Literal("2022-01-01T00:00:00Z", datatype=XSD.dateTime),
+            )
+        )
+        g.add(
+            (
+                second_period,
+                DCAT.endDate,
+                Literal("2022-12-31T00:00:00Z", datatype=XSD.dateTime),
+            )
+        )
+
+        p = RDFParser()
+        p.g = g
+
+        datasets = [d for d in p.datasets()]
+
+        assert len(datasets) == 1
+
+        temporal_coverage = sorted(
+            datasets[0]["temporal_coverage"], key=lambda item: item["start"]
+        )
+
+        assert temporal_coverage == [
+            {
+                "start": "2021-01-01T00:00:00Z",
+                "end": "2021-12-31T00:00:00Z",
+            },
+            {
+                "start": "2022-01-01T00:00:00Z",
+                "end": "2022-12-31T00:00:00Z",
+            },
         ]
