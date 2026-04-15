@@ -658,7 +658,8 @@ class RDFProfile(object):
 
             contact["identifier"] = self._get_vcard_property_value(agent, VCARD.hasUID)
 
-            contact["url"] = self._get_vcard_property_value(agent, VCARD.hasURL)
+            url_value = self._get_vcard_property_value(agent, VCARD.hasURL)
+            contact["url"] = [url_value] if url_value else []
 
             contacts.append(contact)
 
