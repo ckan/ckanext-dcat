@@ -2,7 +2,7 @@ import sys
 import argparse
 import xml
 import json
-from pkg_resources import iter_entry_points
+from importlib.metadata import entry_points
 
 from ckantoolkit import config
 
@@ -82,15 +82,14 @@ class RDFProcessor(object):
         loaded_profiles_names = []
 
         for profile_name in profile_names:
-            for profile in iter_entry_points(
-                    group=RDF_PROFILES_ENTRY_POINT_GROUP,
-                    name=profile_name):
-                profile_class = profile.load()
+            ep = entry_points(group=RDF_PROFILES_ENTRY_POINT_GROUP, name=profile_name)
+            if ep:
+                profile_entry = ep[profile_name]
+                profile_class = profile_entry.load()
                 # Set a reference to the profile name
-                profile_class.name = profile.name
+                profile_class.name = profile_entry.name
                 profiles.append(profile_class)
-                loaded_profiles_names.append(profile.name)
-                break
+                loaded_profiles_names.append(profile_entry.name)
 
         unknown_profiles = set(profile_names) - set(loaded_profiles_names)
         if unknown_profiles:
