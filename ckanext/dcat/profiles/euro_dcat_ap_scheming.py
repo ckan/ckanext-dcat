@@ -11,6 +11,8 @@ from .base import (
     SKOS,
     LOCN,
     RDFS,
+    SCHEMA,
+    TIME,
 )
 
 
@@ -29,6 +31,47 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
     def graph_from_dataset(self, dataset_dict, dataset_ref):
 
         self._graph_from_dataset_v2_scheming(dataset_dict, dataset_ref)
+
+    def _temporal_interval_details(self, interval_ref):
+        details = {}
+
+        start = self._object_value(interval_ref, DCAT.startDate)
+        end = self._object_value(interval_ref, DCAT.endDate)
+
+        if not (start or end):
+            start_nodes = [t for t in self.g.objects(interval_ref, TIME.hasBeginning)]
+            end_nodes = [t for t in self.g.objects(interval_ref, TIME.hasEnd)]
+            if start_nodes:
+                start = self._object_value_multiple_predicate(
+                    start_nodes[0],
+                    [TIME.inXSDDateTimeStamp, TIME.inXSDDateTime, TIME.inXSDDate],
+                )
+            if end_nodes:
+                end = self._object_value_multiple_predicate(
+                    end_nodes[0],
+                    [TIME.inXSDDateTimeStamp, TIME.inXSDDateTime, TIME.inXSDDate],
+                )
+
+        if not (start or end):
+            start = self._object_value(interval_ref, SCHEMA.startDate)
+            end = self._object_value(interval_ref, SCHEMA.endDate)
+
+        if start:
+            details["start"] = start
+        if end:
+            details["end"] = end
+
+        return details
+
+    def _temporal_coverage_details(self, dataset_ref):
+        temporal_coverage = []
+
+        for interval_ref in self.g.objects(dataset_ref, DCT.temporal):
+            details = self._temporal_interval_details(interval_ref)
+            if details:
+                temporal_coverage.append(details)
+
+        return temporal_coverage
 
     def _parse_dataset_v2_scheming(self, dataset_dict, dataset_ref):
         """
@@ -112,12 +155,14 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                 new_extras = []
                 new_dict = {}
                 check_name = new_fields_mapping.get(field_name, field_name)
+                subfield_names = [
+                    subfield["field_name"]
+                    for subfield in schema_field["repeating_subfields"]
+                ]
                 for extra in dataset_dict.get("extras", []):
                     if extra["key"].startswith(f"{check_name}_"):
                         subfield = extra["key"][extra["key"].index("_") + 1 :]
-                        if subfield in [
-                            f["field_name"] for f in schema_field["repeating_subfields"]
-                        ]:
+                        if subfield in subfield_names:
                             new_dict[subfield] = extra["value"]
                         else:
                             new_extras.append(extra)
@@ -126,8 +171,22 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                         new_dict["geom"] = extra["value"]
                     else:
                         new_extras.append(extra)
+                # Legacy profiles may have already promoted namespaced extras such as
+                # `temporal_start` to first-level schema fields before we get here.
+                # Rebuild the repeating structure from those root fields as well.
+                for subfield in subfield_names:
+                    legacy_field_name = f"{check_name}_{subfield}"
+                    value = dataset_dict.get(legacy_field_name)
+                    if value not in (None, "", [], {}):
+                        new_dict.setdefault(subfield, value)
+                if field_name == "temporal_coverage":
+                    temporal_coverage = self._temporal_coverage_details(dataset_ref)
+                    if temporal_coverage:
+                        dataset_dict[field_name] = temporal_coverage
+                        dataset_dict["extras"] = new_extras
+                        continue
                 if new_dict:
-                    dataset_dict[field_name] = [new_dict]
+                    dataset_dict.setdefault(field_name, [new_dict])
                     dataset_dict["extras"] = new_extras
 
         # Contact details
