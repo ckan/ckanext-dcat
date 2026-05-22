@@ -6,6 +6,7 @@ from ckanext.dcat.profiles import (
     SKOS,
     ADMS,
     RDF,
+    OWL,
 )
 
 from .base import URIRefOrLiteral
@@ -35,7 +36,12 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
 
         return dataset_dict
 
-    def self._parse_dataset_v3(dataset_dict, dataset_ref):
+    def _parse_dataset_v3(self, dataset_dict, dataset_ref):
+
+        # version
+        value = self._object_value(dataset_ref, DCAT.version)
+        if value:
+            dataset_dict["version"] = value
 
         # hasVersion
         values = self._object_value_list(dataset_ref, DCAT.hasVersion)
@@ -58,7 +64,6 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
         # DCAT AP v3 properties also applied to higher versions
         self._graph_from_dataset_v3(dataset_dict, dataset_ref)
 
-
     def graph_from_catalog(self, catalog_dict, catalog_ref):
 
         self._graph_from_catalog_base(catalog_dict, catalog_ref)
@@ -73,12 +78,21 @@ class EuropeanDCATAP3Profile(EuropeanDCATAP2Profile, EuropeanDCATAPSchemingProfi
             self.g.remove((dataset_ref, RDF.type, None))
             self.g.add((dataset_ref, RDF.type, DCAT.DatasetSeries))
 
+        # version own:versionInfo -> dcat:version
+        self.g.remove((dataset_ref, OWL.versionInfo, None))
+        self._add_triple_from_dict(
+            dataset_dict,
+            dataset_ref,
+            DCAT.version,
+            "version",
+            _type=Literal,
+        )
+
         # hasVersion
         items = [
             ("has_version", DCAT.hasVersion, None, URIRefOrLiteral),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
-
 
         # byteSize decimal -> nonNegativeInteger
         for subject, predicate, object in self.g.triples((None, DCAT.byteSize, None)):

@@ -69,7 +69,7 @@ class TestDCATUS3ProfileSerializeDataset(BaseSerializeTest):
         assert self._triple(g, dataset_ref, RDF.type, DCAT.Dataset)
         assert self._triple(g, dataset_ref, DCT.title, dataset["title"])
         assert self._triple(g, dataset_ref, DCT.description, dataset["notes"])
-        assert self._triple(g, dataset_ref, OWL.versionInfo, dataset["version"])
+        assert self._triple(g, dataset_ref, DCAT.version, dataset["version"])
 
         # Standard fields
         assert self._triple(g, dataset_ref, DCT.identifier, dataset["identifier"])
