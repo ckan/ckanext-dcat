@@ -45,6 +45,16 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
         dataset_dict = self._parse_health_fields(dataset_dict, dataset_ref)
 
+        analytics_uris = []
+        for analytics_dist in self.g.objects(dataset_ref, HEALTHDCATAP.analytics):
+            if (analytics_dist, RDF.type, DCAT.Distribution) in self.g:
+                resource_dict = self._parse_distribution(analytics_dist)
+                dataset_dict["resources"].append(resource_dict)
+            analytics_uris.append(str(analytics_dist))
+        
+        if analytics_uris:
+            dataset_dict["analytics"] = analytics_uris
+
         return dataset_dict
 
     def _parse_health_fields(self, dataset_dict, dataset_ref):
@@ -92,7 +102,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         self, dataset_dict, dataset_ref, multilingual_fields
     ):
         for (key, predicate,) in (
-            ("analytics", HEALTHDCATAP.analytics),
             ("code_values", HEALTHDCATAP.hasCodeValues),
             ("coding_system", HEALTHDCATAP.hasCodingSystem),
             ("health_category", HEALTHDCATAP.healthCategory),
@@ -191,7 +200,6 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
 
         # key, predicate, fallbacks, _type, _class
         list_items = [
-            ("analytics", HEALTHDCATAP.analytics, None, URIRefOrLiteral),
             ("code_values", HEALTHDCATAP.hasCodeValues, None, URIRefOrLiteral),
             ("coding_system", HEALTHDCATAP.hasCodingSystem, None, URIRefOrLiteral),
             ("health_category", HEALTHDCATAP.healthCategory, None, URIRefOrLiteral),
@@ -254,6 +262,10 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
         # Dataset-level retention period
         self._add_retention_period(dataset_ref, dataset_dict.get("retention_period", []))
 
+        for analytics_uri in dataset_dict.get("analytics", []):
+            if analytics_uri:
+                self.g.add((dataset_ref, HEALTHDCATAP.analytics, URIRef(analytics_uri)))
+        
         for resource_dict in dataset_dict.get("resources", []):
             distribution_ref = CleanedURIRef(resource_uri(resource_dict))
             self._add_retention_period(distribution_ref, resource_dict.get("retention_period", []))
@@ -330,6 +342,101 @@ class EuropeanHealthDCATAPProfile(EuropeanDCATAP3Profile):
                 if isinstance(uri, str) and uri.startswith(("http://", "https://")):
                     self.g.add((annotation_ref, predicate, URIRef(uri)))
 
+
+    def _agents_details(self, subject, predicate):
+        """
+        Override of parent method to include healthdcatap:publisherNote and
+        healthdcatap:publisherType for agents.
+
+        Extends the standard agent details with HealthDCAT-AP specific properties.
+        """
+        # Get the standard agent details from parent
+        agents = super()._agents_details(subject, predicate)
+        
+        # Add healthdcatap:publisherNote to each agent
+        for agent in agents:
+            agent_uri = agent.get("uri")
+            if agent_uri:
+                agent_ref = URIRef(agent_uri)
+            else:
+                # If no URI, we need to find the BNode agents
+                for ag in self.g.objects(subject, predicate):
+                    agent_ref = ag
+                    # Check if this is the publisher note we're looking for
+                    note = self._object_value(ag, HEALTHDCATAP.publisherNote, multilingual=True)
+                    if note:
+                        agent["publisher_note"] = note
+                    publisher_type = self._object_value_list(
+                        ag, HEALTHDCATAP.publisherType
+                    )
+                    if publisher_type:
+                        agent["publisher_type"] = publisher_type
+                continue
+            
+            # Get publisherNote (with multilingual support)
+            note = self._object_value(agent_ref, HEALTHDCATAP.publisherNote, multilingual=True)
+            if note:
+                agent["publisher_note"] = note
+
+            publisher_type = self._object_value_list(
+                agent_ref, HEALTHDCATAP.publisherType
+            )
+            if publisher_type:
+                agent["publisher_type"] = publisher_type
+        
+        return agents
+
+    def _add_agents(
+        self, dataset_ref, dataset_dict, agent_key, rdf_predicate, first_only=False
+    ):
+        """
+        Override of parent method to include healthdcatap:publisherNote and
+        healthdcatap:publisherType for agents.
+
+        Extends the standard agent serialization with HealthDCAT-AP specific properties.
+        """
+        # Call parent method to add standard agent properties
+        super()._add_agents(dataset_ref, dataset_dict, agent_key, rdf_predicate, first_only)
+        
+        # Now add healthdcatap:publisherNote for each agent
+        agent = dataset_dict.get(agent_key)
+        if isinstance(agent, list) and len(agent) and self._not_empty_dict(agent[0]):
+            agents = [agent[0]] if first_only else agent
+            
+            for agent_dict in agents:
+                agent_uri = agent_dict.get("uri")
+                if agent_uri:
+                    agent_ref = CleanedURIRef(agent_uri)
+                else:
+                    # For BNode agents, we need to find them in the graph
+                    # This is more complex, so we'll skip for now as they should have URIs
+                    continue
+                
+                # Add publisherNote if it exists
+                publisher_note = agent_dict.get("publisher_note")
+                if publisher_note:
+                    if isinstance(publisher_note, dict):
+                        # Multilingual support
+                        for lang, note in publisher_note.items():
+                            if note:
+                                self.g.add((agent_ref, HEALTHDCATAP.publisherNote, Literal(note, lang=lang)))
+                    elif isinstance(publisher_note, list):
+                        # Multiple notes
+                        for note in publisher_note:
+                            if note:
+                                self.g.add((agent_ref, HEALTHDCATAP.publisherNote, Literal(note)))
+                    else:
+                        # Single string note
+                        self.g.add((agent_ref, HEALTHDCATAP.publisherNote, Literal(publisher_note)))
+
+                self._add_triple_from_dict(
+                    agent_dict,
+                    agent_ref,
+                    HEALTHDCATAP.publisherType,
+                    "publisher_type",
+                    _type=URIRefOrLiteral,
+                    list_value=True,
+                )
 
     def graph_from_catalog(self, catalog_dict, catalog_ref):
         super().graph_from_catalog(catalog_dict, catalog_ref)

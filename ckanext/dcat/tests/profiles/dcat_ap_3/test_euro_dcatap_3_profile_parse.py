@@ -94,6 +94,10 @@ class TestSchemingParseSupport(BaseParseTest):
             "http://data.europa.eu/eli/reg_impl/2023/138/oj",
             "http://data.europa.eu/eli/reg_impl/2023/138/oj_alt",
         ]
+        assert sorted(dataset["sample"]) == [
+            "https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample",
+        ]
+
         # Repeating subfields
 
         assert dataset["contact"][0]["name"] == "Point of Contact"

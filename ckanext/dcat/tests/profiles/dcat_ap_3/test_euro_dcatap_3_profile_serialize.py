@@ -131,6 +131,10 @@ class TestEuroDCATAP3ProfileSerializeDataset(BaseSerializeTest):
             self._triples_list_values(g, dataset_ref, DCATAP.applicableLegislation)
             == dataset["applicable_legislation"]
         )
+        assert (
+            self._triples_list_values(g, dataset_ref, ADMS.sample)
+            == dataset["sample"]
+        )
 
         # Repeating subfields
 

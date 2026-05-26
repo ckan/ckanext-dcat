@@ -127,7 +127,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ("has_version", DCT.hasVersion),
             ("is_version_of", DCT.isVersionOf),
             ("source", DCT.source),
-            ("sample", ADMS.sample),
         ):
             values = self._object_value_list(dataset_ref, predicate)
             if values:
@@ -218,99 +217,14 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             )
 
         # Resources
+        distribution_uris = []
         for distribution in self._distributions(dataset_ref):
-
-            resource_dict = {}
-
-            multilingual_fields = self._multilingual_resource_fields()
-
-            #  Simple values
-            for key, predicate in (
-                ("access_url", DCAT.accessURL),
-                ("download_url", DCAT.downloadURL),
-                ("issued", DCT.issued),
-                ("modified", DCT.modified),
-                ("status", ADMS.status),
-                ("license", DCT.license),
-                ("rights", DCT.rights),
-            ):
-                multilingual = key in multilingual_fields
-                value = self._object_value(
-                    distribution, predicate, multilingual=multilingual
-                )
-                if value:
-                    resource_dict[key] = value
-
-            # Multilingual core fields
-            for key, predicate in (
-                ("name", DCT.title),
-                ("description", DCT.description)
-            ):
-                if f"{key}_translated" in multilingual_fields:
-                    value = self._object_value(
-                        distribution, predicate, multilingual=True
-                    )
-                    resource_dict[f"{key}_translated"] = value
-                    resource_dict[f"{key}"] = value.get(self._default_lang)
-                else:
-                    value = self._object_value(distribution, predicate)
-                    if value:
-                        resource_dict[key] = value
-
-            # URL
-
-            resource_dict["url"] = self._object_value(
-                distribution, DCAT.downloadURL
-            ) or self._object_value(distribution, DCAT.accessURL)
-
-            #  Lists
-            for key, predicate in (
-                ("language", DCT.language),
-                ("documentation", FOAF.page),
-                ("conforms_to", DCT.conformsTo),
-            ):
-                values = self._object_value_list(distribution, predicate)
-                if values:
-                    resource_dict[key] = json.dumps(values)
-
-            # Format and media type
-            normalize_ckan_format = toolkit.asbool(
-                config.get("ckanext.dcat.normalize_ckan_format", True)
-            )
-            imt, label = self._distribution_format(distribution, normalize_ckan_format)
-
-            if imt:
-                resource_dict["mimetype"] = imt
-
-            if label:
-                resource_dict["format"] = label
-            elif imt:
-                resource_dict["format"] = imt
-
-            # Size
-            size = self._object_value_int(distribution, DCAT.byteSize)
-            if size is not None:
-                resource_dict["size"] = size
-
-            # Checksum
-            for checksum in self.g.objects(distribution, SPDX.checksum):
-                algorithm = self._object_value(checksum, SPDX.algorithm)
-                checksum_value = self._object_value(checksum, SPDX.checksumValue)
-                if algorithm:
-                    resource_dict["hash_algorithm"] = algorithm
-                if checksum_value:
-                    resource_dict["hash"] = checksum_value
-
-            # Distribution URI (explicitly show the missing ones)
-            resource_dict["uri"] = (
-                str(distribution) if isinstance(distribution, term.URIRef) else ""
-            )
-
-            # Remember the (internal) distribution reference for referencing in
-            # further profiles, e.g. for adding more properties
-            resource_dict["distribution_ref"] = str(distribution)
-
+            resource_dict = self._parse_distribution(distribution)
             dataset_dict["resources"].append(resource_dict)
+            distribution_uris.append(str(distribution))
+        
+        if distribution_uris:
+            dataset_dict["distribution"] = distribution_uris
 
         if self.compatibility_mode:
             # Tweak the resulting dict to make it compatible with previous
@@ -328,6 +242,98 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     extra["value"] = ",".join(sorted(json.loads(extra["value"])))
 
         return dataset_dict
+
+    def _parse_distribution(self, distribution):
+        resource_dict = {}
+
+        multilingual_fields = self._multilingual_resource_fields()
+
+        #  Simple values
+        for key, predicate in (
+            ("access_url", DCAT.accessURL),
+            ("download_url", DCAT.downloadURL),
+            ("issued", DCT.issued),
+            ("modified", DCT.modified),
+            ("status", ADMS.status),
+            ("license", DCT.license),
+            ("rights", DCT.rights),
+        ):
+            multilingual = key in multilingual_fields
+            value = self._object_value(
+                distribution, predicate, multilingual=multilingual
+            )
+            if value:
+                resource_dict[key] = value
+
+        # Multilingual core fields
+        for key, predicate in (
+            ("name", DCT.title),
+            ("description", DCT.description)
+        ):
+            if f"{key}_translated" in multilingual_fields:
+                value = self._object_value(
+                    distribution, predicate, multilingual=True
+                )
+                resource_dict[f"{key}_translated"] = value
+                resource_dict[f"{key}"] = value.get(self._default_lang)
+            else:
+                value = self._object_value(distribution, predicate)
+                if value:
+                    resource_dict[key] = value
+
+        # URL
+        resource_dict["url"] = self._object_value(
+            distribution, DCAT.downloadURL
+        ) or self._object_value(distribution, DCAT.accessURL)
+
+        #  Lists
+        for key, predicate in (
+            ("language", DCT.language),
+            ("documentation", FOAF.page),
+            ("conforms_to", DCT.conformsTo),
+        ):
+            values = self._object_value_list(distribution, predicate)
+            if values:
+                resource_dict[key] = json.dumps(values)
+
+        # Format and media type
+        normalize_ckan_format = toolkit.asbool(
+            config.get("ckanext.dcat.normalize_ckan_format", True)
+        )
+        imt, label = self._distribution_format(distribution, normalize_ckan_format)
+
+        if imt:
+            resource_dict["mimetype"] = imt
+
+        if label:
+            resource_dict["format"] = label
+        elif imt:
+            resource_dict["format"] = imt
+
+        # Size
+        size = self._object_value_int(distribution, DCAT.byteSize)
+        if size is not None:
+            resource_dict["size"] = size
+
+        # Checksum
+        for checksum in self.g.objects(distribution, SPDX.checksum):
+            algorithm = self._object_value(checksum, SPDX.algorithm)
+            checksum_value = self._object_value(checksum, SPDX.checksumValue)
+            if algorithm:
+                resource_dict["hash_algorithm"] = algorithm
+            if checksum_value:
+                resource_dict["hash"] = checksum_value
+
+        # Distribution URI (explicitly show the missing ones)
+        resource_dict["uri"] = (
+            str(distribution) if isinstance(distribution, term.URIRef) else ""
+        )
+
+        # Remember the (internal) distribution reference for referencing in
+        # further profiles, e.g. for adding more properties
+        resource_dict["distribution_ref"] = str(distribution)
+
+        return resource_dict
 
     def _graph_from_dataset_base(self, dataset_dict, dataset_ref):
 
@@ -387,7 +393,6 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             ("has_version", DCT.hasVersion, None, URIRefOrLiteral),
             ("is_version_of", DCT.isVersionOf, None, URIRefOrLiteral),
             ("source", DCT.source, None, URIRefOrLiteral),
-            ("sample", ADMS.sample, None, URIRefOrLiteral, DCAT.Distribution),
         ]
         self._add_list_triples_from_dict(dataset_dict, dataset_ref, items)
 
@@ -750,6 +755,10 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                         g.add((checksum_algo, RDF.type, SPDX.ChecksumAlgorithm))
 
                 g.add((distribution, SPDX.checksum, checksum))
+
+        for dist_uri in dataset_dict.get("distribution", []):
+            if dist_uri:
+                g.add((dataset_ref, DCAT.distribution, URIRef(dist_uri)))
 
     def _graph_from_catalog_base(self, catalog_dict, catalog_ref):
 

@@ -100,7 +100,6 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
                 {'key': 'has_version', 'value': '[\"https://data.some.org/catalog/datasets/derived-dataset-1\", \"https://data.some.org/catalog/datasets/derived-dataset-2\"]'},
                 {'key': 'is_version_of', 'value': '[\"https://data.some.org/catalog/datasets/original-dataset\"]'},
                 {'key': 'source', 'value': '[\"https://data.some.org/catalog/datasets/source-dataset-1\", \"https://data.some.org/catalog/datasets/source-dataset-2\", \"test_source\"]'},
-                {'key': 'sample', 'value': '[\"https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample\", \"test_sample\"]'},
             ]
         }
         extras = self._extras(dataset)
@@ -142,7 +141,6 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
             ('has_version', DCT.hasVersion, URIRef),
             ('is_version_of', DCT.isVersionOf, URIRef),
             ('source', DCT.source, [URIRef, URIRef, Literal]),
-            ('sample', ADMS.sample, [URIRef, Literal]),
         ]:
             values = json.loads(extras[item[0]])
             assert len([t for t in g.triples((dataset_ref, item[1], None))]) == len(values)

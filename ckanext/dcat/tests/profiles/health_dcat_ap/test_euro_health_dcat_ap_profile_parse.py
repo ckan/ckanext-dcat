@@ -81,7 +81,7 @@ class TestSchemingParseSupport(BaseParseTest):
         assert dataset["modified"] == "2024-12-31T23:59:59+00:00"
         assert dataset["temporal_resolution"] == "P1D"
 
-        assert dataset["analytics"] == ["http://example.com/analytics"]
+        assert dataset.get("analytics") == ["http://example.com/analytics"]
         assert sorted(dataset["code_values"]) == [
             "http://example.com/code1",
             "http://example.com/code2",

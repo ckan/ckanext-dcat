@@ -148,7 +148,6 @@ class TestEuroDCATAPProfileParsing(BaseParseTest):
         assert (sorted(_get_extra_value_as_list('source')) ==
                 [u'https://data.some.org/catalog/datasets/source-dataset-1',
                  u'https://data.some.org/catalog/datasets/source-dataset-2'])
-        assert sorted(_get_extra_value_as_list('sample')) == [u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98/sample']
 
         # Dataset URI
         assert _get_extra_value('uri') == u'https://data.some.org/catalog/datasets/9df8df51-63db-37a8-e044-0003ba9b0d98'
