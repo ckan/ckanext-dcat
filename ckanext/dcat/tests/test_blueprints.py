@@ -244,11 +244,11 @@ class TestEndpoints:
         app.get(url, status=404)
 
     def test_dataset_form_is_rendered(self, app):
-        sysadmin = factories.Sysadmin()
-        env = {"REMOTE_USER": sysadmin["name"].encode("ascii")}
+        sysadmin = factories.SysadminWithToken()
+        headers = {"Authorization": sysadmin["token"]}
         url = url_for("dataset.new")
 
-        response = app.get(url, extra_environ=env)
+        response = app.get(url, headers=headers)
 
         content = response.body
 
