@@ -1,7 +1,15 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.2...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.3...HEAD)
 
+## [v2.4.3](https://github.com/ckan/ckanext-dcat/compare/v2.4.2...v2.4.3) - 2026-05-22
+
+* Python 3.14 support ([#377](https://github.com/ckan/ckanext-dcat/pull/377))
+* Fix version property on DCAT AP v3 (owl.versionInfo -> dcat.version) ([#378](https://github.com/ckan/ckanext-dcat/pull/378))
+* Support multiple temporal coverage periods ([#375](https://github.com/ckan/ckanext-dcat/pull/375))
+* Fix ontology for adms:status ([#364](https://github.com/ckan/ckanext-dcat/pull/364))
+* Fix translation for contact name ([#367](https://github.com/ckan/ckanext-dcat/pull/367))
+* Fix Croissant helper chaining ([#366](https://github.com/ckan/ckanext-dcat/pull/366))
 
 ## [v2.4.2](https://github.com/ckan/ckanext-dcat/compare/v2.4.1...v2.4.2) - 2025-10-14
 

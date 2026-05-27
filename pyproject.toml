@@ -1,6 +1,6 @@
 [project]
 name = "ckanext-dcat"
-version = "2.4.2"
+version = "2.4.3"
 dynamic = ["dependencies", "optional-dependencies"]
 description = "Plugins for exposing and consuming DCAT metadata on CKAN"
 authors = [

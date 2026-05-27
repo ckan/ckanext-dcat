@@ -2,12 +2,19 @@ name: Tests
 env:
     COLUMNS: 120
 on: [push, pull_request]
+
+permissions: {}
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.10'
       - name: Install requirements
@@ -33,6 +40,8 @@ jobs:
 
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: ${{ matrix.ckan-image }}
       options: --user root
@@ -47,7 +56,7 @@ jobs:
           POSTGRES_DB: postgres
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
-          image: redis:3
+          image: redis:7
     env:
       CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
       CKAN_DATASTORE_WRITE_URL: postgresql://datastore_write:pass@postgres/datastore_test
@@ -56,7 +65,9 @@ jobs:
       CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     - name: Install requirements (common)
       run: |
         pip install -r requirements.txt
