@@ -27,6 +27,9 @@ jobs:
     strategy:
       matrix:
         include:
+          - ckan-version: "2.12"
+            ckan-image: "ckan/ckan-dev:2.12-py3.14"
+            solr-version: "9"
           - ckan-version: "2.11"
             ckan-image: "ckan/ckan-dev:2.11-py3.10"
             solr-version: "9"
