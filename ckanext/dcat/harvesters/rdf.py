@@ -146,6 +146,8 @@ class DCATRDFHarvester(DCATHarvester):
 
         log.debug('In DCATRDFHarvester gather_stage')
 
+        visited_urls = set()
+
         rdf_format = None
         if harvest_job.source.config:
             rdf_format = json.loads(harvest_job.source.config).get("rdf_format")
@@ -158,7 +160,7 @@ class DCATRDFHarvester(DCATHarvester):
         last_content_hash = None
         self._names_taken = []
 
-        while next_page_url:
+        while next_page_url and next_page_url not in visited_urls:
             for harvester in p.PluginImplementations(IDCATRDFHarvester):
                 next_page_url, before_download_errors = harvester.before_download(next_page_url, harvest_job)
 
@@ -247,6 +249,9 @@ class DCATRDFHarvester(DCATHarvester):
                 self._save_gather_error('Error when processsing dataset: %r / %s' % (e, traceback.format_exc()),
                                         harvest_job)
                 return []
+
+            # Add the current URL to the visited set
+            visited_urls.add(next_page_url)
 
             # get the next page
             next_page_url = parser.next_page()
