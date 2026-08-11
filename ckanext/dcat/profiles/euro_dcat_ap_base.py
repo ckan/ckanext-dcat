@@ -658,7 +658,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                     (
                         list(g.objects(distribution, DCT.license))[0],
                         DCT.type,
-                        URIRef("http://purl.org/adms/licencetype/UnknownIPR")
+                        URIRef("http://purl.org/adms/licencetype/Attribution")
                     )
                 )
 
