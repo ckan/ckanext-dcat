@@ -168,11 +168,9 @@ class DCATJSONHarvester(DCATHarvester):
                 guid=guid, job=harvest_job,
                 package_id=guid_to_package_id[guid],
                 extras=[HarvestObjectExtra(key='status', value='delete')])
-            ids.append(obj.id)
-            model.Session.query(HarvestObject).\
-                filter_by(guid=guid).\
-                update({'current': False}, False)
             obj.save()
+            ids.append(obj.id)
+
 
         return ids
 
@@ -199,6 +197,11 @@ class DCATJSONHarvester(DCATHarvester):
                 context, {'id': harvest_object.package_id})
             log.info('Deleted package {0} with guid {1}'
                      .format(harvest_object.package_id, harvest_object.guid))
+
+            model.Session.query(HarvestObject).\
+                filter_by(guid=harvest_object.guid).\
+                filter_by(current=True).\
+                update({'current': False}, False)
 
             return True
 
