@@ -353,7 +353,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
             (title_key, DCT.title, None, Literal),
             (notes_key, DCT.description, None, Literal),
             ("url", DCAT.landingPage, None, URIRef, FOAF.Document),
-            ("identifier", DCT.identifier, ["guid", "id"], URIRefOrLiteral),
+            ("identifier", DCT.identifier, ["guid", "id"], Literal),
             ("version", OWL.versionInfo, ["dcat_version"], Literal),
             ("version_notes", ADMS.versionNotes, None, Literal),
             ("frequency", DCT.accrualPeriodicity, None, URIRefOrLiteral, DCT.Frequency),
@@ -492,7 +492,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("email", FOAF.mbox, None, Literal),
                 ("url", FOAF.homepage, None, URIRef),
                 ("type", DCT.type, None, URIRefOrLiteral),
-                ("identifier", DCT.identifier, None, URIRefOrLiteral),
+                ("identifier", DCT.identifier, None, Literal),
             ]
             self._add_triples_from_dict(publisher_details, publisher_ref, items)
 
@@ -534,7 +534,7 @@ class BaseEuropeanDCATAPProfile(RDFProfile):
                 ("email", FOAF.mbox, None, Literal),
                 ("url", FOAF.homepage, None, URIRef),
                 ("type", DCT.type, None, URIRefOrLiteral),
-                ("identifier", DCT.identifier, None, URIRefOrLiteral),
+                ("identifier", DCT.identifier, None, Literal),
             ]
             self._add_triples_from_dict(creator_details, creator_ref, items)
 
