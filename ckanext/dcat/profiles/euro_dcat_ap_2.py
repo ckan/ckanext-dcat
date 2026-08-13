@@ -534,7 +534,7 @@ class EuropeanDCATAP2Profile(BaseEuropeanDCATAPProfile):
                     access_service_node,
                     DCT.identifier,
                     "identifier",
-                    _type=URIRefOrLiteral
+                    _type=Literal
                 )
 
                 # Add keyword list

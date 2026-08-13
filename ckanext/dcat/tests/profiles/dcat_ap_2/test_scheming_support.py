@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 from rdflib.namespace import RDF
-from rdflib.term import URIRef
+from rdflib.term import URIRef, Literal
 from geomet import wkt
 
 from ckan.tests import factories
@@ -190,7 +190,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             publisher[0][2],
             DCT.identifier,
-            URIRef(dataset_dict["publisher"][0]["identifier"]),
+            Literal(dataset_dict["publisher"][0]["identifier"]),
         )
 
         creator = [t for t in g.triples((dataset_ref, DCT.creator, None))]
@@ -221,7 +221,7 @@ class TestSchemingSerializeSupport(BaseSerializeTest):
             g,
             creator[0][2],
             DCT.identifier,
-            URIRef(dataset_dict["creator"][0]["identifier"]),
+            Literal(dataset_dict["creator"][0]["identifier"]),
         )
 
         temporal = [t for t in g.triples((dataset_ref, DCT.temporal, None))]

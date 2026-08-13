@@ -195,7 +195,7 @@ class TestEuroDCATAPProfileSerializeDataset(BaseSerializeTest):
 
         dataset_ref = s.graph_from_dataset(dataset)
 
-        assert self._triple(g, dataset_ref, DCT.identifier, URIRef(extras['identifier']))
+        assert self._triple(g, dataset_ref, DCT.identifier, Literal(extras['identifier']))
 
     def test_identifier_guid(self):
         dataset = {
