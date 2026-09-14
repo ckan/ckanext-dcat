@@ -195,10 +195,11 @@ class DCATPlugin(p.SingletonPlugin, DefaultTranslation):
                         except ValueError:
                             continue
 
-                    for item in value:
-                        if not isinstance(item, dict):
-                            continue
+                    # Do not process fields that are not of the correct type
+                    if not all(isinstance(item, dict) for item in value):
+                        continue
 
+                    for item in value:
                         for key in item:
                             value = item[key]
                             if not isinstance(value, dict):
