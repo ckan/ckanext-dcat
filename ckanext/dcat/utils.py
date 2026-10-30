@@ -288,7 +288,7 @@ def rdflib_to_url_format(_format):
 
 
 # For parsing {name};q=x and {name} style fields from the accept header
-accept_re = re.compile("^(?P<ct>[^;]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
+accept_re = re.compile("^[ \t]*(?P<ct>[^; \t]+)[ \t]*(;[ \t]*q=(?P<q>[0-9.]+)){0,1}$")
 
 
 def parse_accept_header(accept_header=''):
