@@ -1,6 +1,13 @@
 # Changelog
 
-## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.4...HEAD)
+## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.5...HEAD)
+
+
+## [v2.4.5](https://github.com/ckan/ckanext-dcat/compare/v2.4.4...v2.4.5) - 2026-11-03
+
+* [GHSA-j239-6m7f-wvhg (CVE pending)](https://github.com/ckan/ckanext-dcat/security/advisories/GHSA-j239-6m7f-wvhg): ReDoS (CPU denial-of-service) in Accept-header parsing
+* [GHSA-4w94-8644-qf35 (CVE pending)](https://github.com/ckan/ckanext-dcat/security/advisories/GHSA-4w94-8644-qf35): Uncontrolled recursion in `_agents_details()`
+
 
 ## [v2.4.4](https://github.com/ckan/ckanext-dcat/compare/v2.4.3...v2.4.4) - 2026-05-22
 
