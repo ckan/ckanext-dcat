@@ -365,7 +365,7 @@ class EuropeanDCATAPSchemingProfile(RDFProfile):
                     agent_ref,
                     DCT.identifier,
                     "identifier",
-                    _type=URIRefOrLiteral,
+                    _type=Literal,
                 )
 
     def _relationship_details(self, subject, predicate):
