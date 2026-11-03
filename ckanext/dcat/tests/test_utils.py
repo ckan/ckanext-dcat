@@ -1,3 +1,5 @@
+import time
+
 from ckanext.dcat.utils import parse_accept_header
 
 
@@ -120,3 +122,14 @@ def test_accept_header_html_multiple():
     _format = parse_accept_header(header)
 
     assert _format is None
+
+
+def test_accept_header_redos():
+
+    header = ' ' * 4000 + ';' + ' ' * 4000
+
+    start = time.time()
+    _format = parse_accept_header(header)
+
+    assert _format is None
+    assert time.time() - start < 0.05
