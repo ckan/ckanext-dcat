@@ -1,10 +1,11 @@
 
 import pytest
 
-from rdflib import Graph, URIRef, Literal
+from rdflib import Graph, URIRef, Literal, PROV
 from rdflib.namespace import Namespace
 
 from ckanext.dcat.profiles import RDFProfile, CleanedURIRef
+from ckanext.dcat.profiles.base import AGENTS_MAX_DEPTH
 
 from ckanext.dcat.tests.profiles.base.test_base_parser import _default_graph
 
@@ -909,6 +910,45 @@ class TestBaseRDFProfile(object):
         publisher = p._agents_details(URIRef('http://example.org'), DCT.publisher)[0]
 
         assert publisher['uri'] == 'http://orgs.vocab.org/some-org'
+
+    def test_agents_details_acted_on_behalf_of_cycle(self):
+
+        g = Graph()
+        dataset = URIRef("http://example.org")
+        agent_a = URIRef("http://orgs.vocab.org/a")
+        agent_b = URIRef("http://orgs.vocab.org/b")
+        g.add((dataset, DCT.publisher, agent_a))
+        g.add((agent_a, PROV.actedOnBehalfOf, agent_b))
+        g.add((agent_b, PROV.actedOnBehalfOf, agent_a))
+
+        p = RDFProfile(g)
+
+        publisher = p._agents_details(dataset, DCT.publisher)[0]
+
+        assert publisher["uri"] == str(agent_a)
+        acted = publisher["actedOnBehalfOf"]
+        assert len(acted) == 1
+        assert acted[0]["uri"] == str(agent_b)
+        assert "actedOnBehalfOf" not in acted[0]
+
+    def test_agents_details_acted_on_behalf_of_max_depth(self):
+
+        g = Graph()
+        dataset = URIRef("http://example.org")
+        agents = [URIRef(f"http://orgs.vocab.org/{i}") for i in range(5000)]
+        g.add((dataset, DCT.publisher, agents[0]))
+        for parent, child in zip(agents, agents[1:]):
+            g.add((parent, PROV.actedOnBehalfOf, child))
+
+        p = RDFProfile(g)
+
+        agent = p._agents_details(dataset, DCT.publisher)[0]
+        depth = 1
+        while "actedOnBehalfOf" in agent:
+            agent = agent["actedOnBehalfOf"][0]
+            depth += 1
+
+        assert depth == AGENTS_MAX_DEPTH
 
     def test_contact_details(self):
 

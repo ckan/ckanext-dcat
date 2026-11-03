@@ -55,6 +55,8 @@ GEOJSON_IMT = "https://www.iana.org/assignments/media-types/application/vnd.geo+
 
 DEFAULT_SPATIAL_FORMATS = ["wkt"]
 
+AGENTS_MAX_DEPTH = 5
+
 ROOT_DATASET_FIELDS = [
     'name',
     'title',
@@ -524,7 +526,7 @@ class RDFProfile(object):
         else:
             dataset_dict["extras"].append({"key": key, "value": value})
 
-    def _agents_details(self, subject, predicate):
+    def _agents_details(self, subject, predicate, _visited=None, _depth=0):
         """
         Returns a list of dicts with details about a foaf:Agent property, e.g.
         dct:publisher or dct:creator entity.
@@ -546,9 +548,17 @@ class RDFProfile(object):
         """
 
         agents = []
+        if _depth >= AGENTS_MAX_DEPTH:
+            return agents
+
+        if _visited is None:
+            _visited = frozenset()
+
         default_lang = self._get_default_locale_lang()
 
         for agent in self.g.objects(subject, predicate):
+            if agent in _visited:
+                continue
             agent_details = {}
             agent_details["uri"] = str(agent) if isinstance(agent, term.URIRef) else ""
 
@@ -586,7 +596,12 @@ class RDFProfile(object):
             agent_details["type"] = self._object_value(agent, DCT.type)
             agent_details["identifier"] = self._object_value(agent, DCT.identifier)
 
-            acted_orgs = self._agents_details(agent, PROV.actedOnBehalfOf)
+            acted_orgs = self._agents_details(
+                agent,
+                PROV.actedOnBehalfOf,
+                _visited=_visited | {agent},
+                _depth=_depth + 1,
+            )
             if acted_orgs:
                 agent_details["actedOnBehalfOf"] = acted_orgs
 
