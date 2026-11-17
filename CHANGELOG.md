@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.5...HEAD)
 
+* Always serialize `dct:identifier` as a Literal, per its DCMI range and the DCAT-AP SHACL shapes ([#374](https://github.com/ckan/ckanext-dcat/issues/374))
 
 ## [v2.4.5](https://github.com/ckan/ckanext-dcat/compare/v2.4.4...v2.4.5) - 2026-11-03
 
