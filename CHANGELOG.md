@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://github.com/ckan/ckanext-dcat/compare/v2.4.5...HEAD)
 
+* Fix `AttributeError` when serializing access services with `contact` or `publisher` as a list ([#392](https://github.com/ckan/ckanext-dcat/pull/392))
 
 ## [v2.4.5](https://github.com/ckan/ckanext-dcat/compare/v2.4.4...v2.4.5) - 2026-11-03
 
