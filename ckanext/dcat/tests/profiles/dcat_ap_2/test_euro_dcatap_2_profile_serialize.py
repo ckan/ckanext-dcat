@@ -802,6 +802,141 @@ class TestEuroDCATAP2ProfileSerializeDataset(BaseSerializeTest):
         self._assert_values_list(g, access_service_object, DCAT.servesDataset,
                             self._get_typed_list(access_services[0].get('serves_dataset'), URIRef))
 
+    @pytest.mark.parametrize(
+        'contact,value',
+        [
+            pytest.param(
+                {'name': 'John Doe', 'email': 'john@example.org'},
+                [Literal('John Doe')],
+                id='contact-single-dict',
+            ),
+            pytest.param(
+                [
+                    {'name': 'John Doe', 'email': 'john@example.org'},
+                    {'name': 'Jane Smith', 'email': 'jane@example.org'},
+                ],
+                [Literal('John Doe'), Literal('Jane Smith')],
+                id='contact-list',
+            ),
+            pytest.param(None, [], id='contact-absent'),
+        ],
+    )
+    def test_access_service_contact(self, contact, value):
+        """
+        Regression test for AttributeError: 'list' object has no attribute 'get'.
+
+        _add_contact_to_graph expects a dict but _contact_details() can store
+        contacts as a list.  The serialization side (euro_dcat_ap_2.py) now
+        iterates lists element-wise – the same pattern used by
+        euro_dcat_ap_scheming.py.
+        """
+        access_service = {
+            'title': 'Sparql-end Point 1',
+            'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+        }
+        if contact is not None:
+            access_service['contact'] = contact
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name',
+            'access_services': json.dumps([access_service]),
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [resource]
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        access_service_object = self._triple(g, distribution, DCAT.accessService, None)[2]
+
+        contact_points = [t for t in g.triples((access_service_object, DCAT.contactPoint, None))]
+        assert len(contact_points) == len(value)
+
+        if value:
+            refs = [t[2] for t in contact_points]
+            for ref in refs:
+                assert self._triple(g, ref, VCARD.fn, None)
+                assert self._triple(g, ref, VCARD.hasEmail, None)
+            fn_values = [str(t[2]) for t in g.triples((None, VCARD.fn, None))
+                         if t[0] in refs]
+            for expected in value:
+                assert str(expected) in fn_values
+
+    @pytest.mark.parametrize(
+        'publisher,value',
+        [
+            pytest.param(
+                {'name': 'European Commission'},
+                [Literal('European Commission')],
+                id='publisher-single-dict',
+            ),
+            pytest.param(
+                [
+                    {'name': 'European Commission'},
+                    {'name': 'Publications Office of the European Union'},
+                ],
+                [Literal('European Commission'), Literal('Publications Office of the European Union')],
+                id='publisher-list',
+            ),
+            pytest.param(None, [], id='publisher-absent'),
+        ],
+    )
+    def test_access_service_publisher(self, publisher, value):
+        """
+        Tests publisher as single dict, list, or absent.
+        Follows the same iteration pattern as the contact fix.
+        """
+        access_service = {
+            'title': 'Sparql-end Point 1',
+            'endpoint_url': ['http://publications.europa.eu/webapi/rdf/sparql'],
+        }
+        if publisher is not None:
+            access_service['publisher'] = publisher
+
+        resource = {
+            'id': 'c041c635-054f-4431-b647-f9186926d021',
+            'package_id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'Distribution name',
+            'access_services': json.dumps([access_service]),
+        }
+
+        dataset = {
+            'id': '4b6fe9ca-dc77-4cec-92a4-55c6624a5bd6',
+            'name': 'test-dataset',
+            'title': 'Test DCAT dataset',
+            'resources': [resource]
+        }
+
+        s = RDFSerializer(profiles=DCAT_AP_PROFILES)
+        g = s.g
+
+        dataset_ref = s.graph_from_dataset(dataset)
+
+        distribution = self._triple(g, dataset_ref, DCAT.distribution, None)[2]
+        access_service_object = self._triple(g, distribution, DCAT.accessService, None)[2]
+
+        publishers = [t for t in g.triples((access_service_object, DCT.publisher, None))]
+        assert len(publishers) == len(value)
+
+        if value:
+            refs = [t[2] for t in publishers]
+            for ref in refs:
+                assert self._triple(g, ref, RDF.type, FOAF.Agent)
+            name_values = [str(t[2]) for t in g.triples((None, FOAF.name, None))
+                           if t[0] in refs]
+            for expected in value:
+                assert str(expected) in name_values
+
     def _assert_simple_value(self, graph, object, predicate, value):
         """
         Checks if a triple with the given value is present in the graph
